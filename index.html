@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LearnProgramming — From Zero to Architect</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0d1a;
+      --panel:     #1a1a2e;
+      --card:      #16213e;
+      --accent:    #e94560;
+      --teal:      #4ecca3;
+      --java:      #f89820;
+      --python:    #4584b6;
+      --text:      #e0e0f0;
+      --muted:     #8888aa;
+      --border:    #2a2a4a;
+      --radius:    12px;
+      --shadow:    0 4px 24px rgba(0,0,0,0.45);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── Typography ── */
+    h1, h2, h3 { line-height: 1.2; }
+
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      display: inline-block;
+      padding-bottom: 0.3rem;
+      border-bottom: 3px solid var(--accent);
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    section { padding: 5rem 0; }
+    section:nth-child(even) { background: var(--panel); }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13,13,26,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-logo {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--teal);
+      letter-spacing: -0.5px;
+      margin-right: auto;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--muted);
+      transition: color 0.2s;
+      font-weight: 500;
+    }
+
+    .nav-links a:hover { color: var(--teal); }
+
+    /* ── HERO ── */
+    #hero {
+      padding: 0;
+      background: linear-gradient(135deg, #0d0d1a 0%, #0f0f2e 40%, #1a0a2e 70%, #0d1a1a 100%);
+      position: relative;
+      overflow: hidden;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+    }
+
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(233,69,96,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(78,204,163,0.10) 0%, transparent 55%),
+        radial-gradient(ellipse at 60% 80%, rgba(69,132,182,0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    /* Grid dots */
+    #hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 6rem 1.5rem;
+      width: 100%;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(78,204,163,0.12);
+      border: 1px solid rgba(78,204,163,0.3);
+      color: var(--teal);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 0.35rem 1rem;
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 900;
+      letter-spacing: -2px;
+      line-height: 1.0;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-title .word-learn { color: var(--text); }
+    .hero-title .word-prog  {
+      background: linear-gradient(135deg, var(--accent), var(--teal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-tagline {
+      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .hero-sub {
+      font-size: 0.95rem;
+      color: var(--muted);
+      opacity: 0.7;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+
+    .btn-java {
+      background: linear-gradient(135deg, #f89820, #e07010);
+      color: #0d0d1a;
+      box-shadow: 0 4px 20px rgba(248,152,32,0.35);
+    }
+
+    .btn-python {
+      background: linear-gradient(135deg, #4584b6, #2a6496);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(69,132,182,0.35);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-outline:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* Hero stats row */
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      margin-top: 4rem;
+      padding-top: 3rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .hero-stat { text-align: center; }
+
+    .hero-stat-number {
+      display: block;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--teal);
+      line-height: 1;
+    }
+
+    .hero-stat-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-top: 0.25rem;
+    }
+
+    /* ── SECTION: LEARNING PATHS ── */
+    .paths-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .paths-grid { grid-template-columns: 1fr; }
+    }
+
+    .path-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+
+    .path-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+    }
+
+    .path-header {
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .path-header.java-header { background: linear-gradient(135deg, rgba(248,152,32,0.15), rgba(248,152,32,0.05)); border-bottom: 2px solid var(--java); }
+    .path-header.python-header { background: linear-gradient(135deg, rgba(69,132,182,0.15), rgba(69,132,182,0.05)); border-bottom: 2px solid var(--python); }
+
+    .path-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .java-icon { background: rgba(248,152,32,0.2); color: var(--java); }
+    .python-icon { background: rgba(69,132,182,0.2); color: var(--python); }
+
+    .path-header-text h3 { font-size: 1.25rem; font-weight: 700; }
+    .path-header-text span { font-size: 0.8rem; color: var(--muted); }
+
+    .module-list {
+      list-style: none;
+      padding: 0.75rem 0;
+    }
+
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1.5rem;
+      transition: background 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .module-item.java-item { border-left-color: var(--java); }
+    .module-item.python-item { border-left-color: var(--python); }
+
+    .module-item:hover { background: rgba(255,255,255,0.04); }
+
+    .module-item a {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      transition: color 0.2s;
+    }
+
+    .module-item.java-item a:hover { color: var(--java); }
+    .module-item.python-item a:hover { color: var(--python); }
+
+    .module-num {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--muted);
+      width: 2rem;
+      flex-shrink: 0;
+      font-family: monospace;
+    }
+
+    .module-name { font-size: 0.9rem; font-weight: 500; }
+
+    .module-badge {
+      margin-left: auto;
+      font-size: 0.65rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 100px;
+      font-weight: 600;
+    }
+
+    .badge-new { background: rgba(233,69,96,0.15); color: var(--accent); border: 1px solid rgba(233,69,96,0.3); }
+
+    /* ── SECTION: PROGRESS TRACKER ── */
+    #progress .container { max-width: 900px; }
+
+    .progress-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-summary {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .progress-summary span { color: var(--teal); }
+
+    .btn-reset {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.8rem;
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-reset:hover { border-color: var(--accent); color: var(--accent); }
+
+    .progress-bar-wrap {
+      background: var(--border);
+      border-radius: 100px;
+      height: 8px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--teal));
+      border-radius: 100px;
+      transition: width 0.4s ease;
+    }
+
+    .progress-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 600px) { .progress-grid { grid-template-columns: 1fr; } }
+
+    .progress-column h4 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .java-title { color: var(--java); }
+    .python-title { color: var(--python); }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+      user-select: none;
+    }
+
+    .check-item:hover { background: rgba(255,255,255,0.03); }
+
+    .check-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--teal);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .check-label {
+      font-size: 0.875rem;
+      color: var(--text);
+      transition: color 0.2s;
+    }
+
+    .check-item.checked .check-label {
+      color: var(--muted);
+      text-decoration: line-through;
+      text-decoration-color: rgba(78,204,163,0.5);
+    }
+
+    /* ── SECTION: INTERACTIVE RESOURCES ── */
+    .resources-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .resource-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      cursor: pointer;
+      display: block;
+    }
+
+    .resource-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.55);
+      border-color: var(--teal);
+    }
+
+    .resource-icon {
+      font-size: 2.25rem;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    .resource-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .resource-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .resource-count {
+      display: inline-block;
+      background: rgba(78,204,163,0.12);
+      color: var(--teal);
+      border: 1px solid rgba(78,204,163,0.25);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.6rem;
+      border-radius: 100px;
+      margin-top: 0.5rem;
+    }
+
+    /* ── SECTION: KNOWLEDGE CHECKS ── */
+    .kc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 768px) { .kc-grid { grid-template-columns: 1fr; } }
+
+    .kc-column h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .kc-java-header { background: rgba(248,152,32,0.1); border-left: 4px solid var(--java); color: var(--java); }
+    .kc-python-header { background: rgba(69,132,182,0.1); border-left: 4px solid var(--python); color: var(--python); }
+
+    .quiz-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .quiz-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 0.9rem 1rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .quiz-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .quiz-item.java-quiz:hover { border-color: var(--java); }
+    .quiz-item.python-quiz:hover { border-color: var(--python); }
+
+    .quiz-item a {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .quiz-num {
+      font-family: monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      width: 2rem;
+      flex-shrink: 0;
+      padding-top: 0.1rem;
+    }
+
+    .java-quiz .quiz-num { color: var(--java); }
+    .python-quiz .quiz-num { color: var(--python); }
+
+    .quiz-info { flex: 1; }
+    .quiz-name { font-size: 0.9rem; font-weight: 600; }
+    .quiz-topic { font-size: 0.78rem; color: var(--muted); margin-top: 0.15rem; }
+
+    .quiz-arrow {
+      font-size: 0.85rem;
+      color: var(--muted);
+      padding-top: 0.15rem;
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+
+    .quiz-item:hover .quiz-arrow { transform: translateX(3px); }
+
+    /* ── FOOTER BAR ── */
+    .stats-footer {
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 0;
+    }
+
+    .stats-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .stats-chips {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .stat-chip {
+      background: rgba(78,204,163,0.08);
+      border: 1px solid rgba(78,204,163,0.2);
+      color: var(--teal);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.3rem 0.75rem;
+      border-radius: 100px;
+      white-space: nowrap;
+    }
+
+    .footer-copy {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    /* ── Responsive tweaks ── */
+    @media (max-width: 480px) {
+      .hero-cta { flex-direction: column; align-items: center; }
+      .btn { width: 100%; max-width: 280px; justify-content: center; }
+      .hero-stats { gap: 1.5rem; }
+      .progress-header { flex-direction: column; align-items: flex-start; }
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-content > * {
+      animation: fadeInUp 0.6s ease both;
+    }
+
+    .hero-badge      { animation-delay: 0.1s; }
+    .hero-title      { animation-delay: 0.2s; }
+    .hero-tagline    { animation-delay: 0.3s; }
+    .hero-sub        { animation-delay: 0.35s; }
+    .hero-cta        { animation-delay: 0.4s; }
+    .hero-stats      { animation-delay: 0.5s; }
+
+    /* ── Glow on teal hover ── */
+    .resource-card:hover .resource-icon { filter: drop-shadow(0 0 8px rgba(78,204,163,0.5)); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ NAV -->
+<nav>
+  <div class="nav-inner">
+    <span class="nav-logo">&lt;LP/&gt; LearnProgramming</span>
+    <div class="nav-links">
+      <a href="#paths">Learning Paths</a>
+      <a href="#progress">Progress</a>
+      <a href="#resources">Resources</a>
+      <a href="#knowledge-checks">Quizzes</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ HERO -->
+<section id="hero">
+  <div class="hero-content container">
+    <div class="hero-badge">&#128218; Full-Stack Learning Repository</div>
+
+    <h1 class="hero-title">
+      <span class="word-learn">Learn</span><span class="word-prog">Programming</span>
+    </h1>
+
+    <p class="hero-tagline">From zero to architect — Java &amp; Python</p>
+    <p class="hero-sub">Two complete learning paths · 18 structured modules · Interactive tools &amp; quizzes</p>
+
+    <div class="hero-cta">
+      <a href="#paths" class="btn btn-java">
+        <span>&#9749;</span> Start Java &rarr;
+      </a>
+      <a href="#paths" class="btn btn-python">
+        <span>&#128013;</span> Start Python &rarr;
+      </a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-number">800+</span>
+        <span class="hero-stat-label">Files</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-number">270+</span>
+        <span class="hero-stat-label">Tests</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-number">18</span>
+        <span class="hero-stat-label">Modules</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-number">16</span>
+        <span class="hero-stat-label">Visualizations</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-number">135</span>
+        <span class="hero-stat-label">Flashcards</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-number">18</span>
+        <span class="hero-stat-label">Quizzes</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ LEARNING PATHS -->
+<section id="paths">
+  <div class="container">
+    <h2 class="section-title">Learning Paths</h2>
+    <p class="section-subtitle">Two complete journeys from foundations to architect-level mastery</p>
+
+    <div class="paths-grid">
+
+      <!-- JAVA -->
+      <div class="path-card">
+        <div class="path-header java-header">
+          <div class="path-icon java-icon">J</div>
+          <div class="path-header-text">
+            <h3>Java Path</h3>
+            <span>11 modules · Foundations → Spring Boot</span>
+          </div>
+        </div>
+        <ul class="module-list">
+          <li class="module-item java-item"><a href="learn-java/01-foundations/README.md">
+            <span class="module-num">01</span>
+            <span class="module-name">Foundations</span>
+          </a></li>
+          <li class="module-item java-item"><a href="learn-java/02-core-language/README.md">
+            <span class="module-num">02</span>
+            <span class="module-name">Core Language</span>
+          </a></li>
+          <li class="module-item java-item"><a href="learn-java/03-oop/README.md">
+            <span class="module-num">03</span>
+            <span class="module-name">OOP</span>
+          </a></li>
+          <li class="module-item java-item"><a href="learn-java/04-data-structures/README.md">
+            <span class="module-num">04</span>
+            <span class="module-name">Data Structures</span>
+          </a></li>
+          <li class="module-item java-item"><a href="learn-java/05-real-world/README.md">
+            <span class="module-num">05</span>
+            <span class="module-name">Real-World</span>
+          </a></li>
+          <li class="module-item java-item"><a href="learn-java/06-design/README.md">
+            <span class="module-num">06</span>
+            <span class="module-name">Software Design</span>
+          </a></li>
+          <li class="module-item java-item"><a href="learn-java/07-advanced/README.md">
+            <span class="module-num">07</span>
+            <span class="module-name">Advanced</span>
+          </a></li>
+          <li class="module-item java-item"><a href="learn-java/08-projects/README.md">
+            <span class="module-num">08</span>
+            <span class="module-name">Projects</span>
+          </a></li>
+          <li class="module-item java-item"><a href="learn-java/09-interview-prep/README.md">
+            <span class="module-num">09</span>
+            <span class="module-name">Interview Prep</span>
+          </a></li>
+          <li class="module-item java-item"><a href="learn-java/10-database/README.md">
+            <span class="module-num">10</span>
+            <span class="module-name">Database &amp; JDBC</span>
+            <span class="module-badge badge-new">+</span>
+          </a></li>
+          <li class="module-item java-item"><a href="learn-java/11-rest-api/README.md">
+            <span class="module-num">11</span>
+            <span class="module-name">REST API (Spring Boot)</span>
+            <span class="module-badge badge-new">+</span>
+          </a></li>
+        </ul>
+      </div>
+
+      <!-- PYTHON -->
+      <div class="path-card">
+        <div class="path-header python-header">
+          <div class="path-icon python-icon">Py</div>
+          <div class="path-header-text">
+            <h3>Python Path</h3>
+            <span>11 modules · Foundations → FastAPI</span>
+          </div>
+        </div>
+        <ul class="module-list">
+          <li class="module-item python-item"><a href="learn-python/01-foundations/README.md">
+            <span class="module-num">01</span>
+            <span class="module-name">Foundations</span>
+          </a></li>
+          <li class="module-item python-item"><a href="learn-python/02-core-language/README.md">
+            <span class="module-num">02</span>
+            <span class="module-name">Core Language</span>
+          </a></li>
+          <li class="module-item python-item"><a href="learn-python/03-oop/README.md">
+            <span class="module-num">03</span>
+            <span class="module-name">OOP</span>
+          </a></li>
+          <li class="module-item python-item"><a href="learn-python/04-data-structures/README.md">
+            <span class="module-num">04</span>
+            <span class="module-name">Data Structures</span>
+          </a></li>
+          <li class="module-item python-item"><a href="learn-python/05-real-world/README.md">
+            <span class="module-num">05</span>
+            <span class="module-name">Real-World</span>
+          </a></li>
+          <li class="module-item python-item"><a href="learn-python/06-design/README.md">
+            <span class="module-num">06</span>
+            <span class="module-name">Software Design</span>
+          </a></li>
+          <li class="module-item python-item"><a href="learn-python/07-advanced/README.md">
+            <span class="module-num">07</span>
+            <span class="module-name">Advanced</span>
+          </a></li>
+          <li class="module-item python-item"><a href="learn-python/08-projects/README.md">
+            <span class="module-num">08</span>
+            <span class="module-name">Projects</span>
+          </a></li>
+          <li class="module-item python-item"><a href="learn-python/09-interview-prep/README.md">
+            <span class="module-num">09</span>
+            <span class="module-name">Interview Prep</span>
+          </a></li>
+          <li class="module-item python-item"><a href="learn-python/10-database/README.md">
+            <span class="module-num">10</span>
+            <span class="module-name">Database &amp; SQLAlchemy</span>
+            <span class="module-badge badge-new">+</span>
+          </a></li>
+          <li class="module-item python-item"><a href="learn-python/11-rest-api/README.md">
+            <span class="module-num">11</span>
+            <span class="module-name">REST API (FastAPI)</span>
+            <span class="module-badge badge-new">+</span>
+          </a></li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ PROGRESS TRACKER -->
+<section id="progress">
+  <div class="container">
+    <h2 class="section-title">Progress Tracker</h2>
+    <p class="section-subtitle">Track your journey through the core 9 modules of each path</p>
+
+    <div class="progress-header">
+      <div class="progress-summary">
+        <span id="completedCount">0</span> / 18 modules completed
+      </div>
+      <button class="btn-reset" onclick="resetProgress()">&#8635; Reset Progress</button>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+
+    <div class="progress-grid">
+      <div class="progress-column">
+        <h4 class="java-title">&#9749; Java Path — Core 9 Modules</h4>
+        <div id="javaChecks"></div>
+      </div>
+      <div class="progress-column">
+        <h4 class="python-title">&#128013; Python Path — Core 9 Modules</h4>
+        <div id="pythonChecks"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ INTERACTIVE RESOURCES -->
+<section id="resources">
+  <div class="container">
+    <h2 class="section-title">Interactive Resources</h2>
+    <p class="section-subtitle">Visualizations, cheat sheets, and flashcard decks — open and explore</p>
+
+    <div class="resources-grid">
+
+      <a href="visualizations/README.md" class="resource-card">
+        <span class="resource-icon">&#127912;</span>
+        <div class="resource-title">Algorithm Visualizations</div>
+        <div class="resource-meta">Animated, interactive concept walkthroughs</div>
+        <span class="resource-count">16 visualizations</span>
+      </a>
+
+      <a href="cheat-sheets/README.md" class="resource-card">
+        <span class="resource-icon">&#128196;</span>
+        <div class="resource-title">Cheat Sheets</div>
+        <div class="resource-meta">Java, Python &amp; shared reference sheets</div>
+        <span class="resource-count">13 sheets</span>
+      </a>
+
+      <a href="concept-cards/java-flashcards.html" class="resource-card">
+        <span class="resource-icon">&#9749;</span>
+        <div class="resource-title">Java Flashcards</div>
+        <div class="resource-meta">Core Java concepts, syntax &amp; patterns</div>
+        <span class="resource-count">50 cards</span>
+      </a>
+
+      <a href="concept-cards/python-flashcards.html" class="resource-card">
+        <span class="resource-icon">&#128013;</span>
+        <div class="resource-title">Python Flashcards</div>
+        <div class="resource-meta">Pythonic idioms, stdlib &amp; patterns</div>
+        <span class="resource-count">55 cards</span>
+      </a>
+
+      <a href="concept-cards/interview-flashcards.html" class="resource-card">
+        <span class="resource-icon">&#127381;</span>
+        <div class="resource-title">Interview Flashcards</div>
+        <div class="resource-meta">Algorithms, design patterns &amp; system design</div>
+        <span class="resource-count">30 cards</span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ KNOWLEDGE CHECKS -->
+<section id="knowledge-checks">
+  <div class="container">
+    <h2 class="section-title">Knowledge Checks</h2>
+    <p class="section-subtitle">Test your understanding after each module — instant feedback quizzes</p>
+
+    <div class="kc-grid">
+
+      <!-- JAVA QUIZZES -->
+      <div class="kc-column">
+        <h3 class="kc-java-header">&#9749; Java Quizzes</h3>
+        <div class="quiz-list">
+          <div class="quiz-item java-quiz"><a href="learn-java/knowledge-checks/01-quiz.html">
+            <span class="quiz-num">01</span>
+            <div class="quiz-info">
+              <div class="quiz-name">Foundations Quiz</div>
+              <div class="quiz-topic">Variables, types, operators, control flow</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+          <div class="quiz-item java-quiz"><a href="learn-java/knowledge-checks/02-quiz.html">
+            <span class="quiz-num">02</span>
+            <div class="quiz-info">
+              <div class="quiz-name">Core Language Quiz</div>
+              <div class="quiz-topic">Arrays, strings, collections, exceptions</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+          <div class="quiz-item java-quiz"><a href="learn-java/knowledge-checks/03-quiz.html">
+            <span class="quiz-num">03</span>
+            <div class="quiz-info">
+              <div class="quiz-name">OOP Quiz</div>
+              <div class="quiz-topic">Classes, inheritance, interfaces, polymorphism</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+          <div class="quiz-item java-quiz"><a href="learn-java/knowledge-checks/04-quiz.html">
+            <span class="quiz-num">04</span>
+            <div class="quiz-info">
+              <div class="quiz-name">Data Structures Quiz</div>
+              <div class="quiz-topic">List, Map, Set, Queue, Stack complexity</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+          <div class="quiz-item java-quiz"><a href="learn-java/knowledge-checks/05-quiz.html">
+            <span class="quiz-num">05</span>
+            <div class="quiz-info">
+              <div class="quiz-name">Real-World Quiz</div>
+              <div class="quiz-topic">I/O, concurrency, generics, lambdas</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+          <div class="quiz-item java-quiz"><a href="learn-java/knowledge-checks/06-quiz.html">
+            <span class="quiz-num">06</span>
+            <div class="quiz-info">
+              <div class="quiz-name">Software Design Quiz</div>
+              <div class="quiz-topic">SOLID, design patterns, clean code</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+          <div class="quiz-item java-quiz"><a href="learn-java/knowledge-checks/07-quiz.html">
+            <span class="quiz-num">07</span>
+            <div class="quiz-info">
+              <div class="quiz-name">Advanced Quiz</div>
+              <div class="quiz-topic">Streams, Optional, reactive, JVM tuning</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+          <div class="quiz-item java-quiz"><a href="learn-java/knowledge-checks/08-quiz.html">
+            <span class="quiz-num">08</span>
+            <div class="quiz-info">
+              <div class="quiz-name">Projects Quiz</div>
+              <div class="quiz-topic">Architecture, testing, build tools</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+          <div class="quiz-item java-quiz"><a href="learn-java/knowledge-checks/09-quiz.html">
+            <span class="quiz-num">09</span>
+            <div class="quiz-info">
+              <div class="quiz-name">Interview Prep Quiz</div>
+              <div class="quiz-topic">Algorithms, system design, behavioral</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+        </div>
+      </div>
+
+      <!-- PYTHON QUIZZES -->
+      <div class="kc-column">
+        <h3 class="kc-python-header">&#128013; Python Quizzes</h3>
+        <div class="quiz-list">
+          <div class="quiz-item python-quiz"><a href="learn-python/knowledge-checks/01-quiz.html">
+            <span class="quiz-num">01</span>
+            <div class="quiz-info">
+              <div class="quiz-name">Foundations Quiz</div>
+              <div class="quiz-topic">Variables, types, operators, control flow</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+          <div class="quiz-item python-quiz"><a href="learn-python/knowledge-checks/02-quiz.html">
+            <span class="quiz-num">02</span>
+            <div class="quiz-info">
+              <div class="quiz-name">Core Language Quiz</div>
+              <div class="quiz-topic">Lists, dicts, sets, comprehensions, functions</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+          <div class="quiz-item python-quiz"><a href="learn-python/knowledge-checks/03-quiz.html">
+            <span class="quiz-num">03</span>
+            <div class="quiz-info">
+              <div class="quiz-name">OOP Quiz</div>
+              <div class="quiz-topic">Classes, inheritance, dunder methods, properties</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+          <div class="quiz-item python-quiz"><a href="learn-python/knowledge-checks/04-quiz.html">
+            <span class="quiz-num">04</span>
+            <div class="quiz-info">
+              <div class="quiz-name">Data Structures Quiz</div>
+              <div class="quiz-topic">Stack, queue, linked list, tree complexity</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+          <div class="quiz-item python-quiz"><a href="learn-python/knowledge-checks/05-quiz.html">
+            <span class="quiz-num">05</span>
+            <div class="quiz-info">
+              <div class="quiz-name">Real-World Quiz</div>
+              <div class="quiz-topic">File I/O, concurrency, decorators, context managers</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+          <div class="quiz-item python-quiz"><a href="learn-python/knowledge-checks/06-quiz.html">
+            <span class="quiz-num">06</span>
+            <div class="quiz-info">
+              <div class="quiz-name">Software Design Quiz</div>
+              <div class="quiz-topic">SOLID, design patterns, clean Python</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+          <div class="quiz-item python-quiz"><a href="learn-python/knowledge-checks/07-quiz.html">
+            <span class="quiz-num">07</span>
+            <div class="quiz-info">
+              <div class="quiz-name">Advanced Quiz</div>
+              <div class="quiz-topic">Generators, asyncio, metaclasses, typing</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+          <div class="quiz-item python-quiz"><a href="learn-python/knowledge-checks/08-quiz.html">
+            <span class="quiz-num">08</span>
+            <div class="quiz-info">
+              <div class="quiz-name">Projects Quiz</div>
+              <div class="quiz-topic">Packaging, testing, CI/CD, architecture</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+          <div class="quiz-item python-quiz"><a href="learn-python/knowledge-checks/09-quiz.html">
+            <span class="quiz-num">09</span>
+            <div class="quiz-info">
+              <div class="quiz-name">Interview Prep Quiz</div>
+              <div class="quiz-topic">Algorithms, system design, Pythonic idioms</div>
+            </div>
+            <span class="quiz-arrow">&#8594;</span>
+          </a></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ STATS FOOTER -->
+<footer class="stats-footer">
+  <div class="stats-inner">
+    <div class="stats-chips">
+      <span class="stat-chip">800+ files</span>
+      <span class="stat-chip">270+ tests</span>
+      <span class="stat-chip">18 modules</span>
+      <span class="stat-chip">16 visualizations</span>
+      <span class="stat-chip">135 flashcards</span>
+      <span class="stat-chip">18 quizzes</span>
+      <span class="stat-chip">13 cheat sheets</span>
+    </div>
+    <div class="footer-copy">LearnProgramming &mdash; Java &amp; Python mastery</div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════ JAVASCRIPT -->
+<script>
+(function () {
+  'use strict';
+
+  // ── Module data ──────────────────────────────────────────────────────────
+  const JAVA_MODULES = [
+    { id: 'j01', label: '01 Foundations' },
+    { id: 'j02', label: '02 Core Language' },
+    { id: 'j03', label: '03 OOP' },
+    { id: 'j04', label: '04 Data Structures' },
+    { id: 'j05', label: '05 Real-World' },
+    { id: 'j06', label: '06 Software Design' },
+    { id: 'j07', label: '07 Advanced' },
+    { id: 'j08', label: '08 Projects' },
+    { id: 'j09', label: '09 Interview Prep' },
+  ];
+
+  const PYTHON_MODULES = [
+    { id: 'p01', label: '01 Foundations' },
+    { id: 'p02', label: '02 Core Language' },
+    { id: 'p03', label: '03 OOP' },
+    { id: 'p04', label: '04 Data Structures' },
+    { id: 'p05', label: '05 Real-World' },
+    { id: 'p06', label: '06 Software Design' },
+    { id: 'p07', label: '07 Advanced' },
+    { id: 'p08', label: '08 Projects' },
+    { id: 'p09', label: '09 Interview Prep' },
+  ];
+
+  const STORAGE_KEY = 'lp_progress_v1';
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function saveState(state) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch {}
+  }
+
+  function updateSummary(state) {
+    const all = [...JAVA_MODULES, ...PYTHON_MODULES];
+    const done = all.filter(m => state[m.id]).length;
+    const pct = Math.round((done / all.length) * 100);
+
+    document.getElementById('completedCount').textContent = done;
+    document.getElementById('progressFill').style.width = pct + '%';
+  }
+
+  function buildChecks(container, modules, cssClass) {
+    const state = loadState();
+    container.innerHTML = '';
+
+    modules.forEach(mod => {
+      const item = document.createElement('label');
+      item.className = 'check-item' + (state[mod.id] ? ' checked' : '');
+      item.innerHTML = `
+        <input type="checkbox" id="chk-${mod.id}"${state[mod.id] ? ' checked' : ''} />
+        <span class="check-label">${mod.label}</span>
+      `;
+      const cb = item.querySelector('input');
+      cb.addEventListener('change', function () {
+        const s = loadState();
+        s[mod.id] = this.checked;
+        saveState(s);
+        item.classList.toggle('checked', this.checked);
+        updateSummary(s);
+      });
+      container.appendChild(item);
+    });
+
+    updateSummary(state);
+  }
+
+  function init() {
+    buildChecks(document.getElementById('javaChecks'), JAVA_MODULES, 'java');
+    buildChecks(document.getElementById('pythonChecks'), PYTHON_MODULES, 'python');
+  }
+
+  window.resetProgress = function () {
+    if (!confirm('Reset all progress? This cannot be undone.')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    init();
+  };
+
+  document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+
+</body>
+</html>
