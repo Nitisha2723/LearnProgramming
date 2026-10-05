@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Flashcards — Interview Prep</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#1a1a2e; color:#e0e0e0; font-family:'Segoe UI',system-ui,sans-serif; min-height:100vh; }
+header { background:#16213e; padding:16px 24px; border-bottom:2px solid #0f3460; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+header h1 { font-size:1.5rem; color:#e94560; }
+.progress-bar-wrap { flex:1; max-width:300px; margin:0 16px; }
+.progress-label { font-size:0.8rem; color:#a0b0c0; margin-bottom:4px; display:flex; justify-content:space-between; }
+.progress-bar { height:6px; background:#0f3460; border-radius:3px; overflow:hidden; }
+.progress-fill { height:100%; background:linear-gradient(90deg,#e94560,#f59e0b); border-radius:3px; transition:width 0.4s; }
+.stats { display:flex; gap:12px; font-size:0.78rem; }
+.stat { padding:4px 10px; border-radius:12px; }
+.stat-know { background:#1b5e20; color:#a5d6a7; }
+.stat-review { background:#e65100; color:#ffcc80; }
+.stat-hard { background:#b71c1c; color:#ef9a9a; }
+.controls { background:#16213e; padding:10px 24px; border-bottom:1px solid #0f3460; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.cat-btn { padding:4px 12px; border:1px solid #0f3460; border-radius:16px; cursor:pointer; font-size:0.78rem; background:transparent; color:#a0c4ff; transition:all 0.2s; }
+.cat-btn.active, .cat-btn:hover { background:#0f3460; color:white; }
+.main { display:flex; flex-direction:column; align-items:center; padding:24px 16px; min-height:calc(100vh - 140px); }
+.card-counter { color:#a0b0c0; font-size:0.85rem; margin-bottom:16px; }
+.card-scene { width:100%; max-width:720px; height:380px; perspective:1200px; cursor:pointer; margin-bottom:20px; }
+.card-3d { width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform 0.6s cubic-bezier(0.4,0,0.2,1); }
+.card-3d.flipped { transform:rotateY(180deg); }
+.card-face { position:absolute; inset:0; backface-visibility:hidden; border-radius:14px; display:flex; flex-direction:column; }
+.card-front { background:#16213e; border:2px solid #0f3460; }
+.card-back { background:#0f2a40; border:2px solid #1a4a6a; transform:rotateY(180deg); }
+.card-cat { padding:10px 16px; font-size:0.72rem; font-weight:700; letter-spacing:0.05em; border-radius:12px 12px 0 0; display:flex; justify-content:space-between; align-items:center; }
+.card-body { flex:1; padding:20px 24px; display:flex; align-items:center; justify-content:center; overflow:auto; }
+.card-question { font-size:1.2rem; text-align:center; line-height:1.5; font-weight:600; color:#e0e0e0; }
+.card-answer { font-size:0.9rem; line-height:1.6; color:#d0d8e8; overflow-y:auto; width:100%; }
+.card-answer code { background:#0f3460; padding:2px 6px; border-radius:4px; font-size:0.82em; font-family:monospace; color:#90d0ff; }
+.card-answer pre { background:#0a1520; padding:10px 14px; border-radius:6px; overflow-x:auto; margin:8px 0; font-family:monospace; font-size:0.8rem; color:#a0c4ff; border-left:3px solid #1a4a8a; }
+.hint { padding:8px 16px; font-size:0.75rem; color:#606880; text-align:center; }
+.mark-badge { position:absolute; top:8px; right:8px; padding:2px 8px; border-radius:10px; font-size:0.7rem; font-weight:bold; z-index:1; }
+.badge-know { background:#1b5e20; color:#a5d6a7; }
+.badge-review { background:#e65100; color:#ffcc80; }
+.badge-hard { background:#b71c1c; color:#ef9a9a; }
+.nav-row { display:flex; align-items:center; gap:16px; margin-bottom:16px; }
+.nav-btn { padding:8px 20px; border:1px solid #0f3460; border-radius:8px; background:transparent; color:#a0c4ff; cursor:pointer; font-size:0.88rem; transition:all 0.2s; }
+.nav-btn:hover { background:#0f3460; }
+.mark-row { display:flex; gap:10px; }
+.mark-btn { padding:8px 16px; border:none; border-radius:8px; cursor:pointer; font-size:0.85rem; font-weight:600; transition:all 0.2s; }
+.mark-btn:hover { filter:brightness(1.2); transform:translateY(-1px); }
+.btn-know { background:#1b5e20; color:#a5d6a7; }
+.btn-review { background:#e65100; color:#ffcc80; }
+.btn-hard { background:#b71c1c; color:#ef9a9a; }
+.kbd { background:#0f3460; padding:2px 6px; border-radius:4px; font-size:0.72rem; color:#a0c4ff; font-family:monospace; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Java Flashcards</h1>
+  <div class="progress-bar-wrap">
+    <div class="progress-label">
+      <span id="prog-label">0 / 0 reviewed</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="stats">
+    <span class="stat stat-know">Know: <span id="cnt-know">0</span></span>
+    <span class="stat stat-review">Review: <span id="cnt-review">0</span></span>
+    <span class="stat stat-hard">Hard: <span id="cnt-hard">0</span></span>
+  </div>
+</header>
+<div class="controls" id="cat-controls">
+  <button class="cat-btn active" onclick="filterCat('all',this)">All</button>
+  <button class="cat-btn" onclick="filterCat('core',this)">Core Java</button>
+  <button class="cat-btn" onclick="filterCat('oop',this)">OOP</button>
+  <button class="cat-btn" onclick="filterCat('collections',this)">Collections</button>
+  <button class="cat-btn" onclick="filterCat('concurrency',this)">Concurrency</button>
+  <button class="cat-btn" onclick="filterCat('java8',this)">Java 8+</button>
+</div>
+<div class="main">
+  <div class="card-counter" id="card-counter">Card 1 of 50</div>
+  <div class="card-scene" onclick="flipCard()">
+    <div class="card-3d" id="card3d">
+      <div class="card-face card-front" id="card-front">
+        <div class="card-cat" id="card-cat-front" style="background:#1e3a6a;color:#90c4ff">Category</div>
+        <div class="card-body">
+          <div class="card-question" id="card-q">Loading...</div>
+        </div>
+        <div class="hint">Click to reveal answer</div>
+        <div id="mark-badge" style="display:none" class="mark-badge"></div>
+      </div>
+      <div class="card-face card-back" id="card-back">
+        <div class="card-cat" id="card-cat-back" style="background:#1a4a6a;color:#90d0ff">Answer</div>
+        <div class="card-body">
+          <div class="card-answer" id="card-a">Answer...</div>
+        </div>
+        <div class="hint">Click to see question</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="nav-btn" onclick="prevCard()">← Prev</button>
+    <div class="mark-row">
+      <button class="mark-btn btn-know" onclick="markCard('know')">Know it ✓</button>
+      <button class="mark-btn btn-review" onclick="markCard('review')">Review ↺</button>
+      <button class="mark-btn btn-hard" onclick="markCard('hard')">Hard !</button>
+    </div>
+    <button class="nav-btn" onclick="nextCard()">Next →</button>
+  </div>
+  <div style="font-size:0.78rem;color:#606880;text-align:center">
+    <kbd class="kbd">←</kbd> <kbd class="kbd">→</kbd> navigate &nbsp; <kbd class="kbd">Space</kbd> flip
+  </div>
+</div>
+
+<script>
+const CAT_COLORS = {
+  core: {bg:'#1a237e',color:'#90caf9'},
+  oop: {bg:'#4a148c',color:'#ce93d8'},
+  collections: {bg:'#1b5e20',color:'#a5d6a7'},
+  concurrency: {bg:'#b71c1c',color:'#ef9a9a'},
+  java8: {bg:'#e65100',color:'#ffcc80'}
+};
+
+const CARDS = [
+  {cat:'core', q:'What is the difference between == and .equals() in Java?',
+   a:`<b>==</b> compares <em>references</em> (memory addresses for objects, values for primitives).<br><b>.equals()</b> compares <em>content/value</em>.<br><br>
+<pre>String a = new String("hello");
+String b = new String("hello");
+a == b        // false (different objects)
+a.equals(b)   // true (same content)
+
+// String literals may be the same reference due to interning
+String c = "hello";
+String d = "hello";
+c == d        // true (interned, same ref)
+
+// For null safety:
+Objects.equals(a, b)  // handles null</pre>
+<b>Key rule:</b> Always use <code>.equals()</code> for objects; <code>==</code> for primitives and null checks.`},
+
+  {cat:'core', q:'Why is String immutable in Java?',
+   a:`Strings are immutable for several important reasons:<br><br>
+<b>1. String Pool (interning)</b> — multiple variables can safely share the same string object without risk of one modifying it.<br><br>
+<b>2. Security</b> — database URLs, passwords, class names (used in ClassLoader) cannot be altered once created.<br><br>
+<b>3. Thread safety</b> — immutable objects are inherently thread-safe (no synchronization needed).<br><br>
+<b>4. Caching</b> — hashCode is computed once and cached since the value never changes.<br><br>
+<pre>// How immutability works internally:
+String s = "hello";
+s.toUpperCase();  // returns NEW string "HELLO"
+// s is still "hello" — original unchanged</pre>
+<b>Implication:</b> Heavy string concatenation → use <code>StringBuilder</code> (not thread-safe) or <code>StringBuffer</code> (thread-safe) for mutable string building.`},
+
+  {cat:'core', q:'What is the contract between equals() and hashCode()?',
+   a:`Two objects must follow this contract:<br><br>
+<b>1.</b> If <code>a.equals(b)</code> is <code>true</code>, then <code>a.hashCode() == b.hashCode()</code> MUST be true.<br>
+<b>2.</b> If <code>a.hashCode() == b.hashCode()</code>, <code>a.equals(b)</code> may or may not be true (collision).<br><br>
+<pre>@Override
+public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Person p)) return false;
+    return age == p.age && Objects.equals(name, p.name);
+}
+@Override
+public int hashCode() {
+    return Objects.hash(name, age); // same fields as equals!
+}</pre>
+<b>Why it matters:</b> HashMap/HashSet use hashCode first to find a bucket, then equals to find the exact entry. Violating this contract causes entries to be "lost" in hash-based collections.`},
+
+  {cat:'collections', q:'What is the difference between ArrayList and LinkedList?',
+   a:`<pre>
+Operation        ArrayList      LinkedList
+─────────────────────────────────────────
+get(i)           O(1)           O(n)
+add (end)        O(1) amortized O(1)
+add (middle)     O(n) + shift   O(1) (after traversal)
+remove (middle)  O(n) + shift   O(1) (after traversal)
+Memory           compact array  node objects (2 pointers each)
+</pre>
+<b>ArrayList:</b><br>
+- Backed by a resizable array<br>
+- Best for: random access, iteration, reading<br>
+- Grows by 50% when full<br><br>
+<b>LinkedList:</b><br>
+- Doubly linked list; also implements Deque<br>
+- Best for: frequent insertions/deletions at front/middle<br>
+- Each node has extra overhead (2 references)<br><br>
+<b>In practice:</b> ArrayList is almost always preferred. LinkedList overhead usually outweighs its O(1) insertion benefit due to cache inefficiency.`},
+
+  {cat:'collections', q:'How does HashMap work internally?',
+   a:`HashMap uses an array of buckets (Node[] table).<br><br>
+<b>put(key, value):</b><br>
+1. Compute <code>hash(key)</code><br>
+2. Find bucket index: <code>hash & (capacity-1)</code><br>
+3. If bucket empty → store entry<br>
+4. If bucket occupied → traverse chain; update if key matches, otherwise append<br>
+5. If chain length &gt; 8 → convert to red-black tree (Java 8+)<br><br>
+<b>get(key):</b><br>
+1. Compute hash, find bucket<br>
+2. Walk chain/tree, compare keys with <code>.equals()</code><br><br>
+<pre>// Key parameters
+initial capacity = 16 (default)
+load factor = 0.75 (default)
+// When size > capacity * loadFactor → rehash (expensive!)</pre>
+<b>Java 8 improvements:</b> Chains convert to TreeMap (O(log n)) when length exceeds 8 — prevents worst-case O(n) on hash collisions.`},
+
+  {cat:'concurrency', q:'What is the difference between HashMap and ConcurrentHashMap?',
+   a:`<b>HashMap:</b><br>
+- Not thread-safe<br>
+- Null keys and values allowed<br>
+- No synchronization overhead → faster in single-threaded code<br><br>
+<b>ConcurrentHashMap:</b><br>
+- Thread-safe (Java 5+)<br>
+- No null keys or values<br>
+- Uses segment locking (Java 7) → lock striping for 16 segments by default<br>
+- Java 8+: CAS operations + synchronized per-bucket (finer granularity)<br><br>
+<pre>// Java 8 atomic operations:
+map.compute(key, (k,v) -> v == null ? 1 : v + 1);
+map.computeIfAbsent(key, k -> new ArrayList&lt;&gt;());
+map.merge(key, 1, Integer::sum);
+</pre>
+<b>Collections.synchronizedMap vs ConcurrentHashMap:</b><br>
+<code>synchronizedMap</code> locks the entire map per operation (coarse); <code>ConcurrentHashMap</code> locks per bucket (fine-grained) → much better throughput.`},
+
+  {cat:'core', q:'What is the Java Memory Model (JMM)?',
+   a:`The JMM defines how threads interact through memory — rules for visibility and ordering of shared variables.<br><br>
+<b>Key concepts:</b><br><br>
+<b>Heap:</b> All objects, shared between threads. Can be stale in thread-local caches.<br>
+<b>Stack:</b> Per-thread, holds local variables, method frames.<br><br>
+<b>Visibility problem:</b>
+<pre>// Without volatile: thread B may never see thread A's update!
+boolean running = true;  // in heap
+Thread A: running = false;
+Thread B: while(running) { ... }  // may loop forever!</pre>
+<b>Happens-before:</b> Guarantees that writes in one thread are visible to reads in another:<br>
+- <code>volatile</code> write happens-before volatile read<br>
+- <code>synchronized</code> exit happens-before entry<br>
+- Thread start/join<br>
+- Static initializer`},
+
+  {cat:'concurrency', q:'What is a deadlock and how do you prevent it?',
+   a:`A deadlock occurs when two or more threads are blocked forever, each waiting for a lock held by the other.<br><br>
+<pre>Thread 1: lock(A), then tries to lock(B)
+Thread 2: lock(B), then tries to lock(A)
+→ Both wait forever!</pre>
+<b>Four conditions (Coffman):</b> mutual exclusion, hold-and-wait, no preemption, circular wait.<br><br>
+<b>Prevention strategies:</b><br><br>
+<b>1. Lock ordering:</b> Always acquire locks in the same order across all threads.<br>
+<b>2. Lock timeout:</b> Use <code>tryLock(timeout)</code> instead of <code>lock()</code>.<br>
+<b>3. Avoid nested locks:</b> Never acquire a lock while holding another.<br>
+<b>4. Use high-level concurrency:</b>
+<pre>// Prefer:
+ExecutorService, ConcurrentHashMap, BlockingQueue
+// Over raw synchronized blocks</pre>
+<b>Detection:</b> <code>jstack &lt;pid&gt;</code> or thread dump to find deadlock cycles.`},
+
+  {cat:'java8', q:'What are Java 8 Streams?',
+   a:`Streams provide a declarative, functional-style approach to processing collections of data.<br><br>
+<b>Key characteristics:</b><br>
+- Lazy: intermediate operations don't execute until a terminal operation is called<br>
+- Not a data structure: doesn't store data<br>
+- Single use: consumed once, then exhausted<br>
+- Can be parallel with <code>parallelStream()</code><br><br>
+<pre>List&lt;String&gt; result = employees.stream()
+    .filter(e -> e.getSalary() > 50_000)   // intermediate
+    .map(Employee::getName)                  // intermediate
+    .sorted()                                // intermediate
+    .collect(Collectors.toList());           // terminal
+
+// Nothing executes until collect() is called!</pre>
+<b>Categories:</b><br>
+- <b>Creation:</b> stream(), of(), generate(), iterate(), Files.lines()<br>
+- <b>Intermediate:</b> filter, map, flatMap, sorted, distinct, limit, peek<br>
+- <b>Terminal:</b> collect, forEach, reduce, count, findFirst, anyMatch, min, max`},
+
+  {cat:'java8', q:'What is a functional interface?',
+   a:`An interface with exactly one abstract method. Can be used as the target type for lambda expressions and method references.<br><br>
+<pre>@FunctionalInterface  // optional but recommended annotation
+public interface Transformer&lt;T, R&gt; {
+    R transform(T input);  // exactly one abstract method
+    default void log() {} // default methods are OK
+    static Transformer&lt;?,?&gt; identity() { return x -> x; } // static OK
+}</pre>
+<b>Built-in functional interfaces (java.util.function):</b><br>
+<pre>Predicate&lt;T&gt;      → T -> boolean      (test)
+Function&lt;T,R&gt;     → T -> R            (apply)
+Consumer&lt;T&gt;       → T -> void         (accept)
+Supplier&lt;T&gt;       → () -> T           (get)
+UnaryOperator&lt;T&gt;  → T -> T            (apply)
+BinaryOperator&lt;T&gt; → (T,T) -> T        (apply)
+BiFunction&lt;T,U,R&gt; → (T,U) -> R        (apply)</pre>
+<b>Lambda syntax:</b> <code>(params) -> expression</code> or <code>(params) -> { body; }</code>`},
+
+  {cat:'oop', q:'What is the difference between an abstract class and an interface?',
+   a:`<b>Abstract class:</b><br>
+- Can have instance variables (state)<br>
+- Can have constructors<br>
+- Methods can be abstract or concrete<br>
+- Single inheritance only<br>
+- Use when: sharing code/state among closely related classes<br><br>
+<b>Interface (Java 8+):</b><br>
+- No instance variables (only constants and static fields)<br>
+- No constructors<br>
+- Can have abstract, default, and static methods<br>
+- Multiple implementation allowed<br>
+- Use when: defining capabilities/contracts for unrelated classes<br><br>
+<pre>abstract class Vehicle {       interface Flyable {
+    int speed;                     void fly();
+    abstract void move();          default boolean canHover() {
+    void stop() {}                     return false;
+}                                  }
+                               }</pre>
+<b>Java 9+ interface additions:</b> private methods (helper methods for default methods).`},
+
+  {cat:'oop', q:'What is polymorphism in Java?',
+   a:`Polymorphism ("many forms") allows objects of different types to be treated as instances of a common type.<br><br>
+<b>Compile-time polymorphism (static):</b> Method overloading — same method name, different parameters.<br>
+<pre>void add(int a, int b) { ... }
+void add(double a, double b) { ... }
+void add(String a, String b) { ... }</pre>
+<b>Runtime polymorphism (dynamic dispatch):</b> Method overriding — subclass overrides parent method, correct version called at runtime.
+<pre>Animal animal = new Dog();  // reference type: Animal
+animal.speak();             // calls Dog's speak() — determined at runtime!</pre>
+<b>How it works:</b> JVM uses a virtual method table (vtable) per class. When a virtual method is called, JVM looks up the actual object's class vtable to find the right method.<br><br>
+<b>Benefits:</b> Open/Closed Principle — add new behavior via new classes, no code changes.`},
+
+  {cat:'oop', q:'What is encapsulation and why is it important?',
+   a:`Encapsulation bundles data and methods that operate on the data into a single unit (class), and restricts direct access to internal state.<br><br>
+<b>Implementation:</b>
+<pre>public class BankAccount {
+    private double balance;  // private - hidden from outside
+
+    public void deposit(double amount) {
+        if (amount <= 0) throw new IllegalArgumentException();
+        balance += amount;  // controlled access
+    }
+
+    public double getBalance() { return balance; } // read-only
+    // No setter for balance — can only change via deposit/withdraw
+}</pre>
+<b>Benefits:</b><br>
+- <b>Data integrity</b> — validation in setters prevents invalid state<br>
+- <b>Flexibility</b> — can change internal implementation without breaking API<br>
+- <b>Reduced complexity</b> — hide irrelevant details<br>
+- <b>Security</b> — sensitive data hidden from direct manipulation`},
+
+  {cat:'oop', q:'What is method overloading vs method overriding?',
+   a:`<b>Overloading (compile-time):</b><br>
+- Same class, same name, different parameters<br>
+- Resolved at compile time by parameter types<br>
+- Return type alone doesn't differentiate<br>
+<pre>// Overloading
+void print(int n) { System.out.println("int: " + n); }
+void print(String s) { System.out.println("str: " + s); }
+void print(int a, int b) { /* different param count */ }</pre>
+<b>Overriding (runtime):</b><br>
+- Subclass provides new implementation of parent's method<br>
+- Same name, same parameters, same or covariant return type<br>
+- Resolved at runtime (dynamic dispatch)<br>
+- Cannot override: final, static, private methods<br>
+<pre>class Shape {
+    public String describe() { return "I am a shape"; }
+}
+class Circle extends Shape {
+    @Override  // annotation verifies this is an override
+    public String describe() { return "I am a circle"; }
+}</pre>
+<b>@Override annotation:</b> Strongly recommended — compiler error if you accidentally create an overload instead.`},
+
+  {cat:'core', q:'What is the difference between checked and unchecked exceptions?',
+   a:`<b>Checked exceptions:</b><br>
+- Extend <code>Exception</code> (but not <code>RuntimeException</code>)<br>
+- Must be declared in method signature (<code>throws</code>) or caught<br>
+- Represent recoverable conditions: IOException, SQLException, ParseException<br>
+- Compiler enforces handling<br><br>
+<b>Unchecked exceptions (RuntimeException):</b><br>
+- Extend <code>RuntimeException</code><br>
+- No requirement to catch or declare<br>
+- Represent programming errors: NullPointerException, IllegalArgumentException, IndexOutOfBoundsException<br><br>
+<pre>// Checked — must handle
+public void readFile(String path) throws IOException {
+    new FileReader(path);  // throws checked IOException
+}
+
+// Unchecked — optional handling
+public int get(int[] arr, int idx) {
+    return arr[idx];  // may throw ArrayIndexOutOfBoundsException
+}</pre>
+<b>Best practice:</b> Prefer unchecked exceptions; only use checked for conditions callers can reasonably recover from.`},
+
+  {cat:'core', q:'How does Java garbage collection work?',
+   a:`Java GC automatically reclaims memory from objects no longer reachable from any live thread's reference chain.<br><br>
+<b>Heap structure (generational GC):</b><br>
+- <b>Young Gen</b> (Eden + S0 + S1): Most objects die young. Minor GC is fast.<br>
+- <b>Old Gen (Tenured):</b> Objects that survived several minor GCs. Major/Full GC is slower.<br>
+- <b>Metaspace</b> (Java 8+): Class metadata (replaced PermGen).<br><br>
+<b>GC algorithms:</b><br>
+- <b>Serial GC</b>: Single-threaded, for small heaps<br>
+- <b>Parallel GC</b>: Multi-threaded, throughput-oriented<br>
+- <b>G1 GC</b> (default since Java 9): Region-based, low-latency<br>
+- <b>ZGC/Shenandoah</b>: Ultra-low latency (&lt; 1ms pauses)<br><br>
+<b>Tuning flags:</b>
+<pre>-Xms512m -Xmx2g       # initial/max heap
+-XX:+UseG1GC           # use G1 GC
+-Xlog:gc*:file=gc.log  # GC logging</pre>`},
+
+  {cat:'concurrency', q:'What is the volatile keyword?',
+   a:`<code>volatile</code> guarantees two things:<br><br>
+<b>1. Visibility:</b> Writes to a volatile variable are immediately visible to all other threads (not cached in CPU registers or thread-local caches).<br><br>
+<b>2. Ordering:</b> Prevents instruction reordering around volatile reads/writes (happens-before guarantee).<br><br>
+<pre>// Without volatile: threads may read stale value
+volatile boolean running = true;
+
+// Thread 1
+void stop() { running = false; }
+
+// Thread 2 — guaranteed to see the update!
+void run() { while (running) { process(); } }</pre>
+<b>volatile vs synchronized:</b><br>
+- <code>volatile</code>: visibility only, no atomicity for compound actions<br>
+- <code>synchronized</code>: both visibility AND mutual exclusion<br><br>
+<b>When NOT enough:</b> <code>i++</code> is read-modify-write — volatile doesn't help. Use <code>AtomicInteger</code> or <code>synchronized</code>.`},
+
+  {cat:'concurrency', q:'What is synchronization in Java?',
+   a:`Synchronization controls access to shared resources in a multi-threaded environment, ensuring mutual exclusion and visibility.<br><br>
+<pre>// Synchronized method — locks on 'this'
+public synchronized void increment() { count++; }
+
+// Synchronized block — explicit lock object (preferred)
+private final Object lock = new Object();
+public void increment() {
+    synchronized (lock) { count++; }
+}
+
+// Static synchronized — locks on Class object
+public static synchronized void classMethod() { ... }</pre>
+<b>Higher-level alternatives (java.util.concurrent):</b>
+<pre>ReentrantLock lock = new ReentrantLock();
+lock.lock();
+try { /* critical section */ }
+finally { lock.unlock(); }
+
+// ReadWriteLock: multiple readers OR one writer
+ReadWriteLock rwLock = new ReentrantReadWriteLock();
+rwLock.readLock().lock();
+rwLock.writeLock().lock();</pre>
+<b>Key rule:</b> Always use <code>try-finally</code> with explicit locks to guarantee unlock.`},
+
+  {cat:'concurrency', q:'What is the difference between wait(), notify(), and sleep()?',
+   a:`<b>wait():</b><br>
+- Defined on <code>Object</code><br>
+- Releases the lock and suspends the thread<br>
+- Must be called inside <code>synchronized</code> block<br>
+- Thread awakens on <code>notify()</code>/<code>notifyAll()</code> or spurious wakeup<br><br>
+<b>notify() / notifyAll():</b><br>
+- Defined on <code>Object</code><br>
+- Wakes up waiting thread(s) on the same monitor<br>
+- Prefer <code>notifyAll()</code> to avoid missed signals<br><br>
+<b>sleep():</b><br>
+- Defined on <code>Thread</code><br>
+- Does NOT release the lock<br>
+- Suspends for a fixed duration<br>
+- Just a delay; no inter-thread communication<br><br>
+<pre>// Pattern: wait in a loop (guarded block)
+synchronized (queue) {
+    while (queue.isEmpty()) {  // loop, not if!
+        queue.wait();
+    }
+    item = queue.poll();
+}
+// Producer:
+synchronized (queue) {
+    queue.add(item);
+    queue.notifyAll();
+}</pre>`},
+
+  {cat:'java8', q:'What are Optional and how should you use it?',
+   a:`Optional wraps a value that may or may not be present, forcing explicit null handling.<br><br>
+<pre>// Creating
+Optional&lt;String&gt; opt = Optional.of("hello");        // throws if null
+Optional&lt;String&gt; safe = Optional.ofNullable(null);  // OK with null
+Optional&lt;String&gt; empty = Optional.empty();
+
+// Safe access
+opt.get()                           // throws if empty!
+opt.orElse("default")               // fallback value
+opt.orElseGet(() -> compute())      // lazy fallback
+opt.orElseThrow(NoSuchElementException::new)
+
+// Transform
+opt.map(String::toUpperCase)        // Optional["HELLO"]
+opt.filter(s -> s.length() > 3)     // Optional["hello"] or empty
+opt.flatMap(s -> findUser(s))       // unwraps nested Optional
+
+// Conditional action
+opt.ifPresent(s -> System.out.println(s))
+opt.ifPresentOrElse(s -> use(s), () -> log("empty"))</pre>
+<b>Guidelines:</b><br>
+- Use for method return types, not parameters or fields<br>
+- Never use <code>Optional.get()</code> without checking first<br>
+- Don't use as <code>null</code> replacement everywhere — just for API boundaries`},
+
+  {cat:'collections', q:'What is the difference between HashMap, LinkedHashMap, and TreeMap?',
+   a:`<b>HashMap:</b><br>
+- Unordered (iteration order unpredictable)<br>
+- O(1) average for get/put<br>
+- Allows one null key, multiple null values<br><br>
+<b>LinkedHashMap:</b><br>
+- Maintains insertion order (or access order if configured)<br>
+- Slightly slower than HashMap (extra linked list maintenance)<br>
+- Use for: LRU cache, predictable iteration order<br><br>
+<b>TreeMap:</b><br>
+- Sorted by key (natural order or Comparator)<br>
+- O(log n) for get/put (red-black tree)<br>
+- No null keys<br>
+- Provides extra methods: firstKey(), lastKey(), headMap(), tailMap(), subMap()<br><br>
+<pre>// LRU Cache using LinkedHashMap
+new LinkedHashMap&lt;&gt;(16, 0.75f, true) {  // accessOrder=true
+    @Override
+    protected boolean removeEldestEntry(Map.Entry e) {
+        return size() > MAX_SIZE;
+    }
+};</pre>`},
+
+  {cat:'java8', q:'What are lambda expressions and method references?',
+   a:`Lambdas are anonymous functions — a shorthand for implementing functional interfaces.<br><br>
+<pre>// Lambda syntax
+Runnable r = () -> System.out.println("run");
+Comparator&lt;String&gt; cmp = (a, b) -> a.compareTo(b);
+Function&lt;Integer,Integer&gt; sq = n -> n * n;    // single param, no parens
+Predicate&lt;String&gt; isLong = s -> { return s.length() > 5; }; // block body</pre>
+<b>Method references:</b> Shorthand for lambdas that only call an existing method.
+<pre>// Static method
+Function&lt;String,Integer&gt; p = Integer::parseInt;    // s -> Integer.parseInt(s)
+
+// Instance method on param
+Function&lt;String,Integer&gt; len = String::length;     // s -> s.length()
+
+// Instance method on specific object
+Consumer&lt;String&gt; print = System.out::println;      // s -> System.out.println(s)
+
+// Constructor reference
+Supplier&lt;ArrayList&gt; factory = ArrayList::new;      // () -> new ArrayList()</pre>
+<b>When to use method reference vs lambda:</b> Use method reference when the lambda just calls one method and the readability is improved.`},
+
+  {cat:'core', q:'What is the difference between Stack and Heap memory in Java?',
+   a:`<b>Stack:</b><br>
+- Per-thread, LIFO structure<br>
+- Holds: local variables, method parameters, return addresses, references (not objects!)<br>
+- Fast allocation/deallocation (just move stack pointer)<br>
+- Fixed size (StackOverflowError on overflow — e.g., infinite recursion)<br>
+- Automatically freed when method returns<br><br>
+<b>Heap:</b><br>
+- Shared across all threads<br>
+- Holds: all objects and instance variables<br>
+- Managed by Garbage Collector<br>
+- Larger, slower than stack<br>
+- OutOfMemoryError when full<br><br>
+<pre>void method() {
+    int x = 5;              // stack: primitive value
+    String s = "hello";     // stack: reference; "hello" object on heap
+    User u = new User();    // stack: reference 'u'; User object on heap
+}
+// x, s, u references removed from stack when method returns
+// "hello", User objects remain until GC collects them</pre>`},
+
+  {cat:'core', q:'Is Java pass-by-value or pass-by-reference?',
+   a:`Java is <b>always pass-by-value</b>. For objects, the <em>value</em> passed is a <em>copy of the reference</em> (address), not the object itself.<br><br>
+<pre>// Primitive: value is copied
+void addOne(int x) { x++; } // modifies local copy only
+int a = 5;
+addOne(a);
+System.out.println(a); // 5 — unchanged!
+
+// Object: reference is copied (but both point to same object!)
+void rename(Person p, String name) {
+    p.setName(name);  // modifies original object through copied reference
+}
+Person alice = new Person("Alice");
+rename(alice, "Bob");
+System.out.println(alice.getName()); // "Bob" — modified!
+
+// But reassigning the reference doesn't affect original:
+void replace(Person p) {
+    p = new Person("Charlie");  // local ref points to new object
+}
+rename(alice, "Bob");
+System.out.println(alice.getName()); // "Bob" — still Bob!</pre>`},
+
+  {cat:'core', q:'What is the final keyword in Java?',
+   a:`<code>final</code> has three different meanings depending on context:<br><br>
+<b>Final variable:</b> Can only be assigned once. For primitives: immutable value. For objects: immutable reference (object's state can still change!).<br>
+<pre>final int MAX = 100;       // can't reassign MAX
+final List&lt;String&gt; list = new ArrayList&lt;&gt;();
+list.add("item");          // OK! List is mutable, reference is final</pre>
+<b>Final method:</b> Cannot be overridden by subclasses. Prevents polymorphic behavior change.
+<pre>class Parent { final void template() { /* can't override */ } }</pre>
+<b>Final class:</b> Cannot be subclassed. No inheritance.
+<pre>public final class String { ... }   // can't extend String!
+public final class Integer { ... }  // wrapper classes are final</pre>
+<b>Benefits:</b> Makes intent clear, enables optimization (JIT inlining), safer in multi-threaded code.`},
+
+  {cat:'core', q:'What is the static keyword in Java?',
+   a:`<code>static</code> members belong to the <b>class</b>, not to any instance.<br><br>
+<pre>public class Counter {
+    private static int count = 0;   // shared by ALL instances
+    private int id;
+
+    public Counter() { this.id = ++count; }
+
+    public static int getCount() { return count; } // no 'this' needed
+    public int getId() { return id; }
+}
+
+Counter.getCount(); // class method call (no instance needed)
+new Counter().getCount(); // works but misleading style</pre>
+<b>Static initializer block:</b>
+<pre>static {
+    // Runs once when class is loaded
+    DEFAULT_TIMEOUT = Integer.parseInt(System.getenv("TIMEOUT"));
+}</pre>
+<b>Static import:</b>
+<pre>import static java.lang.Math.*;
+sqrt(4);  // instead of Math.sqrt(4)</pre>
+<b>Inner class context:</b> <code>static</code> nested class does not have access to outer instance members.`},
+
+  {cat:'core', q:'What is autoboxing and unboxing?',
+   a:`Autoboxing is automatic conversion between primitives and their wrapper types.<br><br>
+<pre>// Autoboxing: primitive → wrapper
+int i = 42;
+Integer boxed = i;           // auto: new Integer(42)  [deprecated since Java 9]
+
+// Unboxing: wrapper → primitive
+int unboxed = boxed;         // auto: boxed.intValue()
+
+// Common in collections
+List&lt;Integer&gt; list = new ArrayList&lt;&gt;();
+list.add(42);                // autoboxed to Integer
+int val = list.get(0);       // unboxed to int</pre>
+<b>Integer cache (−128 to 127):</b>
+<pre>Integer a = 100, b = 100;
+a == b;   // true! (cached same object)
+Integer x = 200, y = 200;
+x == y;   // false! (new objects outside cache range)
+x.equals(y); // true (value comparison)</pre>
+<b>Warning:</b> Unboxing null causes NullPointerException!<br>
+<b>Performance:</b> Avoid autoboxing in tight loops — creates many short-lived objects.`},
+
+  {cat:'java8', q:'What is the difference between Comparable and Comparator?',
+   a:`<b>Comparable (natural ordering):</b><br>
+- Interface on the class being sorted: <code>implements Comparable&lt;T&gt;</code><br>
+- Method: <code>compareTo(T other)</code><br>
+- One natural ordering per class<br>
+- Used by: <code>Arrays.sort()</code>, <code>TreeSet/TreeMap</code> (default)<br><br>
+<b>Comparator (external ordering):</b><br>
+- External strategy object<br>
+- Method: <code>compare(T o1, T o2)</code><br>
+- Multiple orderings possible<br>
+- Functional interface (use lambdas!)<br><br>
+<pre>// Natural ordering
+class Person implements Comparable&lt;Person&gt; {
+    public int compareTo(Person o) {
+        return this.name.compareTo(o.name);
+    }
+}
+
+// Custom orderings with Comparator
+Comparator&lt;Person&gt; byAge = Comparator.comparingInt(Person::getAge);
+Comparator&lt;Person&gt; byName = Comparator.comparing(Person::getName);
+Comparator&lt;Person&gt; byAgeNameDesc =
+    Comparator.comparingInt(Person::getAge)
+              .thenComparing(Person::getName)
+              .reversed();
+
+list.sort(byAge);</pre>`},
+
+  {cat:'collections', q:'What is a PriorityQueue and how does it work?',
+   a:`PriorityQueue is a min-heap based priority queue — the element with the lowest priority (according to natural order or Comparator) is always at the head.<br><br>
+<pre>// Min-heap (default: natural order = smallest first)
+PriorityQueue&lt;Integer&gt; minPQ = new PriorityQueue&lt;&gt;();
+minPQ.add(5); minPQ.add(1); minPQ.add(3);
+minPQ.poll(); // 1 (smallest)
+minPQ.poll(); // 3
+minPQ.peek(); // 5 (doesn't remove)
+
+// Max-heap
+PriorityQueue&lt;Integer&gt; maxPQ =
+    new PriorityQueue&lt;&gt;(Comparator.reverseOrder());
+maxPQ.add(5); maxPQ.add(1); maxPQ.add(3);
+maxPQ.poll(); // 5 (largest)
+
+// Custom priority
+PriorityQueue&lt;Task&gt; taskQueue =
+    new PriorityQueue&lt;&gt;(Comparator.comparingInt(Task::getPriority));</pre>
+<b>Big O:</b> poll/add = O(log n), peek = O(1), contains = O(n)<br>
+<b>Use for:</b> Dijkstra's algorithm, scheduling, top-K problems, event simulation.`},
+
+  {cat:'java8', q:'What is CompletableFuture?',
+   a:`CompletableFuture (Java 8) provides a non-blocking, composable async computation API.<br><br>
+<pre>// Start async computation
+CompletableFuture&lt;String&gt; future =
+    CompletableFuture.supplyAsync(() -> fetchFromDB());
+
+// Chain operations (non-blocking)
+future
+    .thenApply(data -> process(data))     // transform
+    .thenAccept(result -> save(result))   // consume (no return)
+    .thenRun(() -> notify())             // run (no input)
+    .exceptionally(ex -> handleError(ex)); // error handler
+
+// Combine
+CompletableFuture&lt;String&gt; userFuture = getUser();
+CompletableFuture&lt;List&lt;Order&gt;&gt; ordersFuture = getOrders();
+
+CompletableFuture.allOf(userFuture, ordersFuture)
+    .thenRun(() -> combine(userFuture.join(), ordersFuture.join()));
+
+// anyOf: returns first to complete
+CompletableFuture.anyOf(cache, db).thenAccept(result -> use(result));</pre>
+<b>get() vs join():</b> <code>get()</code> throws checked exceptions; <code>join()</code> throws unchecked (better in lambdas).`},
+
+  {cat:'core', q:'What is try-with-resources?',
+   a:`Java 7 feature that automatically closes resources implementing <code>AutoCloseable</code> after the try block exits (whether normally or via exception).<br><br>
+<pre>// Old way (error-prone)
+InputStream in = null;
+try {
+    in = new FileInputStream("file.txt");
+    // use in
+} finally {
+    if (in != null) in.close(); // must remember, error-prone
+}
+
+// try-with-resources (automatic close)
+try (var in = new FileInputStream("file.txt");
+     var out = new FileOutputStream("out.txt")) {
+    // in and out are closed automatically
+    in.transferTo(out);
+} // both closed here, in reverse order
+
+// Resources closed in reverse order: out, then in
+// close() is called even if an exception is thrown
+// Suppressed exceptions: if both try and close throw,
+// the close exception is suppressed (not lost)</pre>
+<b>Custom AutoCloseable:</b>
+<pre>class DbConnection implements AutoCloseable {
+    public void close() { connection.release(); }
+}</pre>`},
+
+  {cat:'collections', q:'What is the Iterator pattern and ListIterator?',
+   a:`<b>Iterator:</b> Provides a way to traverse a collection without exposing its internal structure.<br><br>
+<pre>// Using Iterator explicitly
+Iterator&lt;String&gt; it = list.iterator();
+while (it.hasNext()) {
+    String s = it.next();
+    if (s.isEmpty()) it.remove(); // safe removal during iteration!
+}
+
+// Enhanced for-each (uses Iterator internally)
+for (String s : list) { ... }
+
+// Java 8+: Iterable.forEach
+list.forEach(System.out::println);
+list.removeIf(String::isEmpty); // bulk remove</pre>
+<b>ListIterator:</b> Extended iterator for Lists — can go both directions and modify.<br>
+<pre>ListIterator&lt;String&gt; lit = list.listIterator();
+while (lit.hasNext()) {
+    String s = lit.next();
+    lit.set(s.toUpperCase());  // replace current element
+    lit.add("new");            // insert after current
+}
+while (lit.hasPrevious()) {  // traverse backwards
+    System.out.println(lit.previous());
+}</pre>
+<b>ConcurrentModificationException:</b> Thrown if you modify a collection while iterating it (without using iterator.remove()).`},
+
+  {cat:'core', q:'What is the Collections utility class?',
+   a:`<code>java.util.Collections</code> provides static utility methods for collections.<br><br>
+<pre>List&lt;Integer&gt; list = new ArrayList&lt;&gt;(Arrays.asList(3,1,4,1,5,9));
+
+// Sorting and searching
+Collections.sort(list);                              // [1,1,3,4,5,9]
+Collections.sort(list, Comparator.reverseOrder());   // descending
+Collections.binarySearch(sorted, 4);                 // index of 4
+
+// Min/max
+Collections.min(list);    // 1
+Collections.max(list);    // 9
+
+// Modify
+Collections.reverse(list);       // reverse in-place
+Collections.shuffle(list);       // random order
+Collections.swap(list, 0, 1);    // swap positions
+Collections.fill(list, 0);       // fill with value
+Collections.rotate(list, 2);     // rotate by 2 positions
+
+// Views
+Collections.unmodifiableList(list);    // read-only view
+Collections.synchronizedList(list);    // thread-safe view
+Collections.singletonList(item);       // immutable single element
+Collections.nCopies(3, "X");           // ["X","X","X"]
+Collections.emptyList();               // reusable empty list</pre>`},
+
+  {cat:'core', q:'What is the difference between String, StringBuilder, and StringBuffer?',
+   a:`<pre>
+Feature         String      StringBuilder  StringBuffer
+─────────────────────────────────────────────────────
+Immutable       Yes         No             No
+Thread-safe     Yes (immutable)  No        Yes (synchronized)
+Performance     Slowest (new     Fastest    Slower than SB
+                obj each op)
+When to use     Most cases  Single-thread  Multi-thread str building
+</pre>
+<pre>// String concatenation in loop: creates many objects!
+String s = "";
+for (int i = 0; i &lt; 1000; i++) {
+    s += i;  // creates 1000 intermediate String objects!
+}
+
+// Use StringBuilder:
+StringBuilder sb = new StringBuilder();
+for (int i = 0; i &lt; 1000; i++) {
+    sb.append(i);
+}
+String result = sb.toString();  // ONE final String created
+
+// Common StringBuilder methods:
+sb.append("text");
+sb.insert(0, "prefix");
+sb.delete(0, 3);
+sb.reverse();
+sb.replace(0, 3, "new");
+sb.indexOf("text");
+sb.length();</pre>`},
+
+  {cat:'java8', q:'What are default and static methods in interfaces?',
+   a:`Java 8 added <b>default</b> and <b>static</b> methods to interfaces, enabling backward-compatible evolution.<br><br>
+<b>Default methods:</b> Have an implementation; implementing classes can override them.
+<pre>interface Collection&lt;E&gt; {
+    // Abstract
+    boolean add(E e);
+
+    // Default method (added in Java 8 without breaking existing code)
+    default void forEach(Consumer&lt;? super E&gt; action) {
+        for (E e : this) action.accept(e);
+    }
+    default Stream&lt;E&gt; stream() { ... }
+}</pre>
+<b>Static methods:</b> Belong to the interface (not implementing class); helper/factory methods.
+<pre>interface Comparator&lt;T&gt; {
+    int compare(T o1, T o2);
+
+    static &lt;T extends Comparable&lt;? super T&gt;&gt; Comparator&lt;T&gt; naturalOrder() {
+        return (a, b) -> a.compareTo(b);
+    }
+}</pre>
+<b>Diamond problem:</b> If two interfaces provide same default method, the implementing class MUST override it.`},
+
+  {cat:'java8', q:'What are Stream collectors?',
+   a:`Collectors define how stream elements are accumulated into a result.<br><br>
+<pre>// toList (Java 16: Stream.toList())
+List&lt;String&gt; names = stream.collect(Collectors.toList());
+List&lt;String&gt; immutable = stream.toList();  // Java 16+
+
+// toSet, toMap
+Set&lt;String&gt; set = stream.collect(Collectors.toSet());
+Map&lt;String,Integer&gt; map = stream.collect(
+    Collectors.toMap(String::toLowerCase, String::length));
+
+// joining
+stream.collect(Collectors.joining(", ", "[", "]"))  // "[a, b, c]"
+
+// groupingBy — split into groups
+Map&lt;Department, List&lt;Employee&gt;&gt; byDept =
+    employees.stream().collect(Collectors.groupingBy(Employee::getDept));
+
+// groupingBy with downstream
+Map&lt;String, Long&gt; countByCity =
+    employees.stream().collect(
+        Collectors.groupingBy(Employee::getCity, Collectors.counting()));
+
+// partitioningBy
+Map&lt;Boolean, List&lt;Integer&gt;&gt; evenOdd =
+    nums.stream().collect(Collectors.partitioningBy(n -> n % 2 == 0));
+
+// summarizingInt
+IntSummaryStatistics stats =
+    employees.stream().collect(
+        Collectors.summarizingInt(Employee::getSalary));
+stats.getAverage(); stats.getMax(); stats.getSum();</pre>`},
+
+  {cat:'core', q:'What are generics and what is type erasure?',
+   a:`Generics allow classes/methods to operate on typed parameters, providing compile-time type safety.<br><br>
+<pre>// Generic class
+class Box&lt;T&gt; {
+    private T value;
+    public Box(T value) { this.value = value; }
+    public T get() { return value; }
+}
+Box&lt;String&gt; sBox = new Box&lt;&gt;("hello");
+Box&lt;Integer&gt; iBox = new Box&lt;&gt;(42);
+
+// Generic method
+&lt;T extends Comparable&lt;T&gt;&gt; T max(T a, T b) {
+    return a.compareTo(b) &gt; 0 ? a : b;
+}</pre>
+<b>Type erasure:</b> Generic type parameters are erased at runtime — replaced with Object (or bounds). This is for backward compatibility with pre-generics Java.
+<pre>// At compile time:   Box&lt;String&gt;, Box&lt;Integer&gt;
+// At runtime:        Both are just Box (same class!)
+new Box&lt;String&gt;().getClass() == new Box&lt;Integer&gt;().getClass(); // true!
+
+// Cannot do:
+new T();           // can't instantiate type parameter
+instanceof List&lt;String&gt;  // can't check generic type
+T[] arr = new T[10]; // can't create generic array</pre>`},
+
+  {cat:'core', q:'What are inner classes in Java?',
+   a:`Java has 4 types of nested classes:<br><br>
+<b>1. Inner class (non-static):</b> Has reference to outer instance. Can access outer private members.
+<pre>class Outer {
+    private int x = 10;
+    class Inner {
+        void show() { System.out.println(x); } // can access x
+    }
+}
+Outer.Inner inner = new Outer().new Inner(); // needs Outer instance</pre>
+<b>2. Static nested class:</b> No reference to outer instance.
+<pre>class Outer {
+    static class StaticNested { }
+}
+Outer.StaticNested n = new Outer.StaticNested(); // no Outer instance needed</pre>
+<b>3. Local class:</b> Defined inside a method; rare.
+<pre>void method() { class Local { } }</pre>
+<b>4. Anonymous class:</b> Inline implementation of an interface/class.
+<pre>Runnable r = new Runnable() {
+    public void run() { System.out.println("run"); }
+};
+// Mostly replaced by lambdas in Java 8+</pre>
+<b>Best practice:</b> Prefer static nested classes; inner classes create memory leak risk.`},
+
+  {cat:'core', q:'What are varargs in Java?',
+   a:`Varargs (variable-length arguments) allow passing any number of arguments of the same type.<br><br>
+<pre>// Method accepts 0 or more Strings
+public void print(String... messages) {
+    for (String msg : messages) {
+        System.out.println(msg);
+    }
+}
+
+// Call with any number of args
+print();
+print("hello");
+print("a", "b", "c");
+print(new String[]{"x", "y"});  // can also pass array
+
+// Vararg must be last parameter
+public void log(String level, Object... args) { ... }
+log("INFO", "user", 42, true);  // mixed types via Object
+
+// Gotcha with overloading
+public void foo(int... ints) { ... }
+public void foo(String... strs) { ... }
+foo();  // AMBIGUOUS! Compile error</pre>
+<b>Internally:</b> Varargs are just syntactic sugar for arrays. The compiler creates an array.<br>
+<b>Examples in JDK:</b> <code>String.format(String, Object...)</code>, <code>Arrays.asList(T...)</code>, <code>List.of(E...)</code>`},
+
+  {cat:'java8', q:'What are method references and when to use them?',
+   a:`Method references are a shorthand for lambdas that only delegate to an existing method.<br><br>
+<pre>// 4 types:
+
+// 1. Static method reference
+Function&lt;String, Integer&gt; parser = Integer::parseInt;
+// equivalent: s -> Integer.parseInt(s)
+list.stream().map(Integer::parseInt);
+
+// 2. Instance method on arbitrary instance (parameter)
+Function&lt;String, Integer&gt; lenFn = String::length;
+// equivalent: s -> s.length()
+list.stream().mapToInt(String::length);
+
+// 3. Instance method on specific instance
+Consumer&lt;String&gt; printer = System.out::println;
+// equivalent: s -> System.out.println(s)
+list.forEach(System.out::println);
+
+// 4. Constructor reference
+Supplier&lt;ArrayList&gt; factory = ArrayList::new;
+// equivalent: () -> new ArrayList()
+Stream.generate(ArrayList::new).limit(5);
+
+// BiFunction example
+BiFunction&lt;String,Integer,String&gt; repeat = String::repeat;
+repeat.apply("ab", 3);  // "ababab"</pre>
+<b>When to prefer method reference:</b> When the lambda just calls one method. Use lambda when the reference is less clear.`},
+
+  {cat:'collections', q:'What is the difference between fail-fast and fail-safe iterators?',
+   a:`<b>Fail-fast iterators:</b><br>
+- Throw <code>ConcurrentModificationException</code> if collection is modified while iterating<br>
+- Check <code>modCount</code> before each <code>next()</code> call<br>
+- Used by: ArrayList, HashMap, HashSet iterators<br>
+- Iterate on the actual collection<br><br>
+<b>Fail-safe iterators:</b><br>
+- Do NOT throw exception on concurrent modification<br>
+- Work on a copy of the collection (snapshot)<br>
+- Used by: CopyOnWriteArrayList, ConcurrentHashMap iterators<br>
+- May not reflect latest changes<br><br>
+<pre>// Fail-fast example
+List&lt;Integer&gt; list = new ArrayList&lt;&gt;(Arrays.asList(1,2,3));
+for (Integer i : list) {
+    if (i == 2) list.remove(i);  // ConcurrentModificationException!
+}
+
+// Safe removal: use Iterator.remove()
+Iterator&lt;Integer&gt; it = list.iterator();
+while (it.hasNext()) {
+    if (it.next() == 2) it.remove();  // safe!
+}
+
+// Or use removeIf (Java 8)
+list.removeIf(i -> i == 2);</pre>`},
+
+  {cat:'concurrency', q:'What is the Java Executor framework?',
+   a:`The Executor framework provides thread pool management, separating task submission from execution.<br><br>
+<pre>// Executor: just submit Runnable
+Executor executor = Executors.newSingleThreadExecutor();
+executor.execute(() -> System.out.println("task"));
+
+// ExecutorService: lifecycle management + Future support
+ExecutorService pool = Executors.newFixedThreadPool(4);
+Future&lt;Integer&gt; future = pool.submit(() -> expensiveComputation());
+Integer result = future.get(); // blocks until done
+pool.shutdown();               // graceful shutdown
+pool.awaitTermination(60, TimeUnit.SECONDS);
+
+// Thread pool types
+Executors.newSingleThreadExecutor()   // 1 thread
+Executors.newFixedThreadPool(n)       // n threads
+Executors.newCachedThreadPool()       // grows on demand, shrinks when idle
+Executors.newScheduledThreadPool(n)   // scheduled/periodic tasks
+
+// Virtual threads (Java 21+)
+ExecutorService vThreadPool =
+    Executors.newVirtualThreadPerTaskExecutor();
+// Lightweight, millions of concurrent tasks possible!</pre>
+<b>Best practice:</b> Use thread pools instead of <code>new Thread()</code>. Choose pool size based on task type (CPU-bound: n+1 threads; IO-bound: much larger).`},
+
+  {cat:'core', q:'What is covariant return type?',
+   a:`Covariant return type allows an overriding method to return a subtype of the declared return type.<br><br>
+<pre>class Animal {
+    public Animal create() { return new Animal(); }
+    public Animal clone() { return new Animal(); }
+}
+
+class Dog extends Animal {
+    @Override
+    public Dog create() { return new Dog(); }  // Dog is subtype of Animal — OK!
+
+    @Override
+    public Dog clone() { return new Dog(); }   // Covariant return type
+}
+
+// Covariant return enables method chaining in builder pattern
+class Builder {
+    protected String name;
+    public Builder name(String n) { this.name = n; return this; }
+}
+class ExtendedBuilder extends Builder {
+    private int age;
+    @Override
+    public ExtendedBuilder name(String n) { super.name(n); return this; } // returns subtype
+    public ExtendedBuilder age(int a) { this.age = a; return this; }
+}
+
+// Usage
+new ExtendedBuilder().name("Alice").age(30).build(); // fluent, type-safe</pre>`},
+
+  {cat:'core', q:'What is the difference between deep copy and shallow copy?',
+   a:`<b>Shallow copy:</b> Copies the object and all its fields by value. Object references are copied as references — both copies point to the same inner objects.<br><br>
+<b>Deep copy:</b> Copies the object AND recursively copies all referenced objects — completely independent copy.<br><br>
+<pre>// Shallow copy: Object.clone() by default
+Person original = new Person("Alice", new Address("Berlin"));
+Person shallow = (Person) original.clone();
+
+shallow.setName("Bob");           // OK — different name String
+shallow.getAddress().setCity("Paris"); // AFFECTS original too!
+original.getAddress().getCity(); // "Paris" — oops!
+
+// Deep copy: must implement manually
+@Override
+public Person clone() {
+    try {
+        Person copy = (Person) super.clone();
+        copy.address = (Address) address.clone(); // deep copy Address too
+        return copy;
+    } catch (CloneNotSupportedException e) {
+        throw new AssertionError(e);
+    }
+}
+
+// Alternative: serialization-based deep copy
+// Or: use a copy constructor with all nested object copies</pre>`},
+
+  {cat:'core', q:'What is the enum in Java and what are its features?',
+   a:`Java enums are special classes for type-safe constants with full OOP capabilities.<br><br>
+<pre>public enum Planet {
+    // Each constant can have constructor args
+    MERCURY(3.303e+23, 2.4397e6),
+    EARTH  (5.976e+24, 6.37814e6),
+    MARS   (6.421e+23, 3.3972e6);
+
+    private final double mass, radius;
+    Planet(double mass, double radius) {
+        this.mass = mass;
+        this.radius = radius;
+    }
+    double surfaceGravity() { return 6.67e-11 * mass / (radius*radius); }
+    double surfaceWeight(double m) { return m * surfaceGravity(); }
+}
+
+// Built-in enum methods
+Planet.EARTH.name()       // "EARTH"
+Planet.EARTH.ordinal()    // 2
+Planet.values()           // all constants as array
+Planet.valueOf("MARS")    // Planet.MARS
+
+// Enums in switch (excellent combination)
+switch (planet) {
+    case EARTH -> "home";
+    case MARS -> "close by";
+    default -> "far away";
+}
+
+// EnumSet, EnumMap for efficient operations
+EnumSet&lt;Planet&gt; inner = EnumSet.of(Planet.MERCURY, Planet.EARTH);
+EnumMap&lt;Planet, Integer&gt; distance = new EnumMap&lt;&gt;(Planet.class);</pre>`},
+
+  {cat:'core', q:'What is reflection in Java?',
+   a:`Reflection allows inspecting and manipulating classes, methods, and fields at runtime.<br><br>
+<pre>// Get Class object
+Class&lt;?&gt; cls = String.class;
+Class&lt;?&gt; cls2 = Class.forName("java.lang.String");
+Class&lt;?&gt; cls3 = "hello".getClass();
+
+// Inspect class
+cls.getDeclaredFields();   // all fields (including private)
+cls.getDeclaredMethods();  // all methods
+cls.getConstructors();
+
+// Access private field
+Field field = User.class.getDeclaredField("password");
+field.setAccessible(true);  // bypass access check!
+field.get(userInstance);    // read value
+field.set(userInstance, "new"); // write value
+
+// Invoke method dynamically
+Method method = cls.getDeclaredMethod("greet", String.class);
+method.invoke(instance, "Alice"); // calls instance.greet("Alice")
+
+// Create instance
+Constructor&lt;?&gt; ctor = cls.getConstructor(String.class, int.class);
+Object obj = ctor.newInstance("Alice", 30);</pre>
+<b>Uses:</b> Frameworks (Spring, Hibernate, JUnit), serialization, dependency injection, proxies.<br>
+<b>Downsides:</b> Breaks encapsulation, slower than direct calls, may fail with SecurityManager.`},
+
+  {cat:'concurrency', q:'What is the difference between process and thread?',
+   a:`<b>Process:</b><br>
+- Independent execution unit with its own memory space<br>
+- Isolated from other processes<br>
+- Creation is expensive (fork/exec)<br>
+- Communication via IPC (sockets, pipes, shared memory)<br>
+- Crash doesn't affect other processes<br><br>
+<b>Thread:</b><br>
+- Lightweight execution unit within a process<br>
+- Shares heap memory, statics, file descriptors with other threads<br>
+- Creation is cheap<br>
+- Communication via shared memory<br>
+- A crashed thread can take down the process<br><br>
+<pre>// Creating threads in Java
+// 1. Extend Thread
+class MyThread extends Thread {
+    public void run() { /* task */ }
+}
+new MyThread().start();
+
+// 2. Implement Runnable (preferred)
+Thread t = new Thread(() -> { /* task */ });
+t.start();
+
+// 3. Use ExecutorService (best practice)
+ExecutorService pool = Executors.newFixedThreadPool(4);
+pool.submit(() -> { /* task */ });</pre>
+<b>Virtual threads (Java 21):</b> Lightweight managed by JVM, not OS — can create millions.`},
+
+  {cat:'core', q:'What are sealed classes and records in modern Java?',
+   a:`<b>Records (Java 16+):</b> Immutable data carriers — auto-generate constructor, accessors, equals, hashCode, toString.
+<pre>public record Point(int x, int y) {
+    // Compact canonical constructor
+    public Point { // (no params – uses component names)
+        if (x &lt; 0) throw new IllegalArgumentException("x must be >= 0");
+    }
+    // Custom method
+    public double distance() { return Math.sqrt(x*x + y*y); }
+}
+var p = new Point(3, 4);
+p.x();        // accessor (not getX!)
+p.equals(new Point(3, 4)); // true - value equality</pre>
+<b>Sealed classes (Java 17+):</b> Restrict which classes can extend/implement.
+<pre>public sealed interface Shape permits Circle, Rectangle, Triangle {}
+
+public record Circle(double r) implements Shape {}
+public record Rectangle(double w, double h) implements Shape {}
+public final class Triangle implements Shape { ... }
+
+// Enables exhaustive switch (no default needed!)
+double area = switch (shape) {
+    case Circle c -> Math.PI * c.r() * c.r();
+    case Rectangle r -> r.w() * r.h();
+    case Triangle t -> t.base() * t.height() / 2;
+};</pre>`},
+
+  {cat:'java8', q:'What is Stream.flatMap() and when to use it?',
+   a:`flatMap() maps each element to a stream, then flattens all streams into one.<br><br>
+<pre>// map returns Stream&lt;Stream&lt;String&gt;&gt;, flatMap returns Stream&lt;String&gt;
+List&lt;List&lt;String&gt;&gt; nested = List.of(
+    List.of("a", "b"),
+    List.of("c", "d"),
+    List.of("e")
+);
+
+// With map: Stream of Streams
+nested.stream().map(Collection::stream);  // Stream&lt;Stream&lt;String&gt;&gt;
+
+// With flatMap: flat stream
+List&lt;String&gt; flat = nested.stream()
+    .flatMap(Collection::stream)  // Stream&lt;String&gt;
+    .collect(Collectors.toList()); // [a, b, c, d, e]
+
+// Real-world: find all words across sentences
+List&lt;String&gt; sentences = List.of("hello world", "foo bar");
+List&lt;String&gt; words = sentences.stream()
+    .flatMap(s -> Arrays.stream(s.split(" ")))
+    .distinct()
+    .sorted()
+    .collect(Collectors.toList());
+
+// Orders and line items
+List&lt;String&gt; allProducts = orders.stream()
+    .flatMap(order -> order.getLineItems().stream())
+    .map(LineItem::getProductName)
+    .collect(Collectors.toList());</pre>
+<b>Rule:</b> Use flatMap when each element maps to zero or more results, and you want a flat result.`},
+
+  {cat:'core', q:'What are the principles of Object-Oriented Programming?',
+   a:`OOP is built on 4 fundamental pillars:<br><br>
+<b>1. Encapsulation:</b> Bundle data + behavior; hide internal state; expose controlled interface via public methods.<br>
+→ <code>private</code> fields + <code>public</code> getters/setters with validation<br><br>
+<b>2. Inheritance:</b> Subclasses reuse and extend parent class behavior.<br>
+→ <code>class Dog extends Animal</code><br>
+→ Avoid deep hierarchies; prefer composition over inheritance<br><br>
+<b>3. Polymorphism:</b> One interface, many implementations. Objects of different types respond to the same message differently.<br>
+→ Method overriding: <code>animal.speak()</code> calls <code>Dog.speak()</code> or <code>Cat.speak()</code><br><br>
+<b>4. Abstraction:</b> Hide complex implementation details; expose only essential features.<br>
+→ Abstract classes, interfaces — define <em>what</em> without <em>how</em><br><br>
+<b>Additional principles:</b><br>
+- <b>SOLID</b>: SRP, OCP, LSP, ISP, DIP<br>
+- <b>DRY</b>: Don't Repeat Yourself<br>
+- <b>KISS</b>: Keep It Simple<br>
+- <b>Composition over Inheritance</b>: flexible, avoids tight coupling`},
+
+  {cat:'java8', q:'What is the Stream.reduce() operation?',
+   a:`reduce() combines stream elements into a single result using a binary operation (associative, stateless).<br><br>
+<pre>// 3 forms:
+
+// 1. Identity + BinaryOperator
+int sum = IntStream.rangeClosed(1, 10)
+    .reduce(0, Integer::sum);  // 55
+
+Optional&lt;Integer&gt; product =
+    Stream.of(1, 2, 3, 4, 5)
+    .reduce((a, b) -> a * b);  // Optional[120]
+
+// 2. Without identity — returns Optional (may be empty)
+Optional&lt;String&gt; longest = words.stream()
+    .reduce((a, b) -> a.length() &gt;= b.length() ? a : b);
+
+// 3. With combiner (for parallel streams)
+// reduce(identity, accumulator, combiner)
+int sumLengths = words.parallelStream()
+    .reduce(
+        0,
+        (sum, word) -> sum + word.length(),  // accumulator
+        Integer::sum                          // combiner for parallel
+    );
+
+// Use Collectors.reducing for more complex cases
+Map&lt;String, Optional&lt;Employee&gt;&gt; topEarnerByDept =
+    employees.stream().collect(
+        Collectors.groupingBy(Employee::getDept,
+            Collectors.reducing(BinaryOperator.maxBy(
+                Comparator.comparingInt(Employee::getSalary))))
+    );</pre>`},
+
+  {cat:'collections', q:'What is TreeSet vs HashSet vs LinkedHashSet?',
+   a:`All three implement <code>Set</code> (no duplicates), differing in ordering and performance:<br><br>
+<pre>
+Feature          HashSet    LinkedHashSet    TreeSet
+──────────────────────────────────────────────────────────
+Ordering         None       Insertion order  Sorted (natural/comparator)
+get/add/remove   O(1) avg   O(1) avg         O(log n)
+Null values      One null   One null         No null (throws NPE)
+Backed by        HashMap    LinkedHashMap    TreeMap (red-black tree)
+Use when         Need speed Need insertion   Need sorted traversal
+                           order
+</pre>
+<pre>// HashSet — fastest
+Set&lt;String&gt; hash = new HashSet&lt;&gt;(Set.of("b", "a", "c"));
+hash.forEach(System.out::println); // unpredictable order
+
+// LinkedHashSet — insertion-ordered
+Set&lt;String&gt; linked = new LinkedHashSet&lt;&gt;(List.of("b","a","c"));
+linked.forEach(System.out::println); // b, a, c
+
+// TreeSet — sorted
+Set&lt;String&gt; tree = new TreeSet&lt;&gt;(Set.of("b","a","c"));
+tree.forEach(System.out::println); // a, b, c
+tree.first(); // "a"
+tree.last();  // "c"
+tree.headSet("b"); // ["a"]
+tree.subSet("a", "c"); // ["a", "b"]</pre>`},
+
+  {cat:'concurrency', q:'What are atomic classes in Java?',
+   a:`Atomic classes (java.util.concurrent.atomic) provide lock-free, thread-safe operations using hardware CAS (Compare-And-Swap) instructions.<br><br>
+<pre>// AtomicInteger — common operations
+AtomicInteger counter = new AtomicInteger(0);
+counter.incrementAndGet();      // ++i (atomic)
+counter.getAndIncrement();      // i++ (atomic)
+counter.addAndGet(5);           // i += 5
+counter.compareAndSet(5, 10);   // if i==5, set to 10 (returns boolean)
+counter.get();                  // read current value
+
+// AtomicReference — for object references
+AtomicReference&lt;String&gt; ref = new AtomicReference&lt;&gt;("initial");
+ref.compareAndSet("initial", "updated"); // CAS on reference
+
+// AtomicLong, AtomicBoolean work similarly
+
+// LongAdder — better than AtomicLong for high contention
+LongAdder adder = new LongAdder();
+adder.increment();  // faster under contention (uses striping)
+adder.sum();        // get total
+
+// Java 8: AtomicInteger.updateAndGet
+counter.updateAndGet(x -> x * 2);
+counter.accumulateAndGet(3, Integer::sum);</pre>
+<b>When to use:</b> Simple counters, flags, CAS loops. For complex compound operations, use <code>synchronized</code> or <code>Lock</code>.`},
+
+  {cat:'core', q:'What is the hashCode contract for String?',
+   a:`String.hashCode() follows a specific algorithm defined in the Java specification, ensuring <b>consistent</b> results.<br><br>
+<pre>// Java's String hashCode algorithm:
+// h = s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1]
+// where 31 is used because it's prime and allows shift+subtract: 31*n = (n << 5) - n
+
+"hello".hashCode(); // consistent value: 99162322
+"hello".hashCode(); // same value every time within the JVM run
+
+// Important: Contract guarantees
+// 1. Same string → same hashCode (in same JVM run)
+// 2. Different runs may give different results (security randomization)
+// 3. Equal strings → same hashCode (upholds equals/hashCode contract)
+
+// Gotcha with HashMap:
+Map&lt;String, String&gt; map = new HashMap&lt;&gt;();
+String key = new String("key");
+map.put(key, "value");
+map.get(new String("key")); // "value" — equals() ensures this works!
+
+// null key
+map.put(null, "null-value");
+map.get(null);  // "null-value" — HashMap handles null keys (bucket 0)</pre>`},
+
+  {cat:'java8', q:'What is the difference between Iterable, Iterator, and Spliterator?',
+   a:`<b>Iterable:</b> Can produce an iterator; enables for-each loop.
+<pre>interface Iterable&lt;T&gt; {
+    Iterator&lt;T&gt; iterator();
+    default void forEach(Consumer&lt;? super T&gt; action) { ... }
+    default Spliterator&lt;T&gt; spliterator() { ... }
+}</pre>
+<b>Iterator:</b> Stateful traversal cursor for sequential iteration.
+<pre>interface Iterator&lt;E&gt; {
+    boolean hasNext();
+    E next();
+    default void remove() { throw new UnsupportedOperationException(); }
+}</pre>
+<b>Spliterator</b> (Java 8): "Splittable Iterator" for parallel and stream processing.
+<pre>interface Spliterator&lt;T&gt; {
+    boolean tryAdvance(Consumer&lt;? super T&gt; action); // sequential
+    Spliterator&lt;T&gt; trySplit(); // split for parallelism
+    long estimateSize();
+    int characteristics(); // ORDERED, SORTED, DISTINCT, SIZED, etc.
+}
+
+// Used internally by Stream
+list.stream()    // creates Spliterator internally
+list.parallelStream()  // splits Spliterator for fork-join
+
+// Custom Spliterator for parallel processing
+Spliterator&lt;T&gt; spliterator = source.spliterator();
+StreamSupport.stream(spliterator, true); // parallel=true</pre>`},
+
+  {cat:'core', q:'What are the Java 9+ module system features?',
+   a:`Java 9 introduced the Java Platform Module System (JPMS) — a way to encapsulate packages at the module level.<br><br>
+<pre>// module-info.java (at root of module source)
+module com.myapp.core {
+    requires java.sql;              // depends on java.sql module
+    requires transitive java.xml;  // transitive: consumers also get java.xml
+    exports com.myapp.core.api;    // public API (rest is private)
+    opens com.myapp.core.model;    // allows reflection (for serialization/DI)
+    uses com.myapp.core.Plugin;    // declares service usage
+    provides Plugin with MyPlugin; // provides service implementation
+}
+</pre>
+<b>Benefits:</b><br>
+- Strong encapsulation: packages not <code>exports</code>ed are inaccessible even via reflection (without <code>opens</code>)<br>
+- Reliable configuration: missing modules detected at startup, not runtime<br>
+- Custom runtime images: <code>jlink</code> creates minimal JREs<br><br>
+<b>Other Java 9+ features:</b>
+<pre>// Collection factory methods
+var list = List.of(1,2,3);    // immutable
+var map = Map.of("a",1,"b",2);
+var set = Set.of("x","y");
+
+// Stream additions
+stream.takeWhile(x -> x &lt; 10);
+stream.dropWhile(x -> x &lt; 10);
+Stream.iterate(0, x -> x &lt; 100, x -> x+1); // with predicate
+
+// Optional additions
+opt.ifPresentOrElse(fn, emptyAction);
+opt.stream();  // single-element stream
+opt.or(() -> Optional.of(default));</pre>`}
+];
+
+let currentIdx = 0;
+let filteredCards = CARDS.slice();
+let marks = {}; // index -> 'know'|'review'|'hard'
+let isFlipped = false;
+
+function renderCard() {
+  if (filteredCards.length === 0) {
+    document.getElementById('card-q').textContent = 'No cards in this category.';
+    document.getElementById('card-a').innerHTML = '';
+    document.getElementById('card-counter').textContent = '0 cards';
+    return;
+  }
+  const card = filteredCards[currentIdx];
+  const catColor = CAT_COLORS[card.cat] || CAT_COLORS.core;
+  document.getElementById('card-q').textContent = card.q;
+  document.getElementById('card-a').innerHTML = card.a;
+  document.getElementById('card-cat-front').style.background = catColor.bg;
+  document.getElementById('card-cat-front').style.color = catColor.color;
+  document.getElementById('card-cat-front').textContent = card.cat.charAt(0).toUpperCase() + card.cat.slice(1).replace('java8','Java 8+');
+  document.getElementById('card-cat-back').style.background = catColor.bg;
+  document.getElementById('card-cat-back').style.color = catColor.color;
+  document.getElementById('card-cat-back').textContent = 'Answer — ' + (card.cat.charAt(0).toUpperCase() + card.cat.slice(1).replace('java8','Java 8+'));
+  document.getElementById('card-counter').textContent = `Card ${currentIdx+1} of ${filteredCards.length}`;
+
+  // Mark badge
+  const globalIdx = CARDS.indexOf(card);
+  const badge = document.getElementById('mark-badge');
+  if (marks[globalIdx]) {
+    badge.style.display = 'block';
+    badge.className = 'mark-badge badge-' + marks[globalIdx];
+    badge.textContent = marks[globalIdx] === 'know' ? '✓' : marks[globalIdx] === 'review' ? '↺' : '!';
+  } else {
+    badge.style.display = 'none';
+  }
+
+  // Reset flip
+  if (isFlipped) {
+    document.getElementById('card3d').classList.remove('flipped');
+    isFlipped = false;
+  }
+  updateProgress();
+}
+
+function flipCard() {
+  isFlipped = !isFlipped;
+  document.getElementById('card3d').classList.toggle('flipped', isFlipped);
+}
+
+function nextCard() {
+  if (filteredCards.length === 0) return;
+  currentIdx = (currentIdx + 1) % filteredCards.length;
+  renderCard();
+}
+
+function prevCard() {
+  if (filteredCards.length === 0) return;
+  currentIdx = (currentIdx - 1 + filteredCards.length) % filteredCards.length;
+  renderCard();
+}
+
+function markCard(type) {
+  if (filteredCards.length === 0) return;
+  const card = filteredCards[currentIdx];
+  const globalIdx = CARDS.indexOf(card);
+  if (marks[globalIdx] === type) {
+    delete marks[globalIdx];
+  } else {
+    marks[globalIdx] = type;
+  }
+  renderCard();
+}
+
+function filterCat(cat, btn) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filteredCards = cat === 'all' ? CARDS.slice() : CARDS.filter(c => c.cat === cat);
+  currentIdx = 0;
+  renderCard();
+}
+
+function updateProgress() {
+  const total = filteredCards.length;
+  const globalIndices = filteredCards.map(c => CARDS.indexOf(c));
+  const reviewed = globalIndices.filter(i => marks[i]).length;
+  const know = globalIndices.filter(i => marks[i] === 'know').length;
+  const review = globalIndices.filter(i => marks[i] === 'review').length;
+  const hard = globalIndices.filter(i => marks[i] === 'hard').length;
+  document.getElementById('prog-label').textContent = `${reviewed} / ${total} reviewed`;
+  document.getElementById('prog-fill').style.width = total ? `${(reviewed/total*100).toFixed(0)}%` : '0%';
+  document.getElementById('cnt-know').textContent = know;
+  document.getElementById('cnt-review').textContent = review;
+  document.getElementById('cnt-hard').textContent = hard;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') nextCard();
+  else if (e.key === 'ArrowLeft') prevCard();
+  else if (e.key === ' ') { e.preventDefault(); flipCard(); }
+});
+
+renderCard();
+</script>
+</body>
+</html>

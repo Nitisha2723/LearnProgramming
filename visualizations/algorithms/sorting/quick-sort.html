@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quick Sort Visualization</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #1a1a2e;
+    color: #eee;
+    font-family: system-ui, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: #16213e;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 2px solid #0f3460;
+  }
+
+  header h1 { font-size: 1.3rem; color: #e94560; }
+  header .back-link { color: #aaa; text-decoration: none; font-size: 0.85rem; }
+  header .back-link:hover { color: #e94560; }
+
+  .complexity-badges {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+    font-size: 0.78rem;
+  }
+
+  .badge {
+    background: #0f3460;
+    border: 1px solid #e94560;
+    color: #eee;
+    padding: 3px 10px;
+    border-radius: 12px;
+  }
+
+  .main-layout {
+    display: flex;
+    flex: 1;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .left-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .right-panel {
+    width: 280px;
+    background: #16213e;
+    border-left: 2px solid #0f3460;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  /* --- Controls --- */
+  .controls {
+    background: #16213e;
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    border: 1px solid #0f3460;
+  }
+
+  button {
+    background: #0f3460;
+    color: #eee;
+    border: 1px solid #e94560;
+    padding: 7px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.15s;
+  }
+  button:hover { background: #e94560; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button#btn-play { background: #e94560; }
+  button#btn-play:hover { background: #c73652; }
+
+  .speed-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    font-size: 0.85rem;
+    color: #aaa;
+  }
+
+  input[type=range] {
+    accent-color: #e94560;
+    width: 120px;
+  }
+
+  /* --- Stats row --- */
+  .stats-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .stat-box {
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: 10px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 110px;
+  }
+
+  .stat-box .label { font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-box .value { font-size: 1.5rem; font-weight: 700; color: #e94560; }
+
+  /* --- Viz area --- */
+  .viz-area {
+    background: #16213e;
+    border-radius: 10px;
+    border: 1px solid #0f3460;
+    padding: 20px 20px 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 220px;
+  }
+
+  .bars-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 180px;
+    padding-bottom: 30px;
+    position: relative;
+  }
+
+  .bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+  }
+
+  .bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    transition: height 0.18s ease, background 0.18s ease;
+    position: relative;
+  }
+
+  .bar-label {
+    position: absolute;
+    bottom: -22px;
+    font-size: 0.7rem;
+    color: #aaa;
+    white-space: nowrap;
+  }
+
+  /* Bar states */
+  .bar.default        { background: #4a9eda; }
+  .bar.pivot          { background: #ff8c00; box-shadow: 0 0 10px #ff8c0077; }
+  .bar.less-than      { background: #2ecc71; }
+  .bar.greater-than   { background: #e94560; }
+  .bar.sorted         { background: #9b59b6; }
+  .bar.comparing      { background: #f1c40f; box-shadow: 0 0 8px #f1c40f77; }
+  .bar.active-range   { background: #4a9eda; opacity: 0.85; }
+
+  /* Pivot marker */
+  .bar-wrapper.pivot-marker::after {
+    content: 'PIVOT';
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff8c00;
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  /* --- Explanation --- */
+  .explanation {
+    background: #0f3460;
+    border-left: 3px solid #e94560;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    color: #eee;
+    min-height: 44px;
+    line-height: 1.5;
+  }
+
+  /* --- Recursion Depth --- */
+  .depth-display {
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .depth-display .depth-label { color: #aaa; font-size: 0.78rem; text-transform: uppercase; }
+  .depth-dots { display: flex; gap: 5px; }
+  .depth-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #0f3460; border: 1px solid #555;
+    transition: background 0.2s;
+  }
+  .depth-dot.active { background: #e94560; border-color: #e94560; }
+
+  /* --- Right panel: pseudocode --- */
+  .code-panel-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #e94560;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .pseudocode {
+    background: #0f3460;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.78rem;
+    line-height: 1.75;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .code-line {
+    padding: 1px 6px;
+    border-radius: 3px;
+    transition: background 0.15s;
+    white-space: pre;
+    color: #bbb;
+  }
+
+  .code-line.highlighted {
+    background: #e94560;
+    color: #fff;
+  }
+
+  .code-line.dim { color: #555; }
+
+  .code-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.78rem;
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+
+  .panel-section-title {
+    font-size: 0.78rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #0f3460;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../README.md" class="back-link">← Back to Index</a>
+  <h1>Quick Sort</h1>
+  <div class="complexity-badges">
+    <span class="badge">Avg: O(n log n)</span>
+    <span class="badge">Worst: O(n²)</span>
+    <span class="badge">Space: O(log n)</span>
+  </div>
+</header>
+
+<div class="main-layout">
+  <div class="left-panel">
+
+    <!-- Controls -->
+    <div class="controls">
+      <button id="btn-play">&#9654; Play</button>
+      <button id="btn-step">Step</button>
+      <button id="btn-reset">Reset</button>
+      <div class="speed-group">
+        <span>Speed:</span>
+        <input type="range" id="speed-slider" min="1" max="10" value="5">
+        <span id="speed-label">5</span>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <span class="label">Comparisons</span>
+        <span class="value" id="stat-comparisons">0</span>
+      </div>
+      <div class="stat-box">
+        <span class="label">Swaps</span>
+        <span class="value" id="stat-swaps">0</span>
+      </div>
+      <div class="stat-box">
+        <span class="label">Recursion Depth</span>
+        <span class="value" id="stat-depth">0</span>
+      </div>
+      <div class="stat-box">
+        <span class="label">Status</span>
+        <span class="value" id="stat-status" style="font-size:0.95rem; color:#4a9eda;">Ready</span>
+      </div>
+    </div>
+
+    <!-- Visualization -->
+    <div class="viz-area">
+      <div class="bars-container" id="bars-container"></div>
+    </div>
+
+    <!-- Depth dots -->
+    <div class="depth-display">
+      <span class="depth-label">Recursion Depth</span>
+      <div class="depth-dots" id="depth-dots"></div>
+    </div>
+
+    <!-- Explanation -->
+    <div class="explanation" id="explanation">
+      Press Play or Step to begin the Quick Sort visualization.
+    </div>
+
+  </div>
+
+  <div class="right-panel">
+    <div class="code-panel-title">Pseudocode</div>
+    <div class="pseudocode" id="pseudocode"></div>
+
+    <div class="panel-section-title">Legend</div>
+    <div class="code-legend">
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:#ff8c00"></div>
+        <span>Pivot element</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:#2ecc71"></div>
+        <span>Less than pivot</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:#e94560"></div>
+        <span>Greater than pivot</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:#f1c40f"></div>
+        <span>Currently comparing</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:#9b59b6"></div>
+        <span>Sorted / in place</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:#4a9eda"></div>
+        <span>Unsorted / default</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA & INITIAL STATE
+// ============================================================
+const INITIAL_ARRAY = [34, 7, 23, 32, 5, 62, 78, 3, 44, 15, 27, 11, 56, 19, 48];
+const MAX_DEPTH = 8;
+
+const pseudocodeLines = [
+  { text: "quickSort(arr, low, high):", indent: 0 },
+  { text: "  if low < high:", indent: 1 },
+  { text: "    pivot = arr[high]", indent: 2 },
+  { text: "    i = low - 1", indent: 3 },
+  { text: "    for j = low to high-1:", indent: 4 },
+  { text: "      if arr[j] <= pivot:", indent: 5 },
+  { text: "        i++", indent: 6 },
+  { text: "        swap arr[i], arr[j]", indent: 7 },
+  { text: "    swap arr[i+1], arr[high]", indent: 8 },
+  { text: "    pivotIndex = i + 1", indent: 9 },
+  { text: "    quickSort(arr, low, pivotIdx-1)", indent: 10 },
+  { text: "    quickSort(arr, pivotIdx+1, high)", indent: 11 },
+];
+
+let arr = [];
+let steps = [];
+let stepIndex = 0;
+let isPlaying = false;
+let playTimer = null;
+let comparisons = 0;
+let swaps = 0;
+
+// ============================================================
+// STEP GENERATOR
+// ============================================================
+function generateSteps(inputArr) {
+  const a = [...inputArr];
+  const stepsArr = [];
+  let cmp = 0;
+  let swp = 0;
+  const sorted = new Set();
+
+  function addStep(opts) {
+    stepsArr.push({
+      arr: [...a],
+      sorted: new Set(sorted),
+      ...opts,
+      comparisons: cmp,
+      swaps: swp,
+    });
+  }
+
+  function partition(low, high, depth) {
+    const pivot = a[high];
+    addStep({
+      code: 2, depth,
+      pivot: high,
+      lessThan: [], greaterThan: [], comparing: [],
+      explanation: `Pivot = ${pivot} (index ${high}). Setting i = ${low - 1}.`,
+      range: [low, high],
+    });
+
+    let i = low - 1;
+
+    for (let j = low; j < high; j++) {
+      cmp++;
+      addStep({
+        code: 5, depth,
+        pivot: high,
+        comparing: [j],
+        lessThan: [], greaterThan: [],
+        explanation: `Comparing arr[${j}] = ${a[j]} with pivot ${pivot}. ${a[j] <= pivot ? `${a[j]} ≤ ${pivot}: move to LEFT partition.` : `${a[j]} > ${pivot}: stays in RIGHT partition.`}`,
+        range: [low, high],
+      });
+      if (a[j] <= pivot) {
+        i++;
+        addStep({
+          code: 6, depth,
+          pivot: high,
+          comparing: [j],
+          lessThan: [], greaterThan: [],
+          explanation: `${a[j]} ≤ ${pivot}. Incrementing i to ${i}.`,
+          range: [low, high],
+        });
+        if (i !== j) {
+          swp++;
+          [a[i], a[j]] = [a[j], a[i]];
+          addStep({
+            code: 7, depth,
+            pivot: high,
+            comparing: [i, j],
+            lessThan: [], greaterThan: [],
+            explanation: `Swapping arr[${i}] and arr[${j}]. Array: [${a.join(', ')}]`,
+            range: [low, high],
+          });
+        }
+      }
+    }
+
+    swp++;
+    [a[i + 1], a[high]] = [a[high], a[i + 1]];
+    const pi = i + 1;
+    sorted.add(pi);
+    addStep({
+      code: 8, depth,
+      pivot: pi,
+      comparing: [],
+      lessThan: Array.from({ length: pi - low }, (_, k) => low + k),
+      greaterThan: Array.from({ length: high - pi }, (_, k) => pi + 1 + k),
+      explanation: `Placing pivot ${a[pi]} at index ${pi}. Left partition: [${low}..${pi - 1}], Right: [${pi + 1}..${high}]`,
+      range: [low, high],
+    });
+    return pi;
+  }
+
+  function quickSort(low, high, depth) {
+    if (low >= high) {
+      if (low === high) sorted.add(low);
+      return;
+    }
+    addStep({
+      code: 1, depth,
+      pivot: high,
+      comparing: [], lessThan: [], greaterThan: [],
+      explanation: `quickSort(arr, ${low}, ${high}). Range has ${high - low + 1} elements.`,
+      range: [low, high],
+    });
+    const pi = partition(low, high, depth);
+    addStep({
+      code: 10, depth: depth + 1,
+      pivot: -1,
+      comparing: [], lessThan: [], greaterThan: [],
+      explanation: `Recursively sorting LEFT half: indices ${low} to ${pi - 1}.`,
+      range: [low, pi - 1],
+    });
+    quickSort(low, pi - 1, depth + 1);
+    addStep({
+      code: 11, depth: depth + 1,
+      pivot: -1,
+      comparing: [], lessThan: [], greaterThan: [],
+      explanation: `Recursively sorting RIGHT half: indices ${pi + 1} to ${high}.`,
+      range: [pi + 1, high],
+    });
+    quickSort(pi + 1, high, depth + 1);
+  }
+
+  quickSort(0, a.length - 1, 0);
+
+  // Final: all sorted
+  stepsArr.push({
+    arr: [...a],
+    sorted: new Set(a.map((_, i) => i)),
+    code: -1, depth: 0,
+    pivot: -1, comparing: [], lessThan: [], greaterThan: [],
+    explanation: `Sort complete! Array sorted in ${cmp} comparisons and ${swp} swaps.`,
+    range: [0, a.length - 1],
+    comparisons: cmp,
+    swaps: swp,
+  });
+
+  return stepsArr;
+}
+
+// ============================================================
+// DOM HELPERS
+// ============================================================
+function buildBars(values) {
+  const container = document.getElementById('bars-container');
+  container.innerHTML = '';
+  const maxVal = Math.max(...values);
+  values.forEach((v) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'bar-wrapper';
+
+    const bar = document.createElement('div');
+    bar.className = 'bar default';
+    bar.style.height = `${Math.max(10, (v / maxVal) * 155)}px`;
+
+    const lbl = document.createElement('span');
+    lbl.className = 'bar-label';
+    lbl.textContent = v;
+
+    wrapper.appendChild(bar);
+    wrapper.appendChild(lbl);
+    container.appendChild(wrapper);
+  });
+}
+
+function applyStep(step) {
+  const container = document.getElementById('bars-container');
+  const wrappers = container.querySelectorAll('.bar-wrapper');
+  const maxVal = Math.max(...step.arr);
+
+  wrappers.forEach((wrapper, idx) => {
+    const bar = wrapper.querySelector('.bar');
+    const lbl = wrapper.querySelector('.bar-label');
+
+    // Update height
+    bar.style.height = `${Math.max(10, (step.arr[idx] / maxVal) * 155)}px`;
+    lbl.textContent = step.arr[idx];
+
+    // Remove pivot marker class
+    wrapper.classList.remove('pivot-marker');
+
+    // Determine color class
+    bar.className = 'bar';
+    if (step.sorted && step.sorted.has(idx)) {
+      bar.classList.add('sorted');
+    } else if (step.comparing && step.comparing.includes(idx)) {
+      bar.classList.add('comparing');
+    } else if (idx === step.pivot) {
+      bar.classList.add('pivot');
+      wrapper.classList.add('pivot-marker');
+    } else if (step.lessThan && step.lessThan.includes(idx)) {
+      bar.classList.add('less-than');
+    } else if (step.greaterThan && step.greaterThan.includes(idx)) {
+      bar.classList.add('greater-than');
+    } else {
+      bar.classList.add('default');
+    }
+  });
+
+  // Stats
+  document.getElementById('stat-comparisons').textContent = step.comparisons;
+  document.getElementById('stat-swaps').textContent = step.swaps;
+  document.getElementById('stat-depth').textContent = step.depth;
+
+  // Status
+  const statusEl = document.getElementById('stat-status');
+  if (step.code === -1) {
+    statusEl.textContent = 'Done!';
+    statusEl.style.color = '#2ecc71';
+  } else {
+    statusEl.textContent = 'Running';
+    statusEl.style.color = '#f1c40f';
+  }
+
+  // Depth dots
+  const dotsContainer = document.getElementById('depth-dots');
+  dotsContainer.innerHTML = '';
+  for (let d = 0; d < MAX_DEPTH; d++) {
+    const dot = document.createElement('div');
+    dot.className = 'depth-dot' + (d < step.depth ? ' active' : '');
+    dotsContainer.appendChild(dot);
+  }
+
+  // Code highlight
+  const lines = document.querySelectorAll('.code-line');
+  lines.forEach((line, i) => {
+    line.classList.remove('highlighted', 'dim');
+    if (i === step.code) {
+      line.classList.add('highlighted');
+    }
+  });
+
+  // Explanation
+  document.getElementById('explanation').textContent = step.explanation;
+}
+
+function buildPseudocode() {
+  const el = document.getElementById('pseudocode');
+  el.innerHTML = pseudocodeLines.map((line, i) =>
+    `<div class="code-line" data-line="${i}">${line.text}</div>`
+  ).join('');
+}
+
+function buildDepthDots() {
+  const dotsContainer = document.getElementById('depth-dots');
+  dotsContainer.innerHTML = '';
+  for (let d = 0; d < MAX_DEPTH; d++) {
+    const dot = document.createElement('div');
+    dot.className = 'depth-dot';
+    dotsContainer.appendChild(dot);
+  }
+}
+
+// ============================================================
+// PLAYBACK
+// ============================================================
+function getDelay() {
+  const val = parseInt(document.getElementById('speed-slider').value);
+  // speed 1 = 1500ms, speed 10 = 60ms
+  return Math.round(1500 - (val - 1) * (1440 / 9));
+}
+
+function doStep() {
+  if (stepIndex >= steps.length) {
+    stopPlay();
+    document.getElementById('btn-step').disabled = true;
+    document.getElementById('btn-play').disabled = true;
+    return;
+  }
+  applyStep(steps[stepIndex]);
+  stepIndex++;
+  if (stepIndex >= steps.length) {
+    stopPlay();
+    document.getElementById('btn-step').disabled = true;
+    document.getElementById('btn-play').disabled = true;
+  }
+}
+
+function startPlay() {
+  if (stepIndex >= steps.length) return;
+  isPlaying = true;
+  document.getElementById('btn-play').textContent = '⏸ Pause';
+  document.getElementById('btn-step').disabled = true;
+
+  function tick() {
+    if (!isPlaying) return;
+    doStep();
+    if (stepIndex < steps.length) {
+      playTimer = setTimeout(tick, getDelay());
+    }
+  }
+  tick();
+}
+
+function stopPlay() {
+  isPlaying = false;
+  clearTimeout(playTimer);
+  document.getElementById('btn-play').textContent = '▶ Play';
+  document.getElementById('btn-step').disabled = false;
+}
+
+function reset() {
+  stopPlay();
+  arr = [...INITIAL_ARRAY];
+  steps = generateSteps(arr);
+  stepIndex = 0;
+  buildBars(arr);
+  buildDepthDots();
+  document.getElementById('stat-comparisons').textContent = '0';
+  document.getElementById('stat-swaps').textContent = '0';
+  document.getElementById('stat-depth').textContent = '0';
+  document.getElementById('stat-status').textContent = 'Ready';
+  document.getElementById('stat-status').style.color = '#4a9eda';
+  document.getElementById('explanation').textContent = 'Press Play or Step to begin the Quick Sort visualization.';
+  const lines = document.querySelectorAll('.code-line');
+  lines.forEach(l => l.classList.remove('highlighted', 'dim'));
+  document.getElementById('btn-step').disabled = false;
+  document.getElementById('btn-play').disabled = false;
+}
+
+// ============================================================
+// WIRE UP
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  buildPseudocode();
+  reset();
+
+  document.getElementById('btn-play').addEventListener('click', () => {
+    if (isPlaying) {
+      stopPlay();
+    } else {
+      startPlay();
+    }
+  });
+
+  document.getElementById('btn-step').addEventListener('click', () => {
+    stopPlay();
+    doStep();
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', reset);
+
+  document.getElementById('speed-slider').addEventListener('input', function () {
+    document.getElementById('speed-label').textContent = this.value;
+  });
+});
+</script>
+</body>
+</html>

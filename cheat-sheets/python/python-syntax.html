@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Syntax Reference</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#1a1a2e; color:#e0e0e0; font-family:'Segoe UI',system-ui,sans-serif; line-height:1.6; }
+  header { background:#16213e; padding:20px 30px; border-bottom:2px solid #0f3460; display:flex; align-items:center; justify-content:space-between; }
+  header h1 { font-size:1.8rem; color:#e94560; }
+  nav { background:#16213e; padding:10px 30px; display:flex; gap:8px; flex-wrap:wrap; border-bottom:1px solid #0f3460; }
+  nav a { color:#a0c4ff; text-decoration:none; padding:5px 12px; border-radius:20px; font-size:0.83rem; transition:all 0.2s; }
+  nav a:hover { background:#0f3460; color:#e94560; }
+  .container { max-width:1400px; margin:0 auto; padding:20px 30px; }
+  .section { margin-bottom:40px; }
+  .section-title { font-size:1.3rem; color:#e94560; border-left:4px solid #e94560; padding-left:12px; margin-bottom:16px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(380px,1fr)); gap:18px; }
+  .card { background:#16213e; border:1px solid #0f3460; border-radius:10px; overflow:hidden; }
+  .card-header { background:#0f3460; padding:9px 16px; font-weight:600; color:#a0c4ff; font-size:0.87rem; }
+  .card-body { padding:14px; }
+  pre { margin:0; border-radius:6px; font-size:0.81rem; }
+  .tip { background:#0d3325; border-left:3px solid #4caf50; padding:7px 12px; border-radius:0 6px 6px 0; margin-top:10px; font-size:0.81rem; color:#90ee90; }
+  .warn { background:#2a1a0e; border-left:3px solid #ff9800; padding:7px 12px; border-radius:0 6px 6px 0; margin-top:10px; font-size:0.81rem; color:#ffd08a; }
+  .desc { color:#a0b0c0; font-size:0.84rem; margin-bottom:8px; }
+  .search { padding:8px 16px; background:#16213e; border:1px solid #0f3460; border-radius:20px; color:#e0e0e0; font-size:0.88rem; outline:none; width:300px; }
+  .search:focus { border-color:#e94560; }
+  table { width:100%; border-collapse:collapse; font-size:0.84rem; }
+  th { background:#0f3460; padding:7px 12px; text-align:left; color:#a0c4ff; }
+  td { padding:7px 12px; border-bottom:1px solid #0f3460; }
+  tr:hover { background:#1e2a4a; }
+  code { background:#0f3460; padding:2px 6px; border-radius:4px; font-size:0.82em; font-family:monospace; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Python Syntax Reference</h1>
+    <p style="color:#a0a0b0;margin-top:4px">Complete Python language syntax cheat sheet</p>
+  </div>
+  <input type="text" class="search" placeholder="Search..." oninput="filterCards(this.value)">
+</header>
+<nav>
+  <a href="#basics">Basics</a>
+  <a href="#datastructs">Data Structures</a>
+  <a href="#control">Control Flow</a>
+  <a href="#functions">Functions</a>
+  <a href="#oop">OOP</a>
+  <a href="#modules">Modules</a>
+  <a href="#exceptions">Exceptions</a>
+  <a href="#typing">Type Hints</a>
+  <a href="../../README.md">← Index</a>
+</nav>
+<div class="container">
+
+<section class="section" id="basics">
+  <h2 class="section-title">Variables, Types &amp; Operators</h2>
+  <div class="grid">
+    <div class="card" data-tags="variable type assignment">
+      <div class="card-header">Variables &amp; Basic Types</div>
+      <div class="card-body">
+        <pre><code class="language-python"># Dynamic typing - no declaration needed
+name = "Alice"          # str
+age = 30                # int
+height = 5.9            # float
+is_active = True        # bool
+nothing = None          # NoneType
+
+# Multiple assignment
+x = y = z = 0
+a, b, c = 1, 2, 3      # tuple unpacking
+first, *rest = [1,2,3,4]  # extended unpacking
+
+# Type checking
+type(name)              # &lt;class 'str'&gt;
+isinstance(age, int)    # True
+
+# Type conversion
+int("42")               # 42
+float("3.14")           # 3.14
+str(100)                # "100"
+bool(0)                 # False (falsy values: 0, "", [], {}, None)</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="string f-string format">
+      <div class="card-header">Strings &amp; F-Strings</div>
+      <div class="card-body">
+        <pre><code class="language-python">s = "Hello, World!"
+s.upper()               # "HELLO, WORLD!"
+s.lower()
+s.strip()               # remove whitespace
+s.split(", ")           # ["Hello", "World!"]
+s.replace("Hello", "Hi")
+s.startswith("Hello")   # True
+s.find("World")         # 7 (index)
+len(s)                  # 13
+
+# Slicing: [start:stop:step]
+s[0:5]                  # "Hello"
+s[-6:]                  # "World!"
+s[::2]                  # every other char
+s[::-1]                 # reversed
+
+# F-strings (Python 3.6+)
+name, pi = "Alice", 3.14159
+f"Hello, {name}!"           # "Hello, Alice!"
+f"Pi is {pi:.2f}"           # "Pi is 3.14"
+f"{name!r}"                 # "'Alice'" (repr)
+f"{2**10 = }"               # "2**10 = 1024" (debug, 3.8+)
+
+# Multiline strings
+text = """
+Line 1
+Line 2
+"""</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="operator comparison boolean">
+      <div class="card-header">Operators</div>
+      <div class="card-body">
+        <pre><code class="language-python"># Arithmetic
+5 // 2    # 2    (floor division)
+5 % 2     # 1    (modulo)
+2 ** 10   # 1024 (power)
+
+# Comparison
+==, !=, <, >, <=, >=
+1 < 2 < 3   # True (chained!)
+
+# Logical
+and, or, not
+x = 5
+x > 0 and x < 10  # True
+
+# Identity vs equality
+a = [1, 2, 3]
+b = [1, 2, 3]
+a == b      # True (same value)
+a is b      # False (different object)
+a is None   # False
+
+# Walrus operator := (Python 3.8+)
+if n := len(data):
+    print(f"Data has {n} items")
+
+# Ternary expression
+value = "yes" if condition else "no"</code></pre>
+        <div class="tip">Use <code>is</code> only for None, True, False checks</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="datastructs">
+  <h2 class="section-title">Data Structures</h2>
+  <div class="grid">
+    <div class="card" data-tags="list array sequence">
+      <div class="card-header">List</div>
+      <div class="card-body">
+        <pre><code class="language-python">lst = [1, 2, 3, "mixed", True]
+
+# Access &amp; slice
+lst[0]        # 1
+lst[-1]       # True
+lst[1:3]      # [2, 3]
+
+# Modify
+lst.append(4)          # add to end
+lst.insert(1, "new")   # insert at index
+lst.extend([5, 6])     # add multiple
+lst.remove("mixed")    # remove by value
+lst.pop()              # remove &amp; return last
+lst.pop(0)             # remove &amp; return at index
+
+# Query
+3 in lst               # True
+lst.index(2)           # find index
+lst.count(1)           # count occurrences
+len(lst)
+
+# Sort
+lst.sort()             # in-place, ascending
+lst.sort(reverse=True)
+lst.sort(key=lambda x: str(x))
+sorted(lst)            # new sorted list
+
+# Unpack &amp; spread
+a, b, *rest = [1, 2, 3, 4, 5]
+combined = [*lst1, *lst2]</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="dict dictionary map">
+      <div class="card-header">Dictionary</div>
+      <div class="card-body">
+        <pre><code class="language-python">d = {"name": "Alice", "age": 30}
+
+# Access
+d["name"]             # "Alice"
+d.get("email", "n/a") # safe access with default
+d.setdefault("score", 0)  # set if not exists
+
+# Modify
+d["city"] = "Berlin"  # add/update
+del d["age"]
+d.pop("city", None)   # remove, return None if missing
+d.update({"x": 1, "y": 2})
+
+# Iterate
+d.keys()              # dict_keys view
+d.values()            # dict_values view
+d.items()             # (key, value) pairs
+for k, v in d.items():
+    print(f"{k}: {v}")
+
+# Merge dicts
+merged = {**d1, **d2}           # Python 3.5+
+merged = d1 | d2                # Python 3.9+
+
+# Dict comprehension
+squares = {x: x**2 for x in range(5)}
+
+# Special dicts
+from collections import defaultdict, Counter, OrderedDict
+dd = defaultdict(list)
+dd["key"].append(1)   # no KeyError
+c = Counter("hello world")  # {"l": 3, "o": 2, ...}</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="tuple set frozenset">
+      <div class="card-header">Tuple &amp; Set</div>
+      <div class="card-body">
+        <pre><code class="language-python"># Tuples: immutable sequences
+t = (1, 2, 3)
+t = 1, 2, 3           # parentheses optional
+single = (1,)         # single-element tuple needs comma
+x, y, z = t           # unpacking
+
+# Named tuple
+from collections import namedtuple
+Point = namedtuple("Point", ["x", "y"])
+p = Point(3, 4)
+p.x    # 3
+
+# Dataclass (Python 3.7+)
+from dataclasses import dataclass, field
+@dataclass
+class Person:
+    name: str
+    age: int = 0
+
+# Sets: unique, unordered
+s = {1, 2, 3, 2, 1}   # {1, 2, 3}
+s.add(4)
+s.remove(1)            # raises if missing
+s.discard(99)          # safe remove
+
+# Set operations
+a = {1, 2, 3}; b = {2, 3, 4}
+a | b     # union: {1, 2, 3, 4}
+a &amp; b     # intersection: {2, 3}
+a - b     # difference: {1}
+a ^ b     # symmetric difference: {1, 4}
+a &lt;= b    # is a subset of b?</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="control">
+  <h2 class="section-title">Control Flow</h2>
+  <div class="grid">
+    <div class="card" data-tags="if elif else conditional">
+      <div class="card-header">Conditionals</div>
+      <div class="card-body">
+        <pre><code class="language-python">x = 42
+
+if x > 100:
+    print("large")
+elif x > 50:
+    print("medium")
+else:
+    print("small")
+
+# match/case (Python 3.10+)
+match command:
+    case "quit":
+        quit()
+    case "go" | "move":
+        move()
+    case "drop", *objects:
+        for obj in objects: drop(obj)
+    case {"action": action, "target": target}:
+        handle(action, target)
+    case Point(x=0, y=0):
+        print("origin")
+    case _:
+        print(f"Unknown: {command}")</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="for while loop range enumerate">
+      <div class="card-header">Loops</div>
+      <div class="card-body">
+        <pre><code class="language-python"># For loop
+for i in range(10):       # 0..9
+    print(i)
+for i in range(2, 10, 2): # 2,4,6,8
+
+# Loop with index
+for i, val in enumerate(["a", "b", "c"]):
+    print(i, val)  # 0 a, 1 b, 2 c
+
+# Loop multiple lists
+for a, b in zip([1,2,3], ["x","y","z"]):
+    print(a, b)
+
+# While
+n = 0
+while n < 10:
+    n += 1
+else:
+    print("loop finished normally")
+
+# Loop control
+for i in range(100):
+    if i == 5: continue   # skip
+    if i == 10: break     # exit
+else:
+    print("no break occurred")  # runs if no break
+
+# Useful iteration tools
+from itertools import chain, product, combinations, permutations
+list(chain([1,2], [3,4]))         # [1,2,3,4]
+list(product([1,2], [3,4]))       # [(1,3),(1,4),(2,3),(2,4)]
+list(combinations([1,2,3], 2))   # [(1,2),(1,3),(2,3)]</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="functions">
+  <h2 class="section-title">Functions</h2>
+  <div class="grid">
+    <div class="card" data-tags="function def args kwargs default">
+      <div class="card-header">Function Definitions</div>
+      <div class="card-body">
+        <pre><code class="language-python"># Basic
+def greet(name: str, greeting: str = "Hello") -> str:
+    return f"{greeting}, {name}!"
+
+# *args: variable positional arguments
+def sum_all(*args):
+    return sum(args)
+
+# **kwargs: variable keyword arguments
+def configure(**kwargs):
+    for key, value in kwargs.items():
+        print(f"{key} = {value}")
+
+# Keyword-only (after *)
+def draw(x, y, *, color="red", size=5):
+    pass
+draw(1, 2, color="blue")  # must use keyword
+
+# Positional-only (before /)
+def add(x, y, /):
+    return x + y
+add(1, 2)  # must be positional
+
+# Lambda
+square = lambda x: x ** 2
+sorted(lst, key=lambda x: x[1])
+
+# Closures
+def counter():
+    count = 0
+    def increment():
+        nonlocal count
+        count += 1
+        return count
+    return increment
+
+# Generators
+def fibonacci():
+    a, b = 0, 1
+    while True:
+        yield a
+        a, b = b, a + b</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="decorator functools wraps">
+      <div class="card-header">Decorators</div>
+      <div class="card-body">
+        <pre><code class="language-python">from functools import wraps
+import time
+
+# Simple decorator
+def timer(func):
+    @wraps(func)  # preserves __name__, __doc__
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        print(f"{func.__name__} took {time.time()-start:.3f}s")
+        return result
+    return wrapper
+
+@timer
+def slow_function():
+    time.sleep(1)
+
+# Decorator with arguments
+def retry(times=3):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            for attempt in range(times):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    if attempt == times - 1: raise
+            return None
+        return wrapper
+    return decorator
+
+@retry(times=5)
+def fetch_data(): ...
+
+# Built-in decorators
+@staticmethod   # no self/cls, utility methods
+@classmethod    # cls instead of self, alternative constructors
+@property       # getter/setter syntax
+@functools.lru_cache(maxsize=128)  # memoization
+@functools.cached_property          # computed once, then cached</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="context manager with protocol">
+      <div class="card-header">Context Managers</div>
+      <div class="card-body">
+        <pre><code class="language-python"># Built-in usage
+with open("file.txt") as f:
+    data = f.read()
+
+# Custom context manager (class-based)
+class DatabaseConnection:
+    def __enter__(self):
+        self.conn = connect_to_db()
+        return self.conn
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.conn.close()
+        return False  # don't suppress exceptions
+
+with DatabaseConnection() as conn:
+    conn.query("SELECT ...")
+
+# Context manager using contextlib
+from contextlib import contextmanager
+
+@contextmanager
+def timer():
+    start = time.time()
+    try:
+        yield  # code inside with-block runs here
+    finally:
+        print(f"Elapsed: {time.time() - start:.3f}s")
+
+with timer():
+    expensive_operation()
+
+# Multiple context managers
+with open("in.txt") as f_in, open("out.txt", "w") as f_out:
+    f_out.write(f_in.read())</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="oop">
+  <h2 class="section-title">Object-Oriented Programming</h2>
+  <div class="grid">
+    <div class="card" data-tags="class inheritance polymorphism">
+      <div class="card-header">Classes &amp; Inheritance</div>
+      <div class="card-body">
+        <pre><code class="language-python">class Animal:
+    # Class variable (shared)
+    count = 0
+
+    def __init__(self, name: str, age: int):
+        self.name = name    # instance variable
+        self._age = age     # "protected" (convention)
+        Animal.count += 1
+
+    @property
+    def age(self) -> int:
+        return self._age
+
+    @age.setter
+    def age(self, value: int):
+        if value < 0: raise ValueError("Age can't be negative")
+        self._age = value
+
+    def speak(self) -> str:
+        raise NotImplementedError
+
+    def __repr__(self) -> str:
+        return f"Animal(name={self.name!r}, age={self.age})"
+
+    def __eq__(self, other) -> bool:
+        return isinstance(other, Animal) and self.name == other.name
+
+class Dog(Animal):
+    def __init__(self, name, age, breed):
+        super().__init__(name, age)
+        self.breed = breed
+
+    def speak(self) -> str:
+        return f"{self.name} says Woof!"
+
+    def __repr__(self):
+        return f"Dog({self.name!r}, {self.breed!r})"
+
+# Multiple inheritance
+class ServiceDog(Dog, CertifiedWorker):
+    def __init__(self, name, age, breed, certification):
+        Dog.__init__(self, name, age, breed)
+        self.certification = certification</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="dunder magic method protocol">
+      <div class="card-header">Dunder / Magic Methods</div>
+      <div class="card-body">
+        <pre><code class="language-python">class Vector:
+    def __init__(self, x, y): self.x, self.y = x, y
+
+    # String representations
+    def __str__(self): return f"({self.x}, {self.y})"
+    def __repr__(self): return f"Vector({self.x}, {self.y})"
+
+    # Arithmetic
+    def __add__(self, other): return Vector(self.x+other.x, self.y+other.y)
+    def __sub__(self, other): return Vector(self.x-other.x, self.y-other.y)
+    def __mul__(self, scalar): return Vector(self.x*scalar, self.y*scalar)
+    def __rmul__(self, scalar): return self.__mul__(scalar)
+
+    # Comparison
+    def __eq__(self, other): return self.x == other.x and self.y == other.y
+    def __lt__(self, other): return abs(self) < abs(other)
+
+    # Container protocol
+    def __len__(self): return 2
+    def __getitem__(self, i): return (self.x, self.y)[i]
+
+    # Numeric
+    def __abs__(self): return (self.x**2 + self.y**2)**0.5
+    def __bool__(self): return self.x != 0 or self.y != 0
+    def __neg__(self): return Vector(-self.x, -self.y)
+
+    # Context manager
+    def __enter__(self): return self
+    def __exit__(self, *args): pass
+
+    # Callable
+    def __call__(self): return self.__abs__()
+
+    # Hashing (if __eq__ defined, must define __hash__)
+    def __hash__(self): return hash((self.x, self.y))</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="abstract abc interface protocol">
+      <div class="card-header">ABCs &amp; Protocols</div>
+      <div class="card-body">
+        <pre><code class="language-python">from abc import ABC, abstractmethod
+from typing import Protocol, runtime_checkable
+
+# Abstract Base Class
+class Shape(ABC):
+    @abstractmethod
+    def area(self) -> float: ...
+
+    @abstractmethod
+    def perimeter(self) -> float: ...
+
+    def describe(self):  # concrete method
+        print(f"Area: {self.area():.2f}")
+
+class Circle(Shape):
+    def __init__(self, r): self.r = r
+    def area(self): return 3.14159 * self.r ** 2
+    def perimeter(self): return 2 * 3.14159 * self.r
+
+# Protocol (structural subtyping - duck typing)
+@runtime_checkable
+class Drawable(Protocol):
+    def draw(self) -> None: ...
+    def get_color(self) -> str: ...
+
+class Button:  # doesn't explicitly inherit Drawable
+    def draw(self): print("Drawing button")
+    def get_color(self): return "blue"
+
+isinstance(Button(), Drawable)  # True (runtime check!)
+
+# __slots__ for memory efficiency
+class Point:
+    __slots__ = ['x', 'y']  # disables __dict__, saves memory
+    def __init__(self, x, y):
+        self.x, self.y = x, y</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="exceptions">
+  <h2 class="section-title">Exceptions</h2>
+  <div class="grid">
+    <div class="card" data-tags="try except raise finally exception">
+      <div class="card-header">Exception Handling</div>
+      <div class="card-body">
+        <pre><code class="language-python">try:
+    result = 10 / 0
+except ZeroDivisionError as e:
+    print(f"Error: {e}")
+except (TypeError, ValueError) as e:
+    print(f"Type/Value error: {e}")
+except Exception:
+    raise  # re-raise
+else:
+    print("No exception!")  # runs if no exception
+finally:
+    print("Always runs")
+
+# Raise exceptions
+raise ValueError("Invalid input")
+raise ValueError("Bad input") from original_error  # chaining
+
+# Custom exception
+class PaymentError(Exception):
+    def __init__(self, message, code):
+        super().__init__(message)
+        self.code = code
+
+# Exception groups (Python 3.11+)
+try:
+    raise ExceptionGroup("multiple", [ValueError("a"), TypeError("b")])
+except* ValueError as eg:
+    print("Handled ValueErrors:", eg.exceptions)</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="typing">
+  <h2 class="section-title">Type Hints (Python 3.5+)</h2>
+  <div class="grid">
+    <div class="card" data-tags="type hint annotation generic">
+      <div class="card-header">Type Annotations</div>
+      <div class="card-body">
+        <pre><code class="language-python">from typing import Optional, Union, Any, Callable
+from typing import List, Dict, Tuple, Set  # deprecated in 3.9+
+# Prefer built-in types: list, dict, tuple, set
+
+# Function annotations
+def greet(name: str, times: int = 1) -> str:
+    return (name + "\n") * times
+
+# Complex types
+def process(data: list[int]) -> dict[str, int]:
+    return {"sum": sum(data)}
+
+# Optional (= X | None)
+def find(name: str) -> str | None:  # Python 3.10+
+    return None
+
+# Union
+def to_string(value: int | float | str) -> str:
+    return str(value)
+
+# Generics
+from typing import TypeVar, Generic
+T = TypeVar('T')
+
+class Stack(Generic[T]):
+    def __init__(self) -> None: self.items: list[T] = []
+    def push(self, item: T) -> None: self.items.append(item)
+    def pop(self) -> T: return self.items.pop()
+
+# TypedDict
+from typing import TypedDict
+class Movie(TypedDict):
+    name: str
+    year: int
+    rating: float
+
+# Callable
+from typing import Callable
+def apply(func: Callable[[int, int], int], x: int, y: int) -> int:
+    return func(x, y)</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="dataclass frozen slots">
+      <div class="card-header">Dataclasses</div>
+      <div class="card-body">
+        <pre><code class="language-python">from dataclasses import dataclass, field, KW_ONLY
+
+@dataclass
+class Person:
+    name: str
+    age: int
+    hobbies: list[str] = field(default_factory=list)
+
+    def greet(self):
+        return f"Hi, I'm {self.name}"
+
+# Frozen (immutable, hashable)
+@dataclass(frozen=True)
+class Point:
+    x: float
+    y: float
+
+# With ordering
+@dataclass(order=True)
+class Version:
+    major: int
+    minor: int
+    patch: int
+
+# Slots (memory efficient)
+@dataclass(slots=True)
+class Compact:
+    x: int
+    y: int
+
+p = Person("Alice", 30)
+p.name      # "Alice"
+p           # Person(name='Alice', age=30, hobbies=[])
+p == Person("Alice", 30)  # True (structural equality)
+
+# Post-init
+@dataclass
+class Circle:
+    radius: float
+    area: float = field(init=False)
+
+    def __post_init__(self):
+        self.area = 3.14159 * self.radius ** 2</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+<script>
+  hljs.highlightAll();
+  function filterCards(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('.card').forEach(card => {
+      const text = card.textContent.toLowerCase() + (card.dataset.tags || '');
+      card.style.display = q.length === 0 || text.includes(q) ? '' : 'none';
+    });
+  }
+</script>
+</body>
+</html>

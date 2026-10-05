@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python Real-World Programming — Knowledge Check</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #1a1a2e;
+      --panel:     #16213e;
+      --accent:    #e94560;
+      --accent2:   #0f3460;
+      --text:      #e0e0e0;
+      --muted:     #8892a4;
+      --correct:   #27ae60;
+      --wrong:     #c0392b;
+      --border:    #2a3a5c;
+      --hover:     #1e2f4f;
+      --opt-bg:    #1c2a45;
+      --radius:    10px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    a.back-link {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: color 0.2s;
+      z-index: 100;
+    }
+    a.back-link:hover { color: var(--accent); }
+
+    h1 {
+      margin-top: 3.5rem;
+      margin-bottom: 1.5rem;
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
+      text-align: center;
+      color: var(--accent);
+      letter-spacing: 0.02em;
+    }
+
+    /* ── QUIZ CONTAINER ── */
+    #quiz-container {
+      width: 100%;
+      max-width: 760px;
+    }
+
+    /* ── PROGRESS ── */
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .progress-bar-wrap {
+      background: var(--border);
+      border-radius: 99px;
+      height: 6px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── QUESTION CARD ── */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.2rem;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .question-meta {
+      font-size: 0.75rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.6rem;
+    }
+    .question-text {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 1.2rem;
+    }
+
+    /* ── CODE BLOCK ── */
+    pre.code-block {
+      background: #0d1627;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem 1.2rem;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      color: #c9d1d9;
+      margin-bottom: 1.2rem;
+      white-space: pre;
+    }
+
+    /* ── OPTIONS ── */
+    .options-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .option-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      background: var(--opt-bg);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 0.95rem;
+      text-align: left;
+      transition: border-color 0.15s, background 0.15s;
+      width: 100%;
+    }
+    .option-btn:hover:not(:disabled) { border-color: var(--accent); background: var(--hover); }
+    .option-btn.focused:not(:disabled) { border-color: var(--accent); background: var(--hover); outline: 2px solid var(--accent); outline-offset: 2px; }
+    .option-btn:disabled { cursor: default; }
+    .option-btn.correct  { border-color: var(--correct) !important; background: rgba(39,174,96,0.15) !important; }
+    .option-btn.wrong    { border-color: var(--wrong)   !important; background: rgba(192,57,43,0.15)  !important; }
+    .option-key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.8rem;
+      height: 1.8rem;
+      border-radius: 5px;
+      background: var(--accent2);
+      font-size: 0.78rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ── FILL-BLANK ── */
+    .fill-blank-wrap { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .fill-input {
+      flex: 1;
+      min-width: 180px;
+      padding: 0.7rem 1rem;
+      background: var(--opt-bg);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .fill-input:focus { border-color: var(--accent); }
+    .fill-input.correct { border-color: var(--correct); background: rgba(39,174,96,0.1); }
+    .fill-input.wrong   { border-color: var(--wrong);   background: rgba(192,57,43,0.1); }
+    .submit-btn {
+      padding: 0.7rem 1.4rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: opacity 0.15s;
+    }
+    .submit-btn:hover { opacity: 0.85; }
+    .submit-btn:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── FEEDBACK ── */
+    .feedback {
+      margin-top: 1rem;
+      padding: 0.9rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      display: none;
+    }
+    .feedback.correct { background: rgba(39,174,96,0.12); border: 1px solid var(--correct); color: #6fcf97; display: block; }
+    .feedback.wrong   { background: rgba(192,57,43,0.12);  border: 1px solid var(--wrong);   color: #eb5757; display: block; }
+    .feedback strong { display: block; margin-bottom: 0.3rem; font-size: 1rem; }
+    .feedback .explanation { color: var(--text); margin-top: 0.4rem; }
+
+    /* ── NAV BUTTONS ── */
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.8rem;
+      margin-top: 0.5rem;
+    }
+    .nav-btn {
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .nav-btn:hover { border-color: var(--accent); background: var(--hover); }
+    .nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .nav-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+    .nav-btn.primary:hover { opacity: 0.85; }
+
+    /* ── RESULTS ── */
+    #results-screen {
+      display: none;
+      width: 100%;
+      max-width: 760px;
+      text-align: center;
+    }
+    .score-ring {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 8px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+    }
+    .score-ring .pct { font-size: 2rem; font-weight: 800; color: var(--accent); line-height: 1; }
+    .score-ring .lbl { font-size: 0.7rem; color: var(--muted); }
+    .grade { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .meta-row { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .result-btns { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+    .result-btn {
+      padding: 0.75rem 1.6rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .result-btn.primary { background: var(--accent); border: 2px solid var(--accent); color: #fff; }
+    .result-btn.secondary { background: transparent; border: 2px solid var(--border); color: var(--text); }
+    .result-btn:hover { opacity: 0.85; }
+
+    /* ── REVIEW MODE ── */
+    #review-screen { display: none; width: 100%; max-width: 760px; }
+    .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .review-header h2 { color: var(--accent); font-size: 1.2rem; }
+    .review-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.75rem;
+      margin-bottom: 1rem;
+    }
+    .review-qnum { font-size: 0.72rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+    .review-q { font-size: 1rem; line-height: 1.6; margin-bottom: 0.8rem; }
+    .review-your { color: var(--wrong); font-size: 0.9rem; margin-bottom: 0.2rem; }
+    .review-correct { color: var(--correct); font-size: 0.9rem; margin-bottom: 0.6rem; }
+    .review-expl { font-size: 0.88rem; color: var(--muted); line-height: 1.55; }
+    .tag-wrong { background: rgba(192,57,43,0.2); color: #eb5757; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 540px) {
+      .card { padding: 1.2rem 1rem; }
+      h1 { font-size: 1.1rem; }
+      .nav-btn { padding: 0.55rem 0.9rem; font-size: 0.82rem; }
+    }
+  </style>
+</head>
+<body>
+
+<a class="back-link" href="README.md">&#8592; Back to Index</a>
+
+<h1>Python Real-World Programming</h1>
+
+<!-- QUIZ -->
+<div id="quiz-container">
+  <div class="progress-header">
+    <span id="prog-label">Question 1 of 15</span>
+    <span id="score-label">Score: 0</span>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="prog-bar" style="width:0%"></div>
+  </div>
+  <div class="card" id="question-card">
+    <div class="question-meta" id="q-type-label"></div>
+    <div class="question-text" id="q-text"></div>
+    <pre class="code-block" id="q-code" style="display:none"></pre>
+    <div id="q-options"></div>
+    <div class="feedback" id="q-feedback"></div>
+  </div>
+  <div class="nav-row">
+    <button class="nav-btn" id="btn-prev" onclick="navigate(-1)" disabled>&#8592; Previous</button>
+    <button class="nav-btn primary" id="btn-next" onclick="navigate(1)" disabled>Next &#8594;</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="results-screen">
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="score-ring">
+      <span class="pct" id="res-pct">0%</span>
+      <span class="lbl">score</span>
+    </div>
+    <div class="grade" id="res-grade"></div>
+    <div class="meta-row" id="res-meta"></div>
+    <div class="result-btns">
+      <button class="result-btn primary" onclick="retryQuiz()">&#8635; Retry</button>
+      <button class="result-btn secondary" id="btn-review" onclick="showReview()">Review Wrong Answers</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW -->
+<div id="review-screen">
+  <div class="review-header">
+    <h2>Missed Questions</h2>
+    <button class="nav-btn" onclick="backToResults()">&#8592; Back to Results</button>
+  </div>
+  <div id="review-list"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  QUESTIONS DATA
+// ═══════════════════════════════════════════════════════════
+const questions = [
+  // 1 ── multiple-choice
+  {
+    type: "multiple-choice",
+    text: "Which clause in a try/except block runs whether or not an exception was raised?",
+    options: ["except", "else", "finally", "raise"],
+    correct: 2,
+    explanation: "The `finally` clause always executes regardless of whether an exception occurred. It is used for guaranteed cleanup (e.g., closing files, releasing resources)."
+  },
+
+  // 2 ── true-false
+  {
+    type: "true-false",
+    text: "The `else` clause in a try/except block runs only when NO exception was raised in the `try` block.",
+    options: ["True", "False"],
+    correct: 0,
+    explanation: "`else` executes only when the `try` block completes without raising an exception. This is useful to put code that should only run on success, separate from the `try` block itself."
+  },
+
+  // 3 ── code-output
+  {
+    type: "multiple-choice",
+    text: "What is printed when this code runs?",
+    code:
+`def divide(a, b):
+    try:
+        result = a / b
+    except ZeroDivisionError:
+        print("division error")
+        return
+    else:
+        print("ok")
+    finally:
+        print("done")
+    return result
+
+divide(10, 0)`,
+    options: [
+      '"division error" then "done"',
+      '"division error" only',
+      '"ok" then "done"',
+      '"done" only'
+    ],
+    correct: 0,
+    explanation: "When `ZeroDivisionError` is raised, the `except` block prints \"division error\" and returns. But `finally` always runs before the function actually returns, so \"done\" is printed too. The `else` block is skipped because an exception was raised."
+  },
+
+  // 4 ── multiple-choice
+  {
+    type: "multiple-choice",
+    text: "How do you define a custom exception class in Python?",
+    options: [
+      "class MyError(BaseException): pass",
+      "class MyError(Exception): pass",
+      "def MyError(Exception): pass",
+      "exception MyError(Exception): pass"
+    ],
+    correct: 1,
+    explanation: "Custom exceptions are created by subclassing `Exception` (or a more specific built-in exception). Inheriting from `BaseException` directly is technically valid but not recommended — `BaseException` also covers `SystemExit` and `KeyboardInterrupt`. Use `Exception` as your base."
+  },
+
+  // 5 ── multiple-choice  (raise)
+  {
+    type: "multiple-choice",
+    text: "Which line correctly raises a ValueError with a descriptive message?",
+    options: [
+      "raise ValueError",
+      'raise ValueError("age must be positive")',
+      'raise new ValueError("age must be positive")',
+      'throw ValueError("age must be positive")'
+    ],
+    correct: 1,
+    explanation: "Python uses `raise ExceptionType(message)` — no `new` keyword (that is Java/JavaScript) and no `throw` (that is Java/C++). You can also call `raise ValueError` without arguments but that gives no message."
+  },
+
+  // 6 ── code-output  (context manager)
+  {
+    type: "multiple-choice",
+    text: "What does this code print?",
+    code:
+`class Greeter:
+    def __enter__(self):
+        print("entering")
+        return self
+
+    def __exit__(self, exc_type, exc_val, tb):
+        print("exiting")
+        return False
+
+with Greeter() as g:
+    print("inside")`,
+    options: [
+      '"entering", "inside", "exiting"',
+      '"inside", "entering", "exiting"',
+      '"entering", "exiting", "inside"',
+      '"inside" only'
+    ],
+    correct: 0,
+    explanation: "The `with` statement calls `__enter__` first, then executes the body, then always calls `__exit__`. The return value of `__exit__` controls whether exceptions are suppressed (`True` suppresses, `False` propagates)."
+  },
+
+  // 7 ── true-false
+  {
+    type: "true-false",
+    text: "A `contextlib.contextmanager` decorated generator must use `yield` exactly once; code before yield is the setup and code after yield is the teardown.",
+    options: ["True", "False"],
+    correct: 0,
+    explanation: "When using `@contextlib.contextmanager`, the decorated generator must yield exactly once. Everything before the `yield` acts as `__enter__`, the yielded value is bound to the `as` target, and everything after `yield` (including finally blocks) acts as `__exit__`."
+  },
+
+  // 8 ── code-output  (generator)
+  {
+    type: "multiple-choice",
+    text: "What is printed?",
+    code:
+`def countdown(n):
+    while n > 0:
+        yield n
+        n -= 1
+
+gen = countdown(3)
+print(next(gen))
+print(next(gen))`,
+    options: [
+      "3\n2",
+      "2\n1",
+      "3\n3",
+      "StopIteration error"
+    ],
+    correct: 0,
+    explanation: "The generator pauses at each `yield`. The first `next()` runs until `yield 3`, returning 3. The second `next()` resumes, decrements n to 2, loops back, and yields 2. Each call to `next()` advances execution to the next `yield`."
+  },
+
+  // 9 ── multiple-choice
+  {
+    type: "multiple-choice",
+    text: "What is the key memory advantage of a generator expression over a list comprehension?",
+    options: [
+      "Generator expressions are faster to create",
+      "Generators produce values lazily, consuming O(1) memory rather than O(n)",
+      "List comprehensions cannot be iterated more than once",
+      "Generators support indexing; list comprehensions do not"
+    ],
+    correct: 1,
+    explanation: "A list comprehension `[x*2 for x in range(1000000)]` builds the entire list in memory at once (O(n)). A generator expression `(x*2 for x in range(1000000))` is lazy — it computes each value on demand, using only O(1) memory regardless of the input size."
+  },
+
+  // 10 ── fill-blank
+  {
+    type: "fill-blank",
+    text: "Fill in the blank: to open a file for appending text (not overwriting), the file mode string is ___.",
+    correct: "a",
+    explanation: "Mode `'a'` opens a file for appending — new data is written at the end without truncating existing content. `'w'` would overwrite the file. Other common modes: `'r'` (read), `'rb'` (read binary), `'wb'` (write binary)."
+  },
+
+  // 11 ── multiple-choice  (itertools)
+  {
+    type: "multiple-choice",
+    text: "Which `itertools` function yields all ordered pairs (a, b) from two iterables where a comes from the first and b from the second?",
+    options: ["itertools.chain", "itertools.combinations", "itertools.product", "itertools.islice"],
+    correct: 2,
+    explanation: "`itertools.product(A, B)` is the Cartesian product — it yields every pair (a, b). `chain` concatenates iterables end-to-end. `combinations` picks subsets from one iterable. `islice` slices an iterable lazily."
+  },
+
+  // 12 ── multiple-choice  (csv)
+  {
+    type: "multiple-choice",
+    text: "Which csv class reads each row as a dictionary keyed by the column headers?",
+    options: ["csv.reader", "csv.DictReader", "csv.writer", "csv.DictWriter"],
+    correct: 1,
+    explanation: "`csv.DictReader` reads each row as an `OrderedDict` (or regular dict in Python 3.8+) using the first row as keys. `csv.reader` returns each row as a plain list of strings."
+  },
+
+  // 13 ── multiple-choice  (pathlib)
+  {
+    type: "multiple-choice",
+    text: "Using `pathlib.Path`, which expression gives you the file extension of `Path('report.csv')`?",
+    options: [
+      "Path('report.csv').name",
+      "Path('report.csv').stem",
+      "Path('report.csv').suffix",
+      "Path('report.csv').ext"
+    ],
+    correct: 2,
+    explanation: "`.suffix` returns the file extension including the dot (e.g., `'.csv'`). `.name` returns the full filename (`'report.csv'`), `.stem` returns the name without extension (`'report'`). There is no `.ext` attribute."
+  },
+
+  // 14 ── code-output  (StopIteration)
+  {
+    type: "multiple-choice",
+    text: "What happens when this code runs?",
+    code:
+`def one_item():
+    yield 42
+
+gen = one_item()
+print(next(gen))
+print(next(gen))`,
+    options: [
+      "Prints 42 twice",
+      "Prints 42, then raises StopIteration",
+      "Prints 42, then prints None",
+      "Raises StopIteration immediately"
+    ],
+    correct: 1,
+    explanation: "After the generator yields its only value (42), calling `next()` again finds no more `yield` statements. Python raises `StopIteration` to signal that the generator is exhausted. A `for` loop catches this automatically, but a raw `next()` call will propagate it as an exception."
+  },
+
+  // 15 ── fill-blank
+  {
+    type: "fill-blank",
+    text: "Fill in the blank: `itertools.___` lazily concatenates multiple iterables into one sequence.",
+    correct: "chain",
+    explanation: "`itertools.chain(iter1, iter2, ...)` yields elements from the first iterable, then the second, etc., without building a combined list in memory. It is the lazy equivalent of `list1 + list2`."
+  }
+];
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let current   = 0;
+let answered  = new Array(questions.length).fill(null); // null | { chosen, isCorrect }
+let startTime = Date.now();
+let focusIdx  = -1; // keyboard focus on option index
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════════
+function render() {
+  const q = questions[current];
+  const state = answered[current];
+
+  // progress
+  document.getElementById("prog-label").textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById("score-label").textContent = `Score: ${getScore()}`;
+  const pct = ((current) / questions.length) * 100;
+  document.getElementById("prog-bar").style.width = pct + "%";
+
+  // meta label
+  const labels = { "multiple-choice": "Multiple Choice", "true-false": "True / False", "fill-blank": "Fill in the Blank" };
+  document.getElementById("q-type-label").textContent = labels[q.type] || q.type;
+
+  // question text
+  document.getElementById("q-text").textContent = q.text;
+
+  // code block
+  const codeEl = document.getElementById("q-code");
+  if (q.code) {
+    codeEl.textContent = q.code;
+    codeEl.style.display = "block";
+  } else {
+    codeEl.style.display = "none";
+  }
+
+  // options
+  const container = document.getElementById("q-options");
+  container.innerHTML = "";
+  focusIdx = -1;
+
+  if (q.type === "fill-blank") {
+    renderFillBlank(q, state, container);
+  } else {
+    renderMCQ(q, state, container);
+  }
+
+  // feedback
+  const fb = document.getElementById("q-feedback");
+  fb.className = "feedback";
+  fb.innerHTML = "";
+  if (state) {
+    if (state.isCorrect) {
+      fb.className = "feedback correct";
+      fb.innerHTML = `<strong>Correct!</strong><span class="explanation">${q.explanation}</span>`;
+    } else {
+      const correctLabel = q.options ? q.options[q.correct] : q.correct;
+      fb.className = "feedback wrong";
+      fb.innerHTML = `<strong>Incorrect.</strong><span class="explanation">Correct answer: <strong>${correctLabel}</strong><br>${q.explanation}</span>`;
+    }
+  }
+
+  // nav
+  document.getElementById("btn-prev").disabled = current === 0;
+  const nextBtn = document.getElementById("btn-next");
+  if (current === questions.length - 1) {
+    nextBtn.textContent = "Finish ✓";
+    nextBtn.disabled = !state;
+  } else {
+    nextBtn.textContent = "Next →";
+    nextBtn.disabled = !state;
+  }
+}
+
+function renderMCQ(q, state, container) {
+  const ul = document.createElement("ul");
+  ul.className = "options-list";
+  const keys = ["A", "B", "C", "D", "E", "F"];
+
+  q.options.forEach((opt, i) => {
+    const li = document.createElement("li");
+    const btn = document.createElement("button");
+    btn.className = "option-btn";
+    btn.dataset.idx = i;
+
+    const keySpan = document.createElement("span");
+    keySpan.className = "option-key";
+    keySpan.textContent = keys[i];
+
+    const text = document.createTextNode(opt);
+    btn.appendChild(keySpan);
+    btn.appendChild(text);
+
+    if (state) {
+      btn.disabled = true;
+      if (i === q.correct) btn.classList.add("correct");
+      if (state.chosen === i && !state.isCorrect) btn.classList.add("wrong");
+    } else {
+      btn.addEventListener("click", () => submitAnswer(i));
+      btn.addEventListener("mouseenter", () => setFocus(i));
+    }
+    li.appendChild(btn);
+    ul.appendChild(li);
+  });
+
+  container.appendChild(ul);
+}
+
+function renderFillBlank(q, state, container) {
+  const wrap = document.createElement("div");
+  wrap.className = "fill-blank-wrap";
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "fill-input";
+  input.placeholder = "Type your answer…";
+  input.id = "fill-input";
+
+  const btn = document.createElement("button");
+  btn.className = "submit-btn";
+  btn.textContent = "Submit";
+  btn.id = "fill-submit";
+
+  if (state) {
+    input.value = state.chosen;
+    input.disabled = true;
+    btn.disabled = true;
+    input.classList.add(state.isCorrect ? "correct" : "wrong");
+  } else {
+    btn.addEventListener("click", () => {
+      const val = input.value.trim();
+      if (val) submitFillBlank(val);
+    });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const val = input.value.trim();
+        if (val) submitFillBlank(val);
+      }
+    });
+  }
+
+  wrap.appendChild(input);
+  wrap.appendChild(btn);
+  container.appendChild(wrap);
+
+  if (!state) setTimeout(() => input.focus(), 50);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SUBMIT
+// ═══════════════════════════════════════════════════════════
+function submitAnswer(chosenIdx) {
+  const q = questions[current];
+  const isCorrect = chosenIdx === q.correct;
+  answered[current] = { chosen: chosenIdx, isCorrect };
+  render();
+}
+
+function submitFillBlank(val) {
+  const q = questions[current];
+  const isCorrect = val.toLowerCase().trim() === q.correct.toLowerCase().trim();
+  answered[current] = { chosen: val, isCorrect };
+  render();
+}
+
+function getScore() {
+  return answered.filter(a => a && a.isCorrect).length;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function navigate(dir) {
+  if (dir === 1 && current === questions.length - 1) {
+    showResults();
+    return;
+  }
+  current = Math.max(0, Math.min(questions.length - 1, current + dir));
+  render();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  KEYBOARD
+// ═══════════════════════════════════════════════════════════
+document.addEventListener("keydown", (e) => {
+  const q = questions[current];
+  const state = answered[current];
+
+  // only handle MCQ/TF keyboard when on quiz screen
+  if (!document.getElementById("quiz-container").style.display === "none") return;
+  if (q.type === "fill-blank") return;
+  if (state) {
+    if (e.key === "ArrowRight" || e.key === "Enter") navigate(1);
+    if (e.key === "ArrowLeft") navigate(-1);
+    return;
+  }
+
+  const count = q.options.length;
+  if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+    e.preventDefault();
+    focusIdx = (focusIdx + 1) % count;
+    updateFocusStyle();
+  } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+    e.preventDefault();
+    focusIdx = (focusIdx - 1 + count) % count;
+    updateFocusStyle();
+  } else if ((e.key === "Enter" || e.key === " ") && focusIdx >= 0) {
+    e.preventDefault();
+    submitAnswer(focusIdx);
+  } else {
+    // letter shortcut
+    const match = "abcdef".indexOf(e.key.toLowerCase());
+    if (match >= 0 && match < count) {
+      focusIdx = match;
+      updateFocusStyle();
+    }
+  }
+});
+
+function setFocus(i) {
+  focusIdx = i;
+  updateFocusStyle();
+}
+
+function updateFocusStyle() {
+  const btns = document.querySelectorAll(".option-btn");
+  btns.forEach((b, i) => {
+    b.classList.toggle("focused", i === focusIdx);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RESULTS
+// ═══════════════════════════════════════════════════════════
+function showResults() {
+  document.getElementById("quiz-container").style.display = "none";
+  document.getElementById("review-screen").style.display = "none";
+
+  const score = getScore();
+  const total = questions.length;
+  const pct   = Math.round((score / total) * 100);
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+
+  let grade = "";
+  if (pct >= 95) grade = "Expert!";
+  else if (pct >= 80) grade = "Good Job!";
+  else if (pct >= 60) grade = "Getting There";
+  else grade = "Needs Work";
+
+  document.getElementById("res-pct").textContent = pct + "%";
+  document.getElementById("res-grade").textContent = grade;
+  document.getElementById("res-meta").textContent =
+    `${score} / ${total} correct  ·  Time: ${mins}m ${secs}s`;
+
+  const wrongCount = answered.filter(a => a && !a.isCorrect).length;
+  document.getElementById("btn-review").style.display = wrongCount > 0 ? "inline-block" : "none";
+
+  document.getElementById("results-screen").style.display = "block";
+}
+
+function retryQuiz() {
+  current   = 0;
+  answered  = new Array(questions.length).fill(null);
+  startTime = Date.now();
+  document.getElementById("results-screen").style.display = "none";
+  document.getElementById("review-screen").style.display = "none";
+  document.getElementById("quiz-container").style.display = "block";
+  render();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  REVIEW
+// ═══════════════════════════════════════════════════════════
+function showReview() {
+  document.getElementById("results-screen").style.display = "none";
+  const list = document.getElementById("review-list");
+  list.innerHTML = "";
+
+  questions.forEach((q, i) => {
+    const state = answered[i];
+    if (!state || state.isCorrect) return;
+
+    const card = document.createElement("div");
+    card.className = "review-card";
+
+    const qnum = document.createElement("div");
+    qnum.className = "review-qnum";
+    qnum.innerHTML = `Question ${i + 1} <span class="tag-wrong">Wrong</span>`;
+
+    const qtext = document.createElement("div");
+    qtext.className = "review-q";
+    qtext.textContent = q.text;
+
+    const yourDiv = document.createElement("div");
+    yourDiv.className = "review-your";
+    if (q.type === "fill-blank") {
+      yourDiv.textContent = `Your answer: "${state.chosen}"`;
+    } else {
+      yourDiv.textContent = `Your answer: "${q.options[state.chosen]}"`;
+    }
+
+    const correctDiv = document.createElement("div");
+    correctDiv.className = "review-correct";
+    const correctLabel = q.options ? q.options[q.correct] : q.correct;
+    correctDiv.textContent = `Correct answer: "${correctLabel}"`;
+
+    const expl = document.createElement("div");
+    expl.className = "review-expl";
+    expl.textContent = q.explanation;
+
+    card.appendChild(qnum);
+    card.appendChild(qtext);
+    if (q.code) {
+      const pre = document.createElement("pre");
+      pre.className = "code-block";
+      pre.textContent = q.code;
+      card.appendChild(pre);
+    }
+    card.appendChild(yourDiv);
+    card.appendChild(correctDiv);
+    card.appendChild(expl);
+    list.appendChild(card);
+  });
+
+  document.getElementById("review-screen").style.display = "block";
+}
+
+function backToResults() {
+  document.getElementById("review-screen").style.display = "none";
+  document.getElementById("results-screen").style.display = "block";
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+render();
+</script>
+</body>
+</html>

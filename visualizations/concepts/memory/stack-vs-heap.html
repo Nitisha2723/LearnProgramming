@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stack vs Heap Memory Visualization</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #1a1a2e;
+    color: #eee;
+    font-family: system-ui, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    color: #e94560;
+    margin-bottom: 6px;
+    font-size: 1.8rem;
+  }
+  .subtitle {
+    text-align: center;
+    color: #888;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+  }
+  .back-link {
+    display: inline-block;
+    margin-bottom: 16px;
+    color: #4da8da;
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  .back-link:hover { text-decoration: underline; }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  button {
+    background: #0f3460;
+    color: #eee;
+    border: 1px solid #4da8da;
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: background 0.2s;
+  }
+  button:hover:not(:disabled) { background: #1a5276; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.danger { border-color: #e94560; }
+  button.danger:hover:not(:disabled) { background: #4a1020; }
+  button.create-obj { border-color: #2ecc71; }
+  button.create-obj:hover:not(:disabled) { background: #145a32; }
+
+  /* Main layout */
+  .memory-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 1000px;
+    margin: 0 auto 20px;
+  }
+
+  /* Panel */
+  .panel {
+    background: #16213e;
+    border: 2px solid #0f3460;
+    border-radius: 10px;
+    padding: 0;
+    overflow: hidden;
+    min-height: 450px;
+    display: flex;
+    flex-direction: column;
+  }
+  .panel-header {
+    background: #0f3460;
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .panel-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  .panel-subtitle {
+    font-size: 0.7rem;
+    color: #aaa;
+    margin-top: 2px;
+  }
+  .panel-badge {
+    font-size: 0.7rem;
+    background: #1a1a2e;
+    padding: 3px 8px;
+    border-radius: 10px;
+    color: #888;
+  }
+
+  /* Stack panel */
+  .stack-panel { border-color: #f5a623; }
+  .stack-panel .panel-header { background: rgba(245,166,35,0.2); }
+  .stack-panel .panel-title { color: #f5a623; }
+
+  /* Heap panel */
+  .heap-panel { border-color: #4da8da; }
+  .heap-panel .panel-header { background: rgba(77,168,218,0.2); }
+  .heap-panel .panel-title { color: #4da8da; }
+
+  /* Stack content */
+  .stack-content {
+    flex: 1;
+    padding: 12px;
+    display: flex;
+    flex-direction: column-reverse; /* grows upward visually = downward in memory */
+    gap: 4px;
+    justify-content: flex-start;
+    position: relative;
+  }
+  .stack-empty {
+    text-align: center;
+    color: #444;
+    margin: auto;
+    font-size: 0.85rem;
+  }
+
+  /* Stack frame */
+  .stack-frame {
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid;
+    animation: slideIn 0.3s ease-out;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-15px); }
+  }
+  .frame-removing {
+    animation: slideOut 0.3s ease-in forwards;
+  }
+
+  .frame-header {
+    padding: 5px 10px;
+    font-weight: bold;
+    font-size: 0.82rem;
+    display: flex;
+    justify-content: space-between;
+  }
+  .frame-vars {
+    padding: 4px 10px 8px;
+    font-size: 0.78rem;
+    font-family: 'Courier New', monospace;
+  }
+  .frame-var {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .frame-var:last-child { border-bottom: none; }
+  .var-name { color: #ddd; }
+  .var-value { color: #2ecc71; }
+  .var-ref {
+    color: #4da8da;
+    cursor: default;
+    font-weight: bold;
+  }
+
+  /* Frame colors */
+  .frame-foo { border-color: #f5a623; }
+  .frame-foo .frame-header { background: rgba(245,166,35,0.25); color: #f5a623; }
+  .frame-foo .frame-vars { background: rgba(245,166,35,0.05); }
+
+  .frame-bar { border-color: #a29bfe; }
+  .frame-bar .frame-header { background: rgba(162,155,254,0.25); color: #a29bfe; }
+  .frame-bar .frame-vars { background: rgba(162,155,254,0.05); }
+
+  .frame-main { border-color: #888; }
+  .frame-main .frame-header { background: rgba(136,136,136,0.2); color: #aaa; }
+  .frame-main .frame-vars { background: rgba(136,136,136,0.05); }
+
+  /* Heap content */
+  .heap-content {
+    flex: 1;
+    padding: 12px;
+    position: relative;
+    min-height: 380px;
+  }
+  .heap-empty {
+    text-align: center;
+    color: #444;
+    font-size: 0.85rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Heap object */
+  .heap-obj {
+    position: absolute;
+    background: #0d1b34;
+    border: 2px solid #4da8da;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    font-family: 'Courier New', monospace;
+    min-width: 110px;
+    animation: appear 0.3s ease-out;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    z-index: 2;
+  }
+  @keyframes appear {
+    from { opacity: 0; transform: scale(0.7); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .heap-obj.gc-ready {
+    border-color: #e94560;
+    box-shadow: 0 0 14px rgba(233,69,96,0.6);
+    animation: glowRed 1s ease-in-out infinite;
+  }
+  @keyframes glowRed {
+    0%,100% { box-shadow: 0 0 8px rgba(233,69,96,0.4); }
+    50% { box-shadow: 0 0 18px rgba(233,69,96,0.8); }
+  }
+  .heap-obj.removing {
+    animation: fadeOut 0.4s ease-in forwards;
+  }
+  @keyframes fadeOut {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.6); }
+  }
+
+  .obj-addr {
+    color: #888;
+    font-size: 0.68rem;
+    margin-bottom: 4px;
+  }
+  .obj-type {
+    color: #4da8da;
+    font-weight: bold;
+    margin-bottom: 4px;
+    font-size: 0.82rem;
+  }
+  .obj-field {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    color: #ccc;
+    padding: 1px 0;
+  }
+  .obj-field span:last-child { color: #2ecc71; }
+
+  /* SVG arrows overlay */
+  #arrows-svg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* Status message */
+  .status-bar {
+    max-width: 1000px;
+    margin: 0 auto 16px;
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 0.83rem;
+    color: #ccc;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .status-icon { font-size: 1rem; }
+
+  /* Info labels */
+  .info-grid {
+    max-width: 1000px;
+    margin: 0 auto 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .info-box {
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: #ccc;
+  }
+  .info-box h4 { color: #f5a623; margin-bottom: 6px; }
+  .info-box.heap-info h4 { color: #4da8da; }
+  code { background: #0d1b34; padding: 1px 4px; border-radius: 3px; color: #4da8da; }
+
+  @media (max-width: 650px) {
+    .memory-layout { grid-template-columns: 1fr; }
+    .info-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<svg id="arrows-svg"></svg>
+
+<a href="../../README.md" class="back-link">← Back to Index</a>
+<h1>Stack vs Heap Memory</h1>
+<p class="subtitle">How Java manages memory during method calls and object creation</p>
+
+<div class="controls">
+  <button onclick="callFoo()" id="btn-foo">Call method foo()</button>
+  <button onclick="callBar()" id="btn-bar" disabled>Call bar() inside foo()</button>
+  <button onclick="createObject()" id="btn-obj">Create Object (in heap)</button>
+  <button onclick="returnFromBar()" id="btn-ret-bar" class="danger" disabled>Return from bar()</button>
+  <button onclick="returnFromFoo()" id="btn-ret-foo" class="danger" disabled>Return from foo()</button>
+  <button onclick="resetAll()" style="border-color:#888;">Reset All</button>
+</div>
+
+<div class="status-bar">
+  <span class="status-icon" id="status-icon">ℹ️</span>
+  <span id="status-text">Click "Call method foo()" to start the simulation.</span>
+</div>
+
+<div class="memory-layout">
+  <!-- STACK -->
+  <div class="panel stack-panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">STACK</div>
+        <div class="panel-subtitle">LIFO • Fixed size • Stores primitives + references</div>
+      </div>
+      <div class="panel-badge" id="stack-count">0 frames</div>
+    </div>
+    <!-- Growth indicator -->
+    <div style="text-align:center;font-size:0.65rem;color:#f5a623;padding:4px;background:rgba(245,166,35,0.1);">
+      ▼ grows downward in memory (top of stack = most recent call)
+    </div>
+    <div class="stack-content" id="stack-content">
+      <div class="stack-empty" id="stack-empty">Stack is empty<br><span style="font-size:0.75rem">No active method calls</span></div>
+    </div>
+  </div>
+
+  <!-- HEAP -->
+  <div class="panel heap-panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">HEAP</div>
+        <div class="panel-subtitle">Dynamic size • Scattered • Stores objects</div>
+      </div>
+      <div class="panel-badge" id="heap-count">0 objects</div>
+    </div>
+    <div style="text-align:center;font-size:0.65rem;color:#4da8da;padding:4px;background:rgba(77,168,218,0.1);">
+      Objects live here until garbage collected — addresses like 0x1A2B
+    </div>
+    <div class="heap-content" id="heap-content">
+      <div class="heap-empty" id="heap-empty">Heap is empty<br><span style="font-size:0.75rem">No objects allocated yet</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="info-grid">
+  <div class="info-box">
+    <h4>Stack Memory</h4>
+    <strong>LIFO</strong> (Last In, First Out) — the last frame pushed is first popped.<br>
+    Stores <em>local variables</em>, <em>method parameters</em>, and <em>references</em> (pointers to heap objects).<br>
+    When a method returns, its entire frame is instantly removed.
+    <br><br>
+    Fast: just moves a stack pointer. Fixed size (typically 512KB–1MB per thread).
+  </div>
+  <div class="info-box heap-info">
+    <h4>Heap Memory</h4>
+    <strong>Dynamic</strong> — objects allocated anywhere with <code>new</code>.<br>
+    Objects survive across method calls until no more references point to them.<br>
+    When a stack frame is removed, if no other variable holds the reference, the object becomes eligible for <strong>Garbage Collection</strong>.
+    <br><br>
+    Slower: needs memory manager. Much larger (configured with -Xmx flag).
+  </div>
+</div>
+
+<script>
+  // State
+  let state = {
+    hasFoo: false,
+    hasBar: false,
+    objects: [], // {id, addr, type, fields, refVar, refFrame, x, y}
+    objCounter: 0,
+  };
+
+  const ADDRS = ['0x1A2B', '0x3C4D', '0x5E6F', '0x7A8B', '0x9C0D', '0xBE1F', '0xD234'];
+
+  function setStatus(icon, text) {
+    document.getElementById('status-icon').textContent = icon;
+    document.getElementById('status-text').textContent = text;
+  }
+
+  function updateCounts() {
+    const frames = document.querySelectorAll('.stack-frame:not(.frame-removing)').length;
+    document.getElementById('stack-count').textContent = frames + ' frame' + (frames !== 1 ? 's' : '');
+    const objs = state.objects.length;
+    document.getElementById('heap-count').textContent = objs + ' object' + (objs !== 1 ? 's' : '');
+  }
+
+  // Heap positions (pre-set to avoid overlap)
+  const HEAP_POSITIONS = [
+    {x: 10, y: 20}, {x: 55, y: 15}, {x: 10, y: 55},
+    {x: 55, y: 55}, {x: 15, y: 80}, {x: 58, y: 78}
+  ];
+
+  function callFoo() {
+    if (state.hasFoo) return;
+    state.hasFoo = true;
+
+    document.getElementById('stack-empty').style.display = 'none';
+    const stackContent = document.getElementById('stack-content');
+
+    const frame = document.createElement('div');
+    frame.className = 'stack-frame frame-foo';
+    frame.id = 'frame-foo';
+    frame.innerHTML = `
+      <div class="frame-header">
+        <span>foo() frame</span>
+        <span style="font-size:0.68rem;color:#aaa;">return addr: 0x0040</span>
+      </div>
+      <div class="frame-vars">
+        <div class="frame-var"><span class="var-name">int x</span><span class="var-value">= 42</span></div>
+        <div class="frame-var"><span class="var-name">String msg</span><span class="var-value">= "hello"</span></div>
+        <div class="frame-var" id="foo-ref-row" style="display:none">
+          <span class="var-name">MyObj obj</span>
+          <span class="var-ref" id="foo-ref-val">→ ?</span>
+        </div>
+      </div>
+    `;
+    stackContent.appendChild(frame);
+    updateCounts();
+    updateButtons();
+    setStatus('📥', 'foo() called. Its stack frame is created with local variables x=42 and msg="hello". Primitives are stored directly in the frame.');
+    drawArrows();
+  }
+
+  function callBar() {
+    if (!state.hasFoo || state.hasBar) return;
+    state.hasBar = true;
+
+    const stackContent = document.getElementById('stack-content');
+    const frame = document.createElement('div');
+    frame.className = 'stack-frame frame-bar';
+    frame.id = 'frame-bar';
+    frame.innerHTML = `
+      <div class="frame-header">
+        <span>bar() frame</span>
+        <span style="font-size:0.68rem;color:#aaa;">return addr: 0x0080</span>
+      </div>
+      <div class="frame-vars">
+        <div class="frame-var"><span class="var-name">double pi</span><span class="var-value">= 3.14</span></div>
+        <div class="frame-var"><span class="var-name">boolean flag</span><span class="var-value">= true</span></div>
+        <div class="frame-var" id="bar-ref-row" style="display:none">
+          <span class="var-name">MyObj b</span>
+          <span class="var-ref" id="bar-ref-val">→ ?</span>
+        </div>
+      </div>
+    `;
+    stackContent.appendChild(frame);
+    updateCounts();
+    updateButtons();
+    setStatus('📥', 'bar() called inside foo(). A NEW stack frame is pushed on top. bar() runs while foo() is suspended — foo\'s frame stays on stack.');
+    drawArrows();
+  }
+
+  let objectTypes = [
+    { type: 'MyObject', fields: [{k:'id', v:'1'},{k:'value', v:'"data"'}] },
+    { type: 'Person', fields: [{k:'name', v:'"Alice"'},{k:'age', v:'30'}] },
+    { type: 'Node', fields: [{k:'data', v:'99'},{k:'next', v:'null'}] },
+    { type: 'Point', fields: [{k:'x', v:'10'},{k:'y', v:'20'}] },
+  ];
+
+  function createObject() {
+    const heapContent = document.getElementById('heap-content');
+    document.getElementById('heap-empty').style.display = 'none';
+
+    const idx = state.objCounter % objectTypes.length;
+    const typeInfo = objectTypes[idx];
+    const addr = ADDRS[state.objCounter % ADDRS.length];
+    const posIdx = state.objCounter % HEAP_POSITIONS.length;
+    const pos = HEAP_POSITIONS[posIdx];
+
+    const objId = 'heap-obj-' + state.objCounter;
+    const obj = document.createElement('div');
+    obj.className = 'heap-obj';
+    obj.id = objId;
+    obj.style.left = pos.x + '%';
+    obj.style.top = pos.y + '%';
+
+    let fieldsHtml = typeInfo.fields.map(f =>
+      `<div class="obj-field"><span>${f.k}:</span><span>${f.v}</span></div>`
+    ).join('');
+
+    obj.innerHTML = `
+      <div class="obj-addr">${addr}</div>
+      <div class="obj-type">${typeInfo.type}</div>
+      ${fieldsHtml}
+    `;
+    heapContent.appendChild(obj);
+
+    // Determine which frame gets the reference
+    let refFrame = null;
+    let refRowId = null;
+    let refValId = null;
+
+    if (state.hasBar && document.getElementById('frame-bar')) {
+      // bar's frame gets the ref (bar-ref-row might already have a ref)
+      const barRefRow = document.getElementById('bar-ref-row');
+      if (barRefRow && barRefRow.style.display === 'none') {
+        refFrame = 'bar';
+        refRowId = 'bar-ref-row';
+        refValId = 'bar-ref-val';
+      } else if (document.getElementById('foo-ref-row') && document.getElementById('foo-ref-row').style.display === 'none') {
+        refFrame = 'foo';
+        refRowId = 'foo-ref-row';
+        refValId = 'foo-ref-val';
+      }
+    } else if (state.hasFoo && document.getElementById('frame-foo')) {
+      const fooRefRow = document.getElementById('foo-ref-row');
+      if (fooRefRow && fooRefRow.style.display === 'none') {
+        refFrame = 'foo';
+        refRowId = 'foo-ref-row';
+        refValId = 'foo-ref-val';
+      }
+    }
+
+    // Store object
+    state.objects.push({
+      id: objId,
+      addr: addr,
+      type: typeInfo.type,
+      refFrame: refFrame,
+      refRowId: refRowId,
+      refValId: refValId,
+      alive: true
+    });
+
+    // Update stack frame ref variable
+    if (refRowId) {
+      const row = document.getElementById(refRowId);
+      const val = document.getElementById(refValId);
+      if (row) row.style.display = 'flex';
+      if (val) val.textContent = '→ ' + addr;
+    }
+
+    state.objCounter++;
+    updateCounts();
+    updateButtons();
+
+    setTimeout(() => {
+      drawArrows();
+      if (refFrame) {
+        setStatus('📦', `Object ${typeInfo.type} created at ${addr} in heap. A reference (pointer) to ${addr} is stored in ${refFrame}()'s stack frame. The stack only holds the address — the actual object lives in the heap.`);
+      } else {
+        setStatus('📦', `Object ${typeInfo.type} created at ${addr} in heap. (No stack variable holds this reference currently — it will be eligible for GC!)`);
+      }
+    }, 50);
+  }
+
+  function returnFromBar() {
+    if (!state.hasBar) return;
+    state.hasBar = false;
+
+    const frame = document.getElementById('frame-bar');
+    if (!frame) return;
+    frame.classList.add('frame-removing');
+
+    // Check if bar had any unreferenced objects
+    const barObjs = state.objects.filter(o => o.refFrame === 'bar' && o.alive);
+
+    setTimeout(() => {
+      frame.remove();
+      updateCounts();
+      updateButtons();
+
+      // Check for orphaned objects
+      if (barObjs.length > 0) {
+        barObjs.forEach(obj => {
+          // Check if foo has a reference (it might not, since we pre-assign)
+          const heapEl = document.getElementById(obj.id);
+          if (heapEl) heapEl.classList.add('gc-ready');
+        });
+        setStatus('⚠️', `bar() returned. Its stack frame is GONE. Objects that were only referenced by bar() (glowing red) have no more references — they are now eligible for Garbage Collection!`);
+      } else {
+        setStatus('📤', 'bar() returned. Its stack frame is removed from the stack. We are back in foo().');
+      }
+      drawArrows();
+    }, 300);
+  }
+
+  function returnFromFoo() {
+    if (!state.hasFoo || state.hasBar) return;
+    state.hasFoo = false;
+
+    const frame = document.getElementById('frame-foo');
+    if (!frame) return;
+    frame.classList.add('frame-removing');
+
+    const fooObjs = state.objects.filter(o => o.refFrame === 'foo' && o.alive);
+
+    setTimeout(() => {
+      frame.remove();
+
+      // Show empty stack
+      const anyFrames = document.querySelectorAll('.stack-frame').length;
+      if (anyFrames === 0) {
+        document.getElementById('stack-empty').style.display = 'block';
+      }
+
+      updateCounts();
+      updateButtons();
+
+      if (fooObjs.length > 0) {
+        fooObjs.forEach(obj => {
+          const heapEl = document.getElementById(obj.id);
+          if (heapEl) heapEl.classList.add('gc-ready');
+        });
+        setStatus('⚠️', `foo() returned. Stack frame removed. Objects only referenced by foo() (glowing red) are now unreachable — eligible for Garbage Collection!`);
+      } else {
+        setStatus('📤', 'foo() returned. Stack frame removed. Stack is now empty. Objects in heap with no references will eventually be garbage collected.');
+      }
+      drawArrows();
+    }, 300);
+  }
+
+  function resetAll() {
+    state = { hasFoo: false, hasBar: false, objects: [], objCounter: 0 };
+    document.getElementById('stack-content').innerHTML =
+      '<div class="stack-empty" id="stack-empty">Stack is empty<br><span style="font-size:0.75rem">No active method calls</span></div>';
+    document.getElementById('heap-content').innerHTML =
+      '<div class="heap-empty" id="heap-empty">Heap is empty<br><span style="font-size:0.75rem">No objects allocated yet</span></div>';
+    document.getElementById('arrows-svg').innerHTML = '';
+    updateCounts();
+    updateButtons();
+    setStatus('ℹ️', 'Reset complete. Click "Call method foo()" to start again.');
+  }
+
+  function updateButtons() {
+    document.getElementById('btn-foo').disabled = state.hasFoo;
+    document.getElementById('btn-bar').disabled = !state.hasFoo || state.hasBar;
+    document.getElementById('btn-ret-bar').disabled = !state.hasBar;
+    document.getElementById('btn-ret-foo').disabled = !state.hasFoo || state.hasBar;
+    document.getElementById('btn-obj').disabled = !state.hasFoo;
+  }
+
+  // Draw arrows from stack ref variables to heap objects
+  function drawArrows() {
+    const svg = document.getElementById('arrows-svg');
+    svg.innerHTML = '';
+
+    state.objects.forEach(obj => {
+      if (!obj.refFrame || !obj.refValId) return;
+      const refEl = document.getElementById(obj.refValId);
+      const heapEl = document.getElementById(obj.id);
+      if (!refEl || !heapEl) return;
+
+      const fromRect = refEl.getBoundingClientRect();
+      const toRect = heapEl.getBoundingClientRect();
+
+      // Check that frame still exists (not removed)
+      const frameEl = document.getElementById('frame-' + obj.refFrame);
+      if (!frameEl) return;
+
+      const x1 = fromRect.right + 2;
+      const y1 = fromRect.top + fromRect.height / 2;
+      const x2 = toRect.left - 2;
+      const y2 = toRect.top + toRect.height / 2;
+
+      // Bezier curve
+      const cx1 = x1 + (x2 - x1) * 0.5;
+      const cy1 = y1;
+      const cx2 = x1 + (x2 - x1) * 0.5;
+      const cy2 = y2;
+
+      const markerId = 'arrowhead-' + obj.id;
+      svg.innerHTML += `
+        <defs>
+          <marker id="${markerId}" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#4da8da" opacity="0.9"/>
+          </marker>
+        </defs>
+        <path d="M${x1},${y1} C${cx1},${cy1} ${cx2},${cy2} ${x2},${y2}"
+          stroke="#4da8da" stroke-width="1.5" fill="none" stroke-dasharray="4,3"
+          opacity="0.8" marker-end="url(#${markerId})"/>
+      `;
+    });
+  }
+
+  window.addEventListener('scroll', drawArrows);
+  window.addEventListener('resize', drawArrows);
+</script>
+</body>
+</html>

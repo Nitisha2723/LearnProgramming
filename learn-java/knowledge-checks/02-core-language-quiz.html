@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Core Language Quiz</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #1a1a2e;
+    --panel:    #16213e;
+    --accent:   #e94560;
+    --accent2:  #0f3460;
+    --text:     #eaeaea;
+    --muted:    #8892a4;
+    --green:    #2ecc71;
+    --red:      #e74c3c;
+    --yellow:   #f39c12;
+    --radius:   10px;
+    --trans:    0.2s ease;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+  }
+
+  /* ── Back link ── */
+  #back-link {
+    align-self: flex-start;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    margin-bottom: 12px;
+    transition: color var(--trans);
+  }
+  #back-link:hover { color: var(--accent); }
+
+  /* ── Main container ── */
+  #quiz-container {
+    width: 100%;
+    max-width: 760px;
+    background: var(--panel);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  /* ── Header ── */
+  .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .quiz-header h1 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  #timer {
+    font-size: 0.875rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Progress bar ── */
+  #progress-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  #progress-track {
+    background: var(--accent2);
+    border-radius: 99px;
+    height: 6px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  #progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  /* ── Question ── */
+  #question-number {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  #question-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  /* ── Code block ── */
+  pre.code-snippet {
+    background: #0d1b2a;
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: #a8d8ea;
+    overflow-x: auto;
+    margin-bottom: 20px;
+    white-space: pre;
+  }
+
+  /* ── Options ── */
+  #options-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .option-btn {
+    background: var(--accent2);
+    border: 2px solid transparent;
+    border-radius: var(--radius);
+    padding: 13px 18px;
+    text-align: left;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 0.97rem;
+    transition: border-color var(--trans), background var(--trans), transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    transform: translateX(3px);
+  }
+  .option-btn.focused {
+    border-color: var(--accent);
+    outline: none;
+  }
+  .option-btn:disabled { cursor: default; }
+
+  .option-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  .option-btn.correct  { background: rgba(46,204,113,0.2); border-color: var(--green); }
+  .option-btn.wrong    { background: rgba(231,76,60,0.2);  border-color: var(--red);   }
+  .option-btn.correct .option-letter { background: var(--green); color: #000; }
+  .option-btn.wrong   .option-letter { background: var(--red);   color: #fff; }
+
+  /* ── Fill blank ── */
+  #fill-input {
+    background: var(--accent2);
+    border: 2px solid transparent;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    color: var(--text);
+    font-size: 1rem;
+    width: 100%;
+    margin-bottom: 12px;
+    outline: none;
+    transition: border-color var(--trans);
+    font-family: 'Fira Code', monospace;
+  }
+  #fill-input:focus { border-color: var(--accent); }
+  #fill-input.correct { border-color: var(--green); background: rgba(46,204,113,0.15); }
+  #fill-input.wrong   { border-color: var(--red);   background: rgba(231,76,60,0.15);  }
+
+  #submit-fill {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 10px 24px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: opacity var(--trans);
+    margin-bottom: 16px;
+  }
+  #submit-fill:hover { opacity: 0.85; }
+
+  /* ── Feedback ── */
+  #feedback {
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    display: none;
+    margin-bottom: 20px;
+  }
+  #feedback.correct { background: rgba(46,204,113,0.15); border: 1px solid var(--green); }
+  #feedback.wrong   { background: rgba(231,76,60,0.15);  border: 1px solid var(--red);   }
+  #feedback .verdict { font-weight: 700; margin-bottom: 4px; }
+  #feedback .explanation { color: #ccc; }
+
+  /* ── Navigation ── */
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .nav-btn {
+    background: var(--accent2);
+    color: var(--text);
+    border: 2px solid transparent;
+    border-radius: var(--radius);
+    padding: 10px 22px;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: border-color var(--trans), opacity var(--trans);
+  }
+  .nav-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .nav-btn:disabled { opacity: 0.35; cursor: default; }
+  .nav-btn.primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .nav-btn.primary:hover:not(:disabled) { border-color: #fff; }
+
+  /* ── Final screen ── */
+  #final-screen {
+    display: none;
+    text-align: center;
+  }
+  #final-screen h2 {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+    color: var(--accent);
+  }
+  #final-screen .grade {
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+  .score-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 5px solid var(--accent);
+    font-size: 2.4rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+    background: var(--accent2);
+  }
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .stat-item { text-align: center; }
+  .stat-item .val {
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+  .stat-item .lbl {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .final-actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ── Review screen ── */
+  #review-screen {
+    display: none;
+  }
+  #review-screen h2 {
+    font-size: 1.3rem;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  .review-item {
+    background: var(--accent2);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .review-item .r-qnum {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .review-item .r-q {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .review-item .r-your {
+    color: var(--red);
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+  }
+  .review-item .r-correct {
+    color: var(--green);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .review-item .r-exp {
+    font-size: 0.87rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 520px) {
+    #quiz-container { padding: 20px 18px; }
+    .nav-row { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<a id="back-link" href="../README.md">&#8592; Back to Index</a>
+
+<div id="quiz-container">
+
+  <!-- Quiz screen -->
+  <div id="quiz-screen">
+    <div class="quiz-header">
+      <h1>Java Core Language</h1>
+      <span id="timer">0:00</span>
+    </div>
+    <div id="progress-label">Question <span id="q-current">1</span> of 15</div>
+    <div id="progress-track"><div id="progress-fill" style="width:0%"></div></div>
+
+    <div id="question-number"></div>
+    <div id="question-text"></div>
+    <pre id="code-block" class="code-snippet" style="display:none"></pre>
+
+    <ul id="options-list"></ul>
+
+    <!-- fill-blank controls -->
+    <div id="fill-area" style="display:none">
+      <input id="fill-input" type="text" placeholder="Type your answer here&hellip;" autocomplete="off" spellcheck="false">
+      <button id="submit-fill">Check Answer</button>
+    </div>
+
+    <div id="feedback"></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" id="btn-prev" disabled>&#8592; Previous</button>
+      <button class="nav-btn primary" id="btn-next" disabled>Next &#8594;</button>
+    </div>
+  </div>
+
+  <!-- Final screen -->
+  <div id="final-screen">
+    <h2 id="final-grade-label"></h2>
+    <div class="grade" id="final-grade-sub"></div>
+    <div class="score-circle" id="score-pct"></div>
+    <div class="stats-row">
+      <div class="stat-item"><div class="val" id="stat-correct"></div><div class="lbl">Correct</div></div>
+      <div class="stat-item"><div class="val" id="stat-wrong"></div><div class="lbl">Wrong</div></div>
+      <div class="stat-item"><div class="val" id="stat-time"></div><div class="lbl">Time</div></div>
+    </div>
+    <div class="final-actions">
+      <button class="nav-btn primary" id="btn-retry">&#8635; Retry</button>
+      <button class="nav-btn" id="btn-review" style="display:none">Review Wrong Answers</button>
+    </div>
+  </div>
+
+  <!-- Review screen -->
+  <div id="review-screen">
+    <h2>Wrong Answers Review</h2>
+    <div id="review-list"></div>
+    <div class="nav-row" style="margin-top:16px">
+      <button class="nav-btn primary" id="btn-back-final">&#8592; Back to Results</button>
+    </div>
+  </div>
+
+</div><!-- /quiz-container -->
+
+<script>
+// ─────────────────────────────────────────────
+// QUESTION BANK
+// ─────────────────────────────────────────────
+const QUESTIONS = [
+  {
+    type: "multiple-choice",
+    question: "Which keyword is used in Java to handle the case where no if or else-if condition matches?",
+    options: ["default", "else", "catch", "otherwise"],
+    correct: 1,
+    explanation: "In an if/else-if chain, the final 'else' block runs when none of the preceding conditions are true. 'default' is used in switch statements, not if/else chains."
+  },
+  {
+    type: "multiple-choice",
+    code: `int x = 5;\nswitch (x) {\n  case 4:\n    System.out.println("four");\n  case 5:\n    System.out.println("five");\n  case 6:\n    System.out.println("six");\n    break;\n  default:\n    System.out.println("other");\n}`,
+    question: "What is the output of the code above?",
+    options: [
+      "five",
+      "five\nsix",
+      "five\nsix\nother",
+      "four\nfive\nsix"
+    ],
+    correct: 1,
+    explanation: "Switch falls through from the matching case (5) to the next cases until it hits a 'break'. Case 5 prints 'five', then execution falls through to case 6 which prints 'six' and then breaks. No 'break' after case 5 causes fall-through."
+  },
+  {
+    type: "multiple-choice",
+    code: `int count = 0;\nfor (int i = 0; i < 5; i++) {\n  if (i == 3) continue;\n  count++;\n}\nSystem.out.println(count);`,
+    question: "What does the code above print?",
+    options: ["3", "4", "5", "2"],
+    correct: 1,
+    explanation: "The loop runs i = 0,1,2,3,4. When i==3, 'continue' skips the count++ for that iteration. So count is incremented for i=0,1,2,4 — that is 4 times."
+  },
+  {
+    type: "true-false",
+    question: "A do-while loop is guaranteed to execute its body at least once, even if the condition is false from the start.",
+    options: ["True", "False"],
+    correct: 0,
+    explanation: "In a do-while loop the body executes first, then the condition is checked. This means the body always runs at least once regardless of the initial condition value."
+  },
+  {
+    type: "multiple-choice",
+    question: "Given: int[] nums = new int[5];  What is the value of nums[0] and nums.length?",
+    options: [
+      "0 and 5",
+      "null and 5",
+      "0 and 4",
+      "undefined and 5"
+    ],
+    correct: 0,
+    explanation: "Java initializes int array elements to 0 by default. Array indices start at 0, and .length returns the total number of elements — here 5, so valid indices are 0 through 4."
+  },
+  {
+    type: "multiple-choice",
+    code: `String s = "Hello, World!";\nSystem.out.println(s.substring(7, 12));`,
+    question: "What does the code above print?",
+    options: ["World", "World!", "orld!", "World,"],
+    correct: 0,
+    explanation: "substring(startIndex, endIndex) returns characters from startIndex (inclusive) to endIndex (exclusive). Index 7 is 'W' and index 12 is '!' — so characters at indices 7,8,9,10,11 spell 'World'."
+  },
+  {
+    type: "multiple-choice",
+    code: `String s = "Hello";\nSystem.out.println(s.charAt(1) + \" \" + s.indexOf('l'));`,
+    question: "What does the code above print?",
+    options: [
+      "e 2",
+      "H 3",
+      "e 3",
+      "H 2"
+    ],
+    correct: 0,
+    explanation: "charAt(1) returns the character at index 1 which is 'e'. indexOf('l') returns the index of the first occurrence of 'l', which is at index 2. Output: 'e 2'."
+  },
+  {
+    type: "multiple-choice",
+    code: `String s = "Hello";\nSystem.out.println(s.substring(1, 3));`,
+    question: "What does the code above print?",
+    options: ["el", "ell", "He", "Hell"],
+    correct: 0,
+    explanation: "substring(1, 3) returns characters at indices 1 (inclusive) through 3 (exclusive): index 1='e', index 2='l'. The result is 'el'."
+  },
+  {
+    type: "true-false",
+    question: "In Java, method overloading requires the overloaded methods to have different return types.",
+    options: ["True", "False"],
+    correct: 1,
+    explanation: "Method overloading is determined by the method signature — specifically the number, types, and order of parameters. The return type alone cannot distinguish overloaded methods; two methods with the same name and parameters but different return types cause a compile error."
+  },
+  {
+    type: "multiple-choice",
+    question: "Which of the following is a valid varargs method signature in Java?",
+    options: [
+      "void print(String... args)",
+      "void print(String[] ... args)",
+      "void print(...String args)",
+      "void print(var String args)"
+    ],
+    correct: 0,
+    explanation: "Varargs syntax is TypeName... paramName. It must be the last parameter and there can only be one. 'String... args' is correct. The ellipsis comes after the type, not before it."
+  },
+  {
+    type: "multiple-choice",
+    question: "What is the result of: \"Java\".toUpperCase().replace('A', 'X')?",
+    options: ["JXVX", "JXVA", "JAVA", "jxvx"],
+    correct: 0,
+    explanation: "toUpperCase() converts to 'JAVA'. replace('A', 'X') then replaces every 'A' with 'X', giving 'JXVX'. replace() replaces ALL occurrences, not just the first."
+  },
+  {
+    type: "multiple-choice",
+    question: "Which loop type is best suited when you know in advance exactly how many times the loop should run?",
+    options: ["for loop", "while loop", "do-while loop", "enhanced for loop"],
+    correct: 0,
+    explanation: "A traditional for loop (for(init; condition; update)) is ideal when the number of iterations is known because the counter initialization, condition check, and update are all in one line, making the intent clear."
+  },
+  {
+    type: "fill-blank",
+    question: "Complete the method signature: public ___ add(int a, int b) { return a + b; }  What return type replaces the blank so the method compiles correctly?",
+    correct: "int",
+    explanation: "The method body returns 'a + b' where both a and b are int. Adding two ints produces an int, so the return type must be 'int'. Using 'void' would be a compile error because void methods cannot return a value."
+  },
+  {
+    type: "multiple-choice",
+    question: "Which ArrayList method removes the element at a specific index?",
+    options: ["remove(int index)", "delete(int index)", "pop(int index)", "erase(int index)"],
+    correct: 0,
+    explanation: "ArrayList.remove(int index) removes the element at the given position and shifts all subsequent elements left. Note that remove(Object o) is the overloaded version that removes by value. 'delete', 'pop', and 'erase' are not ArrayList methods in Java."
+  },
+  {
+    type: "multiple-choice",
+    code: `int[] arr = {10, 20, 30, 40, 50};\nint sum = 0;\nfor (int val : arr) {\n  if (val == 30) break;\n  sum += val;\n}\nSystem.out.println(sum);`,
+    question: "What does the code above print?",
+    options: ["30", "60", "150", "10"],
+    correct: 0,
+    explanation: "The enhanced for loop iterates: val=10 (sum=10), val=20 (sum=30), val=30 — break is hit and the loop exits immediately. sum is 30 at that point. The values 40 and 50 are never added."
+  }
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let state = {
+  current: 0,
+  answers: new Array(QUESTIONS.length).fill(null),   // null | string (user's answer text)
+  answered: new Array(QUESTIONS.length).fill(false),
+  startTime: null,
+  timerInterval: null,
+  focusedOption: -1
+};
+
+// ─────────────────────────────────────────────
+// DOM refs
+// ─────────────────────────────────────────────
+const quizScreen   = document.getElementById('quiz-screen');
+const finalScreen  = document.getElementById('final-screen');
+const reviewScreen = document.getElementById('review-screen');
+const progressFill = document.getElementById('progress-fill');
+const qCurrent     = document.getElementById('q-current');
+const qNumber      = document.getElementById('question-number');
+const qText        = document.getElementById('question-text');
+const codeBlock    = document.getElementById('code-block');
+const optionsList  = document.getElementById('options-list');
+const fillArea     = document.getElementById('fill-area');
+const fillInput    = document.getElementById('fill-input');
+const submitFill   = document.getElementById('submit-fill');
+const feedback     = document.getElementById('feedback');
+const btnPrev      = document.getElementById('btn-prev');
+const btnNext      = document.getElementById('btn-next');
+const timerEl      = document.getElementById('timer');
+
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function startTimer() {
+  state.startTime = Date.now();
+  state.timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+    timerEl.textContent = formatTime(elapsed);
+  }, 500);
+}
+
+function stopTimer() {
+  clearInterval(state.timerInterval);
+}
+
+function getElapsed() {
+  if (!state.startTime) return 0;
+  return Math.floor((Date.now() - state.startTime) / 1000);
+}
+
+function correctAnswerText(q) {
+  if (q.type === 'fill-blank') return q.correct;
+  return q.options[q.correct];
+}
+
+function isCorrect(q, userAnswer) {
+  if (q.type === 'fill-blank') {
+    return userAnswer.trim().toLowerCase() === q.correct.trim().toLowerCase();
+  }
+  return userAnswer === q.options[q.correct];
+}
+
+// ─────────────────────────────────────────────
+// RENDER QUESTION
+// ─────────────────────────────────────────────
+function renderQuestion(idx) {
+  const q = QUESTIONS[idx];
+  state.focusedOption = -1;
+
+  // progress
+  const pct = ((idx + 1) / QUESTIONS.length) * 100;
+  progressFill.style.width = pct + '%';
+  qCurrent.textContent = idx + 1;
+  qNumber.textContent = `Question ${idx + 1} of ${QUESTIONS.length}`;
+  qText.textContent = q.question;
+
+  // code block
+  if (q.code) {
+    codeBlock.textContent = q.code;
+    codeBlock.style.display = 'block';
+  } else {
+    codeBlock.style.display = 'none';
+  }
+
+  // clear feedback
+  feedback.style.display = 'none';
+  feedback.className = '';
+
+  // options or fill
+  optionsList.innerHTML = '';
+  fillArea.style.display = 'none';
+  fillInput.value = '';
+  fillInput.className = '';
+
+  if (q.type === 'fill-blank') {
+    fillArea.style.display = 'block';
+    submitFill.style.display = 'inline-block';
+    if (state.answered[idx]) {
+      fillInput.value = state.answers[idx];
+      fillInput.disabled = true;
+      submitFill.style.display = 'none';
+      const corr = isCorrect(q, state.answers[idx]);
+      fillInput.classList.add(corr ? 'correct' : 'wrong');
+      showFeedback(q, state.answers[idx], corr);
+    }
+  } else {
+    const labels = ['A', 'B', 'C', 'D'];
+    q.options.forEach((opt, i) => {
+      const li = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.innerHTML = `<span class="option-letter">${labels[i]}</span><span>${escapeHtml(opt)}</span>`;
+      btn.dataset.index = i;
+      btn.addEventListener('click', () => handleOptionClick(i));
+      li.appendChild(btn);
+      optionsList.appendChild(li);
+    });
+    if (state.answered[idx]) {
+      lockOptions(q);
+      showFeedback(q, state.answers[idx], isCorrect(q, state.answers[idx]));
+    }
+  }
+
+  // nav buttons
+  btnPrev.disabled = idx === 0;
+  if (idx === QUESTIONS.length - 1) {
+    btnNext.textContent = 'Finish';
+    btnNext.disabled = !state.answered[idx];
+  } else {
+    btnNext.textContent = 'Next →';
+    btnNext.disabled = !state.answered[idx];
+  }
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─────────────────────────────────────────────
+// ANSWER HANDLING
+// ─────────────────────────────────────────────
+function handleOptionClick(optIdx) {
+  const idx = state.current;
+  if (state.answered[idx]) return;
+  const q = QUESTIONS[idx];
+  const chosen = q.options[optIdx];
+  state.answers[idx] = chosen;
+  state.answered[idx] = true;
+  lockOptions(q);
+  const corr = isCorrect(q, chosen);
+  showFeedback(q, chosen, corr);
+  btnNext.disabled = false;
+}
+
+function lockOptions(q) {
+  const idx = state.current;
+  const userAns = state.answers[idx];
+  const btns = optionsList.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    const opt = q.options[i];
+    if (opt === q.options[q.correct]) btn.classList.add('correct');
+    else if (opt === userAns)         btn.classList.add('wrong');
+  });
+}
+
+function handleFillSubmit() {
+  const idx = state.current;
+  if (state.answered[idx]) return;
+  const q = QUESTIONS[idx];
+  const val = fillInput.value.trim();
+  if (!val) return;
+  state.answers[idx] = val;
+  state.answered[idx] = true;
+  fillInput.disabled = true;
+  submitFill.style.display = 'none';
+  const corr = isCorrect(q, val);
+  fillInput.classList.add(corr ? 'correct' : 'wrong');
+  showFeedback(q, val, corr);
+  btnNext.disabled = false;
+}
+
+function showFeedback(q, userAns, corr) {
+  const icon = corr ? '✓ Correct!' : '✗ Incorrect';
+  const correctText = corr ? '' : `<div style="margin-top:6px">Correct answer: <strong>${escapeHtml(correctAnswerText(q))}</strong></div>`;
+  feedback.innerHTML = `<div class="verdict">${icon}</div>${correctText}<div class="explanation">${escapeHtml(q.explanation)}</div>`;
+  feedback.className = corr ? 'correct' : 'wrong';
+  feedback.style.display = 'block';
+}
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+function goNext() {
+  if (!state.answered[state.current]) return;
+  if (state.current === QUESTIONS.length - 1) {
+    showFinal();
+    return;
+  }
+  state.current++;
+  renderQuestion(state.current);
+}
+
+function goPrev() {
+  if (state.current === 0) return;
+  state.current--;
+  renderQuestion(state.current);
+}
+
+btnNext.addEventListener('click', goNext);
+btnPrev.addEventListener('click', goPrev);
+submitFill.addEventListener('click', handleFillSubmit);
+
+fillInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') handleFillSubmit();
+});
+
+// ─────────────────────────────────────────────
+// KEYBOARD NAV
+// ─────────────────────────────────────────────
+document.addEventListener('keydown', (e) => {
+  if (quizScreen.style.display === 'none') return;
+  const q = QUESTIONS[state.current];
+  if (q.type === 'fill-blank') return;
+  if (state.answered[state.current]) {
+    if ((e.key === 'ArrowRight' || e.key === 'Enter') && !btnNext.disabled) goNext();
+    if (e.key === 'ArrowLeft' && !btnPrev.disabled) goPrev();
+    return;
+  }
+
+  const btns = [...optionsList.querySelectorAll('.option-btn')];
+  if (!btns.length) return;
+
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+    e.preventDefault();
+    state.focusedOption = (state.focusedOption + 1) % btns.length;
+    updateFocus(btns);
+  } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+    e.preventDefault();
+    state.focusedOption = (state.focusedOption - 1 + btns.length) % btns.length;
+    updateFocus(btns);
+  } else if ((e.key === 'Enter' || e.key === ' ') && state.focusedOption >= 0) {
+    e.preventDefault();
+    handleOptionClick(state.focusedOption);
+  } else if (e.key >= '1' && e.key <= '4') {
+    const i = parseInt(e.key) - 1;
+    if (i < btns.length) handleOptionClick(i);
+  }
+});
+
+function updateFocus(btns) {
+  btns.forEach((b, i) => {
+    b.classList.toggle('focused', i === state.focusedOption);
+  });
+}
+
+// ─────────────────────────────────────────────
+// FINAL SCREEN
+// ─────────────────────────────────────────────
+function showFinal() {
+  stopTimer();
+  const elapsed = getElapsed();
+  const correct = state.answers.filter((ans, i) => ans !== null && isCorrect(QUESTIONS[i], ans)).length;
+  const total = QUESTIONS.length;
+  const pct = Math.round((correct / total) * 100);
+
+  let grade, gradeClass;
+  if (pct < 60)       { grade = 'Needs Work';   gradeClass = 'var(--red)'; }
+  else if (pct < 80)  { grade = 'Getting There'; gradeClass = 'var(--yellow)'; }
+  else if (pct < 95)  { grade = 'Good Job!';     gradeClass = 'var(--green)'; }
+  else                { grade = 'Expert!';        gradeClass = 'var(--accent)'; }
+
+  document.getElementById('final-grade-label').textContent = grade;
+  document.getElementById('final-grade-label').style.color = gradeClass;
+  document.getElementById('final-grade-sub').textContent = `You scored ${correct} out of ${total} (${pct}%)`;
+  document.getElementById('score-pct').textContent = pct + '%';
+  document.getElementById('score-pct').style.borderColor = gradeClass;
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-wrong').textContent = total - correct;
+  document.getElementById('stat-time').textContent = formatTime(elapsed);
+
+  const wrongCount = state.answers.filter((ans, i) => {
+    if (ans === null) return true;
+    return !isCorrect(QUESTIONS[i], ans);
+  }).length;
+  document.getElementById('btn-review').style.display = wrongCount > 0 ? 'inline-block' : 'none';
+
+  quizScreen.style.display = 'none';
+  finalScreen.style.display = 'block';
+  reviewScreen.style.display = 'none';
+}
+
+document.getElementById('btn-retry').addEventListener('click', () => {
+  resetQuiz();
+});
+
+document.getElementById('btn-review').addEventListener('click', () => {
+  showReview();
+});
+
+document.getElementById('btn-back-final').addEventListener('click', () => {
+  reviewScreen.style.display = 'none';
+  finalScreen.style.display = 'block';
+});
+
+// ─────────────────────────────────────────────
+// REVIEW SCREEN
+// ─────────────────────────────────────────────
+function showReview() {
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+  QUESTIONS.forEach((q, i) => {
+    const ans = state.answers[i];
+    const corr = ans !== null && isCorrect(q, ans);
+    if (corr) return;  // skip correct ones
+
+    const div = document.createElement('div');
+    div.className = 'review-item';
+
+    let codeHtml = '';
+    if (q.code) {
+      codeHtml = `<pre class="code-snippet" style="margin:8px 0 12px">${escapeHtml(q.code)}</pre>`;
+    }
+
+    const yourAns = ans !== null ? escapeHtml(ans) : '<em style="color:var(--muted)">Not answered</em>';
+    const correctAns = escapeHtml(correctAnswerText(q));
+
+    div.innerHTML = `
+      <div class="r-qnum">Question ${i + 1}</div>
+      <div class="r-q">${escapeHtml(q.question)}</div>
+      ${codeHtml}
+      <div class="r-your">Your answer: ${yourAns}</div>
+      <div class="r-correct">Correct answer: ${correctAns}</div>
+      <div class="r-exp">${escapeHtml(q.explanation)}</div>
+    `;
+    list.appendChild(div);
+  });
+
+  finalScreen.style.display = 'none';
+  reviewScreen.style.display = 'block';
+}
+
+// ─────────────────────────────────────────────
+// RESET
+// ─────────────────────────────────────────────
+function resetQuiz() {
+  stopTimer();
+  state.current = 0;
+  state.answers = new Array(QUESTIONS.length).fill(null);
+  state.answered = new Array(QUESTIONS.length).fill(false);
+  state.focusedOption = -1;
+
+  finalScreen.style.display = 'none';
+  reviewScreen.style.display = 'none';
+  quizScreen.style.display = 'block';
+
+  timerEl.textContent = '0:00';
+  startTimer();
+  renderQuestion(0);
+}
+
+// ─────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────
+startTimer();
+renderQuestion(0);
+</script>
+</body>
+</html>

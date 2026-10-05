@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Python Flashcards</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      color: #4cc9f0;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 20px rgba(76, 201, 240, 0.4);
+    }
+    .subtitle {
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    /* Progress */
+    .progress-bar-wrap {
+      max-width: 720px;
+      margin: 0 auto 18px auto;
+      background: #16213e;
+      border-radius: 10px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid #0f3460;
+    }
+    .progress-text { font-size: 0.95rem; color: #b0b0c0; }
+    .progress-text span { color: #4cc9f0; font-weight: bold; }
+    .marks-summary { display: flex; gap: 14px; font-size: 0.85rem; }
+    .mark-count { display: flex; align-items: center; gap: 4px; }
+    .mark-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-know { background: #4cc9f0; }
+    .dot-review { background: #f8961e; }
+    .dot-hard { background: #e94560; }
+
+    /* Filters */
+    .filters {
+      max-width: 720px;
+      margin: 0 auto 20px auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .filter-btn {
+      padding: 7px 16px;
+      border-radius: 20px;
+      border: 1.5px solid #0f3460;
+      background: #16213e;
+      color: #b0b0c0;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover { border-color: #4cc9f0; color: #4cc9f0; }
+    .filter-btn.active {
+      background: #4cc9f0;
+      border-color: #4cc9f0;
+      color: #1a1a2e;
+      font-weight: bold;
+    }
+    .filter-btn.cat-core.active { background: #4cc9f0; border-color: #4cc9f0; color: #1a1a2e; }
+    .filter-btn.cat-oop.active { background: #7209b7; border-color: #7209b7; color: #fff; }
+    .filter-btn.cat-ds.active { background: #3a86ff; border-color: #3a86ff; color: #fff; }
+    .filter-btn.cat-func.active { background: #f8961e; border-color: #f8961e; color: #1a1a2e; }
+    .filter-btn.cat-async.active { background: #06d6a0; border-color: #06d6a0; color: #1a1a2e; }
+
+    /* Card scene */
+    .card-scene {
+      max-width: 720px;
+      margin: 0 auto 16px auto;
+      height: 340px;
+      perspective: 1200px;
+      cursor: pointer;
+    }
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+    }
+    .card-inner.flipped { transform: rotateY(180deg); }
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      background: #16213e;
+      border-radius: 18px;
+      border: 1px solid #0f3460;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .card-front {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .card-back {
+      transform: rotateY(180deg);
+      justify-content: flex-start;
+      overflow-y: auto;
+    }
+    .card-back::-webkit-scrollbar { width: 5px; }
+    .card-back::-webkit-scrollbar-track { background: #0f3460; border-radius: 10px; }
+    .card-back::-webkit-scrollbar-thumb { background: #4cc9f0; border-radius: 10px; }
+
+    .category-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+    }
+    .badge-Core { background: rgba(76, 201, 240, 0.2); color: #4cc9f0; border: 1px solid rgba(76, 201, 240, 0.4); }
+    .badge-OOP { background: rgba(114, 9, 183, 0.2); color: #b44ff0; border: 1px solid rgba(114, 9, 183, 0.4); }
+    .badge-Data { background: rgba(58, 134, 255, 0.2); color: #6aa3ff; border: 1px solid rgba(58, 134, 255, 0.4); }
+    .badge-Functional { background: rgba(248, 150, 30, 0.2); color: #f8961e; border: 1px solid rgba(248, 150, 30, 0.4); }
+    .badge-Async { background: rgba(6, 214, 160, 0.2); color: #06d6a0; border: 1px solid rgba(6, 214, 160, 0.4); }
+
+    .question-text {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: #e8e8f0;
+      line-height: 1.5;
+      max-width: 560px;
+    }
+    .flip-hint {
+      margin-top: 20px;
+      font-size: 0.78rem;
+      color: #555;
+    }
+    .answer-header {
+      font-size: 0.8rem;
+      color: #4cc9f0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+      font-weight: bold;
+      border-bottom: 1px solid #0f3460;
+      padding-bottom: 8px;
+    }
+    .answer-text {
+      font-size: 0.95rem;
+      color: #c8c8d8;
+      line-height: 1.75;
+      white-space: pre-wrap;
+    }
+    .mark-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      font-weight: bold;
+    }
+    .mark-badge-know { background: rgba(76, 201, 240, 0.15); color: #4cc9f0; border: 1px solid rgba(76, 201, 240, 0.3); }
+    .mark-badge-review { background: rgba(248, 150, 30, 0.15); color: #f8961e; border: 1px solid rgba(248, 150, 30, 0.3); }
+    .mark-badge-hard { background: rgba(233, 69, 96, 0.15); color: #e94560; border: 1px solid rgba(233, 69, 96, 0.3); }
+    .card-number {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      font-size: 0.75rem;
+      color: #444;
+    }
+
+    /* Navigation */
+    .nav-area {
+      max-width: 720px;
+      margin: 0 auto 14px auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-btn {
+      padding: 10px 22px;
+      background: #16213e;
+      border: 1.5px solid #0f3460;
+      color: #b0b0c0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { border-color: #4cc9f0; color: #4cc9f0; background: rgba(76, 201, 240, 0.1); }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .card-counter { color: #888; font-size: 0.9rem; }
+
+    /* Mark buttons */
+    .mark-area {
+      max-width: 720px;
+      margin: 0 auto 20px auto;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .mark-btn {
+      padding: 9px 22px;
+      border-radius: 10px;
+      border: 1.5px solid;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      background: transparent;
+    }
+    .mark-btn-know { border-color: #4cc9f0; color: #4cc9f0; }
+    .mark-btn-know:hover, .mark-btn-know.active { background: #4cc9f0; color: #1a1a2e; }
+    .mark-btn-review { border-color: #f8961e; color: #f8961e; }
+    .mark-btn-review:hover, .mark-btn-review.active { background: #f8961e; color: #1a1a2e; }
+    .mark-btn-hard { border-color: #e94560; color: #e94560; }
+    .mark-btn-hard:hover, .mark-btn-hard.active { background: #e94560; color: #fff; }
+
+    /* Keyboard hint */
+    .keyboard-hint {
+      text-align: center;
+      color: #444;
+      font-size: 0.8rem;
+      margin-bottom: 10px;
+    }
+    .keyboard-hint kbd {
+      background: #0f3460;
+      border: 1px solid #1a4a80;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 0.75rem;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Python Flashcards</h1>
+<p class="subtitle">55 cards covering Core Python, OOP, Data Structures, Functional, and Async</p>
+
+<div class="progress-bar-wrap">
+  <div class="progress-text">Progress: <span id="reviewed-count">0</span> / <span id="total-count">55</span> reviewed</div>
+  <div class="marks-summary">
+    <div class="mark-count"><div class="mark-dot dot-know"></div><span id="count-know">0</span> Know it</div>
+    <div class="mark-count"><div class="mark-dot dot-review"></div><span id="count-review">0</span> Review</div>
+    <div class="mark-count"><div class="mark-dot dot-hard"></div><span id="count-hard">0</span> Hard</div>
+  </div>
+</div>
+
+<div class="filters" id="filters">
+  <button class="filter-btn active" data-cat="All">All (55)</button>
+  <button class="filter-btn cat-core" data-cat="Core Python">Core Python</button>
+  <button class="filter-btn cat-oop" data-cat="OOP">OOP</button>
+  <button class="filter-btn cat-ds" data-cat="Data Structures">Data Structures</button>
+  <button class="filter-btn cat-func" data-cat="Functional">Functional</button>
+  <button class="filter-btn cat-async" data-cat="Async">Async</button>
+</div>
+
+<div class="card-scene" id="card-scene" onclick="flipCard()">
+  <div class="card-inner" id="card-inner">
+    <div class="card-face card-front" id="card-front">
+      <div class="card-number" id="front-num"></div>
+      <div class="mark-badge" id="front-mark-badge"></div>
+      <div class="category-badge" id="front-cat"></div>
+      <div class="question-text" id="question-text"></div>
+      <div class="flip-hint">Click card or press Space to reveal answer</div>
+    </div>
+    <div class="card-face card-back" id="card-back">
+      <div class="card-number" id="back-num"></div>
+      <div class="mark-badge" id="back-mark-badge"></div>
+      <div class="answer-header">Answer</div>
+      <div class="answer-text" id="answer-text"></div>
+    </div>
+  </div>
+</div>
+
+<div class="nav-area">
+  <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+  <span class="card-counter" id="card-counter">1 / 55</span>
+  <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+</div>
+
+<div class="mark-area">
+  <button class="mark-btn mark-btn-know" id="btn-know" onclick="markCard('know')">Know it &#10003;</button>
+  <button class="mark-btn mark-btn-review" id="btn-review" onclick="markCard('review')">Review again &#8634;</button>
+  <button class="mark-btn mark-btn-hard" id="btn-hard" onclick="markCard('hard')">Hard !</button>
+</div>
+
+<div class="keyboard-hint">
+  <kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate &nbsp;|&nbsp; <kbd>Space</kbd> flip card
+</div>
+
+<script>
+const cards = [
+  {
+    id: 1, category: "Core Python",
+    question: "What is the GIL (Global Interpreter Lock)?",
+    answer: "The GIL is a mutex that protects access to Python objects, preventing multiple threads from executing Python bytecode simultaneously. It exists because CPython's memory management is not thread-safe.\n\nImpact: CPU-bound threads don't run truly in parallel.\n\nWorkarounds:\n• multiprocessing module (separate processes, each has own GIL)\n• C extensions that release GIL (NumPy does this)\n• async IO for IO-bound tasks\n• PyPy, Jython have different GIL behavior\n\nPython 3.12+ is working on making GIL optional (PEP 703 — free-threaded CPython)."
+  },
+  {
+    id: 2, category: "Core Python",
+    question: "What is the difference between a list and a tuple?",
+    answer: "List: mutable, uses [], can be modified after creation. Supports append(), remove(), sort().\n\nTuple: immutable, uses (), cannot be modified after creation. Faster than lists. Can be used as dict keys (if all elements hashable).\n\nPerformance: tuples are faster to create and iterate.\nMemory: tuples use less memory than equivalent lists.\n\nUse tuples for: fixed data (coordinates, RGB, function return values), dict keys.\nUse lists for: collections that change, when order and mutability matter."
+  },
+  {
+    id: 3, category: "Core Python",
+    question: "What are Python decorators?",
+    answer: "Decorators are functions that wrap other functions/methods to modify their behavior.\n\nSyntax: @decorator above a function definition.\nThey are syntactic sugar for: func = decorator(func)\n\nCommon built-in decorators:\n• @property — turns method into attribute\n• @staticmethod, @classmethod\n• @functools.lru_cache — memoization\n• @login_required (Django/Flask)\n\nFeatures:\n• Can be stacked (applied bottom-up)\n• Can accept arguments by adding another wrapper layer\n• Class-based decorators use __call__\n• functools.wraps preserves wrapped function metadata"
+  },
+  {
+    id: 4, category: "OOP",
+    question: "What is the difference between @staticmethod and @classmethod?",
+    answer: "@staticmethod:\n• No implicit first argument\n• Doesn't access class or instance\n• Used for utility functions logically grouped in a class\n• Called on class or instance\n\n@classmethod:\n• Receives class (cls) as first argument\n• Can access/modify class state\n• Used for factory methods (alternative constructors)\n• cls allows subclasses to use it correctly (polymorphism)\n\nExample: DateTime.fromtimestamp() is a classmethod that creates DateTime objects.\n\nKey difference: @classmethod receives the class dynamically; @staticmethod is just a namespaced function."
+  },
+  {
+    id: 5, category: "Core Python",
+    question: "What are generators and when should you use them?",
+    answer: "Generators are functions using 'yield' to produce values lazily. They return an iterator without storing all values in memory.\n\nUse when:\n• Processing large datasets (files, DB results)\n• Infinite sequences (Fibonacci, counters)\n• Pipeline data processing\n• Memory is constrained\n\nBenefits:\n• Memory efficient: O(1) vs O(n) for lists\n• Can represent infinite sequences\n• Lazy evaluation (compute only when needed)\n\nTypes:\n• Generator functions (use yield)\n• Generator expressions: (x*2 for x in range(100))\n\nAdvanced: send() passes values in, throw() raises exceptions inside generator."
+  },
+  {
+    id: 6, category: "Core Python",
+    question: "What is list/dict/set comprehension?",
+    answer: "Comprehensions are concise ways to create collections.\n\nList: [expr for item in iterable if condition]\nDict: {k: v for k, v in items.items()}\nSet: {expr for item in iterable}\nGenerator: (expr for item in iterable)  # lazy!\n\nBenefits:\n• More readable than equivalent loops\n• Often faster (optimized internally)\n• Single expression\n\nNested: [[cell for cell in row] for row in matrix]\n(Avoid deep nesting — hurts readability)\n\nWalrus operator := can capture values mid-comprehension:\n[y := f(x), y**2]  # reuse computed value"
+  },
+  {
+    id: 7, category: "Core Python",
+    question: "What is the difference between 'is' and '=='?",
+    answer: "== checks VALUE equality — calls __eq__ method.\n'is' checks IDENTITY — whether both variables refer to the exact same object in memory (compares id()).\n\nTrap: Small integers (-5 to 256) and short strings are interned by CPython, so 'is' may return True unexpectedly:\n  a = 256; b = 256; a is b  # True (interned)\n  a = 257; b = 257; a is b  # False (not interned)\n\nRules:\n• Always use == for value comparison\n• Use 'is' only for: None checks (if x is None), True/False, singleton sentinels\n• Never rely on string/integer interning behavior"
+  },
+  {
+    id: 8, category: "Core Python",
+    question: "What are *args and **kwargs?",
+    answer: "*args collects extra positional arguments into a tuple.\n**kwargs collects extra keyword arguments into a dict.\n\nIn function definition:\n  def f(a, b, *args, **kwargs)\n\nIn function call (unpacking):\n  f(*my_list, **my_dict)\n\nOrder in signature:\n  normal params → *args → keyword-only params → **kwargs\n\nKeyword-only params (Python 3): def f(a, *, b)  # b must be keyword\n\nUse cases:\n• Flexible APIs (logging, formatting functions)\n• Decorator pass-through (preserve signature)\n• super() calls in cooperative inheritance"
+  },
+  {
+    id: 9, category: "Core Python",
+    question: "What is Python's memory management?",
+    answer: "Primary: Reference counting — objects freed when refcount hits 0. Most objects are freed immediately.\n\nSecondary: Cyclic garbage collector handles circular references (gc module). Runs periodically. Can trigger manually: gc.collect().\n\nMemory pools: PyMalloc for small objects (<512 bytes) to avoid OS overhead. Objects allocated in arenas → pools → blocks.\n\nKey functions:\n• sys.getrefcount(obj) — shows refcount (+1 for arg)\n• id(obj) — returns memory address\n• del x — decrements refcount (may or may not free)\n\nWeak references (weakref module): reference without incrementing refcount. Useful for caches."
+  },
+  {
+    id: 10, category: "Core Python",
+    question: "What is duck typing?",
+    answer: "'If it walks like a duck and quacks like a duck, it's a duck.'\n\nPython checks behavior (methods/attributes) not declared type. No explicit interface declaration needed.\n\nExample: any object with __iter__ and __next__ works as an iterator — no need to inherit from Iterator.\n\nEnables polymorphism without inheritance.\n\nEAFP style (Easier to Ask Forgiveness than Permission):\n  try:\n      result = obj.method()\n  except AttributeError:\n      handle_it()\n\nvs LBYL (Look Before You Leap): if hasattr(obj, 'method'):\n\nABCs provide formal duck typing contracts (collections.abc).\nUse isinstance() when type truly matters (security, serialization)."
+  },
+  {
+    id: 11, category: "OOP",
+    question: "What are Python's data model / magic methods?",
+    answer: "Magic (dunder) methods customize object behavior with Python built-ins.\n\nLifecycle: __new__, __init__, __del__\nString repr: __str__ (user-facing), __repr__ (debug/eval)\nCollections: __len__, __getitem__, __setitem__, __delitem__, __contains__\nArithmetic: __add__, __sub__, __mul__, __truediv__, __floordiv__\nComparison: __eq__, __lt__, __le__, __gt__, __ge__, __hash__\nContext manager: __enter__, __exit__\nIteration: __iter__, __next__\nCallable: __call__\nAttribute access: __getattr__, __setattr__, __getattribute__\n\nImplementing them makes objects work seamlessly with:\nlen(), +, -, with, for, [], in, ==, sorted(), etc."
+  },
+  {
+    id: 12, category: "OOP",
+    question: "What is the MRO (Method Resolution Order)?",
+    answer: "MRO determines the order Python searches classes for methods/attributes in inheritance hierarchies.\n\nPython 3 uses C3 Linearization algorithm (also called C3 superclass linearization).\n\nView it: ClassName.__mro__ or ClassName.mro()\n\nRule: left-to-right, depth-first, but maintains local precedence order and never repeats a class.\n\nExample:\n  class A: pass\n  class B(A): pass\n  class C(A): pass\n  class D(B, C): pass\n  D.mro() → [D, B, C, A, object]\n\nsuper() follows MRO automatically — critical for cooperative multiple inheritance.\nMRO prevents calling the same method twice in diamond inheritance."
+  },
+  {
+    id: 13, category: "OOP",
+    question: "What is multiple inheritance in Python?",
+    answer: "Python allows a class to inherit from multiple parents:\n  class C(A, B): pass\n\nC3 MRO determines method lookup order.\n\nCooperative multiple inheritance:\n• All classes call super() in chain\n• super() passes the call along the MRO\n• Each class in hierarchy runs once\n\nMixin pattern: small focused classes providing specific functionality:\n  class LogMixin: ...\n  class SerializeMixin: ...\n  class MyModel(LogMixin, SerializeMixin, BaseModel): pass\n\nCommon issues:\n• Diamond problem — solved by MRO\n• Mixins should always call super()\n• Order of base classes matters (leftmost has priority)\n\nAvoid deep multiple inheritance hierarchies."
+  },
+  {
+    id: 14, category: "Core Python",
+    question: "What is a context manager?",
+    answer: "Context managers define setup and teardown logic used with the 'with' statement.\n\nProtocol:\n• __enter__: runs at start, returns managed resource\n• __exit__(exc_type, exc_val, tb): cleanup, return True to suppress exceptions\n\nCommon uses:\n• File handling (auto-close)\n• Database connections and transactions\n• Thread locks\n• Temporary state changes\n\nCreating them:\n1. Class with __enter__/__exit__\n2. @contextlib.contextmanager decorator with yield:\n   @contextmanager\n   def managed():\n       setup()\n       try: yield resource\n       finally: cleanup()\n\ncontextlib utilities: suppress(), redirect_stdout(), ExitStack()"
+  },
+  {
+    id: 15, category: "Async",
+    question: "What is asyncio and how does it work?",
+    answer: "asyncio is Python's async I/O framework using a single-threaded event loop with cooperative multitasking.\n\nHow it works:\n1. Event loop runs in one thread\n2. Coroutines run until they hit 'await'\n3. 'await' yields control back to event loop\n4. Event loop runs another ready coroutine\n5. When I/O completes, resumes original coroutine\n\nKey components:\n• Event loop: asyncio.get_event_loop()\n• Coroutines: async def functions\n• Tasks: asyncio.create_task() — concurrent scheduling\n• Futures: low-level result containers\n\nEntry point: asyncio.run(main())\n\nBest for: I/O-bound concurrent tasks (HTTP, DB, files).\nNot for: CPU-bound (use multiprocessing instead)."
+  },
+  {
+    id: 16, category: "Async",
+    question: "What are coroutines?",
+    answer: "Coroutines are special functions defined with 'async def' that can be paused (at await points) and resumed.\n\nKey facts:\n• Calling a coroutine function returns a coroutine OBJECT (doesn't execute it)\n• Must be awaited, or wrapped in a Task\n• Use 'await' to pause and yield control\n\nRunning coroutines:\n• await coro — waits for one\n• asyncio.create_task(coro) — schedules concurrently\n• asyncio.gather(*coros) — run many, wait for all\n\nExample:\n  async def fetch(url):\n      async with aiohttp.ClientSession() as s:\n          resp = await s.get(url)\n          return await resp.text()\n\nDifference from generators: coroutines use send/yield internally but are designed for async I/O, not data production."
+  },
+  {
+    id: 17, category: "Async",
+    question: "What is the difference between async/await and threads?",
+    answer: "Async/await:\n• Single-threaded, cooperative multitasking\n• Explicit yield points (await)\n• No race conditions on Python objects\n• Very low overhead (no OS thread switch)\n• Great for I/O-bound concurrent tasks\n• Requires async-compatible libraries\n\nThreads:\n• OS-managed, preemptive switching\n• GIL limits true CPU parallelism for Python code\n• Can have race conditions (need locks)\n• Good for blocking I/O when async not available\n• Works with existing synchronous libraries\n\nMultiprocessing: True CPU parallelism (separate GIL per process)\n\nGuideline:\n• New I/O-bound code → async/await\n• Legacy blocking code → threads\n• CPU-bound computation → multiprocessing"
+  },
+  {
+    id: 18, category: "Functional",
+    question: "What is a closure?",
+    answer: "A closure is a function that captures (closes over) variables from its enclosing scope (free variables). These captured variables persist even after the outer function returns.\n\nRequirements:\n1. Nested function\n2. Inner function references outer variable\n3. Outer function returns inner function\n\nExample:\n  def make_counter(start=0):\n      count = [start]  # mutable container trick\n      def counter():\n          count[0] += 1\n          return count[0]\n      return counter\n\n'nonlocal' keyword modifies captured variables directly.\n\nCell objects store captured variables (func.__closure__).\n\nClosures are the mechanism behind:\n• Decorators\n• Function factories\n• Callbacks with state\n• Partial application"
+  },
+  {
+    id: 19, category: "Functional",
+    question: "What are first-class functions?",
+    answer: "In Python, functions are first-class objects — they can be:\n• Assigned to variables: f = print\n• Passed as arguments: sorted(list, key=func)\n• Returned from functions: return inner_func\n• Stored in data structures: ops = [add, sub, mul]\n\nThis enables:\n• Higher-order functions (map, filter, sorted, reduce)\n• Decorators\n• Callbacks and event handlers\n• Functional programming patterns\n\nFunction attributes:\n• func.__name__ — function name\n• func.__doc__ — docstring\n• func.__annotations__ — type hints dict\n• func.__defaults__ — default argument values\n• func.__code__ — code object\n\nfunctools module provides utilities for working with functions as first-class objects."
+  },
+  {
+    id: 20, category: "Functional",
+    question: "What is functools.partial?",
+    answer: "functools.partial creates a new callable with some arguments pre-filled (partial application).\n\n  from functools import partial\n  def power(base, exp):\n      return base ** exp\n  square = partial(power, exp=2)\n  cube = partial(power, exp=3)\n\nUseful for:\n• Adapting functions with different signatures\n• Creating specialized versions of generic functions\n• Callback registration (with preset arguments)\n• Avoiding lambda for simple cases\n\nvs lambda:\n• partial is more explicit and readable\n• partial handles positional args correctly\n• partial objects ARE picklable (lambda is not)\n\nPartial object attributes:\n• .func — original function\n• .args — preset positional args\n• .keywords — preset keyword args"
+  },
+  {
+    id: 21, category: "Functional",
+    question: "What is itertools?",
+    answer: "itertools provides memory-efficient iterator building blocks — all lazy (no intermediate lists).\n\nInfinite iterators:\n• count(start, step) — 0, 1, 2, ...\n• cycle(iterable) — repeats forever\n• repeat(obj, n) — repeats n times\n\nFinite iterators:\n• chain(*iterables) — concatenate iterables\n• islice(it, stop) — slice without list\n• compress(data, selectors) — filter by bool mask\n• dropwhile/takewhile(pred, it)\n• groupby(it, key) — group consecutive runs\n• pairwise(it) — (a,b), (b,c), ... (Python 3.10+)\n\nCombinatorial:\n• product(*its) — Cartesian product\n• permutations(it, r)\n• combinations(it, r)\n\nChain with map/filter for powerful lazy pipelines."
+  },
+  {
+    id: 22, category: "Functional",
+    question: "What is the difference between map(), filter(), reduce()?",
+    answer: "map(func, iterable):\n• Applies func to each element\n• Returns iterator (lazy in Python 3)\n• Equivalent: (f(x) for x in iterable)\n\nfilter(predicate, iterable):\n• Keeps elements where predicate returns True\n• Returns iterator (lazy in Python 3)\n• Equivalent: (x for x in it if pred(x))\n\nreduce(func, iterable, initial):\n• Folds iterable to a single value\n• From functools (demoted from built-in in Python 3)\n• Example: reduce(add, [1,2,3,4]) → 10\n\nIn Python 3, map/filter return iterators (must list() to see all).\n\nList comprehensions are often preferred for readability over map/filter.\nUse reduce() for accumulation (sum, product, max-by)."
+  },
+  {
+    id: 23, category: "Data Structures",
+    question: "What are Python's built-in data structures?",
+    answer: "Built-in types:\n• list: ordered, mutable, duplicates OK. O(1) append/index, O(n) search/insert.\n• tuple: ordered, immutable. Faster than list.\n• dict: key-value pairs, O(1) avg lookup (hash table). Ordered since Python 3.7+.\n• set: unordered, unique elements, O(1) membership. Not subscriptable.\n• frozenset: immutable set. Can be dict key.\n• str: immutable sequence of Unicode code points.\n• bytes/bytearray: binary data.\n\ncollections module extras:\n• deque: O(1) both-end append/pop\n• Counter: frequency counting\n• defaultdict: auto-default values\n• OrderedDict: ordered dict with move_to_end()\n• namedtuple: tuple with named fields\n• ChainMap: layered dict views"
+  },
+  {
+    id: 24, category: "Data Structures",
+    question: "What is a defaultdict?",
+    answer: "defaultdict (from collections) is a dict subclass that calls a factory function to provide missing key defaults, instead of raising KeyError.\n\nCommon factories:\n  defaultdict(list)   # missing key → []\n  defaultdict(int)    # missing key → 0\n  defaultdict(set)    # missing key → set()\n  defaultdict(lambda: 'N/A')  # any default\n\nClassic use — word count:\n  counts = defaultdict(int)\n  for word in words:\n      counts[word] += 1  # no KeyError!\n\nGrouping:\n  groups = defaultdict(list)\n  for k, v in pairs:\n      groups[k].append(v)\n\nvs dict.setdefault(): defaultdict is cleaner for repeated access to same key.\nvs get(key, default): defaultdict actually inserts the default."
+  },
+  {
+    id: 25, category: "Data Structures",
+    question: "What is a Counter?",
+    answer: "Counter (collections.Counter) counts hashable objects, returning a dict subclass with element counts.\n\nCreation:\n  Counter('abracadabra')  # from iterable\n  Counter({'a': 5, 'b': 2})  # from dict\n  Counter(a=5, b=2)  # from kwargs\n\nKey methods:\n• most_common(n) — top n (count, element) pairs\n• elements() — iterator repeating each element\n• subtract(other) — in-place subtraction\n• update(other) — in-place addition\n\nArithmetic operations:\n  c1 + c2  # add counts\n  c1 - c2  # subtract (drops zero/negative)\n  c1 & c2  # intersection (min counts)\n  c1 | c2  # union (max counts)\n\nMissing keys return 0 (not KeyError).\nCounts CAN be negative (use subtract())."
+  },
+  {
+    id: 26, category: "Data Structures",
+    question: "What is a deque?",
+    answer: "deque (collections.deque) is a double-ended queue with O(1) append/pop from BOTH ends.\n\nWhy use it:\n  list.insert(0, x) is O(n) — shifts all elements\n  list.pop(0) is O(n) — shifts all elements\n  deque.appendleft(x) is O(1)\n  deque.popleft() is O(1)\n\nCreation:\n  d = deque([1,2,3], maxlen=5)\n\nmaxlen: creates bounded deque — old items auto-dropped when full (sliding window).\n\nMethods: append, appendleft, pop, popleft, extend, extendleft, rotate(n)\n\nrotate(1): move last to front (right rotate)\nrotate(-1): move first to back (left rotate)\n\nThread-safe: append/pop operations are atomic.\nNote: O(n) for middle access/insert — not a replacement for list."
+  },
+  {
+    id: 27, category: "Data Structures",
+    question: "What is a namedtuple?",
+    answer: "namedtuple creates tuple subclasses with named fields.\n\nCreation:\n  from collections import namedtuple\n  Point = namedtuple('Point', ['x', 'y'])\n  p = Point(3, 4)\n\nAccess by name (p.x) or index (p[0]). Iterable and unpackable.\n\nFeatures:\n• Immutable (like tuples)\n• Memory-efficient: no __dict__ per instance\n• _asdict() — convert to OrderedDict\n• _replace(x=5) — create copy with changes\n• _fields — tuple of field names\n• _make(iterable) — class method constructor\n\ntyping.NamedTuple adds type hints:\n  class Point(NamedTuple):\n      x: float\n      y: float\n      z: float = 0.0\n\nSuperseded somewhat by dataclasses for mutable data with methods."
+  },
+  {
+    id: 28, category: "OOP",
+    question: "What is @dataclass?",
+    answer: "@dataclass (Python 3.7+) auto-generates boilerplate based on class-level type-annotated fields.\n\nAuto-generated: __init__, __repr__, __eq__\n\nOptions:\n  @dataclass(frozen=True)  # immutable, hashable\n  @dataclass(order=True)   # adds <, <=, >, >=\n  @dataclass(eq=False)     # skip __eq__\n  @dataclass(slots=True)   # use __slots__ (3.10+)\n\nField customization:\n  name: str = field(default='?', repr=False, compare=False)\n\n__post_init__ for custom initialization logic.\n\nvs namedtuple: mutable by default, supports inheritance, more Pythonic, can have methods.\nvs Pydantic: @dataclass has no runtime validation by default.\nvs attrs: similar, attrs predates dataclasses, more features."
+  },
+  {
+    id: 29, category: "OOP",
+    question: "What is abc (Abstract Base Classes)?",
+    answer: "abc module provides infrastructure for defining abstract base classes — classes that can't be instantiated if they have unimplemented abstract methods.\n\nUsage:\n  from abc import ABC, abstractmethod\n  class Animal(ABC):\n      @abstractmethod\n      def speak(self) -> str: ...\n      @abstractmethod\n      def move(self): ...\n  # Animal() → TypeError!\n\nABCMeta metaclass enforces this. ABC is shorthand for class ABC(metaclass=ABCMeta).\n\n@abstractproperty, @abstractclassmethod, @abstractstaticmethod also available.\n\nBuilt-in ABCs in collections.abc:\n  Iterable, Iterator, Sequence, MutableSequence,\n  Mapping, MutableMapping, Set, Callable\n\n__subclasshook__ customizes isinstance() without inheritance.\nregister() allows virtual subclasses."
+  },
+  {
+    id: 30, category: "OOP",
+    question: "What is __slots__?",
+    answer: "__slots__ restricts instance attributes to a fixed set, storing them in a fixed-size array instead of a per-instance __dict__.\n\n  class Point:\n      __slots__ = ('x', 'y')  # tuple or list\n\nBenefits:\n• Less memory per instance (no __dict__ overhead) — significant when creating millions of instances\n• Slightly faster attribute access\n• Prevents accidental attribute creation\n\nTradeoffs:\n• Can't add arbitrary attributes at runtime\n• More complex with multiple inheritance (each class needs own __slots__)\n• Can't use __weakref__ unless added to __slots__\n• Can't pickle by default without __getstate__/__setstate__\n\nBest for: classes with many instances (game entities, data records, point clouds)."
+  },
+  {
+    id: 31, category: "Core Python",
+    question: "What is pickle?",
+    answer: "pickle serializes Python objects to bytes for storage or transmission (Python-specific binary format).\n\n  import pickle\n  data = pickle.dumps(obj)   # object → bytes\n  obj = pickle.loads(data)   # bytes → object\n  pickle.dump(obj, file)     # write to file\n  obj = pickle.load(file)    # read from file\n\nProtocol versions 0-5 (higher = more efficient, less compatible).\n\nLimitations:\n• Python-specific (not cross-language)\n• SECURITY RISK: never unpickle untrusted data — can execute arbitrary code\n• Not human-readable\n\nAlternatives:\n• json: readable, cross-language, limited types\n• msgpack: fast binary, cross-language\n• shelve: persistent dict on disk\n• joblib: better for numpy arrays"
+  },
+  {
+    id: 32, category: "Core Python",
+    question: "What is the difference between deepcopy and shallow copy?",
+    answer: "Shallow copy: creates new container but references SAME inner objects.\n  copy.copy(obj)  or  obj.copy()  or  list[:]  or  dict.copy()\n\nChanging mutable nested objects affects both original and copy!\n\nDeep copy: recursively copies ALL nested objects. Completely independent.\n  copy.deepcopy(obj)\n\nPerformance: deepcopy is slower and uses more memory.\n\nImmutable objects (int, str, tuple of immutables): copying is mostly irrelevant — they can't change.\n\nWhen to use each:\n• Shallow: flat structures, or when inner objects shouldn't be duplicated\n• Deep: nested mutable structures, when full independence is needed\n\n__copy__(self) and __deepcopy__(self, memo) customize behavior.\nmemo dict in deepcopy prevents infinite loops with circular references."
+  },
+  {
+    id: 33, category: "Core Python",
+    question: "What are Python type hints?",
+    answer: "Type hints (PEP 484, Python 3.5+) add optional static type annotations. Not enforced at runtime by default.\n\nSyntax:\n  def greet(name: str, count: int = 1) -> list[str]:\n\nCommon types:\n  int, str, float, bool, None\n  list[int], dict[str, int], tuple[int, str]\n  Optional[str] = str | None\n  Union[int, str] (or int | str in 3.10+)\n  Any, Callable[[int], str]\n  TypeVar('T') for generics\n\nPython 3.12+: generic syntax class Stack[T].\n\nTools that use them:\n• mypy, pyright, pytype — static type checkers\n• IDEs (VSCode, PyCharm) — autocomplete and error highlighting\n• Pydantic, FastAPI — runtime validation\n\nLiteral, Final, TypedDict, Protocol are advanced typing constructs."
+  },
+  {
+    id: 34, category: "Core Python",
+    question: "What is Pydantic?",
+    answer: "Pydantic is a data validation and settings management library using Python type hints for runtime validation.\n\n  from pydantic import BaseModel\n  class User(BaseModel):\n      name: str\n      age: int\n      email: str\n  user = User(name='Alice', age='25')  # coerces '25' to int\n\nFeatures:\n• Runtime type validation and coercion\n• @field_validator for custom validation\n• @computed_field for derived fields\n• JSON serialization: model.model_dump_json()\n• Settings management: BaseSettings reads env vars\n\nPydantic v2 (current): Rust core, 5-50x faster than v1.\n\nUsed heavily in FastAPI for request/response validation.\n\nAlternatives: attrs + cattrs, marshmallow, cerberus."
+  },
+  {
+    id: 35, category: "Core Python",
+    question: "What are Python's exception hierarchy?",
+    answer: "BaseException (top level)\n├── SystemExit (sys.exit())\n├── KeyboardInterrupt (Ctrl+C)\n├── GeneratorExit\n└── Exception (most user exceptions inherit here)\n    ├── ArithmeticError\n    │   ├── ZeroDivisionError\n    │   └── OverflowError\n    ├── LookupError\n    │   ├── IndexError\n    │   └── KeyError\n    ├── ValueError\n    ├── TypeError\n    ├── AttributeError\n    ├── IOError / OSError\n    ├── RuntimeError\n    │   └── RecursionError\n    ├── StopIteration\n    └── NameError\n\nCritical: SystemExit and KeyboardInterrupt inherit from BaseException, NOT Exception.\n'except Exception' won't catch them (intentional).\n\nCustom exceptions: inherit from Exception or a specific subclass."
+  },
+  {
+    id: 36, category: "Core Python",
+    question: "What is the LEGB rule for variable scope?",
+    answer: "LEGB defines Python's variable lookup order:\nL — Local: inside current function\nE — Enclosing: outer function scopes (closures)\nG — Global: module level\nB — Built-in: Python built-ins (len, print, range, etc.)\n\nPython searches L → E → G → B, stopping at first match.\n\nModifying outer scopes:\n• global x: declare module-level variable in function\n• nonlocal x: access/modify enclosing function variable\n\nImportant: Class scope is NOT in LEGB:\n  class MyClass:\n      x = 10\n      def f(self):\n          print(x)  # NameError! Must use self.x or MyClass.x\n\nUnboundLocalError: occurs when you reference a variable before assignment in the same scope where it's later assigned."
+  },
+  {
+    id: 37, category: "Functional",
+    question: "What is a lambda function?",
+    answer: "Lambda creates anonymous single-expression functions.\nSyntax: lambda args: expression\n\n  square = lambda x: x**2\n  add = lambda x, y: x + y\n\nReturns the result of the expression automatically.\n\nLimitations:\n• Single expression only (no statements)\n• No assignments, loops, or multiple statements\n• No type hints or docstrings\n• No name (appears as '<lambda>' in tracebacks)\n\nGood use cases:\n• Sort keys: sorted(people, key=lambda p: p.age)\n• map/filter: map(lambda x: x*2, nums)\n• Simple GUI callbacks\n• One-off short functions\n\nPEP 8 discourages: f = lambda x: x+1 (use def instead)\nPrefer named functions for anything complex.\nCannot contain: return, yield, with, if/else (except ternary)."
+  },
+  {
+    id: 38, category: "Core Python",
+    question: "What is yield from?",
+    answer: "'yield from iterable' delegates to a sub-generator or any iterable.\n\nSimple delegation:\n  def chain(*iterables):\n      for it in iterables:\n          yield from it  # yields each item from it\n\nWith sub-generators (the important case):\n• Propagates send() values to sub-generator\n• Propagates throw() exceptions to sub-generator\n• Returns sub-generator's StopIteration value\n\nRefactoring example:\n  # Instead of:\n  for x in some_generator():\n      yield x\n  # Use:\n  yield from some_generator()\n\nPre-async/await: yield from was used for coroutine chaining (PEP 380).\n\nFlattening:\n  def flatten(nested):\n      for item in nested:\n          if isinstance(item, list): yield from flatten(item)\n          else: yield item"
+  },
+  {
+    id: 39, category: "OOP",
+    question: "What is __init__ vs __new__?",
+    answer: "__new__(cls, *args, **kwargs):\n• Static method called FIRST\n• Creates and RETURNS a new instance\n• Receives the class, not the instance\n• If it returns an instance of cls, __init__ is called on it\n\n__init__(self, *args, **kwargs):\n• Instance method called AFTER __new__\n• INITIALIZES the already-created instance\n• Does not return anything (or returns None)\n• The one you almost always override\n\nWhen to use __new__:\n• Singleton pattern: return existing instance if it exists\n• Subclassing immutable types (int, str, tuple): can't modify after __init__\n• Metaclasses\n• Custom object creation logic\n\n  class Singleton:\n      _instance = None\n      def __new__(cls):\n          if cls._instance is None:\n              cls._instance = super().__new__(cls)\n          return cls._instance"
+  },
+  {
+    id: 40, category: "OOP",
+    question: "What is the @property decorator?",
+    answer: "@property turns a method into a read-only attribute. Add setter/deleter for full access control.\n\n  class Circle:\n      def __init__(self, radius):\n          self._radius = radius\n\n      @property\n      def radius(self):\n          return self._radius\n\n      @radius.setter\n      def radius(self, value):\n          if value < 0: raise ValueError('Negative radius')\n          self._radius = value\n\n      @property\n      def area(self):  # computed property\n          return 3.14159 * self._radius ** 2\n\nBenefits:\n• Computed attributes (area, full_name)\n• Validation on assignment\n• Backward compatibility: add logic to existing attribute without breaking API\n\nProperties are descriptors (implement __get__, __set__, __delete__)."
+  },
+  {
+    id: 41, category: "OOP",
+    question: "What is method chaining?",
+    answer: "Method chaining returns 'self' from methods to allow:\n  obj.method1().method2().method3()\n\nImplementation:\n  class Builder:\n      def set_name(self, name):\n          self.name = name\n          return self  # key!\n      def set_age(self, age):\n          self.age = age\n          return self\n\nUsage: Builder().set_name('Alice').set_age(30)\n\nCommon in:\n• Builder pattern\n• Query builders (SQLAlchemy: session.query(User).filter(...).limit(10))\n• pandas: df.dropna().fillna(0).rename(columns={...})\n• String methods: ' hello '.strip().upper().replace('O', '0')\n\nBenefits:\n• Fluent API — reads like prose\n• Avoids storing intermediate results\n\nDrawback: hard to debug (can't inspect intermediate states easily)."
+  },
+  {
+    id: 42, category: "Functional",
+    question: "What is memoization?",
+    answer: "Memoization caches function results for given inputs to avoid recomputing the same result.\n\nManual implementation:\n  cache = {}\n  def fib(n):\n      if n in cache: return cache[n]\n      result = fib(n-1) + fib(n-2) if n > 1 else n\n      cache[n] = result\n      return result\n\nBuilt-in options:\n  @functools.lru_cache(maxsize=128)  # bounded cache\n  @functools.cache  # unlimited (Python 3.9+)\n  @functools.cached_property  # for instance properties\n\nRequirements:\n• Function must be PURE (same input → same output always)\n• Arguments must be HASHABLE\n\nTrade-off: memory for speed. Watch for memory growth with large input spaces.\n\nUse cases: Fibonacci, dynamic programming, expensive computations (API calls, DB queries)."
+  },
+  {
+    id: 43, category: "Functional",
+    question: "What is lru_cache?",
+    answer: "@functools.lru_cache(maxsize=128) caches the most recently used N calls using Least Recently Used eviction policy.\n\n  @lru_cache(maxsize=None)  # unlimited\n  def expensive(n):\n      return sum(range(n))\n\nOptions:\n  maxsize=None  # unlimited (same as @cache)\n  maxsize=128   # keeps 128 most recent\n  typed=True    # f(3) and f(3.0) cached separately\n\nCache info:\n  expensive.cache_info()  # CacheInfo(hits=5, misses=2, maxsize=128, currsize=2)\n  expensive.cache_clear()  # clears the cache\n\nRequirements: all arguments must be hashable.\nWon't work with: list, dict, set arguments.\n\nThread-safe: yes.\n\nPython 3.9+: @functools.cache is lru_cache(maxsize=None) shorthand.\n\nGreat for: expensive pure functions, recursion optimization."
+  },
+  {
+    id: 44, category: "Core Python",
+    question: "What is the difference between range and xrange (Python 2 vs 3)?",
+    answer: "Python 2:\n• range() — returns a list (memory-heavy for large n)\n• xrange() — returns a lazy iterator (memory-efficient)\n  xrange(10000000) vs range(10000000) — huge difference!\n\nPython 3:\n• range() IS the iterator (like Python 2's xrange)\n• xrange() was removed\n• range(10000000) uses ~50 bytes (just stores start/stop/step)\n\nPython 3 range() features beyond Python 2 xrange:\n• len() works: len(range(100)) → 100\n• Indexing: range(10)[3] → 3\n• Slicing: range(10)[2:8] → range(2, 8)\n• Membership: 99 in range(100) → True (O(1)!)\n• reversed() support\n\nFor Python 2/3 compatibility:\n  from six.moves import range\n  from builtins import range  (future package)"
+  },
+  {
+    id: 45, category: "Core Python",
+    question: "What are Python packages vs modules?",
+    answer: "Module: a single .py file.\n  import math           # imports math module\n  from math import sqrt # imports name from module\n\nPackage: a directory that Python treats as a package.\n  Traditional: must contain __init__.py\n  Namespace package (Python 3.3+): no __init__.py needed\n\nPackage structure:\n  mypackage/\n    __init__.py    # executes on import, can define __all__\n    module1.py\n    subpackage/\n      __init__.py\n      module2.py\n\n  import mypackage.module1\n  from mypackage.subpackage import module2\n\n__init__.py uses:\n• Initialize package state\n• Define __all__ for 'from pkg import *'\n• Re-export names: from .module1 import MyClass\n\nDistribution package (pip install): a distributable archive containing Python packages."
+  },
+  {
+    id: 46, category: "Core Python",
+    question: "What is __all__ in a module?",
+    answer: "__all__ is a list of public names exported when 'from module import *' is used.\n\n  # mymodule.py\n  __all__ = ['PublicClass', 'public_func']  # only these exported\n  class PublicClass: ...\n  def public_func(): ...\n  def _private_func(): ...  # not in __all__\n\nWithout __all__:\n  'from module import *' imports all names NOT starting with underscore.\n\nWith __all__:\n  Explicitly controls the public API.\n  Only names in __all__ are exported with *.\n  Explicit imports (from module import _anything) still work regardless.\n\nBest practices:\n• Define __all__ in library modules meant to be used as APIs\n• Documents what's public and intentional\n• 'import *' is discouraged in production code anyway\n\nAlso affects IDE autocompletion in some tools."
+  },
+  {
+    id: 47, category: "Core Python",
+    question: "What are virtual environments?",
+    answer: "Virtual environments isolate Python package installations per project, avoiding version conflicts.\n\nvenv (built-in, recommended):\n  python -m venv .venv\n  source .venv/bin/activate    # Unix/Mac\n  .venv\\Scripts\\activate       # Windows\n  deactivate\n\nThird-party alternatives:\n• virtualenv: faster, more features, works on older Python\n• conda: manages Python version + packages (data science focus)\n• pipenv: combines venv + pip with Pipfile lock\n• poetry: dependency management + packaging + publishing\n\nManaging Python versions:\n  pyenv: switch between Python versions per directory\n  asdf: polyglot version manager\n\nBest practices:\n• One venv per project\n• Never pip install globally (except pip itself)\n• Add .venv/ to .gitignore\n• Commit requirements.txt or pyproject.toml"
+  },
+  {
+    id: 48, category: "Core Python",
+    question: "What is PEP 8?",
+    answer: "PEP 8 is Python's official style guide. Key rules:\n\nIndentation: 4 spaces (not tabs)\nLine length: 79 chars (99 in some projects)\n\nNaming conventions:\n• snake_case: functions, variables, modules\n• CamelCase: classes\n• UPPER_CASE: constants\n• _single_leading: private by convention\n• __double_leading: name mangling\n\nSpacing:\n• 2 blank lines between top-level definitions\n• 1 blank line between methods\n• Spaces around operators: x = 1 + 2\n• No spaces inside brackets: f(x, y) not f( x, y )\n\nImports: stdlib → third-party → local (isort tool)\n\nTools:\n• flake8, pylint: linting\n• black: opinionated auto-formatter\n• isort: import sorting\n• pycodestyle: PEP 8 checker\n\nPEP 20 (The Zen of Python): run 'import this'"
+  },
+  {
+    id: 49, category: "Core Python",
+    question: "What is the walrus operator :=?",
+    answer: "The walrus operator := (assignment expression, Python 3.8+, PEP 572) assigns AND returns a value in a single expression.\n\nSyntax: (variable := expression)\n\nUse cases:\n\n1. Avoid calling a function twice in a condition:\n  if m := re.search(pattern, text):\n      print(m.group(0))  # m already bound\n\n2. While loop with assignment:\n  while chunk := file.read(8192):\n      process(chunk)\n\n3. List comprehension with reuse:\n  results = [y for x in data if (y := f(x)) > 0]\n\nRules:\n• Must be parenthesized in most contexts\n• Cannot use at statement level (use = instead)\n• Controversial: can reduce readability if overused\n• Useful in tight loops where avoiding double calls matters"
+  },
+  {
+    id: 50, category: "Core Python",
+    question: "What is structural pattern matching (match/case)?",
+    answer: "match/case (Python 3.10+, PEP 634) provides structural pattern matching.\n\n  match command:\n      case 'quit':\n          quit_game()\n      case 'go' | 'move':\n          move()\n      case _:\n          print('unknown')\n\nPattern types:\n• Literal: case 42, case 'hello'\n• Capture: case x (binds value to x)\n• Wildcard: case _ (matches anything, no binding)\n• Sequence: case [x, y] or case [x, *rest]\n• Mapping: case {'key': value}\n• Class: case Point(x=0, y=0) (matches attributes)\n• OR: case 'yes' | 'y' | 'Yes'\n• Guard: case x if x > 0\n\nKey difference from switch/case:\n• Full structural destructuring, not just equality\n• Class patterns match object attributes\n• Preferred over complex if/elif chains"
+  },
+  {
+    id: 51, category: "Core Python",
+    question: "What is the difference between str and bytes in Python 3?",
+    answer: "str: Unicode text. Immutable sequence of Unicode code points. The default string type. Human-readable text.\n\nbytes: Binary data. Immutable sequence of integers 0-255. Prefix b'...'.\n\nbytearray: Mutable bytes.\n\nConversion:\n  'hello'.encode('utf-8')  → b'hello'   # str → bytes\n  b'hello'.decode('utf-8') → 'hello'    # bytes → str\n\nPython 3 enforces STRICT separation — no implicit coercion:\n  'hello' + b'world'  → TypeError!\n\nWhere each is used:\n• str: text processing, display, JSON values\n• bytes: network I/O, file I/O, cryptography, images\n\nCommon encodings:\n• UTF-8: universal, variable width, recommended\n• ASCII: 7-bit, subset of UTF-8\n• latin-1: 8-bit, western European\n• UTF-16/32: fixed width, common in Windows/Java"
+  },
+  {
+    id: 52, category: "OOP",
+    question: "What are descriptors?",
+    answer: "Descriptors are objects that define __get__, __set__, or __delete__ to manage attribute access on OTHER objects.\n\nProtocol:\n  class Descriptor:\n      def __get__(self, obj, objtype=None): ...\n      def __set__(self, obj, value): ...\n      def __delete__(self, obj): ...\n\nTypes:\n• Data descriptor: has both __get__ and __set__ (or __delete__)\n• Non-data descriptor: only __get__ (lower priority than instance __dict__)\n\nBuilt on descriptors:\n• @property — data descriptor\n• @staticmethod — non-data descriptor\n• @classmethod — non-data descriptor\n• Functions (bound methods) — non-data descriptor\n\nUse cases:\n• Type validation (enforce type on assignment)\n• Lazy computation (compute once, cache in instance)\n• ORM field mapping (SQLAlchemy, Django models)\n\nDescriptor protocol is the foundation of Python's attribute access system."
+  },
+  {
+    id: 53, category: "Async",
+    question: "What is an asyncio Task vs Future?",
+    answer: "Future: low-level awaitable object representing an eventual result.\n• Not directly tied to a coroutine\n• Set externally: future.set_result(value) or future.set_exception(exc)\n• Used by low-level protocols and event loops\n\nTask: high-level subclass of Future that wraps a coroutine.\n• Schedules coroutine for execution on the event loop\n• Created with: asyncio.create_task(coro())\n• Runs concurrently when awaited together\n\nRunning tasks concurrently:\n  t1 = asyncio.create_task(coro1())\n  t2 = asyncio.create_task(coro2())\n  await t1\n  await t2\n  # Both run concurrently!\n\nvsawait coro(): runs sequentially.\n\ntask.cancel(): cancels the task.\ntask.done(), task.result(): check status.\nasyncio.gather(*tasks): run many, get all results."
+  },
+  {
+    id: 54, category: "Async",
+    question: "What is asyncio.gather() vs asyncio.wait()?",
+    answer: "asyncio.gather(*coros_or_tasks):\n• Runs all concurrently\n• Returns results IN INPUT ORDER (regardless of completion order)\n• Default: if one raises, cancels others and propagates\n• return_exceptions=True: collects all results + exceptions\n• Simpler to use\n\nasyncio.wait(coros_or_tasks, timeout=None):\n• Lower-level, more control\n• Returns (done, pending) sets of Tasks\n• Timeout support (doesn't cancel, just returns pending)\n• return_when: FIRST_COMPLETED, FIRST_EXCEPTION, ALL_COMPLETED\n• Good for: get results as they complete, handle timeout, cancel remaining\n\nExample:\n  done, pending = await asyncio.wait(tasks, timeout=5.0)\n  for task in pending:\n      task.cancel()\n\nUse gather() for simple concurrent execution.\nUse wait() when you need timeout handling or partial result processing."
+  },
+  {
+    id: 55, category: "Data Structures",
+    question: "What is a heap / heapq in Python?",
+    answer: "heapq module implements a min-heap using a regular Python list.\n\n  import heapq\n  heap = []\n  heapq.heappush(heap, 5)\n  heapq.heappush(heap, 1)\n  heapq.heappop(heap)  → 1 (smallest first)\n\nKey operations:\n  heapq.heapify(list)         # convert list to heap in O(n)\n  heapq.heappush(heap, item)  # O(log n)\n  heapq.heappop(heap)         # O(log n)\n  heap[0]                     # peek min without removing: O(1)\n  heapq.heapreplace(heap, x)  # pop + push in one O(log n)\n  heapq.heappushpop(heap, x)  # push then pop (efficient)\n\nConvenience:\n  heapq.nlargest(n, iterable)   # top n items\n  heapq.nsmallest(n, iterable)  # bottom n items\n\nMax-heap trick: negate values → heappush(heap, -val)\n\nUse cases: priority queues, k-th largest/smallest, Dijkstra's algorithm, streaming median."
+  }
+];
+
+// State
+let currentIndex = 0;
+let isFlipped = false;
+let activeCategory = 'All';
+let marks = {}; // id -> 'know' | 'review' | 'hard'
+let reviewed = new Set();
+
+function getFilteredCards() {
+  if (activeCategory === 'All') return cards;
+  const catMap = {
+    'Core Python': 'Core Python',
+    'OOP': 'OOP',
+    'Data Structures': 'Data Structures',
+    'Functional': 'Functional',
+    'Async': 'Async'
+  };
+  return cards.filter(c => c.category === catMap[activeCategory]);
+}
+
+function getCategoryBadgeClass(cat) {
+  if (cat === 'Core Python') return 'badge-Core';
+  if (cat === 'OOP') return 'badge-OOP';
+  if (cat === 'Data Structures') return 'badge-Data';
+  if (cat === 'Functional') return 'badge-Functional';
+  if (cat === 'Async') return 'badge-Async';
+  return 'badge-Core';
+}
+
+function renderCard() {
+  const filtered = getFilteredCards();
+  if (filtered.length === 0) return;
+
+  const card = filtered[currentIndex];
+  const mark = marks[card.id];
+
+  // Front
+  document.getElementById('front-num').textContent = `#${card.id}`;
+  const frontCat = document.getElementById('front-cat');
+  frontCat.textContent = card.category;
+  frontCat.className = 'category-badge ' + getCategoryBadgeClass(card.category);
+  document.getElementById('question-text').textContent = card.question;
+
+  // Back
+  document.getElementById('back-num').textContent = `#${card.id}`;
+  document.getElementById('answer-text').textContent = card.answer;
+
+  // Mark badges
+  const frontBadge = document.getElementById('front-mark-badge');
+  const backBadge = document.getElementById('back-mark-badge');
+  if (mark) {
+    const badgeClass = mark === 'know' ? 'mark-badge-know' : mark === 'review' ? 'mark-badge-review' : 'mark-badge-hard';
+    const badgeText = mark === 'know' ? 'Know it ✓' : mark === 'review' ? 'Review ↺' : 'Hard !';
+    frontBadge.className = 'mark-badge ' + badgeClass;
+    frontBadge.textContent = badgeText;
+    backBadge.className = 'mark-badge ' + badgeClass;
+    backBadge.textContent = badgeText;
+  } else {
+    frontBadge.className = '';
+    frontBadge.textContent = '';
+    backBadge.className = '';
+    backBadge.textContent = '';
+  }
+
+  // Counter
+  document.getElementById('card-counter').textContent = `${currentIndex + 1} / ${filtered.length}`;
+
+  // Nav buttons
+  document.getElementById('prev-btn').disabled = currentIndex === 0;
+  document.getElementById('next-btn').disabled = currentIndex === filtered.length - 1;
+
+  // Mark buttons
+  ['know', 'review', 'hard'].forEach(m => {
+    document.getElementById('btn-' + m).classList.toggle('active', marks[card.id] === m);
+  });
+
+  // Reset flip state
+  isFlipped = false;
+  document.getElementById('card-inner').classList.remove('flipped');
+
+  // Mark as reviewed
+  reviewed.add(card.id);
+  updateProgress();
+}
+
+function updateProgress() {
+  document.getElementById('reviewed-count').textContent = reviewed.size;
+  let knowCount = 0, reviewCount = 0, hardCount = 0;
+  Object.values(marks).forEach(m => {
+    if (m === 'know') knowCount++;
+    else if (m === 'review') reviewCount++;
+    else if (m === 'hard') hardCount++;
+  });
+  document.getElementById('count-know').textContent = knowCount;
+  document.getElementById('count-review').textContent = reviewCount;
+  document.getElementById('count-hard').textContent = hardCount;
+}
+
+function flipCard() {
+  isFlipped = !isFlipped;
+  document.getElementById('card-inner').classList.toggle('flipped', isFlipped);
+}
+
+function navigate(dir) {
+  const filtered = getFilteredCards();
+  const newIndex = currentIndex + dir;
+  if (newIndex >= 0 && newIndex < filtered.length) {
+    currentIndex = newIndex;
+    renderCard();
+  }
+}
+
+function markCard(mark) {
+  const filtered = getFilteredCards();
+  const card = filtered[currentIndex];
+  if (marks[card.id] === mark) {
+    delete marks[card.id];
+  } else {
+    marks[card.id] = mark;
+  }
+  renderCard();
+}
+
+function filterByCategory(cat) {
+  activeCategory = cat;
+  currentIndex = 0;
+  isFlipped = false;
+
+  // Update button styles
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.dataset.cat === cat) btn.classList.add('active');
+  });
+
+  renderCard();
+}
+
+// Event listeners
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => filterByCategory(btn.dataset.cat));
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'ArrowLeft') { e.preventDefault(); navigate(-1); }
+  else if (e.code === 'ArrowRight') { e.preventDefault(); navigate(1); }
+  else if (e.code === 'Space') { e.preventDefault(); flipCard(); }
+});
+
+// Init
+renderCard();
+document.getElementById('total-count').textContent = cards.length;
+</script>
+
+</body>
+</html>

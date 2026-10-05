@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type Systems: Java vs Python</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #1a1a2e; color: #eee; font-family: system-ui, 'Segoe UI', sans-serif; padding: 20px; min-height: 100vh; }
+        a { color: #e94560; text-decoration: none; font-size: 14px; }
+        a:hover { text-decoration: underline; }
+        h1 { font-size: 1.8rem; color: #e94560; margin: 10px 0 5px; }
+        .subtitle { color: #aaa; margin-bottom: 24px; font-size: 14px; }
+
+        .lang-headers { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+        .lang-header { border-radius: 10px; padding: 16px 20px; text-align: center; font-size: 1.1rem; font-weight: bold; }
+        .java-header { background: #1a2f4a; border: 2px solid #3498db; color: #5dade2; }
+        .python-header { background: #2a2a1a; border: 2px solid #f1c40f; color: #f4d03f; }
+        .lang-sub { font-size: 12px; font-weight: normal; opacity: 0.8; margin-top: 4px; }
+
+        .concept-card { background: #16213e; border-radius: 10px; margin-bottom: 16px; overflow: hidden; border: 1px solid #0f3460; }
+        .card-header { padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .card-header:hover { background: #1e2d50; }
+        .card-title { font-size: 1.05rem; font-weight: bold; }
+        .card-badge { font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: normal; }
+        .badge-static { background: #1a3a5c; color: #5dade2; border: 1px solid #3498db; }
+        .badge-dynamic { background: #3a3a1a; color: #f4d03f; border: 1px solid #f1c40f; }
+        .badge-both { background: #1a3a2a; color: #2ecc71; border: 1px solid #27ae60; }
+        .chevron { transition: transform 0.3s; color: #aaa; font-size: 18px; }
+        .chevron.open { transform: rotate(180deg); }
+        .card-body { display: none; padding: 0 20px 20px; }
+        .card-body.open { display: block; }
+
+        .code-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .code-block { border-radius: 8px; padding: 14px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.7; }
+        .java-code { background: #0d1f33; border: 1px solid #2980b9; }
+        .python-code { background: #1f1f0d; border: 1px solid #c0932d; }
+        .code-label { font-family: system-ui, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .java-code .code-label { color: #3498db; }
+        .python-code .code-label { color: #f1c40f; }
+        .kw { color: #c678dd; }
+        .type { color: #e06c75; }
+        .str { color: #98c379; }
+        .comment { color: #5c6370; font-style: italic; }
+        .err { color: #e94560; }
+        .ok { color: #27ae60; }
+        .num { color: #d19a66; }
+
+        .explanation { background: #0f1a2e; border-left: 4px solid #e94560; border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 14px; line-height: 1.6; color: #ccc; margin-top: 8px; }
+        .explanation strong { color: #eee; }
+
+        .comparison-table { width: 100%; border-collapse: collapse; margin-top: 24px; font-size: 14px; }
+        .comparison-table th { background: #0f3460; padding: 12px 16px; text-align: left; }
+        .comparison-table th:first-child { border-radius: 8px 0 0 0; }
+        .comparison-table th:last-child { border-radius: 0 8px 0 0; }
+        .comparison-table td { padding: 10px 16px; border-bottom: 1px solid #1e2d50; }
+        .comparison-table tr:last-child td { border-bottom: none; }
+        .comparison-table tr:nth-child(even) td { background: #161e35; }
+        .java-cell { color: #5dade2; }
+        .python-cell { color: #f4d03f; }
+        .feature-cell { color: #aaa; font-weight: bold; }
+        .check { color: #27ae60; }
+        .cross { color: #e94560; }
+
+        .section-title { font-size: 1.2rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin: 24px 0 12px; font-size: 13px; }
+        .demo-area { background: #16213e; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+        .demo-area h3 { font-size: 14px; color: #aaa; margin-bottom: 12px; }
+        .demo-row { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+        .demo-label { width: 180px; font-size: 13px; color: #aaa; flex-shrink: 0; }
+        .outcome { padding: 4px 12px; border-radius: 20px; font-size: 13px; }
+        .outcome.compile-error { background: #2f0d0d; border: 1px solid #e94560; color: #e94560; }
+        .outcome.runtime-error { background: #2f1d05; border: 1px solid #f39c12; color: #f39c12; }
+        .outcome.ok-result { background: #0d2f0d; border: 1px solid #27ae60; color: #27ae60; }
+    </style>
+</head>
+<body>
+    <a href="../README.md">← Back to Index</a>
+    <h1>Type Systems: Java vs Python</h1>
+    <p class="subtitle">How each language handles types, type checking, and type safety. | Module: Java &amp; Python Comparison</p>
+
+    <div class="lang-headers">
+        <div class="lang-header java-header">
+            Java
+            <div class="lang-sub">Statically typed · Types checked at compile time</div>
+        </div>
+        <div class="python-header lang-header">
+            Python
+            <div class="lang-sub">Dynamically typed · Types checked at runtime</div>
+        </div>
+    </div>
+
+    <!-- Card 1: Variable Declaration -->
+    <div class="concept-card">
+        <div class="card-header" onclick="toggleCard(this)">
+            <div>
+                <div class="card-title">1. Variable Declaration</div>
+                <div style="font-size:12px; color:#aaa; margin-top:4px">How you tell the language about a variable's type</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <span class="card-badge badge-static">Java: explicit</span>
+                <span class="card-badge badge-dynamic">Python: implicit</span>
+                <span class="chevron">▼</span>
+            </div>
+        </div>
+        <div class="card-body open">
+            <div class="code-compare">
+                <div class="code-block java-code">
+                    <div class="code-label">Java</div>
+<span class="kw">int</span> age = <span class="num">25</span>;          <span class="comment">// must declare type</span>
+<span class="kw">String</span> name = <span class="str">"Alice"</span>; <span class="comment">// type is mandatory</span>
+<span class="kw">double</span> pi = <span class="num">3.14</span>;
+<span class="kw">boolean</span> active = <span class="kw">true</span>;
+
+<span class="comment">// Java 10+: var for type inference</span>
+<span class="kw">var</span> count = <span class="num">10</span>;      <span class="comment">// inferred: int</span>
+                </div>
+                <div class="code-block python-code">
+                    <div class="code-label">Python</div>
+age = <span class="num">25</span>          <span class="comment"># no type declaration</span>
+name = <span class="str">"Alice"</span>   <span class="comment"># type inferred always</span>
+pi = <span class="num">3.14</span>
+active = <span class="kw">True</span>
+
+<span class="comment"># Optional type hints (Python 3.5+)</span>
+count: <span class="type">int</span> = <span class="num">10</span>  <span class="comment"># hint only, not enforced</span>
+                </div>
+            </div>
+            <div class="explanation">
+                <strong>Key difference:</strong> In Java, every variable must declare its type and that type is checked by the compiler.
+                In Python, you just assign a value — the type is inferred from what you assign.
+                Python 3.5+ added optional type hints (<code>age: int</code>) but these are NOT enforced at runtime — they're just documentation.
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 2: Type Checking -->
+    <div class="concept-card">
+        <div class="card-header" onclick="toggleCard(this)">
+            <div>
+                <div class="card-title">2. Type Checking — When Do Errors Happen?</div>
+                <div style="font-size:12px; color:#aaa; margin-top:4px">Static vs dynamic type checking</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <span class="card-badge badge-static">Java: compile-time</span>
+                <span class="card-badge badge-dynamic">Python: runtime</span>
+                <span class="chevron">▼</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="code-compare">
+                <div class="code-block java-code">
+                    <div class="code-label">Java — Compile Error (safe!)</div>
+<span class="kw">String</span> s = <span class="str">"Hello"</span>;
+<span class="kw">int</span> n = <span class="num">5</span>;
+<span class="kw">String</span> result = s + n; <span class="comment">// "Hello5" OK!</span>
+
+<span class="comment">// This FAILS to compile:</span>
+<span class="kw">int</span> x = <span class="str">"not a number"</span>;
+<span class="err">// ERROR: incompatible types</span>
+<span class="err">// String cannot be int</span>
+<span class="comment">// Caught BEFORE running!</span>
+                </div>
+                <div class="code-block python-code">
+                    <div class="code-label">Python — Runtime Error (discovered later)</div>
+s = <span class="str">"Hello"</span>
+n = <span class="num">5</span>
+<span class="comment"># This runs fine:</span>
+result = s + <span class="kw">str</span>(n)  <span class="comment"># "Hello5"</span>
+
+<span class="comment"># This FAILS at runtime:</span>
+result = s + n
+<span class="err"># TypeError: can only concatenate</span>
+<span class="err"># str (not "int") to str</span>
+<span class="comment"># Only caught WHEN executed!</span>
+                </div>
+            </div>
+            <div class="demo-area" style="margin-top:12px">
+                <h3>Type operation outcomes:</h3>
+                <div class="demo-row">
+                    <div class="demo-label"><code>"str" + 5</code></div>
+                    <span class="outcome compile-error">Java: COMPILE ERROR — caught before running</span>
+                    <span class="outcome runtime-error">Python: TypeError at runtime</span>
+                </div>
+                <div class="demo-row">
+                    <div class="demo-label"><code>"str" + "5"</code></div>
+                    <span class="outcome ok-result">Java: "str5" (string concat)</span>
+                    <span class="outcome ok-result">Python: "str5" (string concat)</span>
+                </div>
+                <div class="demo-row">
+                    <div class="demo-label"><code>1 + True</code></div>
+                    <span class="outcome compile-error">Java: COMPILE ERROR — int + boolean disallowed</span>
+                    <span class="outcome ok-result">Python: 2 (True == 1, allowed!)</span>
+                </div>
+            </div>
+            <div class="explanation">
+                <strong>Static typing (Java):</strong> The compiler knows the type of every expression and rejects wrong-type operations before the program runs. You catch errors earlier — great for large teams and refactoring.<br><br>
+                <strong>Dynamic typing (Python):</strong> Types are checked when the code actually executes. A bug in an untested code path could live silently until production. But it's faster to write — no declarations, very flexible.
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: Type Casting -->
+    <div class="concept-card">
+        <div class="card-header" onclick="toggleCard(this)">
+            <div>
+                <div class="card-title">3. Type Casting &amp; Conversion</div>
+                <div style="font-size:12px; color:#aaa; margin-top:4px">Converting a value from one type to another</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <span class="card-badge badge-static">Java: explicit cast</span>
+                <span class="card-badge badge-dynamic">Python: constructor</span>
+                <span class="chevron">▼</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="code-compare">
+                <div class="code-block java-code">
+                    <div class="code-label">Java</div>
+<span class="comment">// Widening (automatic):</span>
+<span class="kw">int</span> i = <span class="num">42</span>;
+<span class="kw">long</span> l = i;      <span class="comment">// int → long, safe</span>
+<span class="kw">double</span> d = i;    <span class="comment">// int → double</span>
+
+<span class="comment">// Narrowing (explicit cast needed):</span>
+<span class="kw">double</span> pi = <span class="num">3.14</span>;
+<span class="kw">int</span> n = (<span class="kw">int</span>) pi; <span class="comment">// truncates: n=3</span>
+
+<span class="comment">// String conversion:</span>
+<span class="kw">int</span> x = Integer.parseInt(<span class="str">"42"</span>);
+<span class="kw">String</span> s = String.valueOf(<span class="num">42</span>);
+                </div>
+                <div class="code-block python-code">
+                    <div class="code-label">Python</div>
+<span class="comment"># Implicit widening in expressions:</span>
+i = <span class="num">42</span>
+f = i / <span class="num">3</span>       <span class="comment"># int/int → float (14.0)</span>
+f2 = i + <span class="num">0.5</span>   <span class="comment"># int + float → float</span>
+
+<span class="comment"># Explicit conversion with constructors:</span>
+pi = <span class="num">3.14</span>
+n = <span class="kw">int</span>(pi)     <span class="comment"># truncates: n=3</span>
+
+<span class="comment"># String conversion:</span>
+x = <span class="kw">int</span>(<span class="str">"42"</span>)   <span class="comment"># str → int</span>
+s = <span class="kw">str</span>(<span class="num">42</span>)     <span class="comment"># int → str</span>
+                </div>
+            </div>
+            <div class="explanation">
+                <strong>Java:</strong> Widening conversions (small → larger type) happen automatically. Narrowing (large → smaller, potentially losing data) requires an explicit cast like <code>(int)</code>. This makes data loss intentional and visible.<br><br>
+                <strong>Python:</strong> Uses constructor functions (<code>int()</code>, <code>float()</code>, <code>str()</code>) for explicit conversion. Division of two ints always gives a float in Python 3 (unlike Java where <code>5/2 = 2</code>).
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 4: Type Inference -->
+    <div class="concept-card">
+        <div class="card-header" onclick="toggleCard(this)">
+            <div>
+                <div class="card-title">4. Type Inference — Letting the Compiler/Interpreter Figure It Out</div>
+                <div style="font-size:12px; color:#aaa; margin-top:4px">When you don't have to write the type explicitly</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <span class="card-badge badge-static">Java 10+: var</span>
+                <span class="card-badge badge-dynamic">Python: always</span>
+                <span class="chevron">▼</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="code-compare">
+                <div class="code-block java-code">
+                    <div class="code-label">Java 10+ — Local Variable Type Inference</div>
+<span class="comment">// Before Java 10 (verbose):</span>
+ArrayList&lt;String&gt; list = <span class="kw">new</span> ArrayList&lt;String&gt;();
+
+<span class="comment">// Java 10+: var infers the type</span>
+<span class="kw">var</span> list2 = <span class="kw">new</span> ArrayList&lt;String&gt;();
+<span class="kw">var</span> x = <span class="num">42</span>;        <span class="comment">// inferred: int</span>
+<span class="kw">var</span> name = <span class="str">"Bob"</span>; <span class="comment">// inferred: String</span>
+
+<span class="comment">// BUT: type is FIXED at compile time</span>
+x = <span class="str">"hello"</span>; <span class="err">// COMPILE ERROR!</span>
+<span class="comment">// x is still int, just inferred</span>
+                </div>
+                <div class="code-block python-code">
+                    <div class="code-label">Python — Always Inferred, Always Dynamic</div>
+<span class="comment"># Python always infers type</span>
+list2 = []          <span class="comment"># type: list</span>
+x = <span class="num">42</span>              <span class="comment"># type: int</span>
+name = <span class="str">"Bob"</span>       <span class="comment"># type: str</span>
+
+<span class="comment"># AND: you can REASSIGN to different type</span>
+x = <span class="str">"hello"</span>        <span class="comment"># now x is str!</span>
+x = <span class="num">3.14</span>           <span class="comment"># now x is float!</span>
+x = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]     <span class="comment"># now x is list!</span>
+<span class="comment"># All valid in Python</span>
+                </div>
+            </div>
+            <div class="explanation">
+                <strong>Java's <code>var</code>:</strong> Reduces boilerplate but still statically typed — the inferred type is fixed at compile time. You can't reassign to a different type later.<br><br>
+                <strong>Python:</strong> All variables are always dynamically typed. A variable is just a name pointing to an object — you can point it to ANY object at any time. This is maximally flexible but can lead to surprising bugs.
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="section-title">Summary Comparison</div>
+    <table class="comparison-table">
+        <thead>
+            <tr>
+                <th>Feature</th>
+                <th style="color:#5dade2">Java</th>
+                <th style="color:#f4d03f">Python</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="feature-cell">Type system</td>
+                <td class="java-cell">Static</td>
+                <td class="python-cell">Dynamic</td>
+            </tr>
+            <tr>
+                <td class="feature-cell">Type declarations</td>
+                <td class="java-cell">Required (var optional in Java 10+)</td>
+                <td class="python-cell">Never required (hints optional)</td>
+            </tr>
+            <tr>
+                <td class="feature-cell">Type checking time</td>
+                <td class="java-cell">Compile time</td>
+                <td class="python-cell">Runtime</td>
+            </tr>
+            <tr>
+                <td class="feature-cell">Type strength</td>
+                <td class="java-cell">Strong (no implicit coercion)</td>
+                <td class="python-cell">Strong (no implicit coercion)</td>
+            </tr>
+            <tr>
+                <td class="feature-cell">Reassign to different type</td>
+                <td class="java-cell"><span class="cross">✗</span> Compile error</td>
+                <td class="python-cell"><span class="check">✓</span> Perfectly valid</td>
+            </tr>
+            <tr>
+                <td class="feature-cell">Catch type errors early</td>
+                <td class="java-cell"><span class="check">✓</span> Before running</td>
+                <td class="python-cell"><span class="cross">✗</span> Only when code runs</td>
+            </tr>
+            <tr>
+                <td class="feature-cell">Duck typing</td>
+                <td class="java-cell"><span class="cross">✗</span> Interfaces required</td>
+                <td class="python-cell"><span class="check">✓</span> If it has the method, use it</td>
+            </tr>
+            <tr>
+                <td class="feature-cell">int / int division</td>
+                <td class="java-cell">5/2 = 2 (integer division)</td>
+                <td class="python-cell">5/2 = 2.5 (always float)</td>
+            </tr>
+            <tr>
+                <td class="feature-cell">Verbosity</td>
+                <td class="java-cell">More verbose, explicit</td>
+                <td class="python-cell">Less code, more concise</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        function toggleCard(header) {
+            const body = header.nextElementSibling;
+            const chevron = header.querySelector('.chevron');
+            const isOpen = body.classList.contains('open');
+            body.classList.toggle('open', !isOpen);
+            chevron.classList.toggle('open', !isOpen);
+        }
+    </script>
+</body>
+</html>

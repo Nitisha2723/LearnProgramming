@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bubble Sort Visualization</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a1a2e;
+      color: #eee;
+      font-family: system-ui, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #16213e;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      border-bottom: 2px solid #0f3460;
+    }
+
+    header a {
+      color: #e94560;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border: 1px solid #e94560;
+      border-radius: 6px;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    header a:hover { background: rgba(233,69,96,0.15); }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #eee;
+    }
+
+    .complexity-badge {
+      margin-left: auto;
+      background: #0f3460;
+      color: #e94560;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid #e94560;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      gap: 0;
+      padding: 20px;
+      gap: 20px;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .left-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    /* Controls */
+    .controls {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .btn {
+      background: #0f3460;
+      color: #eee;
+      border: 1px solid #1a4a8a;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, transform 0.1s;
+      font-weight: 600;
+    }
+    .btn:hover { background: #1a5aaa; }
+    .btn:active { transform: scale(0.97); }
+    .btn.primary { background: #e94560; border-color: #e94560; color: #fff; }
+    .btn.primary:hover { background: #c73652; }
+
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+    }
+    .speed-control label { font-size: 0.85rem; color: #aaa; white-space: nowrap; }
+    .speed-control input[type="range"] {
+      width: 110px;
+      accent-color: #e94560;
+      cursor: pointer;
+    }
+    #speed-display {
+      font-size: 0.85rem;
+      color: #e94560;
+      font-weight: 700;
+      width: 34px;
+      text-align: right;
+    }
+
+    /* Stats */
+    .stats {
+      display: flex;
+      gap: 16px;
+    }
+    .stat-box {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 10px;
+      padding: 12px 20px;
+      text-align: center;
+      flex: 1;
+    }
+    .stat-box .stat-label {
+      font-size: 0.75rem;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    .stat-box .stat-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #e94560;
+      line-height: 1.2;
+    }
+
+    /* Bar chart area */
+    .chart-container {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 12px;
+      padding: 20px 16px 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #bar-area {
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      min-height: 300px;
+    }
+
+    .bar-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      height: 100%;
+    }
+
+    .bar {
+      width: 100%;
+      border-radius: 4px 4px 0 0;
+      transition: height 0.12s ease, background 0.1s ease;
+      background: #3498db;
+      min-height: 4px;
+    }
+
+    .bar-val {
+      font-size: 0.72rem;
+      color: #ccc;
+      margin-top: 5px;
+      text-align: center;
+      line-height: 1;
+    }
+
+    /* Bar color states */
+    .bar.comparing  { background: #f39c12; }
+    .bar.swapping   { background: #e94560; }
+    .bar.sorted     { background: #27ae60; }
+    .bar.default    { background: #3498db; }
+
+    /* Explanation */
+    .explanation {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 0.9rem;
+      color: #ddd;
+      min-height: 46px;
+      line-height: 1.5;
+    }
+    .explanation .highlight { color: #f39c12; font-weight: 700; }
+    .explanation .swap-word { color: #e94560; font-weight: 700; }
+    .explanation .sorted-word { color: #27ae60; font-weight: 700; }
+
+    /* Right panel: code */
+    .right-panel {
+      width: 340px;
+      flex-shrink: 0;
+    }
+
+    .code-panel {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 12px;
+      padding: 18px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .code-panel h3 {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #aaa;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #0f3460;
+    }
+
+    .code-lines {
+      font-family: 'Fira Mono', 'Courier New', monospace;
+      font-size: 0.8rem;
+      line-height: 1.7;
+      flex: 1;
+    }
+
+    .code-line {
+      display: block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: #aaa;
+      white-space: pre;
+      transition: background 0.15s, color 0.15s;
+    }
+    .code-line.active {
+      background: rgba(243,156,18,0.25);
+      color: #f39c12;
+      font-weight: 700;
+    }
+    .code-line .kw  { color: #e94560; }
+    .code-line .fn  { color: #3498db; }
+    .code-line .cmt { color: #555; font-style: italic; }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid #0f3460;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: #bbb;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 800px) {
+      main { flex-direction: column; padding: 12px; }
+      .right-panel { width: 100%; }
+      .code-panel { height: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="../../README.md">&#8592; Back to Index</a>
+  <h1>Bubble Sort</h1>
+  <span class="complexity-badge">Time: O(n&sup2;) &nbsp;|&nbsp; Space: O(1)</span>
+</header>
+
+<main>
+  <div class="left-panel">
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn primary" id="btn-play">&#9654; Play</button>
+      <button class="btn" id="btn-step">Step &rarr;</button>
+      <button class="btn" id="btn-reset">&#8635; Reset</button>
+      <div class="speed-control">
+        <label>Speed</label>
+        <input type="range" id="speed-slider" min="0.1" max="3" step="0.1" value="1" />
+        <span id="speed-display">1.0x</span>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-box">
+        <div class="stat-label">Comparisons</div>
+        <div class="stat-value" id="stat-comparisons">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Swaps</div>
+        <div class="stat-value" id="stat-swaps">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Pass</div>
+        <div class="stat-value" id="stat-pass">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Status</div>
+        <div class="stat-value" id="stat-status" style="font-size:1rem; padding-top:4px;">Ready</div>
+      </div>
+    </div>
+
+    <!-- Bar chart -->
+    <div class="chart-container">
+      <div id="bar-area"></div>
+    </div>
+
+    <!-- Explanation -->
+    <div class="explanation" id="explanation">
+      Press <strong>Play</strong> or <strong>Step</strong> to begin the visualization.
+    </div>
+  </div>
+
+  <!-- Code panel -->
+  <div class="right-panel">
+    <div class="code-panel">
+      <h3>Pseudocode</h3>
+      <div class="code-lines" id="code-lines">
+        <span class="code-line" data-line="0"><span class="fn">bubbleSort</span>(arr):                </span>
+        <span class="code-line" data-line="1">  n = arr.length            </span>
+        <span class="code-line" data-line="2">  <span class="kw">for</span> i = 0 <span class="kw">to</span> n-1:        </span>
+        <span class="code-line" data-line="3">    swapped = <span class="kw">false</span>          </span>
+        <span class="code-line" data-line="4">    <span class="kw">for</span> j = 0 <span class="kw">to</span> n-i-2:    </span>
+        <span class="code-line" data-line="5">      <span class="cmt">// compare neighbors     </span></span>
+        <span class="code-line" data-line="6">      <span class="kw">if</span> arr[j] &gt; arr[j+1]:  </span>
+        <span class="code-line" data-line="7">        swap(arr[j], arr[j+1]) </span>
+        <span class="code-line" data-line="8">        swapped = <span class="kw">true</span>       </span>
+        <span class="code-line" data-line="9">    <span class="kw">if not</span> swapped: <span class="kw">break</span>   </span>
+        <span class="code-line" data-line="10">  <span class="kw">return</span> arr               </span>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#3498db"></div> Default</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f39c12"></div> Comparing</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#e94560"></div> Swapping</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#27ae60"></div> Sorted</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function() {
+  // ─── Config ────────────────────────────────────────────────────────────────
+  const INITIAL_VALUES = [38, 15, 52, 27, 63, 9, 44, 31, 71, 18, 56, 42, 7, 29, 65];
+
+  // ─── State ─────────────────────────────────────────────────────────────────
+  let arr = [];
+  let steps = [];        // pre-computed animation steps
+  let stepIndex = 0;
+  let playing = false;
+  let playTimer = null;
+  let speed = 1.0;
+
+  // ─── DOM refs ──────────────────────────────────────────────────────────────
+  const barArea        = document.getElementById('bar-area');
+  const btnPlay        = document.getElementById('btn-play');
+  const btnStep        = document.getElementById('btn-step');
+  const btnReset       = document.getElementById('btn-reset');
+  const speedSlider    = document.getElementById('speed-slider');
+  const speedDisplay   = document.getElementById('speed-display');
+  const statComp       = document.getElementById('stat-comparisons');
+  const statSwaps      = document.getElementById('stat-swaps');
+  const statPass       = document.getElementById('stat-pass');
+  const statStatus     = document.getElementById('stat-status');
+  const explanationEl  = document.getElementById('explanation');
+  const codeLines      = document.querySelectorAll('.code-line');
+
+  // ─── Build steps ───────────────────────────────────────────────────────────
+  // Each step: { arr, states, codeLine, explanation, comparisons, swaps, pass }
+  // states: array of 'default'|'comparing'|'swapping'|'sorted'
+  function buildSteps(initial) {
+    const steps = [];
+    const a = initial.slice();
+    const n = a.length;
+    let comparisons = 0;
+    let swaps = 0;
+
+    // helper to snapshot
+    function snap(states, codeLine, explanation, pass) {
+      steps.push({
+        arr: a.slice(),
+        states: states.slice(),
+        codeLine,
+        explanation,
+        comparisons,
+        swaps,
+        pass
+      });
+    }
+
+    const sortedFrom = n; // track sorted boundary (from right)
+    const sortedSet = new Set();
+
+    // outer loop
+    for (let i = 0; i < n - 1; i++) {
+      let swapped = false;
+      const pass = i + 1;
+
+      // show "starting pass"
+      {
+        const st = makeStates(n, sortedSet, []);
+        snap(st, 2, `<strong>Pass ${pass}:</strong> Starting outer loop iteration <span class="highlight">i = ${i}</span>. Will compare up to index <span class="highlight">${n - i - 2}</span>.`, pass);
+      }
+
+      // set swapped = false
+      {
+        const st = makeStates(n, sortedSet, []);
+        snap(st, 3, `<strong>Pass ${pass}:</strong> Set <span class="highlight">swapped = false</span>. We'll track if any swap occurs.`, pass);
+      }
+
+      for (let j = 0; j < n - i - 1; j++) {
+        comparisons++;
+
+        // inner loop, highlight comparing
+        {
+          const st = makeStates(n, sortedSet, [j, j + 1], 'comparing');
+          snap(st, 6, `Comparing index <span class="highlight">${j}</span> and <span class="highlight">${j + 1}</span> — values <span class="highlight">${a[j]}</span> and <span class="highlight">${a[j + 1]}</span>.`, pass);
+        }
+
+        if (a[j] > a[j + 1]) {
+          // show swapping
+          {
+            const st = makeStates(n, sortedSet, [j, j + 1], 'swapping');
+            snap(st, 7, `<span class="highlight">${a[j]}</span> &gt; <span class="highlight">${a[j + 1]}</span> — swapping! <span class="swap-word">Swap</span> index ${j} and ${j + 1}.`, pass);
+          }
+
+          // do swap
+          [a[j], a[j + 1]] = [a[j + 1], a[j]];
+          swaps++;
+          swapped = true;
+
+          // show after swap
+          {
+            const st = makeStates(n, sortedSet, [j, j + 1], 'swapping');
+            snap(st, 8, `Swapped! Now index ${j} = <span class="highlight">${a[j]}</span>, index ${j + 1} = <span class="highlight">${a[j + 1]}</span>. Set <span class="highlight">swapped = true</span>.`, pass);
+          }
+        } else {
+          // no swap
+          {
+            const st = makeStates(n, sortedSet, [j, j + 1], 'comparing');
+            snap(st, 6, `<span class="highlight">${a[j]}</span> &le; <span class="highlight">${a[j + 1]}</span> — no swap needed. Continue.`, pass);
+          }
+        }
+      }
+
+      // mark last element as sorted
+      sortedSet.add(n - i - 1);
+
+      {
+        const st = makeStates(n, sortedSet, []);
+        snap(st, 9, `End of pass ${pass}. Element <span class="sorted-word">${a[n - i - 1]}</span> is now in its correct position (index ${n - i - 1}).`, pass);
+      }
+
+      if (!swapped) {
+        // early termination
+        for (let k = 0; k < n - i - 1; k++) sortedSet.add(k);
+        const st = makeStates(n, sortedSet, []);
+        snap(st, 9, `<span class="sorted-word">No swaps occurred</span> in pass ${pass} — array is already sorted! Early exit.`, pass);
+        break;
+      }
+    }
+
+    // mark all sorted
+    for (let k = 0; k < n; k++) sortedSet.add(k);
+    {
+      const st = Array(n).fill('sorted');
+      steps.push({
+        arr: a.slice(),
+        states: st,
+        codeLine: 10,
+        explanation: `<span class="sorted-word">Sorting complete!</span> Array is fully sorted in <strong>${comparisons}</strong> comparisons and <strong>${swaps}</strong> swaps.`,
+        comparisons,
+        swaps,
+        pass: n - 1
+      });
+    }
+
+    return steps;
+  }
+
+  function makeStates(n, sortedSet, highlight, highlightType = 'comparing') {
+    const st = [];
+    for (let k = 0; k < n; k++) {
+      if (highlight.includes(k)) {
+        st.push(highlightType);
+      } else if (sortedSet.has(k)) {
+        st.push('sorted');
+      } else {
+        st.push('default');
+      }
+    }
+    return st;
+  }
+
+  // ─── Render ────────────────────────────────────────────────────────────────
+  function initBars() {
+    barArea.innerHTML = '';
+    const maxVal = Math.max(...INITIAL_VALUES);
+    INITIAL_VALUES.forEach((val, i) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'bar-wrap';
+
+      const bar = document.createElement('div');
+      bar.className = 'bar default';
+      bar.id = `bar-${i}`;
+      bar.style.height = `${Math.round((val / maxVal) * 100)}%`;
+
+      const label = document.createElement('div');
+      label.className = 'bar-val';
+      label.id = `bar-val-${i}`;
+      label.textContent = val;
+
+      wrap.appendChild(bar);
+      wrap.appendChild(label);
+      barArea.appendChild(wrap);
+    });
+  }
+
+  function applyStep(step) {
+    const maxVal = Math.max(...step.arr);
+    step.arr.forEach((val, i) => {
+      const bar = document.getElementById(`bar-${i}`);
+      const lbl = document.getElementById(`bar-val-${i}`);
+      if (!bar || !lbl) return;
+      bar.style.height = `${Math.max(2, Math.round((val / maxVal) * 100))}%`;
+      bar.className = `bar ${step.states[i]}`;
+      lbl.textContent = val;
+    });
+    // highlight code
+    codeLines.forEach(el => {
+      const ln = parseInt(el.dataset.line, 10);
+      el.classList.toggle('active', ln === step.codeLine);
+    });
+    // stats
+    statComp.textContent = step.comparisons;
+    statSwaps.textContent = step.swaps;
+    statPass.textContent = step.pass;
+    explanationEl.innerHTML = step.explanation;
+  }
+
+  function setStatus(text) {
+    statStatus.textContent = text;
+  }
+
+  // ─── Controls ──────────────────────────────────────────────────────────────
+  function reset() {
+    stopPlay();
+    arr = INITIAL_VALUES.slice();
+    steps = buildSteps(arr);
+    stepIndex = 0;
+    initBars();
+    statComp.textContent = '0';
+    statSwaps.textContent = '0';
+    statPass.textContent = '0';
+    setStatus('Ready');
+    // clear code highlight
+    codeLines.forEach(el => el.classList.remove('active'));
+    explanationEl.innerHTML = 'Press <strong>Play</strong> or <strong>Step</strong> to begin the visualization.';
+    btnPlay.textContent = '▶ Play';
+  }
+
+  function doStep() {
+    if (stepIndex >= steps.length) {
+      stopPlay();
+      setStatus('Done');
+      return false;
+    }
+    applyStep(steps[stepIndex]);
+    stepIndex++;
+    if (stepIndex >= steps.length) {
+      stopPlay();
+      setStatus('Done');
+    } else {
+      setStatus('Running');
+    }
+    return true;
+  }
+
+  function startPlay() {
+    if (stepIndex >= steps.length) reset();
+    playing = true;
+    btnPlay.textContent = '⏸ Pause';
+    scheduleNext();
+  }
+
+  function scheduleNext() {
+    if (!playing) return;
+    const delay = Math.round(600 / speed);
+    playTimer = setTimeout(() => {
+      const ok = doStep();
+      if (ok && playing) scheduleNext();
+    }, delay);
+  }
+
+  function stopPlay() {
+    playing = false;
+    clearTimeout(playTimer);
+    btnPlay.textContent = '▶ Play';
+  }
+
+  btnPlay.addEventListener('click', () => {
+    if (playing) stopPlay();
+    else startPlay();
+  });
+
+  btnStep.addEventListener('click', () => {
+    stopPlay();
+    doStep();
+  });
+
+  btnReset.addEventListener('click', reset);
+
+  speedSlider.addEventListener('input', () => {
+    speed = parseFloat(speedSlider.value);
+    speedDisplay.textContent = speed.toFixed(1) + 'x';
+  });
+
+  // ─── Init ──────────────────────────────────────────────────────────────────
+  reset();
+})();
+</script>
+</body>
+</html>

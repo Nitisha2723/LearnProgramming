@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Advanced Topics Quiz</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #1a1a2e;
+    --panel: #16213e;
+    --accent: #e94560;
+    --accent-dim: #b83348;
+    --text: #e0e0f0;
+    --text-muted: #8888aa;
+    --green: #2ecc71;
+    --red: #e94560;
+    --border: #2a2a4a;
+    --option-hover: #1e2a50;
+    --option-selected: #1e2a50;
+    --radius: 10px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+  }
+
+  a.back-link {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s;
+    z-index: 100;
+  }
+  a.back-link:hover { color: var(--accent); }
+
+  .container {
+    width: 100%;
+    max-width: 760px;
+    padding-top: 60px;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+  .subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+  }
+
+  /* Progress */
+  .progress-wrap {
+    margin-bottom: 20px;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .progress-bar-bg {
+    background: var(--border);
+    border-radius: 999px;
+    height: 6px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    background: var(--accent);
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+
+  /* Question card */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    transition: border-color 0.3s;
+  }
+  .card.flash-correct { animation: flashGreen 0.6s ease; }
+  .card.flash-wrong   { animation: flashRed   0.6s ease; }
+
+  @keyframes flashGreen {
+    0%   { border-color: var(--border); }
+    30%  { border-color: var(--green); box-shadow: 0 0 20px rgba(46,204,113,0.3); }
+    100% { border-color: var(--border); }
+  }
+  @keyframes flashRed {
+    0%   { border-color: var(--border); }
+    30%  { border-color: var(--red); box-shadow: 0 0 20px rgba(233,69,96,0.3); }
+    100% { border-color: var(--border); }
+  }
+
+  .question-num {
+    font-size: 0.78rem;
+    color: var(--accent);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .question-text {
+    font-size: 1.08rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+
+  pre.code-block {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    margin-bottom: 20px;
+    color: #c9d1d9;
+  }
+
+  /* Options */
+  .options { display: flex; flex-direction: column; gap: 10px; }
+
+  .option {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    font-size: 0.97rem;
+    line-height: 1.4;
+    outline: none;
+  }
+  .option:hover:not(.disabled) {
+    background: var(--option-hover);
+    border-color: var(--accent);
+    transform: translateX(3px);
+  }
+  .option.focused:not(.disabled) {
+    border-color: var(--accent);
+    background: var(--option-hover);
+  }
+  .option.selected {
+    background: var(--option-selected);
+    border-color: var(--accent);
+  }
+  .option.correct  { border-color: var(--green); background: rgba(46,204,113,0.12); }
+  .option.wrong    { border-color: var(--red);   background: rgba(233,69,96,0.12);  }
+  .option.disabled { cursor: default; }
+
+  .option-letter {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .option.correct  .option-letter { background: var(--green); color: #fff; }
+  .option.wrong    .option-letter { background: var(--red);   color: #fff; }
+  .option.selected .option-letter { background: var(--accent); color: #fff; }
+
+  /* Fill-blank */
+  .fill-input-wrap { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .fill-input {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 0.97rem;
+    font-family: 'Courier New', Courier, monospace;
+    flex: 1;
+    min-width: 180px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .fill-input:focus { border-color: var(--accent); }
+  .fill-input.correct { border-color: var(--green); background: rgba(46,204,113,0.1); }
+  .fill-input.wrong   { border-color: var(--red);   background: rgba(233,69,96,0.1);  }
+
+  .btn-submit {
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    padding: 10px 20px;
+    font-size: 0.97rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn-submit:hover { background: var(--accent-dim); transform: translateY(-1px); }
+  .btn-submit:disabled { background: var(--border); cursor: default; transform: none; }
+
+  /* Feedback */
+  .feedback {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    display: none;
+  }
+  .feedback.correct { background: rgba(46,204,113,0.12); border-left: 4px solid var(--green); }
+  .feedback.wrong   { background: rgba(233,69,96,0.12);  border-left: 4px solid var(--red);   }
+  .feedback .verdict {
+    font-weight: 700;
+    margin-bottom: 4px;
+    font-size: 1rem;
+  }
+  .feedback .correct-ans {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .feedback .explanation { color: var(--text); }
+
+  /* Navigation */
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .btn-nav {
+    background: var(--panel);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 10px 22px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    flex: 1;
+    max-width: 160px;
+  }
+  .btn-nav:hover:not(:disabled) { border-color: var(--accent); background: var(--option-hover); }
+  .btn-nav:disabled { opacity: 0.35; cursor: default; }
+  .btn-nav.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .btn-nav.primary:hover:not(:disabled) { background: var(--accent-dim); border-color: var(--accent-dim); }
+
+  /* Final screen */
+  #final-screen { display: none; text-align: center; }
+  .score-circle {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    border: 5px solid var(--accent);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    margin: 24px auto;
+  }
+  .score-pct { font-size: 2.4rem; font-weight: 800; color: var(--accent); }
+  .score-frac { font-size: 0.85rem; color: var(--text-muted); }
+  .grade-badge {
+    display: inline-block;
+    font-size: 1.3rem;
+    font-weight: 700;
+    padding: 6px 20px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  .elapsed { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
+  .final-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+  .btn-final {
+    background: var(--panel);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 11px 24px;
+    font-size: 0.97rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .btn-final:hover { border-color: var(--accent); background: var(--option-hover); }
+  .btn-final.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-final.primary:hover { background: var(--accent-dim); }
+
+  /* Review screen */
+  #review-screen { display: none; }
+  .review-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+  .review-header h2 { font-size: 1.3rem; }
+  .btn-back-review {
+    background: var(--panel);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 8px 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    margin-left: auto;
+  }
+  .btn-back-review:hover { border-color: var(--accent); }
+
+  .review-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 26px;
+    margin-bottom: 18px;
+  }
+  .review-q-num { font-size: 0.76rem; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .review-q-text { font-size: 1rem; font-weight: 500; margin-bottom: 12px; line-height: 1.5; }
+  .review-your-ans {
+    font-size: 0.88rem;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: rgba(233,69,96,0.1);
+    border-left: 3px solid var(--red);
+    margin-bottom: 8px;
+    color: var(--text-muted);
+  }
+  .review-correct-ans {
+    font-size: 0.88rem;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: rgba(46,204,113,0.1);
+    border-left: 3px solid var(--green);
+    margin-bottom: 10px;
+  }
+  .review-explanation {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Keyboard hint */
+  .kbd-hint {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 12px;
+  }
+  .kbd-hint kbd {
+    display: inline-block;
+    background: var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 0.76rem;
+    font-family: inherit;
+  }
+
+  @media (max-width: 520px) {
+    .card { padding: 20px 18px; }
+    h1 { font-size: 1.3rem; }
+    .btn-nav { max-width: none; }
+  }
+</style>
+</head>
+<body>
+
+<a class="back-link" href="README.md">&#8592; Back to Index</a>
+
+<div class="container">
+  <h1>Python Advanced Topics</h1>
+  <p class="subtitle">Async, GIL, Descriptors, Metaclasses &amp; More — 15 Questions</p>
+
+  <!-- Quiz screen -->
+  <div id="quiz-screen">
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="progress-text">Question 1 of 15</span>
+        <span id="score-live">Score: 0</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="card" id="question-card">
+      <div class="question-num" id="q-num"></div>
+      <div class="question-text" id="q-text"></div>
+      <pre class="code-block" id="q-code" style="display:none"></pre>
+      <div class="options" id="q-options"></div>
+      <div class="fill-input-wrap" id="q-fill" style="display:none">
+        <input type="text" class="fill-input" id="fill-answer" placeholder="Type your answer..." autocomplete="off" spellcheck="false">
+        <button class="btn-submit" id="btn-fill-submit">Submit</button>
+      </div>
+      <div class="feedback" id="q-feedback"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-nav" id="btn-prev" disabled>&#8592; Previous</button>
+      <button class="btn-nav primary" id="btn-next" disabled>Next &#8594;</button>
+    </div>
+
+    <p class="kbd-hint">
+      <kbd>&#8593;</kbd><kbd>&#8595;</kbd> navigate options &nbsp;|&nbsp;
+      <kbd>Enter</kbd><kbd>Space</kbd> confirm &nbsp;|&nbsp;
+      <kbd>&#8592;</kbd><kbd>&#8594;</kbd> prev / next
+    </p>
+  </div>
+
+  <!-- Final screen -->
+  <div id="final-screen">
+    <div class="card">
+      <h2 style="font-size:1.4rem;margin-bottom:4px;">Quiz Complete!</h2>
+      <div class="score-circle">
+        <div class="score-pct" id="final-pct"></div>
+        <div class="score-frac" id="final-frac"></div>
+      </div>
+      <div class="grade-badge" id="final-grade"></div>
+      <div class="elapsed" id="final-time"></div>
+      <div class="final-btns">
+        <button class="btn-final primary" onclick="retryQuiz()">&#8635; Retry</button>
+        <button class="btn-final" id="btn-review" onclick="showReview()">Review Wrong Answers</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review screen -->
+  <div id="review-screen">
+    <div class="review-header">
+      <h2>Review: Wrong Answers</h2>
+      <button class="btn-back-review" onclick="backToFinal()">&#8592; Back to Results</button>
+    </div>
+    <div id="review-list"></div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  QUESTION DATA
+// ─────────────────────────────────────────────
+const questions = [
+  {
+    type: "multiple-choice",
+    text: "What does `@functools.lru_cache` do when applied to a function?",
+    options: [
+      "It runs the function asynchronously in a thread pool",
+      "It memoizes the return value keyed by the arguments, avoiding redundant calls",
+      "It logs every function call to stderr for profiling",
+      "It converts the function into a class-based callable"
+    ],
+    correct: 1,
+    explanation: "`lru_cache` (Least-Recently-Used cache) stores the results of expensive function calls and returns the cached result when the same inputs occur again. The cache has a bounded size (default 128); when full it evicts the least-recently-used entry. `@functools.cache` (Python 3.9+) is the same but unbounded."
+  },
+  {
+    type: "multiple-choice",
+    text: "What is the purpose of the `nonlocal` keyword inside a nested function?",
+    options: [
+      "It makes the variable visible across all modules in the package",
+      "It prevents the variable from being garbage-collected",
+      "It lets the inner function rebind a variable that belongs to an enclosing (non-global) scope",
+      "It declares the variable as a class attribute of the enclosing class"
+    ],
+    correct: 2,
+    explanation: "Without `nonlocal`, an assignment inside a nested function creates a *new local* variable, shadowing the enclosing one. `nonlocal x` tells Python to look up the name in the nearest enclosing scope that is not the module/global scope, and to rebind it there rather than creating a local. `global` does the same for module-level names."
+  },
+  {
+    type: "multiple-choice",
+    text: "Which statement about `asyncio.gather(*coros)` vs sequential `await` is correct?",
+    options: [
+      "`asyncio.gather` runs coroutines on multiple OS threads simultaneously",
+      "`asyncio.gather` schedules all coroutines concurrently within one event loop, reducing total I/O wait time",
+      "Sequential `await` is always faster because it avoids scheduler overhead",
+      "Both approaches are identical — Python's event loop serializes everything anyway"
+    ],
+    correct: 1,
+    explanation: "`asyncio.gather` wraps each coroutine into a Task and submits them all to the event loop *before* waiting. The event loop interleaves them at every `await` point, so overlapping I/O waits run in parallel (within the single-threaded loop). Sequential `await coro1; await coro2` runs coro1 to completion before starting coro2. No OS threads are used — it is cooperative concurrency."
+  },
+  {
+    type: "true-false",
+    text: "The Python GIL (Global Interpreter Lock) prevents two threads from executing Python bytecode simultaneously on multiple CPU cores, making CPU-bound multi-threaded programs no faster than single-threaded ones.",
+    options: ["True", "False"],
+    correct: 0,
+    explanation: "The GIL is a mutex inside CPython that ensures only one thread executes Python bytecode at a time. For CPU-bound work this effectively serialises threads — you get no speed-up from multiple cores. For I/O-bound work threads still help because the GIL is released while waiting for I/O (syscalls), so other threads can run. `multiprocessing` avoids the GIL by using separate processes, each with its own interpreter."
+  },
+  {
+    type: "multiple-choice",
+    text: "When should you prefer `multiprocessing.Process` over `threading.Thread`?",
+    options: [
+      "When you need to share memory between workers using `multiprocessing.shared_memory`",
+      "For CPU-bound tasks where you need true parallelism across CPU cores",
+      "For I/O-bound tasks that spend most time waiting on network calls",
+      "When the GIL helps protect shared state from race conditions"
+    ],
+    correct: 1,
+    explanation: "Each `multiprocessing.Process` gets its own CPython interpreter and therefore its own GIL, enabling true CPU parallelism. This is the right tool for number crunching, image processing, etc. Threads are better for I/O-bound work (network, disk) because they are lighter-weight and share memory easily; the GIL is not a bottleneck there."
+  },
+  {
+    type: "multiple-choice",
+    text: "What does `concurrent.futures.ThreadPoolExecutor` provide that plain `threading.Thread` does not?",
+    options: [
+      "It bypasses the GIL for CPU-bound work using C extensions",
+      "A high-level interface: a reusable pool of threads, a `Future` object for results, and automatic exception propagation",
+      "It automatically switches to processes on multi-core machines",
+      "It allows threads to share a single event loop with asyncio"
+    ],
+    correct: 1,
+    explanation: "`ThreadPoolExecutor` manages a pool of worker threads and returns `Future` objects whose `.result()` method blocks until the task finishes and re-raises any exception from the worker. It avoids the boilerplate of creating, starting, and joining individual `Thread` objects. `ProcessPoolExecutor` has the identical API but uses processes."
+  },
+  {
+    type: "code-output",
+    text: "What does this code print?",
+    code:
+`def make_counter():
+    count = 0
+    def increment():
+        nonlocal count
+        count += 1
+        return count
+    return increment
+
+c1 = make_counter()
+c2 = make_counter()
+print(c1(), c1(), c2())`,
+    options: ["1 2 1", "1 1 1", "1 2 3", "0 1 0"],
+    correct: 0,
+    explanation: "`make_counter()` creates a *new* closure each time it is called. `c1` and `c2` each have their own independent `count` variable in their enclosing scope. Calling `c1()` twice increments its count to 1 then 2. `c2()` has a fresh `count` starting at 0 so it returns 1. Output: `1 2 1`."
+  },
+  {
+    type: "code-output",
+    text: "What does this code print?",
+    code:
+`class Meta(type):
+    def __new__(mcs, name, bases, ns):
+        ns['greet'] = lambda self: f'Hello from {name}'
+        return super().__new__(mcs, name, bases, ns)
+
+class Dog(metaclass=Meta):
+    pass
+
+print(Dog().greet())`,
+    options: [
+      "Hello from Meta",
+      "Hello from Dog",
+      "AttributeError: greet not found",
+      "Hello from object"
+    ],
+    correct: 1,
+    explanation: "A metaclass controls class *creation*. `Meta.__new__` is called when Python constructs the `Dog` class object. It injects a `greet` method into the namespace dict `ns` before the class is finalised. Inside the lambda, `name` is captured from `Meta.__new__`'s parameter — it is `'Dog'`. So `Dog().greet()` returns `'Hello from Dog'`."
+  },
+  {
+    type: "multiple-choice",
+    text: "In the descriptor protocol, which dunder method is called when you *read* a descriptor attribute on an instance?",
+    options: ["`__get__(self, obj, objtype)`", "`__read__(self, obj)`", "`__access__(self, instance)`", "`__fetch__(self, obj, cls)`"],
+    correct: 0,
+    explanation: "A descriptor is any object that defines `__get__`, `__set__`, or `__delete__`. When you access `instance.attr`, Python calls `type(instance).__dict__['attr'].__get__(instance, type(instance))` if the attribute in the class dict has a `__get__`. `@property` is implemented exactly this way — `property.__get__` calls the getter function you provided."
+  },
+  {
+    type: "true-false",
+    text: "`__new__` is responsible for *creating* a new instance, while `__init__` is responsible for *initialising* the already-created instance. Both can be overridden, but `__new__` must return the new object.",
+    options: ["True", "False"],
+    correct: 0,
+    explanation: "`__new__(cls, *args, **kwargs)` is a static method that allocates and returns a new instance. Python then calls `__init__` on that returned object to set up its state. You rarely override `__new__` except when subclassing immutable types (like `int` or `str`) or implementing singletons, because those types' values must be set at allocation time."
+  },
+  {
+    type: "multiple-choice",
+    text: "What is the main benefit of declaring `__slots__` in a Python class?",
+    options: [
+      "It makes all attributes read-only, enforcing immutability",
+      "It eliminates the per-instance `__dict__`, reducing memory usage and slightly speeding up attribute access",
+      "It allows the class to be used as a metaclass",
+      "It enables multiple inheritance without the diamond problem"
+    ],
+    correct: 1,
+    explanation: "Normally each instance stores attributes in a `__dict__` (a hash map), which has significant memory overhead. Declaring `__slots__ = ('x', 'y')` tells Python to store those attributes in fixed-size slots (C struct fields) instead. This can cut per-instance memory by 30–50 %. The trade-off: you cannot add arbitrary attributes not listed in `__slots__`, and `__dict__` is absent unless you explicitly include `'__dict__'` in `__slots__`."
+  },
+  {
+    type: "code-output",
+    text: "What does this code print?",
+    code:
+`class Descriptor:
+    def __set_name__(self, owner, name):
+        self.name = '_' + name
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        return getattr(obj, self.name, 0)
+    def __set__(self, obj, value):
+        setattr(obj, self.name, value * 2)
+
+class Box:
+    size = Descriptor()
+
+b = Box()
+b.size = 5
+print(b.size)`,
+    options: ["5", "10", "0", "AttributeError"],
+    correct: 1,
+    explanation: "`__set__` stores `value * 2` on the instance under `self.name` (`'_size'`). So `b.size = 5` calls `Descriptor.__set__(b, 5)`, which does `b._size = 10`. Then `b.size` calls `Descriptor.__get__(b, Box)`, which returns `b._size` → `10`."
+  },
+  {
+    type: "fill-blank",
+    text: "Complete the blank: to mark a method as a coroutine in Python's asyncio model you prefix the `def` with the keyword ______.",
+    correct: "async",
+    explanation: "`async def` defines a *coroutine function*. Calling it does not execute the body; it returns a coroutine object. The body only runs when the coroutine is awaited (or wrapped in a Task). Inside an `async def` you can use `await expr` to suspend execution until the awaitable is done."
+  },
+  {
+    type: "multiple-choice",
+    text: "Which of the following correctly forwards all positional and keyword arguments to another function?",
+    options: [
+      "`def wrapper(*args, **kwargs): return inner(args, kwargs)`",
+      "`def wrapper(*args, **kwargs): return inner(*args, **kwargs)`",
+      "`def wrapper(args, kwargs): return inner(*args, **kwargs)`",
+      "`def wrapper(**args): return inner(**args)`"
+    ],
+    correct: 1,
+    explanation: "`*args` captures extra positional arguments as a tuple; `**kwargs` captures extra keyword arguments as a dict. To *unpack* them when forwarding you must use the splat operators again: `inner(*args, **kwargs)`. Option A passes the tuple and dict as two positional arguments. Option C expects the caller to already pass a tuple and a dict explicitly."
+  },
+  {
+    type: "multiple-choice",
+    text: "`@property` is often described as a descriptor. Which class defines the `__get__`, `__set__`, and `__delete__` methods that make `@property` work?",
+    options: [
+      "The user-defined class that uses `@property`",
+      "The built-in `property` type itself",
+      "The `functools` module's `property` wrapper",
+      "The `abc.ABC` abstract base class"
+    ],
+    correct: 1,
+    explanation: "`property` is a built-in type (written in C) that implements the descriptor protocol. When you write `@property def x(self): ...`, you create a `property` object stored in the class's `__dict__`. Its `__get__` calls your getter, `__set__` calls your setter (if defined), and `__delete__` calls your deleter. That is why accessing `instance.x` transparently calls the getter without `()`."
+  }
+];
+
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+let current = 0;
+let answers = new Array(questions.length).fill(null); // index for mc/tf, string for fill
+let answered = new Array(questions.length).fill(false);
+let startTime = Date.now();
+let focusedOption = 0;
+
+// ─────────────────────────────────────────────
+//  RENDER
+// ─────────────────────────────────────────────
+function renderQuestion(idx) {
+  const q = questions[idx];
+  current = idx;
+
+  // Progress
+  document.getElementById('progress-text').textContent = `Question ${idx + 1} of ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((idx + 1) / questions.length) * 100}%`;
+  updateScoreLive();
+
+  // Card content
+  document.getElementById('q-num').textContent = `Question ${idx + 1} of ${questions.length}`;
+  document.getElementById('q-text').textContent = q.text;
+
+  const codeEl = document.getElementById('q-code');
+  if (q.code) {
+    codeEl.textContent = q.code;
+    codeEl.style.display = 'block';
+  } else {
+    codeEl.style.display = 'none';
+  }
+
+  // Options vs fill
+  const optionsEl = document.getElementById('q-options');
+  const fillEl = document.getElementById('q-fill');
+  const feedback = document.getElementById('q-feedback');
+  feedback.style.display = 'none';
+  feedback.className = 'feedback';
+
+  optionsEl.innerHTML = '';
+  document.getElementById('fill-answer').value = '';
+  document.getElementById('btn-fill-submit').disabled = false;
+
+  if (q.type === 'fill-blank') {
+    optionsEl.style.display = 'none';
+    fillEl.style.display = 'flex';
+    const input = document.getElementById('fill-answer');
+    input.className = 'fill-input';
+    input.disabled = false;
+    if (answered[idx]) {
+      const wasCorrect = (answers[idx].toLowerCase().trim() === q.correct.toLowerCase().trim());
+      input.value = answers[idx];
+      input.className = 'fill-input ' + (wasCorrect ? 'correct' : 'wrong');
+      input.disabled = true;
+      document.getElementById('btn-fill-submit').disabled = true;
+      showFeedback(wasCorrect, q);
+    }
+    setTimeout(() => { if (!answered[idx]) input.focus(); }, 50);
+  } else {
+    optionsEl.style.display = 'flex';
+    fillEl.style.display = 'none';
+    focusedOption = answered[idx] ? (answers[idx] ?? 0) : 0;
+
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.setAttribute('role', 'radio');
+      btn.setAttribute('aria-checked', 'false');
+      btn.dataset.idx = i;
+
+      const letter = document.createElement('span');
+      letter.className = 'option-letter';
+      letter.textContent = 'ABCD'[i];
+
+      const text = document.createElement('span');
+      text.textContent = opt;
+
+      btn.appendChild(letter);
+      btn.appendChild(text);
+
+      if (answered[idx]) {
+        btn.classList.add('disabled');
+        if (i === q.correct) btn.classList.add('correct');
+        if (i === answers[idx] && answers[idx] !== q.correct) btn.classList.add('wrong');
+        if (i === answers[idx]) btn.setAttribute('aria-checked', 'true');
+      } else {
+        btn.addEventListener('click', () => selectOption(i));
+        if (i === focusedOption) btn.classList.add('focused');
+      }
+
+      optionsEl.appendChild(btn);
+    });
+
+    if (answered[idx]) showFeedback(answers[idx] === q.correct, q);
+  }
+
+  // Nav buttons
+  document.getElementById('btn-prev').disabled = (idx === 0);
+  const nextBtn = document.getElementById('btn-next');
+  if (idx === questions.length - 1) {
+    nextBtn.textContent = 'Finish';
+    nextBtn.disabled = !allAnswered();
+  } else {
+    nextBtn.textContent = 'Next →';
+    nextBtn.disabled = !answered[idx];
+  }
+}
+
+function selectOption(i) {
+  if (answered[current]) return;
+  const q = questions[current];
+  answers[current] = i;
+  answered[current] = true;
+
+  const opts = document.querySelectorAll('.option');
+  opts.forEach(o => {
+    o.classList.add('disabled');
+    o.removeEventListener('click', () => {});
+  });
+  opts[q.correct].classList.add('correct');
+  if (i !== q.correct) opts[i].classList.add('wrong');
+
+  const isCorrect = (i === q.correct);
+  flashCard(isCorrect);
+  showFeedback(isCorrect, q);
+  updateScoreLive();
+
+  // Enable next
+  const nextBtn = document.getElementById('btn-next');
+  if (current === questions.length - 1) {
+    nextBtn.disabled = !allAnswered();
+  } else {
+    nextBtn.disabled = false;
+  }
+}
+
+function submitFill() {
+  if (answered[current]) return;
+  const input = document.getElementById('fill-answer');
+  const val = input.value.trim();
+  if (!val) return;
+
+  const q = questions[current];
+  answers[current] = val;
+  answered[current] = true;
+
+  const isCorrect = (val.toLowerCase() === q.correct.toLowerCase());
+  input.className = 'fill-input ' + (isCorrect ? 'correct' : 'wrong');
+  input.disabled = true;
+  document.getElementById('btn-fill-submit').disabled = true;
+
+  flashCard(isCorrect);
+  showFeedback(isCorrect, q);
+  updateScoreLive();
+
+  const nextBtn = document.getElementById('btn-next');
+  if (current === questions.length - 1) {
+    nextBtn.disabled = !allAnswered();
+  } else {
+    nextBtn.disabled = false;
+  }
+}
+
+function showFeedback(isCorrect, q) {
+  const fb = document.getElementById('q-feedback');
+  fb.style.display = 'block';
+  fb.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+
+  let html = `<div class="verdict">${isCorrect ? '✓ Correct!' : '✗ Incorrect'}</div>`;
+  if (!isCorrect) {
+    const correctLabel = q.type === 'fill-blank'
+      ? q.correct
+      : q.options[q.correct];
+    html += `<div class="correct-ans">Correct answer: <strong>${correctLabel}</strong></div>`;
+  }
+  html += `<div class="explanation">${q.explanation}</div>`;
+  fb.innerHTML = html;
+}
+
+function flashCard(isCorrect) {
+  const card = document.getElementById('question-card');
+  card.classList.remove('flash-correct', 'flash-wrong');
+  void card.offsetWidth; // reflow
+  card.classList.add(isCorrect ? 'flash-correct' : 'flash-wrong');
+}
+
+function updateScoreLive() {
+  const score = answered.reduce((acc, a, i) => {
+    if (!a) return acc;
+    const q = questions[i];
+    if (q.type === 'fill-blank') {
+      return acc + (answers[i]?.toLowerCase().trim() === q.correct.toLowerCase().trim() ? 1 : 0);
+    }
+    return acc + (answers[i] === q.correct ? 1 : 0);
+  }, 0);
+  document.getElementById('score-live').textContent = `Score: ${score}`;
+}
+
+function allAnswered() {
+  return answered.every(Boolean);
+}
+
+// ─────────────────────────────────────────────
+//  NAVIGATION
+// ─────────────────────────────────────────────
+document.getElementById('btn-prev').addEventListener('click', () => {
+  if (current > 0) renderQuestion(current - 1);
+});
+
+document.getElementById('btn-next').addEventListener('click', () => {
+  if (current < questions.length - 1) {
+    renderQuestion(current + 1);
+  } else {
+    showFinal();
+  }
+});
+
+document.getElementById('btn-fill-submit').addEventListener('click', submitFill);
+document.getElementById('fill-answer').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitFill();
+});
+
+// ─────────────────────────────────────────────
+//  KEYBOARD NAVIGATION
+// ─────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (document.getElementById('quiz-screen').style.display === 'none') return;
+  const q = questions[current];
+  const isFill = q.type === 'fill-blank';
+  const fillActive = document.activeElement === document.getElementById('fill-answer');
+
+  if (isFill && fillActive) return; // let text input handle keys
+
+  if (e.key === 'ArrowLeft' && !isFill) {
+    if (current > 0) renderQuestion(current - 1);
+    return;
+  }
+  if (e.key === 'ArrowRight' && !isFill) {
+    if (!document.getElementById('btn-next').disabled) {
+      if (current < questions.length - 1) renderQuestion(current + 1);
+      else showFinal();
+    }
+    return;
+  }
+
+  if (!isFill && !answered[current]) {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      focusedOption = (focusedOption - 1 + q.options.length) % q.options.length;
+      highlightFocused();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      focusedOption = (focusedOption + 1) % q.options.length;
+      highlightFocused();
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      selectOption(focusedOption);
+    }
+  }
+});
+
+function highlightFocused() {
+  document.querySelectorAll('.option').forEach((o, i) => {
+    o.classList.toggle('focused', i === focusedOption);
+  });
+}
+
+// ─────────────────────────────────────────────
+//  FINAL SCREEN
+// ─────────────────────────────────────────────
+function computeScore() {
+  return questions.reduce((acc, q, i) => {
+    if (!answered[i]) return acc;
+    if (q.type === 'fill-blank') {
+      return acc + (answers[i]?.toLowerCase().trim() === q.correct.toLowerCase().trim() ? 1 : 0);
+    }
+    return acc + (answers[i] === q.correct ? 1 : 0);
+  }, 0);
+}
+
+function showFinal() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('final-screen').style.display = 'block';
+
+  const score = computeScore();
+  const pct = Math.round((score / questions.length) * 100);
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+
+  document.getElementById('final-pct').textContent = pct + '%';
+  document.getElementById('final-frac').textContent = `${score} / ${questions.length}`;
+  document.getElementById('final-time').textContent = `Time: ${mins}m ${secs}s`;
+
+  let grade;
+  if (pct >= 95) grade = 'Expert!';
+  else if (pct >= 80) grade = 'Good Job!';
+  else if (pct >= 60) grade = 'Getting There';
+  else grade = 'Needs Work';
+  document.getElementById('final-grade').textContent = grade;
+
+  const wrongCount = questions.length - score;
+  document.getElementById('btn-review').disabled = wrongCount === 0;
+  document.getElementById('btn-review').textContent = wrongCount > 0
+    ? `Review ${wrongCount} Wrong Answer${wrongCount > 1 ? 's' : ''}`
+    : 'All Correct!';
+}
+
+function retryQuiz() {
+  answers = new Array(questions.length).fill(null);
+  answered = new Array(questions.length).fill(false);
+  startTime = Date.now();
+  focusedOption = 0;
+
+  document.getElementById('final-screen').style.display = 'none';
+  document.getElementById('review-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  renderQuestion(0);
+}
+
+// ─────────────────────────────────────────────
+//  REVIEW SCREEN
+// ─────────────────────────────────────────────
+function showReview() {
+  document.getElementById('final-screen').style.display = 'none';
+  document.getElementById('review-screen').style.display = 'block';
+
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+
+  questions.forEach((q, i) => {
+    const isCorrect = q.type === 'fill-blank'
+      ? answers[i]?.toLowerCase().trim() === q.correct.toLowerCase().trim()
+      : answers[i] === q.correct;
+
+    if (isCorrect) return;
+
+    const card = document.createElement('div');
+    card.className = 'review-card';
+
+    const correctLabel = q.type === 'fill-blank'
+      ? q.correct
+      : q.options[q.correct];
+
+    const yourLabel = answers[i] == null
+      ? '(no answer)'
+      : q.type === 'fill-blank'
+        ? answers[i]
+        : q.options[answers[i]] ?? '(no answer)';
+
+    let codeHtml = '';
+    if (q.code) {
+      codeHtml = `<pre class="code-block" style="margin-bottom:12px">${escHtml(q.code)}</pre>`;
+    }
+
+    card.innerHTML = `
+      <div class="review-q-num">Question ${i + 1}</div>
+      <div class="review-q-text">${escHtml(q.text)}</div>
+      ${codeHtml}
+      <div class="review-your-ans">Your answer: <strong>${escHtml(yourLabel)}</strong></div>
+      <div class="review-correct-ans">Correct answer: <strong>${escHtml(correctLabel)}</strong></div>
+      <div class="review-explanation">${escHtml(q.explanation)}</div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function backToFinal() {
+  document.getElementById('review-screen').style.display = 'none';
+  document.getElementById('final-screen').style.display = 'block';
+}
+
+function escHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+renderQuestion(0);
+</script>
+</body>
+</html>

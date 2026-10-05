@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Learning Progress — LearnProgramming</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d1a;
+    --panel: #1a1a2e;
+    --card: #16213e;
+    --accent: #e94560;
+    --teal: #4ecca3;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+    --border: #2a2a4a;
+    --gold: #f59e0b;
+    --green: #4ecca3;
+    --radius: 12px;
+    --transition: 0.25s ease;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ─────────────────────────────── */
+  header {
+    background: linear-gradient(135deg, var(--panel) 0%, #0f0f22 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 32px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .header-left a.back-link {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 6px;
+  }
+  .header-left a.back-link:hover { color: var(--teal); }
+
+  .header-left h1 {
+    font-size: 26px;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--accent), var(--teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+
+  .header-left .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 2px;
+  }
+
+  .overall-progress {
+    text-align: right;
+    min-width: 200px;
+  }
+
+  .overall-progress .pct {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--teal);
+    line-height: 1;
+  }
+
+  .overall-progress .pct-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .overall-bar-wrap {
+    margin-top: 8px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .overall-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--teal));
+    border-radius: 99px;
+    transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    width: 0%;
+  }
+
+  /* ── MAIN WRAPPER ───────────────────────── */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+  }
+
+  /* ── STATS ROW ──────────────────────────── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+
+  @media (max-width: 900px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 500px) {
+    .stats-row { grid-template-columns: 1fr; }
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    transition: border-color var(--transition), transform var(--transition);
+  }
+  .stat-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+  .stat-card .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .stat-card .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-card .stat-value span.denom {
+    font-size: 16px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .stat-card .mini-bar-wrap {
+    margin-top: 10px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .stat-card .mini-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    width: 0%;
+  }
+
+  .bar-java { background: linear-gradient(90deg, #e94560, #ff7b9b); }
+  .bar-python { background: linear-gradient(90deg, #4ecca3, #7ee8d0); }
+  .bar-total { background: linear-gradient(90deg, var(--accent), var(--teal)); }
+  .bar-time { background: linear-gradient(90deg, #a78bfa, #c4b5fd); }
+
+  /* ── PATHS GRID ─────────────────────────── */
+  .paths-section h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .paths-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  @media (max-width: 800px) {
+    .paths-grid { grid-template-columns: 1fr; }
+  }
+
+  .path-column {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .path-header {
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .path-header .path-name {
+    font-size: 17px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .path-header .path-name .lang-badge {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 99px;
+    text-transform: uppercase;
+  }
+
+  .badge-java { background: rgba(233,69,96,0.15); color: #ff7b9b; border: 1px solid rgba(233,69,96,0.3); }
+  .badge-python { background: rgba(78,204,163,0.15); color: #4ecca3; border: 1px solid rgba(78,204,163,0.3); }
+
+  .path-header .path-progress-label {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .path-header .path-progress-label strong {
+    color: var(--text);
+  }
+
+  .path-bar-wrap {
+    height: 3px;
+    background: var(--border);
+    margin: 0;
+  }
+  .path-bar-fill {
+    height: 100%;
+    transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    width: 0%;
+  }
+
+  /* ── MODULE ITEMS ───────────────────────── */
+  .module-list {
+    padding: 8px 0;
+  }
+
+  .module-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 20px;
+    cursor: pointer;
+    transition: background var(--transition);
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+  }
+  .module-item:last-child { border-bottom: none; }
+  .module-item:hover { background: rgba(255,255,255,0.03); }
+  .module-item.completed { background: rgba(78,204,163,0.04); }
+
+  .module-checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color var(--transition), background var(--transition);
+    cursor: pointer;
+    position: relative;
+  }
+
+  .module-item.completed .module-checkbox {
+    background: var(--teal);
+    border-color: var(--teal);
+  }
+
+  .module-checkbox .checkmark {
+    opacity: 0;
+    color: #0d0d1a;
+    font-size: 12px;
+    font-weight: 700;
+    transform: scale(0.5);
+    transition: opacity 0.2s, transform 0.2s;
+    line-height: 1;
+  }
+
+  .module-item.completed .module-checkbox .checkmark {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .module-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .module-id {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+
+  .module-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    transition: color var(--transition), text-decoration var(--transition);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .module-item.completed .module-name {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+
+  .module-weeks {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .module-links {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .module-btn {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background var(--transition), color var(--transition), transform var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    white-space: nowrap;
+  }
+
+  .btn-study {
+    background: rgba(233,69,96,0.12);
+    color: #ff7b9b;
+    border: 1px solid rgba(233,69,96,0.25);
+  }
+  .btn-study:hover {
+    background: rgba(233,69,96,0.22);
+    transform: translateY(-1px);
+  }
+
+  .btn-quiz {
+    background: rgba(78,204,163,0.12);
+    color: var(--teal);
+    border: 1px solid rgba(78,204,163,0.25);
+  }
+  .btn-quiz:hover {
+    background: rgba(78,204,163,0.22);
+    transform: translateY(-1px);
+  }
+
+  .module-item.completed .module-btn {
+    opacity: 0.55;
+  }
+
+  /* ── ACHIEVEMENTS ───────────────────────── */
+  .achievements-section {
+    margin-top: 40px;
+  }
+
+  .achievements-section h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+  }
+
+  .badge-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 16px;
+    text-align: center;
+    transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .badge-card.locked {
+    opacity: 0.4;
+    filter: grayscale(0.7);
+  }
+
+  .badge-card.unlocked {
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(245,158,11,0.2), 0 0 40px rgba(245,158,11,0.05);
+    transform: translateY(-2px);
+  }
+
+  .badge-card.unlocked::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at top, rgba(245,158,11,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .badge-emoji {
+    font-size: 36px;
+    line-height: 1;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .badge-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .badge-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  .badge-card.unlocked .badge-name {
+    color: var(--gold);
+  }
+
+  /* ── FOOTER ─────────────────────────────── */
+  footer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+  }
+
+  .footer-meta {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .reset-btn {
+    background: rgba(233,69,96,0.1);
+    border: 1px solid rgba(233,69,96,0.3);
+    color: var(--accent);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+  }
+  .reset-btn:hover {
+    background: rgba(233,69,96,0.2);
+    transform: translateY(-1px);
+  }
+
+  /* ── PULSE ANIMATION ────────────────────── */
+  @keyframes completePulse {
+    0%   { box-shadow: 0 0 0 0 rgba(78,204,163,0.4); }
+    70%  { box-shadow: 0 0 0 8px rgba(78,204,163,0); }
+    100% { box-shadow: 0 0 0 0 rgba(78,204,163,0); }
+  }
+
+  .module-item.just-completed .module-checkbox {
+    animation: completePulse 0.5s ease-out;
+  }
+
+  @keyframes badgeUnlock {
+    0%   { transform: scale(0.8) translateY(-2px); opacity: 0; }
+    60%  { transform: scale(1.08) translateY(-3px); }
+    100% { transform: scale(1) translateY(-2px); opacity: 1; }
+  }
+
+  .badge-card.just-unlocked {
+    animation: badgeUnlock 0.4s ease-out forwards;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ HEADER ══════════ -->
+<header>
+  <div class="header-inner">
+    <div class="header-left">
+      <a href="index.html" class="back-link">&#8592; Back to Home</a>
+      <h1>My Learning Progress</h1>
+      <div class="subtitle">LearnProgramming &mdash; Java &amp; Python tracks</div>
+    </div>
+    <div class="overall-progress">
+      <div class="pct" id="overall-pct">0%</div>
+      <div class="pct-label">overall completion</div>
+      <div class="overall-bar-wrap">
+        <div class="overall-bar-fill" id="overall-bar"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════ MAIN ══════════ -->
+<main>
+
+  <!-- STATS ROW -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Modules Completed</div>
+      <div class="stat-value" id="stat-total">0<span class="denom"> / 22</span></div>
+      <div class="mini-bar-wrap"><div class="mini-bar-fill bar-total" id="bar-total"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Java Progress</div>
+      <div class="stat-value" id="stat-java">0<span class="denom"> / 11</span></div>
+      <div class="mini-bar-wrap"><div class="mini-bar-fill bar-java" id="bar-java-stat"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Python Progress</div>
+      <div class="stat-value" id="stat-python">0<span class="denom"> / 11</span></div>
+      <div class="mini-bar-wrap"><div class="mini-bar-fill bar-python" id="bar-python-stat"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Est. Time Remaining</div>
+      <div class="stat-value" id="stat-time">—<span class="denom" id="stat-time-unit"> wks</span></div>
+      <div class="mini-bar-wrap"><div class="mini-bar-fill bar-time" id="bar-time-stat"></div></div>
+    </div>
+  </div>
+
+  <!-- PATHS -->
+  <div class="paths-section">
+    <h2>Learning Paths</h2>
+    <div class="paths-grid">
+      <!-- Java column -->
+      <div class="path-column" id="col-java">
+        <div class="path-header">
+          <div class="path-name">
+            <span>&#9749;</span>
+            Java
+            <span class="lang-badge badge-java">JDK 21</span>
+          </div>
+          <div class="path-progress-label"><strong id="java-done">0</strong> / 11 modules</div>
+        </div>
+        <div class="path-bar-wrap">
+          <div class="path-bar-fill bar-java" id="path-bar-java"></div>
+        </div>
+        <div class="module-list" id="list-java"></div>
+      </div>
+
+      <!-- Python column -->
+      <div class="path-column" id="col-python">
+        <div class="path-header">
+          <div class="path-name">
+            <span>&#128013;</span>
+            Python
+            <span class="lang-badge badge-python">3.12+</span>
+          </div>
+          <div class="path-progress-label"><strong id="python-done">0</strong> / 11 modules</div>
+        </div>
+        <div class="path-bar-wrap">
+          <div class="path-bar-fill bar-python" id="path-bar-python"></div>
+        </div>
+        <div class="module-list" id="list-python"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACHIEVEMENTS -->
+  <div class="achievements-section">
+    <h2>&#127942; Achievements</h2>
+    <div class="badges-grid" id="badges-grid"></div>
+  </div>
+
+</main>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <div class="footer-meta" id="footer-meta">No progress recorded yet.</div>
+  <button class="reset-btn" onclick="resetProgress()">&#128465; Reset All Progress</button>
+</footer>
+
+<script>
+// ─────────────────────────────────────────────────
+//  DATA
+// ─────────────────────────────────────────────────
+const modules = {
+  java: [
+    { id: "01", name: "Foundations",           weeks: 2, quiz: true },
+    { id: "02", name: "Core Language",         weeks: 2, quiz: true },
+    { id: "03", name: "OOP",                   weeks: 3, quiz: true },
+    { id: "04", name: "Data Structures",       weeks: 3, quiz: true },
+    { id: "05", name: "Real-World",            weeks: 3, quiz: true },
+    { id: "06", name: "Software Design",       weeks: 4, quiz: true },
+    { id: "07", name: "Advanced",              weeks: 3, quiz: true },
+    { id: "08", name: "Projects",              weeks: 4, quiz: true },
+    { id: "09", name: "Interview Prep",        weeks: 3, quiz: true },
+    { id: "10", name: "Database & JDBC",       weeks: 2, quiz: false },
+    { id: "11", name: "REST API (Spring Boot)",weeks: 2, quiz: false },
+  ],
+  python: [
+    { id: "01", name: "Foundations",           weeks: 2, quiz: true },
+    { id: "02", name: "Core Language",         weeks: 2, quiz: true },
+    { id: "03", name: "OOP",                   weeks: 3, quiz: true },
+    { id: "04", name: "Data Structures",       weeks: 3, quiz: true },
+    { id: "05", name: "Real-World",            weeks: 3, quiz: true },
+    { id: "06", name: "Software Design",       weeks: 4, quiz: true },
+    { id: "07", name: "Advanced",              weeks: 3, quiz: true },
+    { id: "08", name: "Projects",              weeks: 4, quiz: true },
+    { id: "09", name: "Interview Prep",        weeks: 3, quiz: true },
+    { id: "10", name: "Database & SQLAlchemy", weeks: 2, quiz: false },
+    { id: "11", name: "REST API (FastAPI)",    weeks: 2, quiz: false },
+  ]
+};
+
+const TOTAL_MODULES = 22;
+const MAX_WEEKS = modules.java.reduce((s,m) => s + m.weeks, 0) +
+                  modules.python.reduce((s,m) => s + m.weeks, 0);
+
+// ── slug helpers for paths ──
+function javaSlug(m) {
+  const map = {
+    "01": "01-foundations",
+    "02": "02-core-language",
+    "03": "03-oop",
+    "04": "04-data-structures",
+    "05": "05-real-world",
+    "06": "06-software-design",
+    "07": "07-advanced",
+    "08": "08-projects",
+    "09": "09-interview-prep",
+    "10": "10-database",
+    "11": "11-rest-api"
+  };
+  return map[m.id] || "#";
+}
+
+function pythonSlug(m) {
+  const map = {
+    "01": "01-foundations",
+    "02": "02-core-language",
+    "03": "03-oop",
+    "04": "04-data-structures",
+    "05": "05-real-world",
+    "06": "06-software-design",
+    "07": "07-advanced",
+    "08": "08-projects",
+    "09": "09-interview-prep",
+    "10": "10-database",
+    "11": "11-rest-api"
+  };
+  return map[m.id] || "#";
+}
+
+function javaQuizSlug(m) {
+  const map = {
+    "01": "01-foundations-quiz",
+    "02": "02-core-language-quiz",
+    "03": "03-oop-quiz",
+    "04": "04-data-structures-quiz",
+    "05": "05-real-world-quiz",
+    "06": "06-software-design-quiz",
+    "07": "07-advanced-quiz",
+    "08": "08-projects-quiz",
+    "09": "09-interview-prep-quiz"
+  };
+  return map[m.id] || "#";
+}
+
+function pythonQuizSlug(m) {
+  const map = {
+    "01": "01-foundations-quiz",
+    "02": "02-core-language-quiz",
+    "03": "03-oop-quiz",
+    "04": "04-data-structures-quiz",
+    "05": "05-real-world-quiz",
+    "06": "06-software-design-quiz",
+    "07": "07-advanced-quiz",
+    "08": "08-projects-quiz",
+    "09": "09-interview-prep-quiz"
+  };
+  return map[m.id] || "#";
+}
+
+// ─────────────────────────────────────────────────
+//  STORAGE
+// ─────────────────────────────────────────────────
+const STORAGE_KEY = "lp_progress";
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : { java: [], python: [], lastUpdated: null };
+  } catch(e) {
+    return { java: [], python: [], lastUpdated: null };
+  }
+}
+
+function saveProgress(state) {
+  state.lastUpdated = new Date().toISOString();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+// ─────────────────────────────────────────────────
+//  RENDER MODULES
+// ─────────────────────────────────────────────────
+function buildModuleItem(lang, m, completed) {
+  const el = document.createElement("div");
+  el.className = "module-item" + (completed ? " completed" : "");
+  el.dataset.lang = lang;
+  el.dataset.id = m.id;
+
+  const studyPath = lang === "java"
+    ? `learn-java/${javaSlug(m)}/README.md`
+    : `learn-python/${pythonSlug(m)}/README.md`;
+
+  const quizPath = m.quiz
+    ? (lang === "java"
+        ? `learn-java/knowledge-checks/${javaQuizSlug(m)}.html`
+        : `learn-python/knowledge-checks/${pythonQuizSlug(m)}.html`)
+    : null;
+
+  el.innerHTML = `
+    <div class="module-checkbox" role="checkbox" aria-checked="${completed}" tabindex="0">
+      <span class="checkmark">&#10003;</span>
+    </div>
+    <div class="module-info">
+      <div class="module-id">${lang.toUpperCase()} ${m.id}</div>
+      <div class="module-name">${m.name}</div>
+    </div>
+    <div class="module-weeks">~${m.weeks}w</div>
+    <div class="module-links">
+      <a class="module-btn btn-study" href="${studyPath}" title="Open study materials">&#128218; Study</a>
+      ${quizPath ? `<a class="module-btn btn-quiz" href="${quizPath}" title="Take the quiz">&#129504; Quiz</a>` : ''}
+    </div>
+  `;
+
+  // Toggle on row click (but not on link clicks)
+  el.addEventListener("click", (e) => {
+    if (e.target.closest("a")) return;
+    toggleModule(lang, m.id, el);
+  });
+
+  // Keyboard support
+  el.querySelector(".module-checkbox").addEventListener("keydown", (e) => {
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      toggleModule(lang, m.id, el);
+    }
+  });
+
+  return el;
+}
+
+function toggleModule(lang, id, el) {
+  const state = loadProgress();
+  const arr = state[lang] || [];
+  const idx = arr.indexOf(id);
+
+  if (idx === -1) {
+    arr.push(id);
+    el.classList.add("completed", "just-completed");
+    el.querySelector(".module-checkbox").setAttribute("aria-checked", "true");
+    setTimeout(() => el.classList.remove("just-completed"), 600);
+  } else {
+    arr.splice(idx, 1);
+    el.classList.remove("completed");
+    el.querySelector(".module-checkbox").setAttribute("aria-checked", "false");
+  }
+
+  state[lang] = arr;
+  saveProgress(state);
+  updateStats(state);
+  updateAchievements(state);
+  updateFooter(state);
+}
+
+function renderModules() {
+  const state = loadProgress();
+  ["java", "python"].forEach(lang => {
+    const list = document.getElementById("list-" + lang);
+    list.innerHTML = "";
+    modules[lang].forEach(m => {
+      const done = (state[lang] || []).includes(m.id);
+      list.appendChild(buildModuleItem(lang, m, done));
+    });
+  });
+}
+
+// ─────────────────────────────────────────────────
+//  STATS
+// ─────────────────────────────────────────────────
+function setBar(id, pct) {
+  const el = document.getElementById(id);
+  if (el) el.style.width = Math.min(100, pct) + "%";
+}
+
+function updateStats(state) {
+  const javaDone   = (state.java   || []).length;
+  const pythonDone = (state.python || []).length;
+  const totalDone  = javaDone + pythonDone;
+  const totalPct   = Math.round((totalDone / TOTAL_MODULES) * 100);
+
+  // Header
+  document.getElementById("overall-pct").textContent = totalPct + "%";
+  setBar("overall-bar", totalPct);
+
+  // Stats cards
+  document.getElementById("stat-total").innerHTML =
+    `${totalDone}<span class="denom"> / ${TOTAL_MODULES}</span>`;
+  document.getElementById("stat-java").innerHTML =
+    `${javaDone}<span class="denom"> / 11</span>`;
+  document.getElementById("stat-python").innerHTML =
+    `${pythonDone}<span class="denom"> / 11</span>`;
+
+  // Time remaining: sum weeks of uncompleted modules
+  let weeksLeft = 0;
+  ["java", "python"].forEach(lang => {
+    modules[lang].forEach(m => {
+      if (!(state[lang] || []).includes(m.id)) weeksLeft += m.weeks;
+    });
+  });
+  document.getElementById("stat-time").innerHTML =
+    `${weeksLeft}<span class="denom" id="stat-time-unit"> wks</span>`;
+
+  // Mini bars
+  setBar("bar-total",       (totalDone  / TOTAL_MODULES) * 100);
+  setBar("bar-java-stat",   (javaDone   / 11)            * 100);
+  setBar("bar-python-stat", (pythonDone / 11)            * 100);
+  // time bar: inverse — how much done
+  const weeksDone = MAX_WEEKS - weeksLeft;
+  setBar("bar-time-stat", (weeksDone / MAX_WEEKS) * 100);
+
+  // Path headers
+  document.getElementById("java-done").textContent   = javaDone;
+  document.getElementById("python-done").textContent = pythonDone;
+  setBar("path-bar-java",   (javaDone   / 11) * 100);
+  setBar("path-bar-python", (pythonDone / 11) * 100);
+}
+
+// ─────────────────────────────────────────────────
+//  ACHIEVEMENTS
+// ─────────────────────────────────────────────────
+const achievementDefs = [
+  {
+    id: "hello-world",
+    emoji: "&#128075;",
+    name: "Hello World",
+    desc: "Complete your very first module",
+    check: (s) => (s.java.length + s.python.length) >= 1
+  },
+  {
+    id: "foundations",
+    emoji: "&#127963;",
+    name: "Foundations",
+    desc: "Complete modules 01 & 02 in either language",
+    check: (s) =>
+      (s.java.includes("01")   && s.java.includes("02"))   ||
+      (s.python.includes("01") && s.python.includes("02"))
+  },
+  {
+    id: "oop-master",
+    emoji: "&#129520;",
+    name: "OOP Master",
+    desc: "Complete module 03 in both languages",
+    check: (s) => s.java.includes("03") && s.python.includes("03")
+  },
+  {
+    id: "full-stack",
+    emoji: "&#127760;",
+    name: "Full Stack",
+    desc: "Complete module 11 in either language",
+    check: (s) => s.java.includes("11") || s.python.includes("11")
+  },
+  {
+    id: "bilingual",
+    emoji: "&#129526;",
+    name: "Bilingual Dev",
+    desc: "Complete all 9 core modules in both languages",
+    check: (s) => {
+      const core = ["01","02","03","04","05","06","07","08","09"];
+      return core.every(id => s.java.includes(id)) &&
+             core.every(id => s.python.includes(id));
+    }
+  },
+  {
+    id: "architect",
+    emoji: "&#127942;",
+    name: "The Architect",
+    desc: "Complete all 22 modules",
+    check: (s) => (s.java.length + s.python.length) >= 22
+  }
+];
+
+function renderAchievements() {
+  const grid = document.getElementById("badges-grid");
+  grid.innerHTML = "";
+  achievementDefs.forEach(a => {
+    const card = document.createElement("div");
+    card.className = "badge-card locked";
+    card.id = "badge-" + a.id;
+    card.innerHTML = `
+      <span class="badge-emoji">${a.emoji}</span>
+      <div class="badge-name">${a.name}</div>
+      <div class="badge-desc">${a.desc}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function updateAchievements(state) {
+  achievementDefs.forEach(a => {
+    const card = document.getElementById("badge-" + a.id);
+    if (!card) return;
+    const earned = a.check(state);
+    const wasLocked = card.classList.contains("locked");
+    if (earned) {
+      if (wasLocked) {
+        card.classList.remove("locked");
+        card.classList.add("unlocked", "just-unlocked");
+        setTimeout(() => card.classList.remove("just-unlocked"), 500);
+      } else {
+        card.classList.add("unlocked");
+        card.classList.remove("locked");
+      }
+    } else {
+      card.classList.add("locked");
+      card.classList.remove("unlocked");
+    }
+  });
+}
+
+// ─────────────────────────────────────────────────
+//  FOOTER
+// ─────────────────────────────────────────────────
+function updateFooter(state) {
+  const meta = document.getElementById("footer-meta");
+  if (state.lastUpdated) {
+    const d = new Date(state.lastUpdated);
+    meta.textContent = "Last updated: " + d.toLocaleString();
+  } else {
+    meta.textContent = "No progress recorded yet.";
+  }
+}
+
+// ─────────────────────────────────────────────────
+//  RESET
+// ─────────────────────────────────────────────────
+function resetProgress() {
+  if (!confirm("Reset all progress? This cannot be undone.")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  init();
+}
+
+// ─────────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────────
+function init() {
+  renderModules();
+  renderAchievements();
+  const state = loadProgress();
+  updateStats(state);
+  updateAchievements(state);
+  updateFooter(state);
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>

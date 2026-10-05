@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classes &amp; Objects – OOP Visualization</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #1a1a2e;
+    color: #eee;
+    font-family: system-ui, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  a.back-link {
+    color: #e94560;
+    text-decoration: none;
+    font-size: 14px;
+    display: inline-block;
+    margin-bottom: 16px;
+  }
+  a.back-link:hover { text-decoration: underline; }
+
+  h1 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 4px;
+    color: #eee;
+  }
+  .subtitle {
+    text-align: center;
+    color: #aaa;
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  /* Top controls */
+  .top-controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 9px 18px;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  button:hover:not(:disabled) { opacity: 0.85; }
+  button:active:not(:disabled) { transform: scale(0.97); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-create1 { background: #e94560; color: #fff; }
+  .btn-create2 { background: #0f3460; color: #7ecfff; border: 1px solid #7ecfff; }
+  .btn-reset   { background: #222; color: #888; border: 1px solid #555; font-size: 12px; }
+
+  /* Main 3-column layout: blueprint | lines | objects */
+  .main-layout {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* Blueprint / Class panel */
+  .blueprint-panel {
+    background: #16213e;
+    border: 2px solid #2a7fff;
+    border-radius: 12px;
+    padding: 20px;
+    width: 260px;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .blueprint-header {
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .blueprint-badge {
+    display: inline-block;
+    background: #0f3460;
+    color: #7ecfff;
+    border: 1px solid #2a7fff;
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .blueprint-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #7ecfff;
+  }
+
+  .section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #aaa;
+    margin: 12px 0 6px;
+    border-bottom: 1px solid #0f3460;
+    padding-bottom: 4px;
+  }
+
+  .field-item, .method-item {
+    padding: 5px 8px;
+    border-radius: 5px;
+    font-family: monospace;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  .field-item  { background: #0f1a2e; color: #c9d1d9; }
+  .method-item { background: #0a1628; color: #79c0ff; border-left: 3px solid #2a7fff; }
+
+  .field-name  { color: #ffa657; }
+  .field-type  { color: #7ecfff; }
+  .method-name { color: #d2a8ff; }
+  .paren       { color: #aaa; }
+
+  /* SVG layer for dotted lines */
+  .lines-layer {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Objects panel */
+  .objects-panel {
+    flex: 1;
+    padding: 0 0 0 24px;
+    position: relative;
+  }
+
+  .objects-panel h2 {
+    font-size: 1rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+
+  .objects-area {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .empty-hint {
+    color: #555;
+    font-size: 14px;
+    padding: 20px 0;
+    font-style: italic;
+  }
+
+  /* Object card */
+  .obj-card {
+    background: #16213e;
+    border: 2px solid #e94560;
+    border-radius: 12px;
+    padding: 16px;
+    animation: cardIn 0.4s cubic-bezier(.4,1.3,.6,1);
+    position: relative;
+    z-index: 1;
+  }
+  .obj-card.car2 { border-color: #2a7fff; }
+
+  @keyframes cardIn {
+    from { transform: scale(0.7) translateY(-20px); opacity: 0; }
+    to   { transform: scale(1)   translateY(0);     opacity: 1; }
+  }
+
+  .obj-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .obj-title {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .car1 .obj-title { color: #e94560; }
+  .car2 .obj-title { color: #7ecfff; }
+
+  .instance-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .car1 .instance-badge { background: #e9456020; color: #e94560; border: 1px solid #e94560; }
+  .car2 .instance-badge { background: #2a7fff20; color: #7ecfff; border: 1px solid #2a7fff; }
+
+  .obj-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .obj-field {
+    background: #0f1a2e;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  .obj-field-label {
+    color: #aaa;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  .obj-field-value {
+    font-family: monospace;
+    font-weight: 700;
+    color: #eee;
+    font-size: 13px;
+  }
+
+  .obj-field-edit {
+    width: 100%;
+    background: #0f3460;
+    border: 1px solid #2a7fff;
+    border-radius: 4px;
+    color: #eee;
+    padding: 3px 6px;
+    font-size: 12px;
+    margin-top: 3px;
+    outline: none;
+  }
+
+  .speed-bar-wrap {
+    margin-top: 3px;
+    background: #0f1a2e;
+    border-radius: 3px;
+    height: 6px;
+    width: 100%;
+    overflow: hidden;
+  }
+  .speed-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+  .car1 .speed-bar { background: #e94560; }
+  .car2 .speed-bar { background: #2a7fff; }
+
+  .obj-methods {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  .method-btn {
+    font-size: 12px;
+    padding: 5px 11px;
+    border-radius: 5px;
+    background: #0f1a2e;
+    border: 1px solid #2a7fff;
+    color: #7ecfff;
+    font-family: monospace;
+  }
+  .method-btn.drive-btn  { border-color: #4caf50; color: #4caf50; }
+  .method-btn.brake-btn  { border-color: #ffdd57; color: #ffdd57; }
+  .method-btn.refuel-btn { border-color: #d2a8ff; color: #d2a8ff; }
+
+  .obj-log {
+    font-size: 11px;
+    color: #aaa;
+    font-style: italic;
+    min-height: 16px;
+    transition: color 0.3s;
+  }
+
+  /* Shared methods note */
+  .shared-note {
+    background: #0f3460;
+    border: 1px dashed #2a7fff;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #7ecfff;
+    margin-top: 14px;
+    text-align: center;
+    display: none;
+  }
+  .shared-note.visible { display: block; animation: fadeIn 0.4s ease; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* Bottom note */
+  .bottom-note {
+    max-width: 1100px;
+    margin: 20px auto 0;
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #ccc;
+  }
+  .bottom-note strong { color: #e94560; }
+  .bottom-note em { color: #7ecfff; font-style: normal; font-weight: 600; }
+
+  /* Message log */
+  #action-log {
+    max-width: 1100px;
+    margin: 12px auto 0;
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    min-height: 36px;
+    color: #ffdd57;
+    font-family: monospace;
+  }
+
+  @media (max-width: 700px) {
+    .main-layout { flex-direction: column; }
+    .blueprint-panel { width: 100%; }
+    .objects-panel { padding: 16px 0 0; }
+  }
+</style>
+</head>
+<body>
+
+<a class="back-link" href="../../README.md">← Back to Index</a>
+
+<h1>Classes &amp; Objects</h1>
+<p class="subtitle">OOP: Blueprint vs. Instance visualization</p>
+
+<div class="top-controls">
+  <button class="btn-create1" id="btn1" onclick="createCar(1)">Create Car Instance 1</button>
+  <button class="btn-create2" id="btn2" onclick="createCar(2)" disabled>Create Car Instance 2</button>
+  <button class="btn-reset"   onclick="resetAll()">Reset</button>
+</div>
+
+<div class="main-layout" id="main-layout">
+  <!-- SVG lines layer -->
+  <svg class="lines-layer" id="lines-svg"></svg>
+
+  <!-- Blueprint -->
+  <div class="blueprint-panel" id="blueprint">
+    <div class="blueprint-header">
+      <div class="blueprint-badge">Class Blueprint</div>
+      <div class="blueprint-title">Car</div>
+    </div>
+
+    <div class="section-label">Fields (state per instance)</div>
+    <div class="field-item"><span class="field-name">color</span>: <span class="field-type">string</span></div>
+    <div class="field-item"><span class="field-name">speed</span>: <span class="field-type">number</span></div>
+    <div class="field-item"><span class="field-name">fuel</span>: <span class="field-type">number</span></div>
+
+    <div class="section-label">Methods (shared from class)</div>
+    <div class="method-item" id="bp-drive"><span class="method-name">drive</span><span class="paren">()</span> <span style="color:#555; font-size:11px;">→ speed += 10, fuel -= 5</span></div>
+    <div class="method-item" id="bp-brake"><span class="method-name">brake</span><span class="paren">()</span> <span style="color:#555; font-size:11px;">→ speed -= 10 (min 0)</span></div>
+    <div class="method-item" id="bp-refuel"><span class="method-name">refuel</span><span class="paren">()</span> <span style="color:#555; font-size:11px;">→ fuel = 100</span></div>
+  </div>
+
+  <!-- Objects area -->
+  <div class="objects-panel">
+    <h2>Object Instances</h2>
+    <div class="objects-area" id="objects-area">
+      <div class="empty-hint" id="empty-hint">No instances yet. Click "Create Car Instance 1" to instantiate.</div>
+    </div>
+    <div class="shared-note" id="shared-note">
+      Both instances share the SAME methods from the class blueprint —<br>
+      but each instance holds its OWN state (color, speed, fuel).
+    </div>
+  </div>
+</div>
+
+<div id="action-log">Waiting for an action...</div>
+
+<div class="bottom-note">
+  <strong>Class</strong> = Blueprint (1 copy in memory, defines structure &amp; behavior)<br>
+  <em>Objects</em> = Instances (multiple copies, each with their own independent state)<br>
+  When you call <code style="color:#d2a8ff">car1.drive()</code>, JavaScript looks up <code style="color:#d2a8ff">drive()</code> on the
+  <em>prototype chain</em> (the class), but modifies <strong>car1</strong>'s own <code>speed</code> and <code>fuel</code>.
+</div>
+
+<script>
+// ─── Car state ───────────────────────────────────────────────────────────────
+const cars = {};  // {1: {color, speed, fuel}, 2: {color, speed, fuel}}
+
+const defaults = {
+  1: { color: 'red',  speed: 0, fuel: 100 },
+  2: { color: 'blue', speed: 0, fuel: 80  }
+};
+
+function log(msg) {
+  document.getElementById('action-log').textContent = msg;
+}
+
+// ─── Create instance ──────────────────────────────────────────────────────────
+function createCar(n) {
+  if (cars[n]) return;
+  cars[n] = { ...defaults[n] };
+
+  document.getElementById('empty-hint')?.remove();
+
+  const area = document.getElementById('objects-area');
+  const card = document.createElement('div');
+  card.className = `obj-card car${n}`;
+  card.id = `car-card-${n}`;
+  card.innerHTML = buildCardHTML(n);
+  area.appendChild(card);
+
+  // Disable button
+  document.getElementById(`btn${n}`).disabled = true;
+
+  // Enable btn2 after car1
+  if (n === 1) document.getElementById('btn2').disabled = false;
+
+  // Show shared note when both exist
+  if (Object.keys(cars).length >= 2) {
+    document.getElementById('shared-note').classList.add('visible');
+  }
+
+  log(`new Car() → Car #${n} instantiated with color="${defaults[n].color}", speed=0, fuel=${defaults[n].fuel}`);
+
+  // Draw lines after DOM settles
+  requestAnimationFrame(() => requestAnimationFrame(drawLines));
+}
+
+function buildCardHTML(n) {
+  const c = cars[n];
+  const colorLabel = n === 1 ? '#e94560' : '#2a7fff';
+  return `
+    <div class="obj-header">
+      <div class="obj-title">Car #${n}</div>
+      <div class="instance-badge">Instance</div>
+    </div>
+    <div class="obj-fields">
+      <div class="obj-field">
+        <div class="obj-field-label">color</div>
+        <div class="obj-field-value" id="val-color-${n}">${c.color}</div>
+        <input class="obj-field-edit" type="text" value="${c.color}" placeholder="color" oninput="updateColor(${n}, this.value)">
+      </div>
+      <div class="obj-field">
+        <div class="obj-field-label">fuel</div>
+        <div class="obj-field-value" id="val-fuel-${n}">${c.fuel}</div>
+        <input class="obj-field-edit" type="number" value="${c.fuel}" min="0" max="100" oninput="updateFuel(${n}, this.value)">
+      </div>
+      <div class="obj-field" style="grid-column: span 2;">
+        <div class="obj-field-label">speed</div>
+        <div class="obj-field-value" id="val-speed-${n}">${c.speed} km/h</div>
+        <div class="speed-bar-wrap">
+          <div class="speed-bar" id="speed-bar-${n}" style="width:0%;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="obj-methods">
+      <button class="method-btn drive-btn"  onclick="carDrive(${n})">drive()</button>
+      <button class="method-btn brake-btn"  onclick="carBrake(${n})">brake()</button>
+      <button class="method-btn refuel-btn" onclick="carRefuel(${n})">refuel()</button>
+    </div>
+    <div class="obj-log" id="obj-log-${n}">Ready.</div>
+  `;
+}
+
+// ─── Methods ──────────────────────────────────────────────────────────────────
+function carDrive(n) {
+  const c = cars[n];
+  if (!c) return;
+  if (c.fuel <= 0) {
+    setObjLog(n, 'Out of fuel! Cannot drive.', '#ff5252');
+    log(`Car #${n}.drive() → No fuel!`);
+    return;
+  }
+  const prevSpeed = c.speed;
+  c.speed = Math.min(c.speed + 10, 200);
+  c.fuel  = Math.max(c.fuel  - 5,  0);
+  updateDisplay(n);
+  flashBlueprint('bp-drive');
+  setObjLog(n, `drive() called → speed: ${prevSpeed} → ${c.speed} km/h, fuel: ${c.fuel}`, '#4caf50');
+  log(`car${n}.drive() → speed goes from ${prevSpeed} to ${c.speed} km/h`);
+}
+
+function carBrake(n) {
+  const c = cars[n];
+  if (!c) return;
+  const prevSpeed = c.speed;
+  c.speed = Math.max(c.speed - 10, 0);
+  updateDisplay(n);
+  flashBlueprint('bp-brake');
+  setObjLog(n, `brake() called → speed: ${prevSpeed} → ${c.speed} km/h`, '#ffdd57');
+  log(`car${n}.brake() → speed goes from ${prevSpeed} to ${c.speed} km/h`);
+}
+
+function carRefuel(n) {
+  const c = cars[n];
+  if (!c) return;
+  const prev = c.fuel;
+  c.fuel = 100;
+  updateDisplay(n);
+  flashBlueprint('bp-refuel');
+  setObjLog(n, `refuel() called → fuel: ${prev} → 100`, '#d2a8ff');
+  log(`car${n}.refuel() → fuel goes from ${prev} to 100`);
+}
+
+function updateColor(n, val) {
+  if (!cars[n]) return;
+  cars[n].color = val;
+  document.getElementById(`val-color-${n}`).textContent = val;
+  log(`car${n}.color = "${val}"`);
+}
+
+function updateFuel(n, val) {
+  if (!cars[n]) return;
+  const v = Math.max(0, Math.min(100, Number(val) || 0));
+  cars[n].fuel = v;
+  document.getElementById(`val-fuel-${n}`).textContent = v;
+  log(`car${n}.fuel = ${v}`);
+}
+
+function updateDisplay(n) {
+  const c = cars[n];
+  if (!c) return;
+  const speedEl = document.getElementById(`val-speed-${n}`);
+  const fuelEl  = document.getElementById(`val-fuel-${n}`);
+  const barEl   = document.getElementById(`speed-bar-${n}`);
+  const fuelInput = document.querySelector(`#car-card-${n} input[type=number]`);
+
+  if (speedEl) speedEl.textContent = `${c.speed} km/h`;
+  if (fuelEl)  fuelEl.textContent  = c.fuel;
+  if (barEl)   barEl.style.width   = `${Math.min(c.speed / 2, 100)}%`;
+  if (fuelInput) fuelInput.value   = c.fuel;
+}
+
+function setObjLog(n, msg, color = '#aaa') {
+  const el = document.getElementById(`obj-log-${n}`);
+  if (el) { el.textContent = msg; el.style.color = color; }
+}
+
+// ─── Blueprint flash ──────────────────────────────────────────────────────────
+function flashBlueprint(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.background = '#2a4a1e';
+  el.style.borderLeft = '3px solid #4caf50';
+  setTimeout(() => {
+    el.style.background = '';
+    el.style.borderLeft = '';
+  }, 500);
+}
+
+// ─── SVG dotted lines ──────────────────────────────────────────────────────────
+function drawLines() {
+  const svg = document.getElementById('lines-svg');
+  svg.innerHTML = '';
+
+  const svgRect = svg.getBoundingClientRect();
+  const bpEl = document.getElementById('blueprint');
+  const bpRect = bpEl.getBoundingClientRect();
+
+  // Right edge of blueprint (relative to svg)
+  const bpRightX = bpRect.right  - svgRect.left;
+  const bpMidY   = bpRect.top + bpRect.height / 2 - svgRect.top;
+
+  function makeLineForCard(n) {
+    const card = document.getElementById(`car-card-${n}`);
+    if (!card) return;
+    const cardRect = card.getBoundingClientRect();
+    const cardLeftX = cardRect.left   - svgRect.left;
+    const cardMidY  = cardRect.top + cardRect.height / 2 - svgRect.top;
+
+    const color = n === 1 ? '#e9456088' : '#2a7fff88';
+
+    // Bezier curve
+    const cx1 = bpRightX + (cardLeftX - bpRightX) * 0.4;
+    const cx2 = bpRightX + (cardLeftX - bpRightX) * 0.6;
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M ${bpRightX} ${bpMidY} C ${cx1} ${bpMidY}, ${cx2} ${cardMidY}, ${cardLeftX} ${cardMidY}`);
+    path.setAttribute('stroke', color);
+    path.setAttribute('stroke-width', '2');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke-dasharray', '6,4');
+    path.style.animation = `dashFlow 1.5s linear infinite`;
+    svg.appendChild(path);
+
+    // Arrowhead at card end
+    const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    const ax = cardLeftX, ay = cardMidY;
+    arrow.setAttribute('points', `${ax},${ay} ${ax-8},${ay-4} ${ax-8},${ay+4}`);
+    arrow.setAttribute('fill', color);
+    svg.appendChild(arrow);
+  }
+
+  if (cars[1]) makeLineForCard(1);
+  if (cars[2]) makeLineForCard(2);
+}
+
+// Animate dashes
+const styleEl = document.createElement('style');
+styleEl.textContent = `
+  @keyframes dashFlow {
+    from { stroke-dashoffset: 0; }
+    to   { stroke-dashoffset: -20; }
+  }
+`;
+document.head.appendChild(styleEl);
+
+// ─── Reset ────────────────────────────────────────────────────────────────────
+function resetAll() {
+  delete cars[1];
+  delete cars[2];
+  const area = document.getElementById('objects-area');
+  area.innerHTML = '<div class="empty-hint" id="empty-hint">No instances yet. Click "Create Car Instance 1" to instantiate.</div>';
+  document.getElementById('shared-note').classList.remove('visible');
+  document.getElementById('btn1').disabled = false;
+  document.getElementById('btn2').disabled = true;
+  document.getElementById('lines-svg').innerHTML = '';
+  log('Reset. Create new instances.');
+}
+
+// Redraw lines on resize
+window.addEventListener('resize', () => {
+  if (Object.keys(cars).length > 0) drawLines();
+});
+</script>
+</body>
+</html>

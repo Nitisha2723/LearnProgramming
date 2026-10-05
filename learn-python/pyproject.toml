@@ -1,0 +1,18 @@
+[tool.pytest.ini_options]
+testpaths = [
+    "01-foundations",
+    "02-core-language",
+    "03-oop",
+    "04-data-structures",
+    "05-real-world",
+    "06-design",
+    "07-advanced",
+]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.pytest.ini_options.markers]
+slow = "marks tests as slow"
+integration = "marks tests as integration tests"

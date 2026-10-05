@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Big O Complexity Reference</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #1a1a2e;
+    --panel: #16213e;
+    --panel2: #0f3460;
+    --accent: #e94560;
+    --accent2: #533483;
+    --text: #eaeaea;
+    --muted: #8892a4;
+    --green: #4ade80;
+    --yellow: #facc15;
+    --orange: #fb923c;
+    --red: #f87171;
+    --curve-o1: #4ade80;
+    --curve-logn: #a3e635;
+    --curve-n: #facc15;
+    --curve-nlogn: #fb923c;
+    --curve-n2: #f87171;
+    --curve-2n: #e879f9;
+  }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  header {
+    background: linear-gradient(135deg, var(--panel2) 0%, var(--accent2) 100%);
+    padding: 2rem;
+    text-align: center;
+    border-bottom: 2px solid var(--accent);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(233,69,96,0.15) 0%, transparent 70%);
+  }
+  header h1 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    position: relative;
+  }
+  header h1 span { color: var(--accent); }
+  header p { color: var(--muted); margin-top: 0.5rem; font-size: 1.05rem; position: relative; }
+  .container { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
+  section { margin-bottom: 3rem; }
+  h2 {
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--text);
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent);
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  h2 .icon { font-size: 1.3rem; }
+
+  /* ── GRAPH SECTION ── */
+  .graph-wrapper {
+    background: var(--panel);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .graph-controls {
+    display: flex; flex-wrap: wrap; gap: 1rem;
+    align-items: center; margin-bottom: 1.2rem;
+  }
+  .slider-group {
+    display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 200px;
+  }
+  .slider-group label { color: var(--muted); font-size: 0.9rem; white-space: nowrap; }
+  .n-val {
+    background: var(--accent);
+    color: #fff;
+    padding: 0.15rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 1rem;
+    min-width: 3rem;
+    text-align: center;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--panel2);
+    outline: none;
+    flex: 1;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 0.6rem;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 0.4rem;
+    background: rgba(255,255,255,0.04);
+    padding: 0.3rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .legend-item:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+  .legend-item.dimmed { opacity: 0.35; }
+  .legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .canvas-container { position: relative; }
+  canvas#complexityGraph {
+    width: 100%; max-height: 420px;
+    border-radius: 10px;
+    cursor: crosshair;
+    display: block;
+  }
+  .tooltip {
+    position: absolute;
+    background: rgba(15,52,96,0.96);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    max-width: 280px;
+    z-index: 10;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .tooltip.visible { opacity: 1; }
+  .tooltip-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.3rem; }
+  .tooltip-desc { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.4rem; line-height: 1.4; }
+  .tooltip-examples { font-size: 0.8rem; color: #a5b4fc; }
+
+  /* ── TABLE SECTION ── */
+  .table-scroll { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.87rem;
+  }
+  thead tr { background: var(--panel2); }
+  thead th {
+    padding: 0.85rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+  tbody tr { background: var(--panel); border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+  tbody tr:hover { background: rgba(255,255,255,0.04); }
+  td { padding: 0.7rem 1rem; vertical-align: middle; }
+  td:first-child { font-weight: 600; white-space: nowrap; }
+  .lang-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+    font-weight: 700;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+  }
+  .lang-java { background: rgba(233,69,96,0.2); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+  .lang-python { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+  .o { font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 0.2rem 0.5rem; border-radius: 5px; display: inline-block; font-weight: 600; white-space: nowrap; }
+  .o-green { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.25); }
+  .o-yellow { background: rgba(250,204,21,0.15); color: var(--yellow); border: 1px solid rgba(250,204,21,0.25); }
+  .o-orange { background: rgba(251,146,60,0.15); color: var(--orange); border: 1px solid rgba(251,146,60,0.25); }
+  .o-red { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+  .section-divider { background: var(--panel2); color: var(--accent); font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .section-divider td { padding: 0.45rem 1rem; }
+
+  /* ── CODE EXAMPLES ── */
+  .ops-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.75rem;
+  }
+  .op-btn {
+    background: var(--panel);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text);
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    text-align: left;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .op-btn:hover, .op-btn.active {
+    background: var(--panel2);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(233,69,96,0.2);
+  }
+  .op-btn .op-complexity { margin-left: auto; font-size: 0.75rem; font-weight: 700; font-family: monospace; }
+  .code-panel {
+    display: none;
+    background: var(--panel);
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.06);
+    overflow: hidden;
+    margin-top: 1rem;
+  }
+  .code-panel.visible { display: block; }
+  .code-tabs {
+    display: flex;
+    background: var(--panel2);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .code-tab {
+    padding: 0.7rem 1.5rem;
+    cursor: pointer;
+    font-size: 0.87rem;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .code-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .code-content { display: none; padding: 0; }
+  .code-content.active { display: block; }
+  .code-content pre { margin: 0 !important; border-radius: 0 !important; }
+  .code-content pre code { font-size: 0.85rem !important; line-height: 1.6 !important; }
+  .op-info {
+    padding: 1rem 1.25rem;
+    background: rgba(83,52,131,0.2);
+    border-bottom: 1px solid rgba(83,52,131,0.3);
+  }
+  .op-info-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem; }
+  .op-info-desc { color: var(--muted); font-size: 0.87rem; line-height: 1.5; }
+  .op-info-complexity { margin-top: 0.4rem; font-size: 0.82rem; }
+
+  /* ── COMPLEXITY LEGEND CARD ── */
+  .complexity-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .complexity-card {
+    background: var(--panel);
+    border-radius: 10px;
+    padding: 1rem;
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: transform 0.2s;
+  }
+  .complexity-card:hover { transform: translateY(-3px); }
+  .complexity-card .formula {
+    font-family: 'Courier New', monospace;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+  .complexity-card .name { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.2rem; }
+  .complexity-card .desc { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+  .complexity-card .examples { margin-top: 0.4rem; font-size: 0.76rem; color: #a5b4fc; }
+
+  @media (max-width: 768px) {
+    .graph-controls { flex-direction: column; align-items: flex-start; }
+    .ops-grid { grid-template-columns: 1fr 1fr; }
+    td { padding: 0.5rem 0.6rem; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Big <span>O</span> Complexity Reference</h1>
+  <p>Interactive complexity curves, data structure operations, and code examples</p>
+</header>
+
+<div class="container">
+
+  <!-- ── COMPLEXITY OVERVIEW ── -->
+  <section>
+    <h2><span class="icon">⚡</span> Complexity Classes</h2>
+    <div class="complexity-cards">
+      <div class="complexity-card" style="border-top: 3px solid var(--curve-o1);">
+        <div class="formula" style="color: var(--curve-o1);">O(1)</div>
+        <div class="name">Constant</div>
+        <div class="desc">Always the same time, no matter the input size.</div>
+        <div class="examples">Array index access, HashMap get</div>
+      </div>
+      <div class="complexity-card" style="border-top: 3px solid var(--curve-logn);">
+        <div class="formula" style="color: var(--curve-logn);">O(log n)</div>
+        <div class="name">Logarithmic</div>
+        <div class="desc">Halves the problem at each step. Very efficient.</div>
+        <div class="examples">Binary search, balanced BST ops</div>
+      </div>
+      <div class="complexity-card" style="border-top: 3px solid var(--curve-n);">
+        <div class="formula" style="color: var(--curve-n);">O(n)</div>
+        <div class="name">Linear</div>
+        <div class="desc">Time grows proportionally with input size.</div>
+        <div class="examples">Linear search, array traversal</div>
+      </div>
+      <div class="complexity-card" style="border-top: 3px solid var(--curve-nlogn);">
+        <div class="formula" style="color: var(--curve-nlogn);">O(n log n)</div>
+        <div class="name">Linearithmic</div>
+        <div class="desc">Efficient sorting. Divide and conquer.</div>
+        <div class="examples">Merge sort, heap sort, quick sort avg</div>
+      </div>
+      <div class="complexity-card" style="border-top: 3px solid var(--curve-n2);">
+        <div class="formula" style="color: var(--curve-n2);">O(n²)</div>
+        <div class="name">Quadratic</div>
+        <div class="desc">Nested loops over input. Gets slow quickly.</div>
+        <div class="examples">Bubble sort, insertion sort, matrix multiply naive</div>
+      </div>
+      <div class="complexity-card" style="border-top: 3px solid var(--curve-2n);">
+        <div class="formula" style="color: var(--curve-2n);">O(2ⁿ)</div>
+        <div class="name">Exponential</div>
+        <div class="desc">Doubles with each new element. Avoid at scale.</div>
+        <div class="examples">Power set, recursive Fibonacci, subset generation</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── GRAPH ── -->
+  <section>
+    <h2><span class="icon">📈</span> Interactive Growth Curves</h2>
+    <div class="graph-wrapper">
+      <div class="graph-controls">
+        <div class="slider-group">
+          <label>n =</label>
+          <span class="n-val" id="nDisplay">20</span>
+          <input type="range" id="nSlider" min="2" max="50" value="20">
+          <label style="color:var(--muted); font-size: 0.8rem;">(drag to animate)</label>
+        </div>
+        <div class="legend" id="legend"></div>
+      </div>
+      <div class="canvas-container">
+        <canvas id="complexityGraph"></canvas>
+        <div class="tooltip" id="tooltip"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── BIG O TABLE ── -->
+  <section>
+    <h2><span class="icon">📊</span> Data Structure Complexity Table</h2>
+    <div class="table-scroll">
+      <table id="complexityTable">
+        <thead>
+          <tr>
+            <th>Structure</th>
+            <th>Language</th>
+            <th>Access</th>
+            <th>Search</th>
+            <th>Insert</th>
+            <th>Delete</th>
+            <th>Space</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── CODE EXAMPLES ── -->
+  <section>
+    <h2><span class="icon">💻</span> Code Examples</h2>
+    <p style="color: var(--muted); margin-bottom: 1rem; font-size: 0.9rem;">Click an operation to see the Java &amp; Python implementation.</p>
+    <div class="ops-grid" id="opsGrid"></div>
+    <div class="code-panel" id="codePanel">
+      <div class="op-info" id="opInfo"></div>
+      <div class="code-tabs">
+        <div class="code-tab active" onclick="switchTab('java')">Java</div>
+        <div class="code-tab" onclick="switchTab('python')">Python</div>
+      </div>
+      <div class="code-content active" id="javaContent"></div>
+      <div class="code-content" id="pythonContent"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════
+const CURVES = [
+  { id: 'o1',    label: 'O(1)',       color: '#4ade80', fn: n => 1,              desc: 'Constant time — does not depend on input size.', examples: 'Array access, HashMap get/put, Stack push/pop' },
+  { id: 'logn',  label: 'O(log n)',   color: '#a3e635', fn: n => Math.log2(n),   desc: 'Logarithmic — cuts problem in half each step.', examples: 'Binary search, balanced BST operations, TreeMap' },
+  { id: 'n',     label: 'O(n)',       color: '#facc15', fn: n => n,              desc: 'Linear — single pass through input.', examples: 'Linear search, array traversal, ArrayList copy' },
+  { id: 'nlogn', label: 'O(n log n)', color: '#fb923c', fn: n => n * Math.log2(n), desc: 'Linearithmic — efficient sorting algorithms.', examples: 'Merge sort, Heap sort, Arrays.sort() (TimSort)' },
+  { id: 'n2',    label: 'O(n²)',      color: '#f87171', fn: n => n * n,          desc: 'Quadratic — nested loops. Avoid for large n.', examples: 'Bubble sort, Selection sort, naive matrix multiply' },
+  { id: '2n',    label: 'O(2ⁿ)',      color: '#e879f9', fn: n => Math.pow(2, n), desc: 'Exponential — doubles with each element. Only feasible for tiny n.', examples: 'Power set, recursive Fibonacci, TSP brute force' },
+];
+
+const VISIBLE = new Set(CURVES.map(c => c.id));
+
+const TABLE_DATA = [
+  { section: 'Java Collections' },
+  { name: 'ArrayList', lang: 'java', access: ['O(1)','green'], search: ['O(n)','yellow'], insert: ['O(1)*','green'], delete: ['O(n)','yellow'], space: ['O(n)','yellow'], note: '*amortized; O(n) worst' },
+  { name: 'LinkedList', lang: 'java', access: ['O(n)','yellow'], search: ['O(n)','yellow'], insert: ['O(1)','green'], delete: ['O(1)','green'], space: ['O(n)','yellow'], note: 'O(1) insert/delete at ends' },
+  { name: 'HashMap', lang: 'java', access: ['O(1)','green'], search: ['O(1)','green'], insert: ['O(1)','green'], delete: ['O(1)','green'], space: ['O(n)','yellow'], note: 'avg; O(n) worst (hash collision)' },
+  { name: 'TreeMap', lang: 'java', access: ['O(log n)','green'], search: ['O(log n)','green'], insert: ['O(log n)','green'], delete: ['O(log n)','green'], space: ['O(n)','yellow'], note: 'Red-black tree; sorted keys' },
+  { name: 'HashSet', lang: 'java', access: ['O(1)','green'], search: ['O(1)','green'], insert: ['O(1)','green'], delete: ['O(1)','green'], space: ['O(n)','yellow'], note: 'Backed by HashMap' },
+  { name: 'TreeSet', lang: 'java', access: ['O(log n)','green'], search: ['O(log n)','green'], insert: ['O(log n)','green'], delete: ['O(log n)','green'], space: ['O(n)','yellow'], note: 'Sorted; backed by TreeMap' },
+  { name: 'Stack', lang: 'java', access: ['O(n)','yellow'], search: ['O(n)','yellow'], insert: ['O(1)','green'], delete: ['O(1)','green'], space: ['O(n)','yellow'], note: 'push/pop O(1); extends Vector' },
+  { name: 'ArrayDeque', lang: 'java', access: ['O(n)','yellow'], search: ['O(n)','yellow'], insert: ['O(1)','green'], delete: ['O(1)','green'], space: ['O(n)','yellow'], note: 'addFirst/Last, peekFirst/Last O(1)' },
+  { name: 'PriorityQueue', lang: 'java', access: ['O(n)','yellow'], search: ['O(n)','yellow'], insert: ['O(log n)','green'], delete: ['O(log n)','green'], space: ['O(n)','yellow'], note: 'peek O(1); min-heap by default' },
+  { name: 'LinkedHashMap', lang: 'java', access: ['O(1)','green'], search: ['O(1)','green'], insert: ['O(1)','green'], delete: ['O(1)','green'], space: ['O(n)','yellow'], note: 'Maintains insertion order' },
+  { name: 'Arrays (sorted)', lang: 'java', access: ['O(1)','green'], search: ['O(log n)','green'], insert: ['O(n)','yellow'], delete: ['O(n)','yellow'], space: ['O(n)','yellow'], note: 'Binary search after sort; fixed size' },
+  { section: 'Python Data Structures' },
+  { name: 'list', lang: 'python', access: ['O(1)','green'], search: ['O(n)','yellow'], insert: ['O(1)*','green'], delete: ['O(n)','yellow'], space: ['O(n)','yellow'], note: '*append O(1) amortized; insert(0,x) O(n)' },
+  { name: 'dict', lang: 'python', access: ['O(1)','green'], search: ['O(1)','green'], insert: ['O(1)','green'], delete: ['O(1)','green'], space: ['O(n)','yellow'], note: 'Hash table; O(n) worst case' },
+  { name: 'set', lang: 'python', access: ['O(1)','green'], search: ['O(1)','green'], insert: ['O(1)','green'], delete: ['O(1)','green'], space: ['O(n)','yellow'], note: 'Hash set; avg O(1) ops' },
+  { name: 'tuple', lang: 'python', access: ['O(1)','green'], search: ['O(n)','yellow'], insert: ['N/A','green'], delete: ['N/A','green'], space: ['O(n)','yellow'], note: 'Immutable; slightly faster than list' },
+  { name: 'deque', lang: 'python', access: ['O(n)','yellow'], search: ['O(n)','yellow'], insert: ['O(1)','green'], delete: ['O(1)','green'], space: ['O(n)','yellow'], note: 'appendleft/popleft O(1); collections.deque' },
+  { name: 'heapq (list)', lang: 'python', access: ['O(n)','yellow'], search: ['O(n)','yellow'], insert: ['O(log n)','green'], delete: ['O(log n)','green'], space: ['O(n)','yellow'], note: 'heappush/heappop O(log n); min-heap' },
+  { name: 'OrderedDict', lang: 'python', access: ['O(1)','green'], search: ['O(1)','green'], insert: ['O(1)','green'], delete: ['O(1)','green'], space: ['O(n)','yellow'], note: 'Preserves insertion order; collections' },
+  { name: 'Counter', lang: 'python', access: ['O(1)','green'], search: ['O(1)','green'], insert: ['O(1)','green'], delete: ['O(1)','green'], space: ['O(n)','yellow'], note: 'Subclass of dict; collections.Counter' },
+  { name: 'sortedcontainers SortedList', lang: 'python', access: ['O(log n)','green'], search: ['O(log n)','green'], insert: ['O(log n)','green'], delete: ['O(log n)','green'], space: ['O(n)','yellow'], note: '3rd party; sorted list with fast ops' },
+  { section: 'Sorting Algorithms' },
+  { name: 'Bubble Sort', lang: 'java', access: ['-','green'], search: ['-','green'], insert: ['-','green'], delete: ['-','green'], space: ['O(1)','green'], note: 'Best O(n), Avg/Worst O(n²)' },
+  { name: 'Merge Sort', lang: 'java', access: ['-','green'], search: ['-','green'], insert: ['-','green'], delete: ['-','green'], space: ['O(n)','yellow'], note: 'All cases O(n log n); stable' },
+  { name: 'Quick Sort', lang: 'java', access: ['-','green'], search: ['-','green'], insert: ['-','green'], delete: ['-','green'], space: ['O(log n)','green'], note: 'Avg O(n log n); worst O(n²)' },
+  { name: 'Heap Sort', lang: 'java', access: ['-','green'], search: ['-','green'], insert: ['-','green'], delete: ['-','green'], space: ['O(1)','green'], note: 'All cases O(n log n); not stable' },
+  { name: 'TimSort', lang: 'java', access: ['-','green'], search: ['-','green'], insert: ['-','green'], delete: ['-','green'], space: ['O(n)','yellow'], note: 'Java Arrays.sort; Best O(n), Worst O(n log n)' },
+];
+
+const CODE_EXAMPLES = [
+  {
+    id: 'binary-search',
+    name: 'Binary Search',
+    icon: '🔍',
+    complexity: 'O(log n)',
+    complexityClass: 'green',
+    desc: 'Efficiently search a sorted array by repeatedly halving the search space.',
+    java: `import java.util.Arrays;
+
+public class BinarySearch {
+    // Returns index of target, or -1 if not found
+    public static int binarySearch(int[] arr, int target) {
+        int left = 0, right = arr.length - 1;
+
+        while (left <= right) {
+            int mid = left + (right - left) / 2; // avoids overflow
+
+            if (arr[mid] == target)   return mid;
+            else if (arr[mid] < target) left = mid + 1;
+            else                        right = mid - 1;
+        }
+        return -1;
+    }
+
+    public static void main(String[] args) {
+        int[] sorted = {2, 5, 8, 12, 16, 23, 38, 56, 72, 91};
+        System.out.println(binarySearch(sorted, 23)); // → 5
+        System.out.println(Arrays.binarySearch(sorted, 23)); // built-in → 5
+    }
+}`,
+    python: `import bisect
+
+def binary_search(arr: list, target) -> int:
+    """Returns index of target, or -1 if not found."""
+    left, right = 0, len(arr) - 1
+
+    while left <= right:
+        mid = (left + right) // 2
+
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return -1
+
+# Usage
+sorted_arr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]
+print(binary_search(sorted_arr, 23))      # → 5
+
+# Built-in: bisect module
+idx = bisect.bisect_left(sorted_arr, 23)
+print(idx if sorted_arr[idx] == 23 else -1)  # → 5`
+  },
+  {
+    id: 'merge-sort',
+    name: 'Merge Sort',
+    icon: '🔀',
+    complexity: 'O(n log n)',
+    complexityClass: 'orange',
+    desc: 'Divide-and-conquer sorting: split recursively, then merge sorted halves.',
+    java: `public class MergeSort {
+    public static void mergeSort(int[] arr, int left, int right) {
+        if (left >= right) return;
+
+        int mid = (left + right) / 2;
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+        merge(arr, left, mid, right);
+    }
+
+    private static void merge(int[] arr, int left, int mid, int right) {
+        int[] temp = new int[right - left + 1];
+        int i = left, j = mid + 1, k = 0;
+
+        while (i <= mid && j <= right)
+            temp[k++] = arr[i] <= arr[j] ? arr[i++] : arr[j++];
+        while (i <= mid)  temp[k++] = arr[i++];
+        while (j <= right) temp[k++] = arr[j++];
+
+        System.arraycopy(temp, 0, arr, left, temp.length);
+    }
+
+    public static void main(String[] args) {
+        int[] arr = {38, 27, 43, 3, 9, 82, 10};
+        mergeSort(arr, 0, arr.length - 1);
+        // arr → [3, 9, 10, 27, 38, 43, 82]
+    }
+}`,
+    python: `def merge_sort(arr: list) -> list:
+    if len(arr) <= 1:
+        return arr
+
+    mid = len(arr) // 2
+    left  = merge_sort(arr[:mid])
+    right = merge_sort(arr[mid:])
+    return merge(left, right)
+
+def merge(left: list, right: list) -> list:
+    result = []
+    i = j = 0
+
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            result.append(left[i]); i += 1
+        else:
+            result.append(right[j]); j += 1
+
+    result.extend(left[i:])
+    result.extend(right[j:])
+    return result
+
+# Usage
+arr = [38, 27, 43, 3, 9, 82, 10]
+print(merge_sort(arr))  # → [3, 9, 10, 27, 38, 43, 82]
+
+# Python built-in (TimSort, also O(n log n))
+arr.sort()  # in-place
+sorted_arr = sorted(arr)  # returns new list`
+  },
+  {
+    id: 'hashmap-ops',
+    name: 'HashMap / dict',
+    icon: '🗺️',
+    complexity: 'O(1) avg',
+    complexityClass: 'green',
+    desc: 'Hash-based key-value store with average O(1) get, put, and remove.',
+    java: `import java.util.HashMap;
+import java.util.Map;
+
+public class HashMapOps {
+    public static void main(String[] args) {
+        Map<String, Integer> freq = new HashMap<>();
+
+        // Insert / Update — O(1) avg
+        freq.put("apple", 3);
+        freq.put("banana", 1);
+        freq.merge("apple", 1, Integer::sum); // increment
+
+        // Access — O(1) avg
+        int count = freq.getOrDefault("apple", 0); // → 4
+
+        // Contains key — O(1)
+        boolean has = freq.containsKey("cherry"); // false
+
+        // Delete — O(1) avg
+        freq.remove("banana");
+
+        // Iterate — O(n)
+        for (Map.Entry<String, Integer> e : freq.entrySet())
+            System.out.println(e.getKey() + ": " + e.getValue());
+
+        // Compute if absent — O(1) avg
+        freq.computeIfAbsent("cherry", k -> 0);
+    }
+}`,
+    python: `# Python dict — O(1) average for all core ops
+from collections import defaultdict, Counter
+
+# Basic usage
+freq: dict[str, int] = {}
+
+# Insert / Update — O(1)
+freq["apple"] = 3
+freq["banana"] = 1
+freq["apple"] = freq.get("apple", 0) + 1  # → 4
+
+# Access — O(1)
+count = freq.get("apple", 0)  # → 4
+
+# Contains key — O(1)
+has = "cherry" in freq  # False
+
+# Delete — O(1)
+del freq["banana"]
+removed = freq.pop("banana", None)  # safe pop
+
+# Iterate — O(n)
+for key, val in freq.items():
+    print(f"{key}: {val}")
+
+# defaultdict — auto-initialises missing keys
+word_count = defaultdict(int)
+for word in ["a", "b", "a", "c", "a"]:
+    word_count[word] += 1  # no KeyError
+
+# Counter — purpose-built frequency map
+c = Counter("abracadabra")  # Counter({'a':5,'b':2,'r':2,'c':1,'d':1})`
+  },
+  {
+    id: 'linked-list',
+    name: 'LinkedList ops',
+    icon: '🔗',
+    complexity: 'O(1) ends',
+    complexityClass: 'green',
+    desc: 'Linked list with O(1) insert/delete at head/tail, O(n) for arbitrary position.',
+    java: `import java.util.LinkedList;
+import java.util.Deque;
+
+public class LinkedListOps {
+    public static void main(String[] args) {
+        // Java LinkedList implements Deque
+        Deque<Integer> list = new LinkedList<>();
+
+        // Add — O(1) at ends
+        list.addFirst(1);   // [1]
+        list.addLast(2);    // [1, 2]
+        list.addLast(3);    // [1, 2, 3]
+        list.offerFirst(0); // [0, 1, 2, 3]
+
+        // Peek — O(1), no removal
+        int head = list.peekFirst(); // → 0
+        int tail = list.peekLast();  // → 3
+
+        // Remove — O(1) at ends
+        list.pollFirst(); // removes 0
+        list.pollLast();  // removes 3
+
+        // Size — O(1)
+        int sz = list.size(); // → 2
+
+        // Iterate — O(n)
+        for (int val : list) System.out.println(val);
+
+        // ⚠️ get(index) — O(n)! Use ArrayList for random access.
+    }
+}`,
+    python: `from collections import deque
+
+# Python deque — doubly-linked list backed O(1) ends
+dq: deque[int] = deque()
+
+# Add — O(1)
+dq.append(1)       # right  → deque([1])
+dq.appendleft(0)   # left   → deque([0, 1])
+dq.append(2)       #        → deque([0, 1, 2])
+
+# Peek — O(1)
+head = dq[0]   # → 0
+tail = dq[-1]  # → 2
+
+# Remove — O(1) at ends
+dq.popleft()   # removes 0
+dq.pop()       # removes 2
+
+# Size — O(1)
+sz = len(dq)  # → 1
+
+# Iterate — O(n)
+for val in dq:
+    print(val)
+
+# ⚠️ dq[i] for arbitrary i — O(n)
+# Use list for random access: list[i] is O(1)
+
+# Manual node-based linked list (for interviews)
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val; self.next = next`
+  },
+  {
+    id: 'tree-bst',
+    name: 'Binary Search Tree',
+    icon: '🌳',
+    complexity: 'O(log n) avg',
+    complexityClass: 'green',
+    desc: 'BST provides O(log n) search, insert, delete on average (O(n) worst if unbalanced).',
+    java: `public class BST {
+    static class Node {
+        int val; Node left, right;
+        Node(int v) { val = v; }
+    }
+
+    Node root;
+
+    // Insert — O(log n) avg, O(n) worst
+    Node insert(Node node, int val) {
+        if (node == null) return new Node(val);
+        if (val < node.val)      node.left  = insert(node.left, val);
+        else if (val > node.val) node.right = insert(node.right, val);
+        return node;
+    }
+
+    // Search — O(log n) avg
+    boolean search(Node node, int val) {
+        if (node == null) return false;
+        if (val == node.val) return true;
+        return val < node.val
+            ? search(node.left, val)
+            : search(node.right, val);
+    }
+
+    // In-order traversal (sorted) — O(n)
+    void inOrder(Node node) {
+        if (node == null) return;
+        inOrder(node.left);
+        System.out.print(node.val + " ");
+        inOrder(node.right);
+    }
+}`,
+    python: `from __future__ import annotations
+
+class BSTNode:
+    def __init__(self, val: int):
+        self.val = val
+        self.left: BSTNode | None = None
+        self.right: BSTNode | None = None
+
+class BST:
+    def __init__(self): self.root: BSTNode | None = None
+
+    # Insert — O(log n) avg, O(n) worst (skewed)
+    def insert(self, val: int) -> None:
+        def _insert(node, val):
+            if node is None: return BSTNode(val)
+            if val < node.val:   node.left  = _insert(node.left, val)
+            elif val > node.val: node.right = _insert(node.right, val)
+            return node
+        self.root = _insert(self.root, val)
+
+    # Search — O(log n) avg
+    def search(self, val: int) -> bool:
+        def _search(node, val):
+            if node is None: return False
+            if val == node.val: return True
+            return _search(node.left, val) if val < node.val else _search(node.right, val)
+        return _search(self.root, val)
+
+    # In-order traversal → sorted — O(n)
+    def inorder(self) -> list[int]:
+        result = []
+        def _inorder(node):
+            if node: _inorder(node.left); result.append(node.val); _inorder(node.right)
+        _inorder(self.root)
+        return result
+
+# Python: use sortedcontainers.SortedList for production BST
+# from sortedcontainers import SortedList
+# sl = SortedList([5, 3, 7, 1, 4])`
+  },
+  {
+    id: 'graph-bfs',
+    name: 'Graph BFS',
+    icon: '🕸️',
+    complexity: 'O(V + E)',
+    complexityClass: 'yellow',
+    desc: 'Breadth-First Search explores nodes level by level. O(V+E) where V = vertices, E = edges.',
+    java: `import java.util.*;
+
+public class GraphBFS {
+    // Adjacency list representation
+    static Map<Integer, List<Integer>> graph = new HashMap<>();
+
+    static void addEdge(int u, int v) {
+        graph.computeIfAbsent(u, k -> new ArrayList<>()).add(v);
+        graph.computeIfAbsent(v, k -> new ArrayList<>()).add(u);
+    }
+
+    // BFS — O(V + E)
+    static List<Integer> bfs(int start) {
+        List<Integer> order = new ArrayList<>();
+        Set<Integer> visited = new HashSet<>();
+        Queue<Integer> queue = new LinkedList<>();
+
+        queue.offer(start);
+        visited.add(start);
+
+        while (!queue.isEmpty()) {
+            int node = queue.poll();
+            order.add(node);
+
+            for (int neighbor : graph.getOrDefault(node, Collections.emptyList())) {
+                if (!visited.contains(neighbor)) {
+                    visited.add(neighbor);
+                    queue.offer(neighbor);
+                }
+            }
+        }
+        return order;
+    }
+
+    public static void main(String[] args) {
+        addEdge(1, 2); addEdge(1, 3);
+        addEdge(2, 4); addEdge(3, 4); addEdge(4, 5);
+        System.out.println(bfs(1)); // [1, 2, 3, 4, 5]
+    }
+}`,
+    python: `from collections import deque, defaultdict
+
+# Adjacency list representation
+graph: dict[int, list[int]] = defaultdict(list)
+
+def add_edge(u: int, v: int) -> None:
+    graph[u].append(v)
+    graph[v].append(u)
+
+# BFS — O(V + E)
+def bfs(start: int) -> list[int]:
+    visited = {start}
+    queue = deque([start])
+    order = []
+
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append(neighbor)
+
+    return order
+
+# BFS shortest path
+def bfs_shortest_path(start: int, end: int) -> list[int] | None:
+    queue = deque([[start]])
+    visited = {start}
+
+    while queue:
+        path = queue.popleft()
+        node = path[-1]
+        if node == end:
+            return path
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append(path + [neighbor])
+    return None  # unreachable
+
+add_edge(1, 2); add_edge(1, 3)
+add_edge(2, 4); add_edge(3, 4); add_edge(4, 5)
+print(bfs(1))  # [1, 2, 3, 4, 5]`
+  },
+  {
+    id: 'dp-fib',
+    name: 'Dynamic Programming',
+    icon: '🧩',
+    complexity: 'O(n) / O(2ⁿ)',
+    complexityClass: 'yellow',
+    desc: 'DP reduces exponential problems to polynomial by memoising sub-problems. Fibonacci: O(2ⁿ) naive → O(n) with memo.',
+    java: `import java.util.Arrays;
+
+public class DynamicProgramming {
+    // Naive recursive — O(2^n) ❌
+    static int fibNaive(int n) {
+        if (n <= 1) return n;
+        return fibNaive(n - 1) + fibNaive(n - 2);
+    }
+
+    // Memoised top-down — O(n) ✅
+    static int[] memo = new int[100];
+    static int fibMemo(int n) {
+        if (n <= 1) return n;
+        if (memo[n] != 0) return memo[n];
+        return memo[n] = fibMemo(n - 1) + fibMemo(n - 2);
+    }
+
+    // Bottom-up DP — O(n) time, O(1) space ✅✅
+    static int fibDP(int n) {
+        if (n <= 1) return n;
+        int a = 0, b = 1;
+        for (int i = 2; i <= n; i++) {
+            int c = a + b;
+            a = b; b = c;
+        }
+        return b;
+    }
+
+    // Coin change — classic DP — O(amount * coins)
+    static int coinChange(int[] coins, int amount) {
+        int[] dp = new int[amount + 1];
+        Arrays.fill(dp, amount + 1);
+        dp[0] = 0;
+        for (int i = 1; i <= amount; i++)
+            for (int coin : coins)
+                if (coin <= i) dp[i] = Math.min(dp[i], dp[i - coin] + 1);
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+}`,
+    python: `from functools import lru_cache
+
+# Naive recursive — O(2^n) ❌
+def fib_naive(n: int) -> int:
+    if n <= 1: return n
+    return fib_naive(n - 1) + fib_naive(n - 2)
+
+# Memoised with lru_cache — O(n) ✅
+@lru_cache(maxsize=None)
+def fib_memo(n: int) -> int:
+    if n <= 1: return n
+    return fib_memo(n - 1) + fib_memo(n - 2)
+
+# Bottom-up DP — O(n) time, O(1) space ✅✅
+def fib_dp(n: int) -> int:
+    if n <= 1: return n
+    a, b = 0, 1
+    for _ in range(2, n + 1):
+        a, b = b, a + b
+    return b
+
+# Coin change — classic DP — O(amount × len(coins))
+def coin_change(coins: list[int], amount: int) -> int:
+    dp = [float('inf')] * (amount + 1)
+    dp[0] = 0
+
+    for i in range(1, amount + 1):
+        for coin in coins:
+            if coin <= i:
+                dp[i] = min(dp[i], dp[i - coin] + 1)
+
+    return dp[amount] if dp[amount] != float('inf') else -1
+
+print(fib_dp(10))               # → 55
+print(coin_change([1,5,6,9], 11))  # → 2`
+  },
+  {
+    id: 'heap-ops',
+    name: 'Heap / Priority Queue',
+    icon: '⛰️',
+    complexity: 'O(log n)',
+    complexityClass: 'green',
+    desc: 'A heap guarantees O(log n) insert and extract-min/max, with O(1) peek.',
+    java: `import java.util.PriorityQueue;
+import java.util.Collections;
+
+public class HeapOps {
+    public static void main(String[] args) {
+        // Min-Heap (default)
+        PriorityQueue<Integer> minHeap = new PriorityQueue<>();
+        minHeap.offer(5);   // O(log n)
+        minHeap.offer(2);
+        minHeap.offer(8);
+        minHeap.offer(1);
+
+        System.out.println(minHeap.peek());  // 1  — O(1)
+        System.out.println(minHeap.poll());  // 1  — O(log n)
+        System.out.println(minHeap.poll());  // 2
+
+        // Max-Heap
+        PriorityQueue<Integer> maxHeap =
+            new PriorityQueue<>(Collections.reverseOrder());
+        maxHeap.offer(5); maxHeap.offer(2); maxHeap.offer(8);
+        System.out.println(maxHeap.poll()); // 8
+
+        // Custom comparator — PQ of int[] by first element
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);
+        pq.offer(new int[]{3, 100});
+        pq.offer(new int[]{1, 200});
+        int[] top = pq.poll(); // [1, 200]
+    }
+}`,
+    python: `import heapq
+
+# Python heapq — min-heap
+heap: list[int] = []
+
+# Push — O(log n)
+heapq.heappush(heap, 5)
+heapq.heappush(heap, 2)
+heapq.heappush(heap, 8)
+heapq.heappush(heap, 1)
+
+# Peek — O(1)
+top = heap[0]  # → 1
+
+# Pop — O(log n)
+print(heapq.heappop(heap))  # → 1
+print(heapq.heappop(heap))  # → 2
+
+# Heapify a list — O(n)
+nums = [5, 2, 8, 1, 9, 3]
+heapq.heapify(nums)  # in-place min-heap
+
+# Max-heap trick: negate values
+max_heap: list[int] = []
+for n in [5, 2, 8, 1]:
+    heapq.heappush(max_heap, -n)
+print(-heapq.heappop(max_heap))  # → 8
+
+# nlargest / nsmallest — O(n log k)
+print(heapq.nlargest(3, nums))   # [9, 8, 5]
+print(heapq.nsmallest(3, nums))  # [1, 2, 3]
+
+# Tuple heap — sorted by first element
+tasks = [(3, "low"), (1, "high"), (2, "mid")]
+heapq.heapify(tasks)
+print(heapq.heappop(tasks))  # (1, 'high')`
+  },
+];
+
+// ══════════════════════════════════════════════════════
+// LEGEND BUILD
+// ══════════════════════════════════════════════════════
+(function buildLegend() {
+  const el = document.getElementById('legend');
+  CURVES.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.dataset.id = c.id;
+    item.innerHTML = `<span class="legend-dot" style="background:${c.color}"></span>${c.label}`;
+    item.addEventListener('click', () => {
+      if (VISIBLE.has(c.id)) VISIBLE.delete(c.id);
+      else VISIBLE.add(c.id);
+      item.classList.toggle('dimmed', !VISIBLE.has(c.id));
+      drawGraph();
+    });
+    el.appendChild(item);
+  });
+})();
+
+// ══════════════════════════════════════════════════════
+// CANVAS GRAPH
+// ══════════════════════════════════════════════════════
+const canvas = document.getElementById('complexityGraph');
+const ctx = canvas.getContext('2d');
+const tooltip = document.getElementById('tooltip');
+let currentN = 20;
+let hoveredCurve = null;
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width  = rect.width;
+  canvas.height = Math.min(420, Math.max(280, rect.width * 0.45));
+  drawGraph();
+}
+
+function drawGraph() {
+  const W = canvas.width, H = canvas.height;
+  const PAD = { top: 20, right: 20, bottom: 50, left: 60 };
+  const gW = W - PAD.left - PAD.right;
+  const gH = H - PAD.top  - PAD.bottom;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background
+  ctx.fillStyle = 'rgba(15,52,96,0.25)';
+  ctx.beginPath();
+  ctx.roundRect(PAD.left, PAD.top, gW, gH, 6);
+  ctx.fill();
+
+  // Compute max value for scale (capped)
+  const n = currentN;
+  const maxY = Math.min(n * n * 1.05, 1500);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 5; i++) {
+    const y = PAD.top + (gH / 5) * i;
+    ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + gW, y); ctx.stroke();
+  }
+  for (let i = 0; i <= 5; i++) {
+    const x = PAD.left + (gW / 5) * i;
+    ctx.beginPath(); ctx.moveTo(x, PAD.top); ctx.lineTo(x, PAD.top + gH); ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(PAD.left, PAD.top); ctx.lineTo(PAD.left, PAD.top + gH);
+  ctx.moveTo(PAD.left, PAD.top + gH); ctx.lineTo(PAD.left + gW, PAD.top + gH);
+  ctx.stroke();
+
+  // Axis labels
+  ctx.fillStyle = 'rgba(136,146,164,0.8)';
+  ctx.font = '11px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('n', PAD.left + gW / 2, H - 8);
+  ctx.save(); ctx.translate(14, PAD.top + gH / 2); ctx.rotate(-Math.PI / 2);
+  ctx.fillText('operations', 0, 0); ctx.restore();
+
+  // X axis ticks
+  ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(136,146,164,0.6)'; ctx.font = '10px monospace';
+  for (let i = 0; i <= 4; i++) {
+    const xVal = Math.round((n / 4) * i);
+    const x = PAD.left + (gW / n) * xVal;
+    ctx.fillText(xVal, x, PAD.top + gH + 16);
+  }
+
+  // Y axis ticks
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const yVal = Math.round((maxY / 4) * i);
+    const y = PAD.top + gH - (gH / maxY) * yVal;
+    const label = yVal >= 1000 ? (yVal / 1000).toFixed(1) + 'k' : yVal;
+    ctx.fillText(label, PAD.left - 6, y + 4);
+  }
+
+  // Draw curves
+  CURVES.forEach(curve => {
+    if (!VISIBLE.has(curve.id)) return;
+    const isHov = hoveredCurve && hoveredCurve.id === curve.id;
+
+    ctx.beginPath();
+    ctx.strokeStyle = curve.color;
+    ctx.lineWidth = isHov ? 4 : 2;
+    ctx.shadowBlur = isHov ? 12 : 0;
+    ctx.shadowColor = curve.color;
+    ctx.globalAlpha = isHov ? 1 : 0.75;
+
+    let first = true;
+    for (let xi = 0; xi <= gW; xi += 2) {
+      const xN = (xi / gW) * n;
+      let yVal = curve.fn(Math.max(1, xN));
+      if (!isFinite(yVal) || yVal > maxY * 1.5) yVal = maxY * 1.5;
+      const y = PAD.top + gH - (yVal / maxY) * gH;
+      const x = PAD.left + xi;
+      if (first) { ctx.moveTo(x, y); first = false; }
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
+
+    // Label at end of curve
+    const endX = PAD.left + gW;
+    const endN = n;
+    let endY = curve.fn(Math.max(1, endN));
+    if (!isFinite(endY) || endY > maxY) endY = maxY;
+    const endCanvasY = PAD.top + gH - (endY / maxY) * gH;
+    if (endCanvasY > PAD.top && endCanvasY < PAD.top + gH - 10) {
+      ctx.fillStyle = curve.color;
+      ctx.font = `${isHov ? 'bold ' : ''}10px monospace`;
+      ctx.textAlign = 'right';
+      ctx.fillText(curve.label, endX - 4, endCanvasY - 4);
+    }
+  });
+
+  // n-line indicator
+  const nx = PAD.left + gW;
+  ctx.strokeStyle = 'rgba(233,69,96,0.3)';
+  ctx.setLineDash([4, 4]);
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(nx, PAD.top); ctx.lineTo(nx, PAD.top + gH); ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+// Hover
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+  const my = (e.clientY - rect.top)  * (canvas.height / rect.height);
+
+  const PAD = { top: 20, right: 20, bottom: 50, left: 60 };
+  const gW = canvas.width  - PAD.left - PAD.right;
+  const gH = canvas.height - PAD.top  - PAD.bottom;
+  const n = currentN;
+  const maxY = Math.min(n * n * 1.05, 1500);
+
+  const xN = Math.max(1, ((mx - PAD.left) / gW) * n);
+
+  let best = null, bestDist = 30;
+  CURVES.forEach(c => {
+    if (!VISIBLE.has(c.id)) return;
+    let yVal = c.fn(xN);
+    if (!isFinite(yVal) || yVal > maxY * 1.5) return;
+    const canvasY = PAD.top + gH - (yVal / maxY) * gH;
+    const dist = Math.abs(my - canvasY);
+    if (dist < bestDist) { bestDist = dist; best = c; }
+  });
+
+  if (best !== hoveredCurve) {
+    hoveredCurve = best;
+    drawGraph();
+  }
+
+  if (best) {
+    tooltip.innerHTML = `
+      <div class="tooltip-title" style="color:${best.color}">${best.label}</div>
+      <div class="tooltip-desc">${best.desc}</div>
+      <div class="tooltip-examples">Examples: ${best.examples}</div>`;
+    const ttW = 260, ttH = 90;
+    let tx = e.clientX - rect.left + 14;
+    let ty = e.clientY - rect.top - ttH / 2;
+    if (tx + ttW > rect.width)  tx = e.clientX - rect.left - ttW - 14;
+    if (ty < 0) ty = 4;
+    tooltip.style.left = tx + 'px';
+    tooltip.style.top  = ty + 'px';
+    tooltip.classList.add('visible');
+  } else {
+    tooltip.classList.remove('visible');
+  }
+});
+canvas.addEventListener('mouseleave', () => {
+  hoveredCurve = null;
+  tooltip.classList.remove('visible');
+  drawGraph();
+});
+
+// Slider
+document.getElementById('nSlider').addEventListener('input', e => {
+  currentN = parseInt(e.target.value);
+  document.getElementById('nDisplay').textContent = currentN;
+  drawGraph();
+});
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// ══════════════════════════════════════════════════════
+// TABLE BUILD
+// ══════════════════════════════════════════════════════
+(function buildTable() {
+  const tbody = document.getElementById('tableBody');
+  const colorMap = { green: 'o-green', yellow: 'o-yellow', orange: 'o-orange', red: 'o-red' };
+  const langBadge = { java: '<span class="lang-badge lang-java">Java</span>', python: '<span class="lang-badge lang-python">Py</span>' };
+
+  TABLE_DATA.forEach(row => {
+    const tr = document.createElement('tr');
+    if (row.section) {
+      tr.className = 'section-divider';
+      tr.innerHTML = `<td colspan="8">${row.section}</td>`;
+    } else {
+      const ops = [row.access, row.search, row.insert, row.delete, row.space];
+      tr.innerHTML = `
+        <td>${row.name}${langBadge[row.lang] || ''}</td>
+        <td>${row.lang === 'java' ? 'Java' : 'Python'}</td>
+        ${ops.map(([val, cls]) => `<td><span class="o ${colorMap[cls]||'o-green'}">${val}</span></td>`).join('')}
+        <td style="color:var(--muted);font-size:0.8rem;">${row.note}</td>`;
+    }
+    tbody.appendChild(tr);
+  });
+})();
+
+// ══════════════════════════════════════════════════════
+// CODE EXAMPLES
+// ══════════════════════════════════════════════════════
+(function buildOps() {
+  const grid = document.getElementById('opsGrid');
+  const complexityColors = { green: 'var(--green)', yellow: 'var(--yellow)', orange: 'var(--orange)', red: 'var(--red)' };
+
+  CODE_EXAMPLES.forEach(op => {
+    const btn = document.createElement('button');
+    btn.className = 'op-btn';
+    btn.dataset.id = op.id;
+    btn.innerHTML = `<span>${op.icon}</span><span>${op.name}</span><span class="op-complexity" style="color:${complexityColors[op.complexityClass]}">${op.complexity}</span>`;
+    btn.addEventListener('click', () => showCode(op.id));
+    grid.appendChild(btn);
+  });
+})();
+
+let activeTab = 'java';
+function showCode(id) {
+  const op = CODE_EXAMPLES.find(o => o.id === id);
+  if (!op) return;
+
+  document.querySelectorAll('.op-btn').forEach(b => b.classList.toggle('active', b.dataset.id === id));
+
+  const panel = document.getElementById('codePanel');
+  panel.classList.add('visible');
+
+  const complexityColors = { green: 'var(--green)', yellow: 'var(--yellow)', orange: 'var(--orange)', red: 'var(--red)' };
+  document.getElementById('opInfo').innerHTML = `
+    <div class="op-info-title">${op.icon} ${op.name}</div>
+    <div class="op-info-desc">${op.desc}</div>
+    <div class="op-info-complexity">Complexity: <strong style="color:${complexityColors[op.complexityClass]}">${op.complexity}</strong></div>`;
+
+  const javaEl = document.getElementById('javaContent');
+  const pyEl   = document.getElementById('pythonContent');
+  javaEl.innerHTML = `<pre><code class="language-java">${escapeHtml(op.java)}</code></pre>`;
+  pyEl.innerHTML   = `<pre><code class="language-python">${escapeHtml(op.python)}</code></pre>`;
+
+  javaEl.querySelectorAll('code').forEach(b => hljs.highlightElement(b));
+  pyEl.querySelectorAll('code').forEach(b => hljs.highlightElement(b));
+
+  switchTab(activeTab);
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function switchTab(lang) {
+  activeTab = lang;
+  document.querySelectorAll('.code-tab').forEach(t => t.classList.toggle('active', t.textContent.toLowerCase() === lang));
+  document.querySelectorAll('.code-content').forEach(c => c.classList.toggle('active', c.id === lang + 'Content'));
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Auto-show first example
+showCode('binary-search');
+</script>
+</body>
+</html>

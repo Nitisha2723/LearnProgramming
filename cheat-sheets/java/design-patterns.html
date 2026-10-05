@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoF Design Patterns — Java Reference</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#1a1a2e; color:#e0e0e0; font-family:'Segoe UI',system-ui,sans-serif; }
+header { background:#16213e; padding:20px 30px; border-bottom:2px solid #0f3460; }
+header h1 { font-size:1.8rem; color:#e94560; }
+header p { color:#a0a0b0; margin-top:4px; }
+.filter-bar { background:#16213e; padding:12px 30px; display:flex; gap:10px; flex-wrap:wrap; border-bottom:1px solid #0f3460; align-items:center; }
+.filter-btn { padding:5px 14px; border:1px solid #0f3460; border-radius:20px; cursor:pointer; font-size:0.82rem; transition:all 0.2s; background:transparent; color:#a0c4ff; }
+.filter-btn:hover, .filter-btn.active { color:white; }
+.filter-btn[data-cat="all"].active, .filter-btn[data-cat="all"]:hover { background:#e94560; border-color:#e94560; }
+.filter-btn[data-cat="creational"].active { background:#3b82f6; border-color:#3b82f6; }
+.filter-btn[data-cat="structural"].active { background:#10b981; border-color:#10b981; }
+.filter-btn[data-cat="behavioral"].active { background:#f59e0b; border-color:#f59e0b; color:#1a1a2e; }
+.search { padding:6px 14px; background:#1a1a2e; border:1px solid #0f3460; border-radius:20px; color:#e0e0e0; font-size:0.85rem; outline:none; width:220px; }
+.search:focus { border-color:#e94560; }
+.container { max-width:1400px; margin:0 auto; padding:24px 30px; }
+.category-title { font-size:1.1rem; font-weight:600; padding:8px 16px; border-radius:6px; margin:30px 0 16px; display:inline-block; }
+.creational-title { background:#1e2f5a; color:#90c4ff; }
+.structural-title { background:#0d3325; color:#7de2b5; }
+.behavioral-title { background:#3a2800; color:#ffd080; }
+.patterns-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(380px, 1fr)); gap:18px; margin-bottom:30px; }
+.pattern-card { background:#16213e; border:1px solid #0f3460; border-radius:10px; overflow:hidden; transition:border-color 0.2s; cursor:pointer; }
+.pattern-card:hover { border-color:#e94560; }
+.pattern-card.hidden { display:none; }
+.card-top { padding:14px 16px; display:flex; justify-content:space-between; align-items:flex-start; }
+.pattern-name { font-weight:700; font-size:1rem; }
+.cat-badge { padding:2px 10px; border-radius:12px; font-size:0.72rem; font-weight:600; }
+.creational .cat-badge { background:#1e3a6a; color:#90c4ff; }
+.structural .cat-badge { background:#0d3325; color:#7de2b5; }
+.behavioral .cat-badge { background:#3a2800; color:#ffd080; }
+.pattern-desc { padding:0 16px 10px; color:#a0b0c0; font-size:0.85rem; }
+.pattern-code { display:none; padding:16px; border-top:1px solid #0f3460; }
+.pattern-code.open { display:block; }
+pre { margin:0; border-radius:6px; font-size:0.79rem; }
+.use-when { padding:10px 16px; background:#0d1525; font-size:0.82rem; color:#90d0a0; border-top:1px solid #0f3460; }
+.use-when strong { color:#a0c4ff; }
+.toggle-hint { font-size:0.75rem; color:#606880; padding:0 16px 10px; }
+.real-world { color:#f0a070; font-size:0.8rem; padding:0 16px 10px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>GoF Design Patterns — Java</h1>
+  <p>All 23 Gang of Four patterns with Java code examples. Click any card to expand.</p>
+</header>
+<div class="filter-bar">
+  <button class="filter-btn active" data-cat="all" onclick="filter('all')">All (23)</button>
+  <button class="filter-btn" data-cat="creational" onclick="filter('creational')">Creational (5)</button>
+  <button class="filter-btn" data-cat="structural" onclick="filter('structural')">Structural (7)</button>
+  <button class="filter-btn" data-cat="behavioral" onclick="filter('behavioral')">Behavioral (11)</button>
+  <input type="text" class="search" placeholder="Search patterns..." oninput="search(this.value)">
+</div>
+<div class="container">
+
+<span class="category-title creational-title">Creational Patterns — Object Creation</span>
+<div class="patterns-grid" id="creational-grid">
+
+  <div class="pattern-card creational" data-name="singleton creational" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Singleton</span>
+      <span class="cat-badge">Creational</span>
+    </div>
+    <p class="pattern-desc">Ensure a class has only one instance and provide a global access point.</p>
+    <p class="real-world">Real world: Logger, Config, Database connection pool, Thread pool</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Thread-safe Singleton (preferred: enum-based)
+public enum AppConfig {
+    INSTANCE;
+    private final Properties props = new Properties();
+    public String get(String key) { return props.getProperty(key); }
+}
+
+// Double-checked locking (classic approach)
+public class DatabasePool {
+    private static volatile DatabasePool instance;
+
+    private DatabasePool() {}
+
+    public static DatabasePool getInstance() {
+        if (instance == null) {
+            synchronized (DatabasePool.class) {
+                if (instance == null) {
+                    instance = new DatabasePool();
+                }
+            }
+        }
+        return instance;
+    }
+}
+
+// Holder pattern (lazy, thread-safe)
+public class Cache {
+    private Cache() {}
+    private static class Holder {
+        static final Cache INSTANCE = new Cache();
+    }
+    public static Cache getInstance() { return Holder.INSTANCE; }
+}</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Exactly one object needed to coordinate actions (config, logging, connection pool). Avoid overuse — often a sign of poor design.</div>
+  </div>
+
+  <div class="pattern-card creational" data-name="factory method creational" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Factory Method</span>
+      <span class="cat-badge">Creational</span>
+    </div>
+    <p class="pattern-desc">Define an interface for creating objects, but let subclasses decide which class to instantiate.</p>
+    <p class="real-world">Real world: JDBC DriverManager, LoggerFactory, DocumentBuilderFactory</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Abstract creator
+public abstract class Notification {
+    public void send(String message) {
+        Channel channel = createChannel();  // factory method
+        channel.deliver(message);
+    }
+    protected abstract Channel createChannel();
+}
+
+// Concrete creators
+public class EmailNotification extends Notification {
+    @Override
+    protected Channel createChannel() {
+        return new EmailChannel();
+    }
+}
+public class SmsNotification extends Notification {
+    @Override
+    protected Channel createChannel() {
+        return new SmsChannel();
+    }
+}
+
+// Usage
+Notification n = new EmailNotification();
+n.send("Hello!");  // uses EmailChannel internally</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> A class can't anticipate the type of objects it needs to create, or you want subclasses to control object creation.</div>
+  </div>
+
+  <div class="pattern-card creational" data-name="abstract factory creational" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Abstract Factory</span>
+      <span class="cat-badge">Creational</span>
+    </div>
+    <p class="pattern-desc">Provide an interface for creating families of related objects without specifying concrete classes.</p>
+    <p class="real-world">Real world: javax.xml.parsers.DocumentBuilderFactory, UI toolkit factories (Swing, AWT)</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Abstract factory
+public interface UIFactory {
+    Button createButton();
+    Checkbox createCheckbox();
+}
+
+// Windows family
+public class WindowsFactory implements UIFactory {
+    public Button createButton()   { return new WindowsButton(); }
+    public Checkbox createCheckbox() { return new WindowsCheckbox(); }
+}
+
+// Mac family
+public class MacFactory implements UIFactory {
+    public Button createButton()   { return new MacButton(); }
+    public Checkbox createCheckbox() { return new MacCheckbox(); }
+}
+
+// Client uses factory - doesn't know concrete classes
+public class Application {
+    private final UIFactory factory;
+    public Application(UIFactory factory) { this.factory = factory; }
+    public void buildUI() {
+        Button btn = factory.createButton();
+        Checkbox cb = factory.createCheckbox();
+        btn.render();
+        cb.render();
+    }
+}
+
+// Usage
+UIFactory factory = isWindows() ? new WindowsFactory() : new MacFactory();
+new Application(factory).buildUI();</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> System needs to be independent of how products are created, and you want to ensure families of related objects are used together.</div>
+  </div>
+
+  <div class="pattern-card creational" data-name="builder creational" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Builder</span>
+      <span class="cat-badge">Creational</span>
+    </div>
+    <p class="pattern-desc">Separate the construction of a complex object from its representation.</p>
+    <p class="real-world">Real world: StringBuilder, Stream.Builder, HttpClient.Builder, Lombok @Builder</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">public class HttpRequest {
+    private final String url;
+    private final String method;
+    private final Map&lt;String, String&gt; headers;
+    private final String body;
+    private final int timeoutMs;
+
+    private HttpRequest(Builder builder) {
+        this.url = builder.url;
+        this.method = builder.method;
+        this.headers = Collections.unmodifiableMap(builder.headers);
+        this.body = builder.body;
+        this.timeoutMs = builder.timeoutMs;
+    }
+
+    public static class Builder {
+        private final String url;  // required
+        private String method = "GET";
+        private Map&lt;String, String&gt; headers = new HashMap&lt;&gt;();
+        private String body;
+        private int timeoutMs = 5000;
+
+        public Builder(String url) { this.url = url; }
+        public Builder method(String m) { method = m; return this; }
+        public Builder header(String k, String v) { headers.put(k,v); return this; }
+        public Builder body(String b) { body = b; return this; }
+        public Builder timeout(int ms) { timeoutMs = ms; return this; }
+        public HttpRequest build() { return new HttpRequest(this); }
+    }
+}
+
+// Usage - fluent API
+var req = new HttpRequest.Builder("https://api.example.com/users")
+    .method("POST")
+    .header("Content-Type", "application/json")
+    .body("{\"name\":\"Alice\"}")
+    .timeout(3000)
+    .build();</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Object has many optional parameters (avoids telescoping constructors), or construction is a multi-step process.</div>
+  </div>
+
+  <div class="pattern-card creational" data-name="prototype creational" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Prototype</span>
+      <span class="cat-badge">Creational</span>
+    </div>
+    <p class="pattern-desc">Create new objects by copying existing ones (cloning).</p>
+    <p class="real-world">Real world: Object.clone(), Spring bean prototype scope, copy constructors</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">public class ShapeConfig implements Cloneable {
+    private List&lt;String&gt; properties = new ArrayList&lt;&gt;();
+    private int complexity;
+
+    // Deep clone
+    @Override
+    public ShapeConfig clone() {
+        try {
+            ShapeConfig clone = (ShapeConfig) super.clone();
+            clone.properties = new ArrayList&lt;&gt;(this.properties); // deep copy list
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
+    }
+}
+
+// Better alternative: copy constructor
+public class DocumentTemplate {
+    private String content;
+    private Map&lt;String, String&gt; variables;
+
+    // Copy constructor
+    public DocumentTemplate(DocumentTemplate source) {
+        this.content = source.content;
+        this.variables = new HashMap&lt;&gt;(source.variables);
+    }
+}
+
+// Usage
+DocumentTemplate template = loadFromFile("invoice.tmpl");
+DocumentTemplate copy = new DocumentTemplate(template);
+copy.setVariable("name", "Alice");  // doesn't affect original</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Creating an object is expensive and you need many similar objects, or you want to avoid subclassing object creators.</div>
+  </div>
+
+</div>
+
+<span class="category-title structural-title">Structural Patterns — Object Composition</span>
+<div class="patterns-grid" id="structural-grid">
+
+  <div class="pattern-card structural" data-name="adapter structural" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Adapter</span>
+      <span class="cat-badge">Structural</span>
+    </div>
+    <p class="pattern-desc">Convert the interface of a class into another interface clients expect.</p>
+    <p class="real-world">Real world: Arrays.asList(), InputStreamReader, Collections.enumeration()</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Target interface (what client expects)
+public interface JsonSerializer {
+    String serialize(Object obj);
+}
+
+// Adaptee (existing class with incompatible interface)
+public class XmlSerializer {
+    public String toXml(Object obj) { return "&lt;obj&gt;" + obj + "&lt;/obj&gt;"; }
+}
+
+// Adapter wraps Adaptee, implements Target
+public class XmlToJsonAdapter implements JsonSerializer {
+    private final XmlSerializer xmlSerializer;
+
+    public XmlToJsonAdapter(XmlSerializer xml) {
+        this.xmlSerializer = xml;
+    }
+
+    @Override
+    public String serialize(Object obj) {
+        String xml = xmlSerializer.toXml(obj);
+        return convertXmlToJson(xml);  // convert internally
+    }
+    private String convertXmlToJson(String xml) { /* ... */ return "{}"; }
+}
+
+// Client uses JsonSerializer, unaware of XmlSerializer
+JsonSerializer serializer = new XmlToJsonAdapter(new XmlSerializer());
+serializer.serialize(myObj);</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> You want to use an existing class but its interface doesn't match what you need; integrating incompatible third-party code.</div>
+  </div>
+
+  <div class="pattern-card structural" data-name="decorator structural" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Decorator</span>
+      <span class="cat-badge">Structural</span>
+    </div>
+    <p class="pattern-desc">Attach additional responsibilities to an object dynamically.</p>
+    <p class="real-world">Real world: Java I/O streams (BufferedInputStream, GZIPOutputStream), Spring Security filters</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">public interface Coffee {
+    double getCost();
+    String getDescription();
+}
+
+public class SimpleCoffee implements Coffee {
+    public double getCost() { return 1.00; }
+    public String getDescription() { return "Coffee"; }
+}
+
+// Base decorator
+public abstract class CoffeeDecorator implements Coffee {
+    protected final Coffee coffee;
+    public CoffeeDecorator(Coffee coffee) { this.coffee = coffee; }
+}
+
+public class MilkDecorator extends CoffeeDecorator {
+    public MilkDecorator(Coffee c) { super(c); }
+    public double getCost() { return coffee.getCost() + 0.25; }
+    public String getDescription() { return coffee.getDescription() + ", milk"; }
+}
+
+public class VanillaDecorator extends CoffeeDecorator {
+    public VanillaDecorator(Coffee c) { super(c); }
+    public double getCost() { return coffee.getCost() + 0.50; }
+    public String getDescription() { return coffee.getDescription() + ", vanilla"; }
+}
+
+// Stack decorators at runtime!
+Coffee order = new VanillaDecorator(new MilkDecorator(new SimpleCoffee()));
+System.out.println(order.getDescription()); // "Coffee, milk, vanilla"
+System.out.println(order.getCost());        // 1.75</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> You want to add responsibilities to objects without subclassing, and extensions can be composed at runtime.</div>
+  </div>
+
+  <div class="pattern-card structural" data-name="proxy structural" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Proxy</span>
+      <span class="cat-badge">Structural</span>
+    </div>
+    <p class="pattern-desc">Provide a surrogate or placeholder for another object to control access.</p>
+    <p class="real-world">Real world: Spring AOP, Hibernate lazy loading, Java RMI, java.lang.reflect.Proxy</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">public interface DataService {
+    List&lt;String&gt; getData();
+}
+
+// Real implementation (expensive)
+public class RealDataService implements DataService {
+    public List&lt;String&gt; getData() {
+        // expensive DB query
+        return List.of("data1", "data2");
+    }
+}
+
+// Caching proxy
+public class CachingDataServiceProxy implements DataService {
+    private final DataService real = new RealDataService();
+    private List&lt;String&gt; cache;
+
+    public List&lt;String&gt; getData() {
+        if (cache == null) {
+            cache = real.getData();  // call real service once
+        }
+        return cache;
+    }
+}
+
+// Access control proxy
+public class SecureDataServiceProxy implements DataService {
+    private final DataService real = new RealDataService();
+    private final SecurityContext context;
+
+    public List&lt;String&gt; getData() {
+        if (!context.hasPermission("DATA_READ"))
+            throw new SecurityException("Access denied");
+        return real.getData();
+    }
+}</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Need lazy initialization, access control, logging, caching, or remote access to an object.</div>
+  </div>
+
+  <div class="pattern-card structural" data-name="facade structural" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Facade</span>
+      <span class="cat-badge">Structural</span>
+    </div>
+    <p class="pattern-desc">Provide a simplified interface to a complex subsystem.</p>
+    <p class="real-world">Real world: JDBC (hides socket/protocol/parsing), SLF4J (hides Log4j/Logback)</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Complex subsystem classes
+class VideoDecoder { VideoFile decode(String path) {...} }
+class AudioMixer    { AudioTrack mix(VideoFile vf) {...} }
+class VideoEncoder  { byte[] encode(VideoFile vf, AudioTrack at) {...} }
+class FileWriter    { void write(byte[] data, String path) {...} }
+
+// Facade: simple API over complex subsystem
+public class VideoConverter {
+    private VideoDecoder decoder = new VideoDecoder();
+    private AudioMixer mixer = new AudioMixer();
+    private VideoEncoder encoder = new VideoEncoder();
+    private FileWriter writer = new FileWriter();
+
+    public void convert(String inputPath, String outputPath) {
+        VideoFile video = decoder.decode(inputPath);
+        AudioTrack audio = mixer.mix(video);
+        byte[] result = encoder.encode(video, audio);
+        writer.write(result, outputPath);
+    }
+}
+
+// Client uses just one simple method
+new VideoConverter().convert("input.mov", "output.mp4");</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> You want to provide a simple interface to a complex subsystem, or to layer your subsystems.</div>
+  </div>
+
+  <div class="pattern-card structural" data-name="composite structural" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Composite</span>
+      <span class="cat-badge">Structural</span>
+    </div>
+    <p class="pattern-desc">Compose objects into tree structures to represent part-whole hierarchies.</p>
+    <p class="real-world">Real world: File system, UI component trees (Swing, HTML DOM), XML/JSON trees</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Component
+public interface FileSystemItem {
+    String getName();
+    long getSize();
+    void print(String indent);
+}
+
+// Leaf
+public class File implements FileSystemItem {
+    private String name;
+    private long size;
+
+    public File(String name, long size) { this.name = name; this.size = size; }
+    public String getName() { return name; }
+    public long getSize() { return size; }
+    public void print(String indent) {
+        System.out.println(indent + "File: " + name + " (" + size + "B)");
+    }
+}
+
+// Composite
+public class Directory implements FileSystemItem {
+    private String name;
+    private List&lt;FileSystemItem&gt; children = new ArrayList&lt;&gt;();
+
+    public Directory(String name) { this.name = name; }
+    public void add(FileSystemItem item) { children.add(item); }
+    public String getName() { return name; }
+    public long getSize() { return children.stream().mapToLong(FileSystemItem::getSize).sum(); }
+    public void print(String indent) {
+        System.out.println(indent + "Dir: " + name + "/");
+        children.forEach(c -> c.print(indent + "  "));
+    }
+}
+
+// Usage - treat file and directory uniformly
+Directory root = new Directory("root");
+root.add(new File("readme.txt", 1024));
+Directory src = new Directory("src");
+src.add(new File("Main.java", 2048));
+root.add(src);
+root.print("");  // prints entire tree</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> You want clients to treat individual objects and compositions of objects uniformly (tree structure).</div>
+  </div>
+
+  <div class="pattern-card structural" data-name="bridge structural" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Bridge</span>
+      <span class="cat-badge">Structural</span>
+    </div>
+    <p class="pattern-desc">Separate an abstraction from its implementation so they can vary independently.</p>
+    <p class="real-world">Real world: JDBC drivers, AWT peer architecture</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Implementation interface
+public interface Renderer {
+    void renderCircle(double x, double y, double radius);
+}
+class VectorRenderer implements Renderer {
+    public void renderCircle(double x, double y, double radius) {
+        System.out.println("Drawing circle as vector at (" + x + "," + y + ")");
+    }
+}
+class RasterRenderer implements Renderer {
+    public void renderCircle(double x, double y, double radius) {
+        System.out.println("Drawing circle as pixels at (" + x + "," + y + ")");
+    }
+}
+
+// Abstraction (bridges to implementation)
+public abstract class Shape {
+    protected Renderer renderer;
+    public Shape(Renderer renderer) { this.renderer = renderer; }
+    public abstract void draw();
+}
+public class Circle extends Shape {
+    private double x, y, radius;
+    public Circle(double x, double y, double radius, Renderer r) {
+        super(r); this.x=x; this.y=y; this.radius=radius;
+    }
+    public void draw() { renderer.renderCircle(x, y, radius); }
+}
+
+// Choose rendering at runtime
+Circle c1 = new Circle(1, 2, 5, new VectorRenderer());
+Circle c2 = new Circle(1, 2, 5, new RasterRenderer());</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> You want to avoid permanent binding between abstraction and implementation, or both should be extensible via subclassing.</div>
+  </div>
+
+  <div class="pattern-card structural" data-name="flyweight structural" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Flyweight</span>
+      <span class="cat-badge">Structural</span>
+    </div>
+    <p class="pattern-desc">Use sharing to efficiently support large numbers of fine-grained objects.</p>
+    <p class="real-world">Real world: Integer.valueOf(-128..127), String pool, java.lang.Character cache</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Flyweight: shared, immutable intrinsic state
+public class CharacterGlyph {
+    private final char character;  // intrinsic (shared)
+    private final Font font;       // intrinsic (shared)
+
+    public CharacterGlyph(char c, Font f) { character = c; font = f; }
+    // Extrinsic state (position) passed in render call
+    public void render(int x, int y) { /* draw at position */ }
+}
+
+// Factory/pool manages shared flyweights
+public class GlyphFactory {
+    private static final Map&lt;String, CharacterGlyph&gt; pool = new HashMap&lt;&gt;();
+
+    public static CharacterGlyph getGlyph(char c, Font f) {
+        String key = c + f.getName();
+        return pool.computeIfAbsent(key, k -> new CharacterGlyph(c, f));
+    }
+}
+
+// Usage: 1000 'A' chars share ONE CharacterGlyph object!
+for (int i = 0; i &lt; 1000; i++) {
+    CharacterGlyph g = GlyphFactory.getGlyph('A', defaultFont);
+    g.render(i * 10, 100);  // extrinsic state varies, object is shared
+}</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> An application uses a large number of objects that have mostly shared state; memory usage is a concern.</div>
+  </div>
+
+</div>
+
+<span class="category-title behavioral-title">Behavioral Patterns — Object Interaction</span>
+<div class="patterns-grid" id="behavioral-grid">
+
+  <div class="pattern-card behavioral" data-name="observer behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Observer</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Define a one-to-many dependency so that when one object changes state, all dependents are notified.</p>
+    <p class="real-world">Real world: java.util.Observer, Spring ApplicationEvent, Swing listeners, Reactive Streams</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Observer interface
+public interface StockObserver {
+    void onPriceChange(String symbol, double newPrice);
+}
+
+// Subject
+public class StockMarket {
+    private final Map&lt;String, List&lt;StockObserver&gt;&gt; observers = new HashMap&lt;&gt;();
+    private final Map&lt;String, Double&gt; prices = new HashMap&lt;&gt;();
+
+    public void subscribe(String symbol, StockObserver observer) {
+        observers.computeIfAbsent(symbol, k -> new ArrayList&lt;&gt;()).add(observer);
+    }
+    public void unsubscribe(String symbol, StockObserver observer) {
+        observers.getOrDefault(symbol, List.of()).remove(observer);
+    }
+    public void updatePrice(String symbol, double price) {
+        prices.put(symbol, price);
+        observers.getOrDefault(symbol, List.of())
+                 .forEach(o -> o.onPriceChange(symbol, price));
+    }
+}
+
+// Concrete observer
+StockObserver alerter = (symbol, price) ->
+    System.out.println("ALERT: " + symbol + " now $" + price);
+
+StockMarket market = new StockMarket();
+market.subscribe("AAPL", alerter);
+market.updatePrice("AAPL", 195.5);  // alerter is called</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Changes to one object require updating others, and you don't know how many objects need to change.</div>
+  </div>
+
+  <div class="pattern-card behavioral" data-name="strategy behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Strategy</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Define a family of algorithms, encapsulate each one, and make them interchangeable.</p>
+    <p class="real-world">Real world: Comparator, Collections.sort(), java.util.Comparator, Spring Security authentication</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Strategy interface
+@FunctionalInterface
+public interface SortStrategy {
+    void sort(int[] data);
+}
+
+// Strategies
+public class QuickSort implements SortStrategy {
+    public void sort(int[] data) { /* quicksort impl */ }
+}
+public class MergeSort implements SortStrategy {
+    public void sort(int[] data) { /* mergesort impl */ }
+}
+
+// Context
+public class Sorter {
+    private SortStrategy strategy;
+
+    public void setStrategy(SortStrategy strategy) {
+        this.strategy = strategy;
+    }
+    public void sort(int[] data) {
+        strategy.sort(data);
+    }
+}
+
+// Usage - switch strategy at runtime
+Sorter sorter = new Sorter();
+int[] data = {5, 2, 8, 1, 9};
+
+sorter.setStrategy(new QuickSort());
+sorter.sort(data);  // uses quicksort
+
+sorter.setStrategy(data.length > 1000 ? new MergeSort() : new QuickSort());
+sorter.sort(data);  // auto-selects based on size
+
+// With lambdas (Strategy is a functional interface)
+sorter.setStrategy(d -> Arrays.sort(d));</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> You need different variants of an algorithm and want to switch between them at runtime.</div>
+  </div>
+
+  <div class="pattern-card behavioral" data-name="command behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Command</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Encapsulate a request as an object, enabling undo/redo, queuing, and logging.</p>
+    <p class="real-world">Real world: java.lang.Runnable, Swing AbstractAction, transaction scripts</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Command interface
+public interface Command {
+    void execute();
+    void undo();
+}
+
+// Concrete commands
+public class MoveCommand implements Command {
+    private final TextEditor editor;
+    private final int deltaX, deltaY;
+
+    public MoveCommand(TextEditor e, int dx, int dy) {
+        editor = e; deltaX = dx; deltaY = dy;
+    }
+    public void execute() { editor.move(deltaX, deltaY); }
+    public void undo()    { editor.move(-deltaX, -deltaY); }
+}
+
+// Invoker - maintains history for undo
+public class CommandHistory {
+    private final Deque&lt;Command&gt; history = new ArrayDeque&lt;&gt;();
+
+    public void execute(Command cmd) {
+        cmd.execute();
+        history.push(cmd);
+    }
+    public void undo() {
+        if (!history.isEmpty()) history.pop().undo();
+    }
+}
+
+// Usage
+var history = new CommandHistory();
+history.execute(new MoveCommand(editor, 10, 5));
+history.execute(new MoveCommand(editor, -3, 2));
+history.undo();  // undoes last move</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> You need undo/redo, operation queuing, logging of operations, or transactional behavior.</div>
+  </div>
+
+  <div class="pattern-card behavioral" data-name="template method behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Template Method</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Define the skeleton of an algorithm in a base class, deferring some steps to subclasses.</p>
+    <p class="real-world">Real world: java.io.InputStream (read()), Spring's AbstractController, JUnit lifecycle</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Abstract class with template method
+public abstract class DataProcessor {
+    // Template method - defines the algorithm skeleton
+    public final void process(String source) {
+        String raw = readData(source);      // step 1
+        String processed = parseData(raw); // step 2
+        validateData(processed);           // step 3 (hook - optional)
+        saveData(processed);               // step 4
+    }
+
+    protected abstract String readData(String source);
+    protected abstract String parseData(String raw);
+    protected abstract void saveData(String data);
+
+    // Hook method - subclasses may override
+    protected void validateData(String data) { /* default: no validation */ }
+}
+
+// Concrete implementations provide specific steps
+public class CsvDataProcessor extends DataProcessor {
+    protected String readData(String path) { return Files.readString(Path.of(path)); }
+    protected String parseData(String csv) { return convertCsvToJson(csv); }
+    protected void saveData(String json) { db.save(json); }
+
+    @Override
+    protected void validateData(String data) { JsonParser.validate(data); }
+}
+
+// Usage
+new CsvDataProcessor().process("data.csv");
+new XmlDataProcessor().process("data.xml");</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Multiple classes share the same algorithm structure but differ in specifics; you want to avoid code duplication.</div>
+  </div>
+
+  <div class="pattern-card behavioral" data-name="iterator behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Iterator</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Provide a way to sequentially access elements of a collection without exposing its underlying representation.</p>
+    <p class="real-world">Real world: java.util.Iterator, Iterable, enhanced for-each loop</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Custom Iterable collection
+public class NumberRange implements Iterable&lt;Integer&gt; {
+    private final int from, to, step;
+
+    public NumberRange(int from, int to, int step) {
+        this.from = from; this.to = to; this.step = step;
+    }
+
+    @Override
+    public Iterator&lt;Integer&gt; iterator() {
+        return new Iterator&lt;Integer&gt;() {
+            private int current = from;
+
+            public boolean hasNext() { return current &lt;= to; }
+            public Integer next() {
+                if (!hasNext()) throw new NoSuchElementException();
+                int val = current;
+                current += step;
+                return val;
+            }
+        };
+    }
+}
+
+// Usage - works in for-each
+NumberRange evens = new NumberRange(0, 10, 2);
+for (int n : evens) {
+    System.out.println(n); // 0, 2, 4, 6, 8, 10
+}
+
+// Also works with streams
+StreamSupport.stream(evens.spliterator(), false)
+    .filter(n -> n > 4)
+    .forEach(System.out::println);</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> You want to traverse a collection without exposing its internal structure, or you need multiple traversal algorithms.</div>
+  </div>
+
+  <div class="pattern-card behavioral" data-name="state behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">State</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Allow an object to alter its behavior when its internal state changes.</p>
+    <p class="real-world">Real world: TCP connection states, vending machines, workflow engines</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">public interface TrafficLightState {
+    void handle(TrafficLight light);
+    String getColor();
+}
+
+public class RedState implements TrafficLightState {
+    public void handle(TrafficLight light) { light.setState(new GreenState()); }
+    public String getColor() { return "RED"; }
+}
+public class GreenState implements TrafficLightState {
+    public void handle(TrafficLight light) { light.setState(new YellowState()); }
+    public String getColor() { return "GREEN"; }
+}
+public class YellowState implements TrafficLightState {
+    public void handle(TrafficLight light) { light.setState(new RedState()); }
+    public String getColor() { return "YELLOW"; }
+}
+
+public class TrafficLight {
+    private TrafficLightState state = new RedState();
+
+    public void setState(TrafficLightState state) { this.state = state; }
+    public void change() { state.handle(this); }
+    public String getColor() { return state.getColor(); }
+}
+
+// Usage
+TrafficLight light = new TrafficLight();
+light.getColor(); // RED
+light.change();   // transitions to GREEN
+light.getColor(); // GREEN</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Object behavior depends on its state, and it must change at runtime; eliminates large conditional statements.</div>
+  </div>
+
+  <div class="pattern-card behavioral" data-name="chain of responsibility behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Chain of Responsibility</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Pass a request along a chain of handlers; each handler decides to process it or pass it on.</p>
+    <p class="real-world">Real world: Servlet filters, Spring Security filter chain, exception handler chain</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">public abstract class RequestHandler {
+    private RequestHandler next;
+
+    public RequestHandler setNext(RequestHandler handler) {
+        this.next = handler;
+        return handler;
+    }
+    public void handle(Request request) {
+        if (next != null) next.handle(request);
+    }
+}
+
+public class AuthHandler extends RequestHandler {
+    public void handle(Request req) {
+        if (!req.hasAuthToken()) {
+            System.out.println("Unauthorized");
+            return;  // stop chain
+        }
+        super.handle(req);  // pass to next
+    }
+}
+public class RateLimitHandler extends RequestHandler {
+    public void handle(Request req) {
+        if (rateLimitExceeded(req)) {
+            System.out.println("Rate limit exceeded");
+            return;
+        }
+        super.handle(req);
+    }
+}
+public class LoggingHandler extends RequestHandler {
+    public void handle(Request req) {
+        System.out.println("Processing: " + req);
+        super.handle(req);
+    }
+}
+
+// Build chain
+RequestHandler chain = new AuthHandler();
+chain.setNext(new RateLimitHandler())
+     .setNext(new LoggingHandler());
+
+chain.handle(request);</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> More than one object may handle a request, and the handler isn't known a priori; handler set should be specified dynamically.</div>
+  </div>
+
+  <div class="pattern-card behavioral" data-name="mediator behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Mediator</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Define an object that encapsulates how a set of objects interact, promoting loose coupling.</p>
+    <p class="real-world">Real world: java.util.Timer, Spring ApplicationEventPublisher, chat rooms</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Mediator
+public interface ChatMediator {
+    void sendMessage(String msg, User from);
+    void addUser(User user);
+}
+
+public class ChatRoom implements ChatMediator {
+    private final List&lt;User&gt; users = new ArrayList&lt;&gt;();
+
+    public void addUser(User user) { users.add(user); }
+    public void sendMessage(String msg, User from) {
+        users.stream()
+             .filter(u -> u != from)
+             .forEach(u -> u.receive(msg, from.getName()));
+    }
+}
+
+// Colleagues communicate via mediator
+public class User {
+    private final String name;
+    private final ChatMediator mediator;
+
+    public User(String name, ChatMediator mediator) {
+        this.name = name;
+        this.mediator = mediator;
+        mediator.addUser(this);
+    }
+    public void send(String msg) { mediator.sendMessage(msg, this); }
+    public void receive(String msg, String from) {
+        System.out.println(name + " received from " + from + ": " + msg);
+    }
+    public String getName() { return name; }
+}
+
+// Usage
+ChatRoom room = new ChatRoom();
+User alice = new User("Alice", room);
+User bob = new User("Bob", room);
+alice.send("Hello!");  // Bob receives it</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> A set of objects communicate in complex ways, creating tight coupling; want to reuse objects independently.</div>
+  </div>
+
+  <div class="pattern-card behavioral" data-name="memento behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Memento</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Capture an object's internal state and restore it later without violating encapsulation.</p>
+    <p class="real-world">Real world: undo/redo, game save states, database transaction rollback</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Originator - the object whose state we save
+public class TextEditor {
+    private String content;
+
+    public void type(String text) { content += text; }
+    public String getContent() { return content; }
+
+    // Create snapshot
+    public Snapshot save() { return new Snapshot(content); }
+    // Restore from snapshot
+    public void restore(Snapshot snap) { content = snap.getContent(); }
+
+    // Memento - snapshot of state
+    public static class Snapshot {
+        private final String content;
+        private Snapshot(String content) { this.content = content; }
+        private String getContent() { return content; }
+    }
+}
+
+// Caretaker - manages snapshots
+public class History {
+    private final Deque&lt;TextEditor.Snapshot&gt; snapshots = new ArrayDeque&lt;&gt;();
+
+    public void push(TextEditor.Snapshot snap) { snapshots.push(snap); }
+    public TextEditor.Snapshot pop() { return snapshots.pop(); }
+}
+
+// Usage
+var editor = new TextEditor();
+var history = new History();
+
+editor.type("Hello");
+history.push(editor.save());  // save state
+
+editor.type(", World!");
+history.push(editor.save());  // save state
+
+editor.type(" - some mistake");
+editor.restore(history.pop()); // undo - back to "Hello, World!"</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> You need to snapshot and restore an object's state; direct access to state would break encapsulation.</div>
+  </div>
+
+  <div class="pattern-card behavioral" data-name="visitor behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Visitor</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Separate an algorithm from the objects it operates on, enabling new operations without modifying those objects.</p>
+    <p class="real-world">Real world: Java compiler AST visitors, javax.lang.model visitors, DOM visitors</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Visitor interface
+public interface ShapeVisitor {
+    void visit(Circle circle);
+    void visit(Rectangle rectangle);
+    void visit(Triangle triangle);
+}
+
+// Element interface
+public interface Shape {
+    void accept(ShapeVisitor visitor);
+}
+
+// Concrete elements
+public class Circle implements Shape {
+    public double radius;
+    public Circle(double r) { radius = r; }
+    public void accept(ShapeVisitor v) { v.visit(this); }
+}
+public class Rectangle implements Shape {
+    public double width, height;
+    public Rectangle(double w, double h) { width=w; height=h; }
+    public void accept(ShapeVisitor v) { v.visit(this); }
+}
+
+// Concrete visitor - add new operations without changing shapes!
+public class AreaCalculator implements ShapeVisitor {
+    private double totalArea = 0;
+    public void visit(Circle c) { totalArea += Math.PI * c.radius * c.radius; }
+    public void visit(Rectangle r) { totalArea += r.width * r.height; }
+    public void visit(Triangle t) { /* ... */ }
+    public double getTotal() { return totalArea; }
+}
+
+// Usage
+List&lt;Shape&gt; shapes = List.of(new Circle(5), new Rectangle(3, 4));
+AreaCalculator calc = new AreaCalculator();
+shapes.forEach(s -> s.accept(calc));
+System.out.println("Total area: " + calc.getTotal());</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> You need to perform many distinct operations on an object structure, and you want to avoid polluting classes with operations.</div>
+  </div>
+
+  <div class="pattern-card behavioral" data-name="interpreter behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Interpreter</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Define a grammar for a language and provide an interpreter to deal with that grammar.</p>
+    <p class="real-world">Real world: Spring SpEL, Regex (java.util.regex), SQL parsers, scripting engines</p>
+    <p class="toggle-hint">Click to see code</p>
+    <div class="pattern-code">
+      <pre><code class="language-java">// Expression interface
+public interface Expression {
+    int interpret(Map&lt;String, Integer&gt; context);
+}
+
+// Terminal expressions
+public class NumberExpression implements Expression {
+    private final int number;
+    public NumberExpression(int n) { number = n; }
+    public int interpret(Map&lt;String, Integer&gt; ctx) { return number; }
+}
+public class VariableExpression implements Expression {
+    private final String name;
+    public VariableExpression(String name) { this.name = name; }
+    public int interpret(Map&lt;String, Integer&gt; ctx) {
+        return ctx.getOrDefault(name, 0);
+    }
+}
+
+// Non-terminal expressions
+public class AddExpression implements Expression {
+    private final Expression left, right;
+    public AddExpression(Expression l, Expression r) { left=l; right=r; }
+    public int interpret(Map&lt;String, Integer&gt; ctx) {
+        return left.interpret(ctx) + right.interpret(ctx);
+    }
+}
+
+// Build expression tree for: x + 5 + y
+Expression expr = new AddExpression(
+    new AddExpression(new VariableExpression("x"), new NumberExpression(5)),
+    new VariableExpression("y")
+);
+
+Map&lt;String, Integer&gt; ctx = Map.of("x", 10, "y", 3);
+System.out.println(expr.interpret(ctx)); // 18</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> There is a grammar to interpret and efficiency is not critical; good for simple languages and expression evaluation.</div>
+  </div>
+
+</div>
+</div>
+
+<script>
+hljs.highlightAll();
+
+function toggle(card) {
+  const code = card.querySelector('.pattern-code');
+  const hint = card.querySelector('.toggle-hint');
+  code.classList.toggle('open');
+  hint.textContent = code.classList.contains('open') ? 'Click to collapse' : 'Click to see code';
+}
+
+function filter(cat) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.filter-btn[data-cat="${cat}"]`).classList.add('active');
+  document.querySelectorAll('.pattern-card').forEach(card => {
+    if (cat === 'all' || card.classList.contains(cat)) {
+      card.classList.remove('hidden');
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+}
+
+function search(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('.pattern-card').forEach(card => {
+    const text = card.dataset.name + ' ' + card.textContent.toLowerCase();
+    card.classList.toggle('hidden', q.length > 0 && !text.includes(q));
+  });
+}
+</script>
+</body>
+</html>

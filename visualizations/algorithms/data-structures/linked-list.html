@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linked List Visualizer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a1a2e;
+      color: #eee;
+      font-family: system-ui, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    header h1 { font-size: 2rem; letter-spacing: .04em; color: #e0e0ff; }
+    header p  { color: #aaa; margin-top: 6px; font-size: .95rem; }
+    .back-link {
+      display: inline-block;
+      margin-top: 10px;
+      color: #7b93ff;
+      text-decoration: none;
+      font-size: .85rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    /* ── main card ── */
+    .card {
+      background: #16213e;
+      border-radius: 14px;
+      padding: 28px;
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ── stat row ── */
+    .stat-row {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .stat {
+      background: #0f1e3e;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: .85rem;
+    }
+    .stat-label { color: #888; margin-right: 6px; }
+    .stat-value { color: #7b93ff; font-weight: 700; font-size: 1rem; }
+
+    /* ── CONTROLS ── */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .control-group {
+      background: #0f1e3e;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .control-group label {
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: #888;
+    }
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .input-row input {
+      flex: 1;
+      padding: 8px 12px;
+      background: #162040;
+      border: 1px solid #2a4a80;
+      border-radius: 8px;
+      color: #eee;
+      font-size: .9rem;
+      min-width: 0;
+    }
+    .input-row input:focus { outline: 2px solid #7b93ff; }
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .1s, opacity .15s;
+      white-space: nowrap;
+    }
+    .btn:hover  { transform: translateY(-1px); }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+    .btn-prepend { background: #4c6ef5; color: #fff; }
+    .btn-append  { background: #12b886; color: #fff; }
+    .btn-delete  { background: #f03e3e; color: #fff; }
+    .btn-search  { background: #f59f00; color: #222; }
+
+    /* ── MESSAGE ── */
+    .message {
+      min-height: 26px;
+      font-size: .85rem;
+      color: #aaa;
+      font-style: italic;
+      padding: 0 4px;
+      transition: color .3s;
+    }
+    .message.success { color: #34d399; font-style: normal; }
+    .message.error   { color: #ff6b6b; font-style: normal; }
+    .message.info    { color: #f59f00; font-style: normal; }
+
+    /* ── VISUALIZATION AREA ── */
+    .vis-scroll {
+      overflow-x: auto;
+      padding: 10px 4px 20px;
+    }
+    .vis-area {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      min-height: 110px;
+      padding: 16px 8px;
+      background: #0d1527;
+      border-radius: 10px;
+      border: 2px dashed #1e3060;
+      min-width: max-content;
+      position: relative;
+    }
+
+    /* empty state */
+    .vis-empty {
+      color: #444;
+      font-style: italic;
+      font-size: .95rem;
+      margin: auto;
+      min-width: unset;
+    }
+
+    /* ── NODE ── */
+    .node-wrapper {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+    }
+    .node-label {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: #4c6ef5;
+      height: 14px;
+    }
+    .node {
+      display: flex;
+      align-items: stretch;
+      border: 2px solid #3d5af1;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #1a2f6e;
+      transition: border-color .25s, background .25s, box-shadow .25s;
+    }
+    .node.highlight {
+      border-color: #f59f00;
+      background: #3a2a00;
+      box-shadow: 0 0 12px #f59f0088;
+    }
+    .node.found {
+      border-color: #12b886;
+      background: #0a2e20;
+      box-shadow: 0 0 12px #12b88688;
+    }
+    .node-val {
+      padding: 10px 14px;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #e0e8ff;
+      min-width: 44px;
+      text-align: center;
+      background: #1a2f6e;
+      transition: background .25s;
+    }
+    .node.highlight .node-val { background: #3a2a00; }
+    .node.found     .node-val { background: #0a2e20; }
+    .node-ptr {
+      padding: 10px 10px;
+      border-left: 2px solid #3d5af1;
+      background: #111e50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .85rem;
+      color: #7b93ff;
+      transition: border-color .25s, background .25s;
+    }
+    .node.highlight .node-ptr { border-color: #f59f00; background: #2a1f00; }
+    .node.found     .node-ptr { border-color: #12b886; background: #061c10; }
+
+    /* ── ARROW between nodes ── */
+    .arrow {
+      display: flex;
+      align-items: center;
+      color: #3d5af1;
+      font-size: 1.3rem;
+      padding: 0 2px;
+      margin-top: 18px; /* align with node body (offset for label) */
+      transition: color .25s;
+    }
+
+    /* ── NULL terminator ── */
+    .null-wrapper {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 0;
+    }
+    .null-label { height: 14px; }
+    .null-box {
+      padding: 10px 12px;
+      border: 2px dashed #2a3f6e;
+      border-radius: 8px;
+      color: #555;
+      font-size: .85rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+    }
+
+    /* ── animations ── */
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(.6) translateY(-12px); }
+      to   { opacity: 1; transform: scale(1)  translateY(0); }
+    }
+    @keyframes fadeOutScale {
+      from { opacity: 1; transform: scale(1); }
+      to   { opacity: 0; transform: scale(.5); }
+    }
+    .node-enter { animation: fadeInScale .35s ease forwards; }
+    .node-exit  { animation: fadeOutScale .3s ease forwards; }
+
+    /* ── info section ── */
+    .info-section {
+      background: #0d1527;
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-size: .85rem;
+      color: #bbb;
+      line-height: 1.7;
+    }
+    .info-section h3 { color: #7b93ff; font-size: .9rem; margin-bottom: 6px; }
+    .info-section code {
+      background: #0f2040;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: .82rem;
+      color: #a9c5ff;
+    }
+    .ops-table {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 20px;
+      margin-top: 6px;
+    }
+    .op-row { display: contents; }
+    .op-name  { color: #e0e8ff; font-weight: 600; }
+    .op-time  { color: #34d399; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Linked List</h1>
+  <p>Visual singly linked list with traversal animations</p>
+  <a class="back-link" href="../../README.md">&#8592; Back to Index</a>
+</header>
+
+<div class="card">
+
+  <!-- STATS -->
+  <div class="stat-row">
+    <div class="stat">
+      <span class="stat-label">Length</span>
+      <span class="stat-value" id="stat-length">0</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Head</span>
+      <span class="stat-value" id="stat-head">null</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Tail</span>
+      <span class="stat-value" id="stat-tail">null</span>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls-grid">
+    <div class="control-group">
+      <label>Prepend (insert at beginning)</label>
+      <div class="input-row">
+        <input id="prepend-input" type="text" placeholder="Value…" maxlength="6" />
+        <button class="btn btn-prepend" id="btn-prepend">Prepend</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <label>Append (insert at end)</label>
+      <div class="input-row">
+        <input id="append-input" type="text" placeholder="Value…" maxlength="6" />
+        <button class="btn btn-append" id="btn-append">Append</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <label>Delete by value</label>
+      <div class="input-row">
+        <input id="delete-input" type="text" placeholder="Value…" maxlength="6" />
+        <button class="btn btn-delete" id="btn-delete">Delete</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <label>Search (traversal animation)</label>
+      <div class="input-row">
+        <input id="search-input" type="text" placeholder="Value…" maxlength="6" />
+        <button class="btn btn-search" id="btn-search">Search</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MESSAGE -->
+  <div class="message" id="message">Interact with the list using the controls above.</div>
+
+  <!-- VISUALIZATION -->
+  <div class="vis-scroll">
+    <div class="vis-area" id="vis-area">
+      <span class="vis-empty" id="vis-empty">List is empty — prepend or append a value</span>
+    </div>
+  </div>
+
+  <!-- INFO -->
+  <div class="info-section">
+    <h3>Time Complexities</h3>
+    <div class="ops-table">
+      <div class="op-row"><span class="op-name">Prepend</span><span class="op-time">O(1)</span></div>
+      <div class="op-row"><span class="op-name">Append</span><span class="op-time">O(n)</span></div>
+      <div class="op-row"><span class="op-name">Delete (by value)</span><span class="op-time">O(n)</span></div>
+      <div class="op-row"><span class="op-name">Search</span><span class="op-time">O(n)</span></div>
+      <div class="op-row"><span class="op-name">Access by index</span><span class="op-time">O(n)</span></div>
+    </div>
+    <p style="margin-top:10px;">
+      A linked list stores each element in a <code>Node</code> containing a <strong>value</strong>
+      and a <strong>pointer</strong> to the next node. Memory is non-contiguous — nodes live
+      anywhere in the heap and are stitched together by pointers.
+    </p>
+  </div>
+
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════
+   Data model
+════════════════════════════════════════════════════ */
+class ListNode {
+  constructor(value) {
+    this.value = value;
+    this.next  = null;
+    this.id    = 'n' + (++ListNode._id);
+  }
+}
+ListNode._id = 0;
+
+let head = null;
+let length = 0;
+let animating = false;   // guard: block ops during traversal animation
+
+/* ════════════════════════════════════════════════════
+   DOM helpers
+════════════════════════════════════════════════════ */
+const visArea    = document.getElementById('vis-area');
+const visEmpty   = document.getElementById('vis-empty');
+const msgEl      = document.getElementById('message');
+const statLength = document.getElementById('stat-length');
+const statHead   = document.getElementById('stat-head');
+const statTail   = document.getElementById('stat-tail');
+
+function setMsg(text, type = '') {
+  msgEl.textContent = text;
+  msgEl.className = 'message' + (type ? ' ' + type : '');
+}
+
+function updateStats() {
+  statLength.textContent = length;
+  if (!head) {
+    statHead.textContent = 'null';
+    statTail.textContent = 'null';
+    return;
+  }
+  statHead.textContent = head.value;
+  let cur = head;
+  while (cur.next) cur = cur.next;
+  statTail.textContent = cur.value;
+}
+
+/* ════════════════════════════════════════════════════
+   Full render
+════════════════════════════════════════════════════ */
+function render() {
+  // Clear (keep empty sentinel in DOM but hide/show)
+  // Remove all node-wrapper and arrow and null-wrapper elements
+  Array.from(visArea.children).forEach(el => {
+    if (el !== visEmpty) el.remove();
+  });
+
+  if (!head) {
+    visEmpty.style.display = 'block';
+    return;
+  }
+  visEmpty.style.display = 'none';
+
+  let cur = head;
+  let first = true;
+  while (cur) {
+    if (!first) {
+      const arrow = document.createElement('div');
+      arrow.className = 'arrow';
+      arrow.textContent = '→';
+      visArea.appendChild(arrow);
+    }
+    first = false;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'node-wrapper';
+    wrapper.dataset.id = cur.id;
+
+    const label = document.createElement('div');
+    label.className = 'node-label';
+    label.textContent = cur === head ? 'HEAD' : '';
+    wrapper.appendChild(label);
+
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.id = 'dom-' + cur.id;
+
+    const valDiv = document.createElement('div');
+    valDiv.className = 'node-val';
+    valDiv.textContent = cur.value;
+
+    const ptrDiv = document.createElement('div');
+    ptrDiv.className = 'node-ptr';
+    ptrDiv.textContent = cur.next ? '→' : 'null';
+
+    node.appendChild(valDiv);
+    node.appendChild(ptrDiv);
+    wrapper.appendChild(node);
+    visArea.appendChild(wrapper);
+
+    cur = cur.next;
+  }
+
+  // NULL box at end
+  const arrow = document.createElement('div');
+  arrow.className = 'arrow';
+  arrow.textContent = '→';
+  visArea.appendChild(arrow);
+
+  const nullWrap = document.createElement('div');
+  nullWrap.className = 'null-wrapper';
+  const nullLabel = document.createElement('div');
+  nullLabel.className = 'null-label';
+  nullWrap.appendChild(nullLabel);
+  const nullBox = document.createElement('div');
+  nullBox.className = 'null-box';
+  nullBox.textContent = 'NULL';
+  nullWrap.appendChild(nullBox);
+  visArea.appendChild(nullWrap);
+}
+
+/* ════════════════════════════════════════════════════
+   Operations
+════════════════════════════════════════════════════ */
+
+/* ----- Prepend ----- */
+function prepend(value) {
+  if (animating) return;
+  const node = new ListNode(value);
+  node.next = head;
+  head = node;
+  length++;
+  updateStats();
+  render();
+
+  // animate the new first node-wrapper
+  const domNode = document.getElementById('dom-' + node.id);
+  if (domNode) {
+    domNode.classList.add('node-enter');
+    domNode.addEventListener('animationend', () => domNode.classList.remove('node-enter'), { once: true });
+  }
+  setMsg(`Prepended "${value}" at the beginning.`, 'success');
+}
+
+/* ----- Append ----- */
+function append(value) {
+  if (animating) return;
+  const node = new ListNode(value);
+  if (!head) {
+    head = node;
+  } else {
+    let cur = head;
+    while (cur.next) cur = cur.next;
+    cur.next = node;
+  }
+  length++;
+  updateStats();
+  render();
+
+  const domNode = document.getElementById('dom-' + node.id);
+  if (domNode) {
+    domNode.classList.add('node-enter');
+    domNode.addEventListener('animationend', () => domNode.classList.remove('node-enter'), { once: true });
+  }
+  setMsg(`Appended "${value}" at the end.`, 'success');
+}
+
+/* ----- Delete ----- */
+function deleteByValue(value) {
+  if (animating) return;
+  if (!head) { setMsg('List is empty.', 'error'); return; }
+
+  // find the node to delete
+  let cur  = head;
+  let prev = null;
+  while (cur && cur.value !== value) {
+    prev = cur;
+    cur  = cur.next;
+  }
+  if (!cur) { setMsg(`Value "${value}" not found.`, 'error'); return; }
+
+  const domNode = document.getElementById('dom-' + cur.id);
+  const doDelete = () => {
+    if (prev) {
+      prev.next = cur.next;
+    } else {
+      head = cur.next;
+    }
+    length--;
+    updateStats();
+    render();
+    setMsg(`Deleted node with value "${value}".`, 'success');
+  };
+
+  if (domNode) {
+    animating = true;
+    domNode.classList.add('node-exit');
+    domNode.addEventListener('animationend', () => {
+      animating = false;
+      doDelete();
+    }, { once: true });
+  } else {
+    doDelete();
+  }
+}
+
+/* ----- Search (traversal animation) ----- */
+function search(value) {
+  if (animating) return;
+  if (!head) { setMsg('List is empty.', 'error'); return; }
+
+  animating = true;
+  setMsg(`Searching for "${value}"…`, 'info');
+
+  // collect traversal order
+  const path = [];
+  let cur = head;
+  while (cur) {
+    path.push(cur.id);
+    cur = cur.next;
+  }
+
+  let step = 0;
+  let foundId = null;
+
+  // Clear all highlights first
+  function clearHighlights() {
+    document.querySelectorAll('.node.highlight, .node.found').forEach(el => {
+      el.classList.remove('highlight', 'found');
+    });
+  }
+
+  function highlightStep() {
+    clearHighlights();
+
+    if (step >= path.length) {
+      // traversal done, not found
+      animating = false;
+      setMsg(`Value "${value}" not found after full traversal.`, 'error');
+      return;
+    }
+
+    const nodeId = path[step];
+    const domNode = document.getElementById('dom-' + nodeId);
+
+    // find corresponding linked list node to check value
+    let listCur = head;
+    let listIdx = 0;
+    while (listCur && listIdx < step) { listCur = listCur.next; listIdx++; }
+    const isTarget = listCur && listCur.value === value;
+
+    if (domNode) {
+      if (isTarget) {
+        domNode.classList.add('found');
+      } else {
+        domNode.classList.add('highlight');
+      }
+    }
+
+    if (isTarget) {
+      animating = false;
+      setMsg(`Found "${value}" at position ${step} (0-indexed).`, 'success');
+      // Leave 'found' highlight for a moment then clear
+      setTimeout(() => {
+        clearHighlights();
+      }, 2000);
+      return;
+    }
+
+    step++;
+    setTimeout(highlightStep, 520);
+  }
+
+  highlightStep();
+}
+
+/* ════════════════════════════════════════════════════
+   Button wiring
+════════════════════════════════════════════════════ */
+const prependInput = document.getElementById('prepend-input');
+const appendInput  = document.getElementById('append-input');
+const deleteInput  = document.getElementById('delete-input');
+const searchInput  = document.getElementById('search-input');
+
+document.getElementById('btn-prepend').addEventListener('click', () => {
+  const v = prependInput.value.trim();
+  if (!v) { setMsg('Enter a value to prepend.', 'error'); return; }
+  prependInput.value = '';
+  prepend(v);
+});
+prependInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-prepend').click(); });
+
+document.getElementById('btn-append').addEventListener('click', () => {
+  const v = appendInput.value.trim();
+  if (!v) { setMsg('Enter a value to append.', 'error'); return; }
+  appendInput.value = '';
+  append(v);
+});
+appendInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-append').click(); });
+
+document.getElementById('btn-delete').addEventListener('click', () => {
+  const v = deleteInput.value.trim();
+  if (!v) { setMsg('Enter a value to delete.', 'error'); return; }
+  deleteInput.value = '';
+  deleteByValue(v);
+});
+deleteInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-delete').click(); });
+
+document.getElementById('btn-search').addEventListener('click', () => {
+  const v = searchInput.value.trim();
+  if (!v) { setMsg('Enter a value to search for.', 'error'); return; }
+  searchInput.value = '';
+  search(v);
+});
+searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-search').click(); });
+
+/* ════════════════════════════════════════════════════
+   Seed initial list: 10 → 20 → 30
+════════════════════════════════════════════════════ */
+append('10');
+append('20');
+append('30');
+setMsg('List seeded with 10 → 20 → 30. Try the operations above!');
+</script>
+</body>
+</html>

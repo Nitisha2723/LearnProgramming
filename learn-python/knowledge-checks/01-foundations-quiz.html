@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python Foundations Quiz</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #1a1a2e;
+      --panel:     #16213e;
+      --accent:    #e94560;
+      --accent2:   #0f3460;
+      --text:      #e0e0e0;
+      --muted:     #8892b0;
+      --correct:   #2ecc71;
+      --wrong:     #e74c3c;
+      --border:    #2a3a5c;
+      --opt-hover: #1e2d50;
+      --opt-sel:   #0f3460;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    a.back-link {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: color 0.2s;
+      z-index: 100;
+    }
+    a.back-link:hover { color: var(--accent); }
+
+    .quiz-wrapper {
+      width: 100%;
+      max-width: 720px;
+      margin-top: 3.5rem;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.6rem;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.03em;
+    }
+
+    /* ─── Progress ─── */
+    .progress-bar-wrap {
+      background: var(--panel);
+      border-radius: 99px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.4s ease;
+      border-radius: 99px;
+    }
+    .progress-label {
+      text-align: right;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+    }
+
+    /* ─── Card ─── */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.6rem;
+      margin-bottom: 1.2rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+    .card.flash-correct { border-color: var(--correct); animation: flashGreen 0.6s ease; }
+    .card.flash-wrong   { border-color: var(--wrong);   animation: flashRed   0.6s ease; }
+
+    @keyframes flashGreen {
+      0%   { background: var(--panel); }
+      30%  { background: rgba(46,204,113,0.15); }
+      100% { background: var(--panel); }
+    }
+    @keyframes flashRed {
+      0%   { background: var(--panel); }
+      30%  { background: rgba(231,76,60,0.15); }
+      100% { background: var(--panel); }
+    }
+
+    .question-number {
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.7rem;
+    }
+    .question-text {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 1.2rem;
+    }
+
+    /* code block inside question */
+    pre.code-snippet {
+      background: #0d1b2a;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px;
+      padding: 0.9rem 1rem;
+      font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.9rem;
+      overflow-x: auto;
+      margin-bottom: 1.2rem;
+      line-height: 1.6;
+      color: #c9d1d9;
+    }
+
+    /* ─── Options ─── */
+    .options { display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .option-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .option-btn:hover:not(:disabled) {
+      background: var(--opt-hover);
+      border-color: var(--accent);
+    }
+    .option-btn.selected {
+      background: var(--opt-sel);
+      border-color: #4a90d9;
+    }
+    .option-btn.keyboard-focus {
+      background: var(--opt-hover);
+      border-color: #4a90d9;
+      outline: 2px solid #4a90d9;
+      outline-offset: 2px;
+    }
+    .option-btn.correct-answer {
+      background: rgba(46,204,113,0.15);
+      border-color: var(--correct);
+      color: var(--correct);
+    }
+    .option-btn.wrong-answer {
+      background: rgba(231,76,60,0.15);
+      border-color: var(--wrong);
+      color: var(--wrong);
+    }
+    .option-btn:disabled { cursor: default; }
+
+    .opt-letter {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--border);
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ─── Fill blank ─── */
+    .fill-blank-row {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .fill-blank-input {
+      flex: 1;
+      min-width: 160px;
+      background: #0d1b2a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: 'Fira Code', monospace;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .fill-blank-input:focus { border-color: var(--accent); }
+    .fill-blank-input:disabled { opacity: 0.7; cursor: default; }
+
+    .submit-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      padding: 0.7rem 1.4rem;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .submit-btn:hover { opacity: 0.85; }
+    .submit-btn:disabled { opacity: 0.4; cursor: default; }
+
+    /* ─── Feedback ─── */
+    .feedback {
+      display: none;
+      margin-top: 1rem;
+      padding: 0.9rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .feedback.correct { background: rgba(46,204,113,0.12); border: 1px solid var(--correct); }
+    .feedback.wrong   { background: rgba(231,76,60,0.12);  border: 1px solid var(--wrong); }
+    .feedback .label  { font-weight: 700; margin-bottom: 0.3rem; }
+    .feedback .correct-info { color: var(--correct); }
+    .feedback .explanation { color: var(--muted); margin-top: 0.4rem; }
+
+    /* ─── Navigation ─── */
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.8rem;
+      margin-top: 0.5rem;
+    }
+    .nav-btn {
+      background: var(--accent2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 1.4rem;
+      color: var(--text);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .nav-btn:hover { background: var(--opt-hover); }
+    .nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .nav-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .nav-btn.primary:hover { opacity: 0.85; }
+
+    /* ─── Final Screen ─── */
+    #final-screen {
+      display: none;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+    }
+    #final-screen h2 { font-size: 1.4rem; margin-bottom: 1rem; color: var(--accent); }
+    .score-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 6px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.2rem;
+    }
+    .score-pct { font-size: 2rem; font-weight: 800; color: var(--accent); }
+    .score-sub { font-size: 0.75rem; color: var(--muted); }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.4rem 1.2rem;
+      border-radius: 99px;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    .grade-needs  { background: rgba(231,76,60,0.2);  color: #e74c3c; border: 1px solid #e74c3c; }
+    .grade-getting{ background: rgba(241,196,15,0.2); color: #f1c40f; border: 1px solid #f1c40f; }
+    .grade-good   { background: rgba(52,152,219,0.2); color: #3498db; border: 1px solid #3498db; }
+    .grade-expert { background: rgba(46,204,113,0.2); color: #2ecc71; border: 1px solid #2ecc71; }
+
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 1rem 0 1.5rem;
+      flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-val { font-size: 1.3rem; font-weight: 700; color: var(--text); }
+    .stat-lbl { font-size: 0.75rem; color: var(--muted); }
+
+    .final-btns { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+    .final-btn {
+      padding: 0.7rem 1.6rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.2s;
+    }
+    .final-btn:hover { opacity: 0.85; }
+    .final-btn.retry  { background: var(--accent); color: #fff; }
+    .final-btn.review { background: var(--accent2); color: var(--text); border: 1px solid var(--border); }
+
+    /* ─── Review Screen ─── */
+    #review-screen { display: none; }
+    #review-screen h2 { text-align: center; color: var(--accent); margin-bottom: 1.2rem; }
+
+    .review-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .review-card .q-label { font-size: 0.75rem; color: var(--accent); font-weight: 700; margin-bottom: 0.4rem; }
+    .review-card .q-text  { font-size: 0.95rem; margin-bottom: 0.8rem; }
+    .review-answer {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      font-size: 0.88rem;
+    }
+    .review-answer .your-ans { color: var(--wrong); }
+    .review-answer .right-ans { color: var(--correct); }
+    .review-answer .expl { color: var(--muted); font-style: italic; margin-top: 0.3rem; }
+
+    .back-to-result-btn {
+      display: block;
+      margin: 1rem auto 0;
+      padding: 0.65rem 1.4rem;
+      background: var(--accent2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .back-to-result-btn:hover { background: var(--opt-hover); }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 480px) {
+      h1 { font-size: 1.2rem; }
+      .card { padding: 1.1rem; }
+      .stats-row { gap: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<a class="back-link" href="README.md">&#8592; Back to Index</a>
+
+<div class="quiz-wrapper">
+  <h1>Python Foundations Quiz</h1>
+
+  <!-- ── Quiz Screen ── -->
+  <div id="quiz-screen">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-label" id="progress-label">Question 1 of 15</div>
+
+    <div class="card" id="question-card">
+      <div class="question-number" id="q-number">Question 1</div>
+      <div class="question-text" id="q-text"></div>
+      <pre class="code-snippet" id="q-code" style="display:none"></pre>
+      <div class="options" id="q-options"></div>
+      <div class="feedback" id="q-feedback"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" id="btn-prev" onclick="navigate(-1)" disabled>&#8592; Previous</button>
+      <button class="nav-btn primary" id="btn-next" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+  </div>
+
+  <!-- ── Final Screen ── -->
+  <div id="final-screen">
+    <h2>Quiz Complete!</h2>
+    <div class="score-circle">
+      <span class="score-pct" id="final-pct">0%</span>
+      <span class="score-sub" id="final-fraction">0 / 15</span>
+    </div>
+    <div class="grade-badge" id="grade-badge"></div>
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-val" id="stat-correct">0</div>
+        <div class="stat-lbl">Correct</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="stat-wrong">0</div>
+        <div class="stat-lbl">Wrong</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="stat-time">0s</div>
+        <div class="stat-lbl">Time</div>
+      </div>
+    </div>
+    <div class="final-btns">
+      <button class="final-btn retry" onclick="retryQuiz()">Retry</button>
+      <button class="final-btn review" id="btn-review-wrong" onclick="showReview()">Review Wrong Answers</button>
+    </div>
+  </div>
+
+  <!-- ── Review Screen ── -->
+  <div id="review-screen">
+    <h2>Wrong Answer Review</h2>
+    <div id="review-list"></div>
+    <button class="back-to-result-btn" onclick="backToResult()">&#8592; Back to Results</button>
+  </div>
+
+</div><!-- /.quiz-wrapper -->
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   QUESTION DATA
+═══════════════════════════════════════════════════════════════ */
+const questions = [
+  // 1 — multiple-choice
+  {
+    type: "multiple-choice",
+    text: "Which of the following best describes how Python executes code compared to a compiled language like C?",
+    options: [
+      "Python compiles to native machine code before running.",
+      "Python is interpreted line-by-line at runtime (via a bytecode VM), so no separate compile step is needed.",
+      "Python requires a linker to produce an executable binary.",
+      "Python converts source code to assembly, then runs it."
+    ],
+    correct: 1,
+    explanation: "Python is an interpreted language: the CPython interpreter reads source, compiles it to bytecode on-the-fly, then runs that bytecode in the Python VM — all in one step, with no separate compilation phase visible to the user."
+  },
+
+  // 2 — true-false
+  {
+    type: "true-false",
+    text: "In Python, you must declare a variable's type before assigning a value to it (e.g., `int x = 5`).",
+    options: ["True", "False"],
+    correct: 1,
+    explanation: "Python uses dynamic typing — variables are not declared with a type. You simply write `x = 5` and Python infers the type at runtime. Type annotations (PEP 526) are optional hints, not enforced declarations."
+  },
+
+  // 3 — code-output
+  {
+    type: "multiple-choice",
+    text: "What is the output of this code?",
+    code: "print(type(3.0))",
+    options: [
+      "<class 'int'>",
+      "<class 'float'>",
+      "<class 'double'>",
+      "<type 'float'>"
+    ],
+    correct: 1,
+    explanation: "`3.0` has a decimal point, making it a floating-point literal. `type()` returns the class object, and Python's built-in floating-point type is named `float`, displayed as `<class 'float'>`. Python has no `double` type (it uses 64-bit doubles internally but calls them `float`)."
+  },
+
+  // 4 — code-output
+  {
+    type: "multiple-choice",
+    text: "What is the output of this code?",
+    code: "print(10 // 3)",
+    options: ["3.333...", "3", "4", "3.0"],
+    correct: 1,
+    explanation: "The `//` operator performs floor (integer) division — it divides and rounds down to the nearest integer. `10 / 3 = 3.333…`, floored to `3`. If either operand were a float (e.g. `10.0 // 3`), the result would be `3.0`."
+  },
+
+  // 5 — code-output
+  {
+    type: "multiple-choice",
+    text: "What is the output of this code?",
+    code: "print(bool(\"\"))",
+    options: ["True", "False", "None", "Error"],
+    correct: 1,
+    explanation: 'An empty string `""` is falsy in Python. `bool("")` evaluates to `False`. The falsy values are: `0`, `0.0`, `""`, `[]`, `{}`, `()`, `None`, and `False` itself.'
+  },
+
+  // 6 — multiple-choice
+  {
+    type: "multiple-choice",
+    text: "Which formatting approach uses placeholders like `{name}` inserted directly into a string literal preceded by `f`?",
+    options: [
+      "%-style formatting (`'Hello, %s' % name`)",
+      "`.format()` method (`'Hello, {}'.format(name)`)",
+      "f-strings (`f'Hello, {name}'`)",
+      "Template strings (`Template('Hello $name')`)"
+    ],
+    correct: 2,
+    explanation: "f-strings (formatted string literals), introduced in Python 3.6, prefix a string with `f` and allow arbitrary expressions inside `{}`. They are generally the fastest and most readable option for simple cases."
+  },
+
+  // 7 — true-false
+  {
+    type: "true-false",
+    text: "Python uses curly braces `{}` to define code blocks (like if-statements and functions).",
+    options: ["True", "False"],
+    correct: 1,
+    explanation: "Python uses indentation (whitespace) to delimit code blocks, not curly braces. Consistent indentation (PEP 8 recommends 4 spaces) is mandatory — mismatched indentation causes an `IndentationError`."
+  },
+
+  // 8 — multiple-choice
+  {
+    type: "multiple-choice",
+    text: "What does Python's `None` represent, and how does it differ from `null` in languages like JavaScript or Java?",
+    options: [
+      "`None` is an integer with value 0.",
+      "`None` is Python's equivalent of `null` — a singleton object of type `NoneType` representing the absence of a value.",
+      "`None` is an empty string.",
+      "`None` is a boolean equal to `False`."
+    ],
+    correct: 1,
+    explanation: "`None` is a singleton object (there is only one `None` in any Python process) of type `NoneType`. It represents the intentional absence of a value. You test for it with `x is None` (identity), not `x == None` (equality), because `is` checks object identity."
+  },
+
+  // 9 — multiple-choice
+  {
+    type: "multiple-choice",
+    text: "What is the difference between `is` and `==` in Python?",
+    options: [
+      "`is` checks value equality; `==` checks identity.",
+      "`is` checks identity (same object in memory); `==` checks value equality.",
+      "They are identical operators.",
+      "`is` only works with numbers; `==` works with all types."
+    ],
+    correct: 1,
+    explanation: "`==` calls `__eq__` and compares values. `is` compares object identity — whether two names point to the exact same object in memory. Example: `a = [1,2]; b = [1,2]; a == b` is `True` but `a is b` is `False` (two distinct list objects)."
+  },
+
+  // 10 — multiple-choice
+  {
+    type: "multiple-choice",
+    text: "Which of the following values is TRUTHY in Python?",
+    options: [
+      "0",
+      '""',
+      "[]",
+      '"hello"'
+    ],
+    correct: 3,
+    explanation: 'A non-empty string like `"hello"` is truthy. The falsy values in Python include: `0`, `0.0`, `0j`, `""`, `b""`, `[]`, `()`, `{}`, `set()`, `None`, and `False`. Anything else is truthy by default.'
+  },
+
+  // 11 — code-output
+  {
+    type: "multiple-choice",
+    text: "What is the output of this code?",
+    code: "print(2 ** 8)",
+    options: ["16", "256", "64", "512"],
+    correct: 1,
+    explanation: "`**` is Python's exponentiation operator. `2 ** 8` means 2 raised to the power of 8, which equals 256. Python integers can be arbitrarily large, so there is no overflow."
+  },
+
+  // 12 — fill-blank
+  {
+    type: "fill-blank",
+    text: "Complete the expression: to get the remainder when dividing 17 by 5, you use the modulo operator. Type the result of `17 % 5`:",
+    correct: "2",
+    explanation: "`%` is the modulo (remainder) operator. `17 // 5 = 3` remainder `2`, so `17 % 5 = 2`. Modulo is widely used for tasks like checking even/odd (`n % 2 == 0`) or cycling through values."
+  },
+
+  // 13 — multiple-choice
+  {
+    type: "multiple-choice",
+    text: "Which statement about Python's Zen (import this) is CORRECT?",
+    options: [
+      "\"Complex is better than simple.\"",
+      "\"Readability counts.\"",
+      "\"Errors should pass silently, unless explicitly suppressed.\"",
+      "\"There should be many ways to do it.\""
+    ],
+    correct: 1,
+    explanation: '"Readability counts." is one of the 19 aphorisms in the Zen of Python (PEP 20). The others listed are intentionally inverted: the Zen says "Simple is better than complex", "Errors should never pass silently…", and "There should be one — and preferably only one — obvious way to do it."'
+  },
+
+  // 14 — true-false
+  {
+    type: "true-false",
+    text: "In Python 3, the `/` operator between two integers always returns a float.",
+    options: ["True", "False"],
+    correct: 0,
+    explanation: "In Python 3, `/` is true division and always returns a float. `10 / 2` gives `5.0`, not `5`. This changed from Python 2, where `/` between integers performed floor division. Use `//` for integer (floor) division."
+  },
+
+  // 15 — multiple-choice
+  {
+    type: "multiple-choice",
+    text: "What is the output of `type(True)` in Python?",
+    options: [
+      "<class 'int'>",
+      "<class 'bool'>",
+      "<class 'NoneType'>",
+      "<class 'str'>"
+    ],
+    correct: 1,
+    explanation: "`True` and `False` are instances of `bool`, a subclass of `int`. `type(True)` is `<class 'bool'>`. Because `bool` inherits from `int`, `True == 1` and `False == 0` are both `True`, which can cause surprising results in arithmetic (`True + True == 2`)."
+  }
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════════ */
+let currentIdx = 0;
+let answers    = new Array(questions.length).fill(null); // null | index/string
+let answered   = new Array(questions.length).fill(false);
+let correct    = new Array(questions.length).fill(false);
+let startTime  = Date.now();
+let kbFocus    = -1; // keyboard-focused option index
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════════════════════════ */
+function renderQuestion(idx) {
+  const q = questions[idx];
+  kbFocus = -1;
+
+  // progress
+  const pct = ((idx + 1) / questions.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent =
+    `Question ${idx + 1} of ${questions.length}`;
+
+  document.getElementById('q-number').textContent = `Question ${idx + 1}`;
+  document.getElementById('q-text').textContent = q.text;
+
+  // code block
+  const codeEl = document.getElementById('q-code');
+  if (q.code) {
+    codeEl.textContent = q.code;
+    codeEl.style.display = 'block';
+  } else {
+    codeEl.style.display = 'none';
+  }
+
+  // options / fill-blank
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+
+  if (q.type === 'fill-blank') {
+    const row = document.createElement('div');
+    row.className = 'fill-blank-row';
+
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'fill-blank-input';
+    inp.placeholder = 'Type your answer…';
+    inp.id = 'fill-input';
+    if (answered[idx]) {
+      inp.value = answers[idx];
+      inp.disabled = true;
+    }
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') submitFillBlank();
+    });
+
+    const btn = document.createElement('button');
+    btn.className = 'submit-btn';
+    btn.textContent = 'Submit';
+    btn.id = 'fill-submit-btn';
+    if (answered[idx]) btn.disabled = true;
+    btn.addEventListener('click', submitFillBlank);
+
+    row.appendChild(inp);
+    row.appendChild(btn);
+    optsEl.appendChild(row);
+
+    if (!answered[idx]) {
+      setTimeout(() => inp.focus(), 50);
+    }
+  } else {
+    const letters = ['A', 'B', 'C', 'D'];
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.disabled = answered[idx];
+
+      const letterSpan = document.createElement('span');
+      letterSpan.className = 'opt-letter';
+      letterSpan.textContent = letters[i];
+
+      const textSpan = document.createElement('span');
+      textSpan.textContent = opt;
+
+      btn.appendChild(letterSpan);
+      btn.appendChild(textSpan);
+
+      if (answered[idx]) {
+        if (i === q.correct) {
+          btn.classList.add('correct-answer');
+        } else if (i === answers[idx] && answers[idx] !== q.correct) {
+          btn.classList.add('wrong-answer');
+        }
+      } else {
+        btn.addEventListener('click', () => selectOption(i));
+        btn.setAttribute('data-idx', i);
+      }
+
+      optsEl.appendChild(btn);
+    });
+  }
+
+  // feedback
+  const fbEl = document.getElementById('q-feedback');
+  if (answered[idx]) {
+    fbEl.style.display = 'block';
+    if (correct[idx]) {
+      fbEl.className = 'feedback correct';
+      fbEl.innerHTML = `<div class="label">&#10003; Correct!</div>
+        <div class="explanation">${q.explanation}</div>`;
+    } else {
+      fbEl.className = 'feedback wrong';
+      const correctLabel = q.type === 'fill-blank'
+        ? `<code>${q.correct}</code>`
+        : `"${q.options[q.correct]}"`;
+      fbEl.innerHTML = `<div class="label">&#10007; Incorrect</div>
+        <div class="correct-info">Correct answer: ${correctLabel}</div>
+        <div class="explanation">${q.explanation}</div>`;
+    }
+  } else {
+    fbEl.style.display = 'none';
+    fbEl.className = 'feedback';
+  }
+
+  // card flash (only on first render of already-answered)
+  const card = document.getElementById('question-card');
+  card.classList.remove('flash-correct', 'flash-wrong');
+
+  // nav buttons
+  document.getElementById('btn-prev').disabled = (idx === 0);
+  const nextBtn = document.getElementById('btn-next');
+  if (idx === questions.length - 1) {
+    nextBtn.textContent = 'Finish';
+    nextBtn.classList.add('primary');
+  } else {
+    nextBtn.textContent = 'Next →';
+  }
+  nextBtn.disabled = false;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ANSWER LOGIC
+═══════════════════════════════════════════════════════════════ */
+function selectOption(i) {
+  if (answered[currentIdx]) return;
+  const q = questions[currentIdx];
+  answered[currentIdx] = true;
+  answers[currentIdx] = i;
+  correct[currentIdx] = (i === q.correct);
+
+  const card = document.getElementById('question-card');
+  card.classList.add(correct[currentIdx] ? 'flash-correct' : 'flash-wrong');
+
+  // re-render (shows feedback + coloured options)
+  renderQuestion(currentIdx);
+}
+
+function submitFillBlank() {
+  if (answered[currentIdx]) return;
+  const q = questions[currentIdx];
+  const inp = document.getElementById('fill-input');
+  const val = inp.value.trim();
+  if (!val) return;
+
+  answered[currentIdx] = true;
+  answers[currentIdx] = val;
+  correct[currentIdx] = (val === q.correct);
+
+  const card = document.getElementById('question-card');
+  card.classList.add(correct[currentIdx] ? 'flash-correct' : 'flash-wrong');
+
+  renderQuestion(currentIdx);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════════════ */
+function navigate(dir) {
+  const next = currentIdx + dir;
+  if (next < 0) return;
+  if (next >= questions.length) {
+    showFinalScreen();
+    return;
+  }
+  currentIdx = next;
+  renderQuestion(currentIdx);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   KEYBOARD
+═══════════════════════════════════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  if (document.getElementById('quiz-screen').style.display === 'none') return;
+
+  const q = questions[currentIdx];
+
+  // fill-blank: let input handle its own keys
+  if (q.type === 'fill-blank') {
+    if (document.getElementById('fill-input') === document.activeElement) return;
+  }
+
+  const opts = document.querySelectorAll('#q-options .option-btn:not(:disabled)');
+  const count = opts.length;
+
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+    e.preventDefault();
+    if (count === 0) return;
+    clearKbFocus(opts);
+    kbFocus = (kbFocus + 1) % count;
+    opts[kbFocus].classList.add('keyboard-focus');
+    opts[kbFocus].focus();
+  } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+    e.preventDefault();
+    if (count === 0) return;
+    clearKbFocus(opts);
+    kbFocus = (kbFocus - 1 + count) % count;
+    opts[kbFocus].classList.add('keyboard-focus');
+    opts[kbFocus].focus();
+  } else if (e.key === 'Enter' || e.key === ' ') {
+    if (kbFocus >= 0 && kbFocus < count && !answered[currentIdx]) {
+      e.preventDefault();
+      selectOption(parseInt(opts[kbFocus].getAttribute('data-idx')));
+    } else if (answered[currentIdx]) {
+      e.preventDefault();
+      navigate(1);
+    }
+  }
+});
+
+function clearKbFocus(opts) {
+  opts.forEach(o => o.classList.remove('keyboard-focus'));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FINAL SCREEN
+═══════════════════════════════════════════════════════════════ */
+function showFinalScreen() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('review-screen').style.display = 'none';
+
+  const totalCorrect = correct.filter(Boolean).length;
+  const total = questions.length;
+  const pct = Math.round((totalCorrect / total) * 100);
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+
+  document.getElementById('final-pct').textContent = pct + '%';
+  document.getElementById('final-fraction').textContent = `${totalCorrect} / ${total}`;
+  document.getElementById('stat-correct').textContent = totalCorrect;
+  document.getElementById('stat-wrong').textContent = total - totalCorrect;
+  document.getElementById('stat-time').textContent = formatTime(elapsed);
+
+  const badge = document.getElementById('grade-badge');
+  let gradeText, gradeClass;
+  if (pct >= 95)      { gradeText = 'Expert!';      gradeClass = 'grade-expert'; }
+  else if (pct >= 80) { gradeText = 'Good Job!';    gradeClass = 'grade-good'; }
+  else if (pct >= 60) { gradeText = 'Getting There'; gradeClass = 'grade-getting'; }
+  else                { gradeText = 'Needs Work';   gradeClass = 'grade-needs'; }
+  badge.textContent = gradeText;
+  badge.className = 'grade-badge ' + gradeClass;
+
+  // hide review button if no wrong answers
+  const wrongCount = correct.filter(v => !v).length;
+  document.getElementById('btn-review-wrong').style.display =
+    wrongCount > 0 ? 'inline-block' : 'none';
+
+  document.getElementById('final-screen').style.display = 'block';
+}
+
+function formatTime(s) {
+  if (s < 60) return s + 's';
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}m ${sec}s`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RETRY
+═══════════════════════════════════════════════════════════════ */
+function retryQuiz() {
+  currentIdx = 0;
+  answers    = new Array(questions.length).fill(null);
+  answered   = new Array(questions.length).fill(false);
+  correct    = new Array(questions.length).fill(false);
+  startTime  = Date.now();
+  kbFocus    = -1;
+
+  document.getElementById('final-screen').style.display  = 'none';
+  document.getElementById('review-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display   = 'block';
+  renderQuestion(0);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   REVIEW WRONG ANSWERS
+═══════════════════════════════════════════════════════════════ */
+function showReview() {
+  document.getElementById('final-screen').style.display  = 'none';
+  document.getElementById('quiz-screen').style.display   = 'none';
+
+  const listEl = document.getElementById('review-list');
+  listEl.innerHTML = '';
+
+  questions.forEach((q, i) => {
+    if (correct[i]) return; // skip correct
+
+    const card = document.createElement('div');
+    card.className = 'review-card';
+
+    const qLabel = document.createElement('div');
+    qLabel.className = 'q-label';
+    qLabel.textContent = `Question ${i + 1}`;
+
+    const qText = document.createElement('div');
+    qText.className = 'q-text';
+    qText.textContent = q.text;
+
+    const ans = document.createElement('div');
+    ans.className = 'review-answer';
+
+    if (q.type === 'fill-blank') {
+      const yourAns = document.createElement('div');
+      yourAns.className = 'your-ans';
+      yourAns.textContent = `Your answer: ${answers[i] ?? '(not answered)'}`;
+
+      const rightAns = document.createElement('div');
+      rightAns.className = 'right-ans';
+      rightAns.textContent = `Correct answer: ${q.correct}`;
+
+      ans.appendChild(yourAns);
+      ans.appendChild(rightAns);
+    } else {
+      const yourAns = document.createElement('div');
+      yourAns.className = 'your-ans';
+      yourAns.textContent = `Your answer: ${answers[i] !== null ? q.options[answers[i]] : '(not answered)'}`;
+
+      const rightAns = document.createElement('div');
+      rightAns.className = 'right-ans';
+      rightAns.textContent = `Correct answer: ${q.options[q.correct]}`;
+
+      ans.appendChild(yourAns);
+      ans.appendChild(rightAns);
+    }
+
+    const expl = document.createElement('div');
+    expl.className = 'expl';
+    expl.textContent = q.explanation;
+
+    ans.appendChild(expl);
+
+    if (q.code) {
+      const pre = document.createElement('pre');
+      pre.className = 'code-snippet';
+      pre.style.margin = '0.5rem 0';
+      pre.textContent = q.code;
+      card.appendChild(qLabel);
+      card.appendChild(qText);
+      card.appendChild(pre);
+      card.appendChild(ans);
+    } else {
+      card.appendChild(qLabel);
+      card.appendChild(qText);
+      card.appendChild(ans);
+    }
+
+    listEl.appendChild(card);
+  });
+
+  document.getElementById('review-screen').style.display = 'block';
+}
+
+function backToResult() {
+  document.getElementById('review-screen').style.display = 'none';
+  showFinalScreen();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════════ */
+renderQuestion(0);
+</script>
+</body>
+</html>

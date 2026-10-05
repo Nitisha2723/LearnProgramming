@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garbage Collection Visualization</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #1a1a2e;
+    color: #eee;
+    font-family: system-ui, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    color: #e94560;
+    margin-bottom: 6px;
+    font-size: 1.8rem;
+  }
+  .subtitle {
+    text-align: center;
+    color: #888;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+  }
+  .back-link {
+    display: inline-block;
+    margin-bottom: 16px;
+    color: #4da8da;
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  .back-link:hover { text-decoration: underline; }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  button {
+    background: #0f3460;
+    color: #eee;
+    border: 1px solid #4da8da;
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: background 0.2s;
+  }
+  button:hover:not(:disabled) { background: #1a5276; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.gc-btn { border-color: #2ecc71; color: #2ecc71; font-weight: bold; }
+  button.gc-btn:hover:not(:disabled) { background: #145a32; }
+  button.remove-btn { border-color: #e94560; }
+  button.remove-btn:hover:not(:disabled) { background: #4a1020; }
+  button.add-ref-btn { border-color: #f5a623; }
+  button.add-ref-btn:hover:not(:disabled) { background: #4a3010; }
+
+  /* Status bar */
+  .status-bar {
+    max-width: 1050px;
+    margin: 0 auto 14px;
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    color: #ccc;
+    min-height: 40px;
+    line-height: 1.4;
+  }
+  .status-phase {
+    font-weight: bold;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+  }
+  .phase-idle { color: #888; }
+  .phase-mark { color: #f5a623; }
+  .phase-sweep { color: #e94560; }
+  .phase-done { color: #2ecc71; }
+
+  /* Counter bar */
+  .counter-bar {
+    max-width: 1050px;
+    margin: 0 auto 16px;
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 6px;
+    padding: 8px 16px;
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+  }
+  .counter-item { display: flex; align-items: center; gap: 6px; }
+  .counter-val { font-weight: bold; font-size: 1.1rem; }
+  .c-total { color: #4da8da; }
+  .c-reachable { color: #2ecc71; }
+  .c-unreachable { color: #e94560; }
+  .c-freed { color: #f5a623; }
+
+  /* Main layout */
+  .main-layout {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 16px;
+    max-width: 1050px;
+    margin: 0 auto 20px;
+    align-items: start;
+  }
+
+  /* GC Roots panel */
+  .roots-panel {
+    background: #16213e;
+    border: 2px solid #f5a623;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .roots-header {
+    background: rgba(245,166,35,0.2);
+    padding: 8px 12px;
+    font-weight: bold;
+    color: #f5a623;
+    font-size: 0.9rem;
+  }
+  .roots-subtitle {
+    font-size: 0.65rem;
+    color: #888;
+    padding: 3px 12px 6px;
+    background: #0d1b34;
+    border-bottom: 1px solid #0f3460;
+  }
+  .root-item {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 12px;
+    border-bottom: 1px solid #0f3460;
+    font-size: 0.78rem;
+  }
+  .root-item:last-child { border-bottom: none; }
+  .root-name {
+    color: #f5a623;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+  }
+  .root-ref {
+    color: #4da8da;
+    font-family: 'Courier New', monospace;
+    font-size: 0.72rem;
+    margin-top: 2px;
+  }
+  .root-ref.null-ref { color: #666; }
+
+  /* Heap arena */
+  .heap-arena {
+    background: #16213e;
+    border: 2px solid #4da8da;
+    border-radius: 10px;
+    overflow: hidden;
+    min-height: 420px;
+  }
+  .heap-arena-header {
+    background: rgba(77,168,218,0.15);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    color: #4da8da;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #0f3460;
+  }
+  .heap-arena-body {
+    position: relative;
+    min-height: 380px;
+    padding: 10px;
+  }
+
+  /* Heap objects */
+  .heap-node {
+    position: absolute;
+    background: #0d1b34;
+    border: 2px solid #4da8da;
+    border-radius: 12px;
+    width: 90px;
+    height: 65px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.3s, box-shadow 0.3s, opacity 0.4s, background 0.3s;
+    font-size: 0.78rem;
+    user-select: none;
+    z-index: 2;
+  }
+  .heap-node .node-label {
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+  }
+  .heap-node .node-addr {
+    color: #666;
+    font-size: 0.65rem;
+    margin-top: 2px;
+  }
+  .heap-node .node-type {
+    font-size: 0.68rem;
+    color: #888;
+    margin-top: 1px;
+  }
+
+  /* States */
+  .heap-node.default { border-color: #4da8da; }
+  .heap-node.reachable {
+    border-color: #2ecc71;
+    background: #0d2b1a;
+    box-shadow: 0 0 12px rgba(46,204,113,0.5);
+  }
+  .heap-node.unreachable {
+    border-color: #e94560;
+    background: #2b0d16;
+    box-shadow: 0 0 12px rgba(233,69,96,0.5);
+    animation: glowRed 1s ease-in-out infinite;
+  }
+  .heap-node.selected-src {
+    border-color: #f5a623;
+    box-shadow: 0 0 12px rgba(245,166,35,0.6);
+  }
+  .heap-node.selected-dst {
+    border-color: #a29bfe;
+    box-shadow: 0 0 12px rgba(162,155,254,0.6);
+  }
+  .heap-node.swept {
+    opacity: 0;
+    transform: scale(0.4);
+    transition: all 0.5s ease-in;
+  }
+  @keyframes glowRed {
+    0%,100% { box-shadow: 0 0 8px rgba(233,69,96,0.4); }
+    50% { box-shadow: 0 0 18px rgba(233,69,96,0.8); }
+  }
+  @keyframes markAnim {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+  .marking { animation: markAnim 0.4s ease-in-out; }
+
+  /* SVG for arrows */
+  #gc-arrows {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: visible;
+  }
+
+  /* Select panels for ref adding */
+  .select-prompt {
+    max-width: 1050px;
+    margin: 0 auto 12px;
+    background: #16213e;
+    border: 2px solid #f5a623;
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    display: none;
+  }
+  .select-prompt.active { display: block; }
+  .select-prompt strong { color: #f5a623; }
+
+  /* Legend */
+  .legend {
+    max-width: 1050px;
+    margin: 0 auto 16px;
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: center;
+    font-size: 0.78rem;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid;
+  }
+
+  /* Explanation */
+  .explanation-box {
+    max-width: 1050px;
+    margin: 0 auto 20px;
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 0.83rem;
+    line-height: 1.6;
+    color: #ccc;
+  }
+  .explanation-box h4 { color: #4da8da; margin-bottom: 6px; }
+  code { background: #0d1b34; padding: 1px 4px; border-radius: 3px; color: #4da8da; font-size: 0.82rem; }
+  .step { display: flex; gap: 8px; margin: 4px 0; }
+  .step-num {
+    background: #0f3460;
+    color: #4da8da;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  @media (max-width: 700px) {
+    .main-layout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<a href="../../README.md" class="back-link">← Back to Index</a>
+<h1>Garbage Collection — Mark &amp; Sweep</h1>
+<p class="subtitle">How the JVM reclaims memory from unreachable objects</p>
+
+<div class="controls">
+  <button onclick="allocateObject()" id="btn-alloc">Allocate Object</button>
+  <button onclick="startAddRef()" id="btn-add-ref" class="add-ref-btn" disabled>Add Reference</button>
+  <button onclick="startRemoveRef()" id="btn-remove-ref" class="remove-btn" disabled>Remove Reference</button>
+  <button onclick="runGC()" id="btn-gc" class="gc-btn" disabled>Run GC (Mark &amp; Sweep)</button>
+  <button onclick="resetAll()" style="border-color:#888;">Reset</button>
+</div>
+
+<!-- Select prompt -->
+<div class="select-prompt" id="select-prompt">
+  <strong id="select-prompt-text">Click an object to select it...</strong>
+</div>
+
+<!-- Counter bar -->
+<div class="counter-bar">
+  <div class="counter-item">
+    <span>Total objects:</span>
+    <span class="counter-val c-total" id="c-total">0</span>
+  </div>
+  <div class="counter-item">
+    <span>Reachable:</span>
+    <span class="counter-val c-reachable" id="c-reachable">—</span>
+  </div>
+  <div class="counter-item">
+    <span>Unreachable:</span>
+    <span class="counter-val c-unreachable" id="c-unreachable">—</span>
+  </div>
+  <div class="counter-item">
+    <span>Freed by GC:</span>
+    <span class="counter-val c-freed" id="c-freed">0</span>
+  </div>
+</div>
+
+<!-- Status -->
+<div class="status-bar">
+  <div class="status-phase phase-idle" id="status-phase">IDLE</div>
+  <div id="status-text">Allocate objects to populate the heap, then add/remove references. Run GC to see Mark &amp; Sweep in action.</div>
+</div>
+
+<!-- Main layout -->
+<div class="main-layout">
+  <!-- GC Roots -->
+  <div class="roots-panel">
+    <div class="roots-header">GC Roots</div>
+    <div class="roots-subtitle">Stack vars + static fields.<br>GC starts here.</div>
+    <div id="roots-list">
+      <div class="root-item">
+        <div class="root-name">stack.main.ref1</div>
+        <div class="root-ref null-ref" id="root-0-ref">→ null</div>
+      </div>
+      <div class="root-item">
+        <div class="root-name">stack.main.ref2</div>
+        <div class="root-ref null-ref" id="root-1-ref">→ null</div>
+      </div>
+      <div class="root-item">
+        <div class="root-name">static.App.cache</div>
+        <div class="root-ref null-ref" id="root-2-ref">→ null</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Heap arena -->
+  <div class="heap-arena">
+    <div class="heap-arena-header">
+      <span>HEAP</span>
+      <span style="font-size:0.7rem;color:#888;font-weight:normal;">Click objects to select for operations</span>
+    </div>
+    <div class="heap-arena-body" id="heap-body">
+      <svg id="gc-arrows"></svg>
+      <div style="text-align:center;color:#444;font-size:0.85rem;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)" id="heap-empty-msg">
+        Heap is empty<br><span style="font-size:0.75rem">Click "Allocate Object" to add objects</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-dot" style="border-color:#4da8da;background:#0d1b34;"></div> Default object
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="border-color:#2ecc71;background:#0d2b1a;"></div> Reachable (marked)
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="border-color:#e94560;background:#2b0d16;"></div> Unreachable (will be swept)
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="border-color:#f5a623;background:#0d1b34;"></div> Selected source
+  </div>
+  <div class="legend-item">
+    <svg width="30" height="12" style="overflow:visible">
+      <line x1="0" y1="6" x2="22" y2="6" stroke="#4da8da" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <polygon points="22,3 30,6 22,9" fill="#4da8da"/>
+    </svg> Object reference
+  </div>
+  <div class="legend-item">
+    <svg width="30" height="12" style="overflow:visible">
+      <line x1="0" y1="6" x2="22" y2="6" stroke="#f5a623" stroke-width="2"/>
+      <polygon points="22,3 30,6 22,9" fill="#f5a623"/>
+    </svg> Root reference
+  </div>
+</div>
+
+<!-- Explanation -->
+<div class="explanation-box">
+  <h4>Mark &amp; Sweep Algorithm</h4>
+  <div class="step"><div class="step-num">1</div><div><strong>GC starts from GC Roots</strong> (stack variables, static fields) — these are always reachable.</div></div>
+  <div class="step"><div class="step-num">2</div><div><strong>MARK phase:</strong> GC traverses every object reachable from roots (following all reference arrows), marks each one green.</div></div>
+  <div class="step"><div class="step-num">3</div><div><strong>SWEEP phase:</strong> Any object NOT marked (unreachable = no path from roots) is garbage. GC frees its memory.</div></div>
+  <div class="step"><div class="step-num">!</div><div><strong>Key insight:</strong> An object is eligible for GC when zero reachable references point to it — not when you're "done with it". Objects can keep each other alive if they form an isolated cycle with no root connection.</div></div>
+</div>
+
+<script>
+  // State
+  let objects = {};   // id -> {id, label, type, x, y, refs: Set<id>, rootRef: rootIdx|null}
+  let objCounter = 0;
+  let totalFreed = 0;
+  let gcRunning = false;
+  let mode = 'idle'; // 'idle' | 'add-ref-src' | 'add-ref-dst' | 'remove-ref-src' | 'remove-ref-dst'
+  let selectedSrc = null;
+
+  const TYPES = ['Object', 'String', 'ArrayList', 'HashMap', 'Node', 'Person', 'Thread', 'Event'];
+  const POSITIONS = [
+    {x:15,y:10}, {x:55,y:8},  {x:75,y:10}, {x:30,y:42},
+    {x:65,y:40}, {x:12,y:60}, {x:48,y:65}, {x:78,y:60},
+    {x:25,y:80}, {x:60,y:78}, {x:82,y:35}, {x:5,y:35},
+  ];
+  const ADDRS_BASE = ['0x1A2B','0x3C4D','0x5E6F','0x7A8B','0x9C0D','0xBE1F','0xD234','0xF456'];
+
+  // Roots state: which object (id) each root points to
+  let roots = [null, null, null]; // indices 0,1,2
+
+  function setStatus(phase, phaseClass, text) {
+    document.getElementById('status-phase').textContent = phase;
+    document.getElementById('status-phase').className = 'status-phase ' + phaseClass;
+    document.getElementById('status-text').textContent = text;
+  }
+
+  function updateCounters() {
+    const total = Object.keys(objects).length;
+    document.getElementById('c-total').textContent = total;
+    document.getElementById('c-freed').textContent = totalFreed;
+    if (total === 0) {
+      document.getElementById('c-reachable').textContent = '—';
+      document.getElementById('c-unreachable').textContent = '—';
+    }
+  }
+
+  function allocateObject() {
+    if (gcRunning) return;
+    const pos = POSITIONS[objCounter % POSITIONS.length];
+    const id = 'obj-' + objCounter;
+    const label = 'O' + (objCounter + 1);
+    const type = TYPES[objCounter % TYPES.length];
+    const addr = ADDRS_BASE[objCounter % ADDRS_BASE.length];
+
+    objects[id] = { id, label, type, addr, x: pos.x, y: pos.y, refs: new Set(), rootRef: null };
+    objCounter++;
+
+    // Assign to a free root if any root is null
+    const freeRootIdx = roots.indexOf(null);
+    if (freeRootIdx !== -1 && objCounter <= 3) {
+      roots[freeRootIdx] = id;
+      objects[id].rootRef = freeRootIdx;
+    }
+
+    renderObject(id);
+    updateRoots();
+    updateControls();
+    updateCounters();
+
+    const objCount = Object.keys(objects).length;
+    document.getElementById('heap-empty-msg').style.display = 'none';
+
+    if (freeRootIdx !== -1 && objCounter <= 3) {
+      setStatus('ALLOC', 'phase-idle', `Object ${label} (${type}) allocated at ${addr}. A GC root now points to it — it is reachable.`);
+    } else {
+      setStatus('ALLOC', 'phase-idle', `Object ${label} (${type}) allocated at ${addr}. No root points to it yet — add a reference or it will be swept by GC.`);
+    }
+    drawArrows();
+  }
+
+  function renderObject(id) {
+    const obj = objects[id];
+    const heapBody = document.getElementById('heap-body');
+    const el = document.createElement('div');
+    el.className = 'heap-node default';
+    el.id = 'node-' + id;
+    el.style.left = obj.x + '%';
+    el.style.top = obj.y + '%';
+    el.innerHTML = `
+      <div class="node-label">${obj.label}</div>
+      <div class="node-addr">${obj.addr}</div>
+      <div class="node-type">${obj.type}</div>
+    `;
+    el.addEventListener('click', () => handleNodeClick(id));
+    heapBody.appendChild(el);
+  }
+
+  function handleNodeClick(id) {
+    if (gcRunning) return;
+
+    if (mode === 'add-ref-src') {
+      selectedSrc = id;
+      resetNodeHighlights();
+      document.getElementById('node-' + id).classList.add('selected-src');
+      mode = 'add-ref-dst';
+      document.getElementById('select-prompt-text').textContent =
+        `Now click the DESTINATION object that ${objects[id].label} should reference...`;
+      return;
+    }
+    if (mode === 'add-ref-dst') {
+      if (id === selectedSrc) {
+        setStatus('!', 'phase-idle', 'Cannot add a self-reference. Click a different object.');
+        return;
+      }
+      objects[selectedSrc].refs.add(id);
+      setStatus('REF', 'phase-idle', `Reference added: ${objects[selectedSrc].label} → ${objects[id].label}. ${objects[selectedSrc].label} now holds a pointer to ${objects[id].label}.`);
+      endSelectMode();
+      drawArrows();
+      return;
+    }
+    if (mode === 'remove-ref-src') {
+      selectedSrc = id;
+      resetNodeHighlights();
+      document.getElementById('node-' + id).classList.add('selected-src');
+      mode = 'remove-ref-dst';
+      document.getElementById('select-prompt-text').textContent =
+        `Now click the object to REMOVE the reference from ${objects[id].label} to...`;
+      return;
+    }
+    if (mode === 'remove-ref-dst') {
+      if (!objects[selectedSrc].refs.has(id)) {
+        setStatus('!', 'phase-idle', `${objects[selectedSrc].label} does not have a direct reference to ${objects[id].label}.`);
+        return;
+      }
+      objects[selectedSrc].refs.delete(id);
+      setStatus('UNREF', 'phase-idle', `Reference removed: ${objects[selectedSrc].label} no longer points to ${objects[id].label}. If no other references exist, ${objects[id].label} may become unreachable.`);
+      endSelectMode();
+      drawArrows();
+      return;
+    }
+  }
+
+  function resetNodeHighlights() {
+    Object.keys(objects).forEach(id => {
+      const el = document.getElementById('node-' + id);
+      if (el) {
+        el.classList.remove('selected-src', 'selected-dst', 'reachable', 'unreachable', 'marking');
+        el.classList.add('default');
+      }
+    });
+  }
+
+  function startAddRef() {
+    if (gcRunning) return;
+    if (Object.keys(objects).length < 2) {
+      setStatus('!', 'phase-idle', 'You need at least 2 objects to add a reference.');
+      return;
+    }
+    mode = 'add-ref-src';
+    selectedSrc = null;
+    resetNodeHighlights();
+    document.getElementById('select-prompt').classList.add('active');
+    document.getElementById('select-prompt-text').textContent = 'Click the SOURCE object (the one that will hold the reference)...';
+    setStatus('SELECT', 'phase-mark', 'Select a source object, then a destination to create a reference arrow.');
+  }
+
+  function startRemoveRef() {
+    if (gcRunning) return;
+    // Check if any references exist
+    let hasRefs = false;
+    Object.values(objects).forEach(o => { if (o.refs.size > 0) hasRefs = true; });
+    if (!hasRefs) {
+      setStatus('!', 'phase-idle', 'No object-to-object references to remove.');
+      return;
+    }
+    mode = 'remove-ref-src';
+    selectedSrc = null;
+    resetNodeHighlights();
+    document.getElementById('select-prompt').classList.add('active');
+    document.getElementById('select-prompt-text').textContent = 'Click the SOURCE object (the one holding the reference you want to remove)...';
+    setStatus('SELECT', 'phase-sweep', 'Select source object, then the target reference to remove.');
+  }
+
+  function endSelectMode() {
+    mode = 'idle';
+    selectedSrc = null;
+    resetNodeHighlights();
+    document.getElementById('select-prompt').classList.remove('active');
+    updateControls();
+  }
+
+  // Mark & Sweep GC
+  async function runGC() {
+    if (gcRunning || Object.keys(objects).length === 0) return;
+    gcRunning = true;
+    mode = 'idle';
+    document.getElementById('select-prompt').classList.remove('active');
+    updateControls();
+
+    const totalBefore = Object.keys(objects).length;
+
+    // ---- MARK PHASE ----
+    setStatus('MARK PHASE', 'phase-mark', 'Step 1: Starting from GC Roots, traversing all reachable objects...');
+    await sleep(800);
+
+    resetNodeHighlights();
+
+    // BFS from roots
+    const reachable = new Set();
+    const queue = [];
+
+    // Start from roots
+    roots.forEach((rootObjId, idx) => {
+      if (rootObjId && objects[rootObjId]) {
+        queue.push(rootObjId);
+      }
+    });
+
+    let step = 0;
+    while (queue.length > 0) {
+      const id = queue.shift();
+      if (reachable.has(id)) continue;
+      reachable.add(id);
+
+      const el = document.getElementById('node-' + id);
+      if (el) {
+        el.classList.remove('default', 'unreachable');
+        el.classList.add('reachable', 'marking');
+        setTimeout(() => el && el.classList.remove('marking'), 400);
+      }
+      setStatus('MARK PHASE', 'phase-mark', `Marking ${objects[id].label} (${objects[id].type}) as REACHABLE — traversing its references...`);
+      await sleep(500);
+
+      // Follow refs
+      objects[id].refs.forEach(refId => {
+        if (!reachable.has(refId) && objects[refId]) {
+          queue.push(refId);
+        }
+      });
+      step++;
+    }
+
+    // Mark unreachable
+    const unreachable = [];
+    Object.keys(objects).forEach(id => {
+      if (!reachable.has(id)) {
+        unreachable.push(id);
+        const el = document.getElementById('node-' + id);
+        if (el) {
+          el.classList.remove('default', 'reachable');
+          el.classList.add('unreachable');
+        }
+      }
+    });
+
+    if (unreachable.length > 0) {
+      setStatus('SWEEP PHASE', 'phase-sweep', `Mark phase complete. Found ${reachable.size} reachable, ${unreachable.length} UNREACHABLE (highlighted red). Beginning sweep...`);
+      document.getElementById('c-reachable').textContent = reachable.size;
+      document.getElementById('c-unreachable').textContent = unreachable.length;
+      await sleep(1200);
+
+      // ---- SWEEP PHASE ----
+      for (const id of unreachable) {
+        setStatus('SWEEP PHASE', 'phase-sweep', `Sweeping ${objects[id].label} (${objects[id].addr}) — memory freed!`);
+        const el = document.getElementById('node-' + id);
+        if (el) el.classList.add('swept');
+        drawArrows(); // redraw without this node's arrows
+        await sleep(500);
+
+        // Remove from state
+        delete objects[id];
+        roots = roots.map(r => r === id ? null : r);
+        // Remove refs to this obj from other objects
+        Object.values(objects).forEach(o => o.refs.delete(id));
+        totalFreed++;
+
+        if (el) {
+          setTimeout(() => el.remove(), 500);
+        }
+        drawArrows();
+        updateCounters();
+      }
+
+      await sleep(400);
+      const totalAfter = Object.keys(objects).length;
+      setStatus('GC COMPLETE', 'phase-done',
+        `Memory before GC: ${totalBefore} objects | After GC: ${totalAfter} objects | Freed: ${unreachable.length} objects. Total freed this session: ${totalFreed}.`);
+    } else {
+      document.getElementById('c-reachable').textContent = reachable.size;
+      document.getElementById('c-unreachable').textContent = 0;
+      setStatus('GC COMPLETE', 'phase-done', `All ${reachable.size} objects are reachable from GC roots — nothing to collect! Create isolated objects or remove references to generate garbage.`);
+    }
+
+    // Check if heap is empty
+    if (Object.keys(objects).length === 0) {
+      document.getElementById('heap-empty-msg').style.display = 'block';
+    }
+
+    updateRoots();
+    updateCounters();
+    drawArrows();
+    gcRunning = false;
+    updateControls();
+  }
+
+  function updateRoots() {
+    roots.forEach((objId, idx) => {
+      const el = document.getElementById('root-' + idx + '-ref');
+      if (!el) return;
+      if (objId && objects[objId]) {
+        el.textContent = '→ ' + objects[objId].addr + ' (' + objects[objId].label + ')';
+        el.className = 'root-ref';
+      } else {
+        roots[idx] = null;
+        el.textContent = '→ null';
+        el.className = 'root-ref null-ref';
+      }
+    });
+  }
+
+  function updateControls() {
+    const count = Object.keys(objects).length;
+    document.getElementById('btn-alloc').disabled = gcRunning || count >= 12;
+    document.getElementById('btn-add-ref').disabled = gcRunning || count < 2 || mode !== 'idle';
+    document.getElementById('btn-remove-ref').disabled = gcRunning || count < 1 || mode !== 'idle';
+    document.getElementById('btn-gc').disabled = gcRunning || count === 0;
+  }
+
+  function drawArrows() {
+    const svg = document.getElementById('gc-arrows');
+    const heapBody = document.getElementById('heap-body');
+    if (!svg || !heapBody) return;
+
+    const bodyRect = heapBody.getBoundingClientRect();
+    svg.innerHTML = '';
+
+    let defs = '<defs>';
+    defs += '<marker id="arr-obj" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#4da8da" opacity="0.7"/></marker>';
+    defs += '<marker id="arr-root" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#f5a623"/></marker>';
+    defs += '</defs>';
+    svg.innerHTML = defs;
+
+    // Draw object-to-object refs
+    Object.values(objects).forEach(src => {
+      const srcEl = document.getElementById('node-' + src.id);
+      if (!srcEl) return;
+      const srcRect = srcEl.getBoundingClientRect();
+
+      src.refs.forEach(dstId => {
+        if (!objects[dstId]) return;
+        const dstEl = document.getElementById('node-' + dstId);
+        if (!dstEl) return;
+        const dstRect = dstEl.getBoundingClientRect();
+
+        const x1 = srcRect.left - bodyRect.left + srcRect.width / 2;
+        const y1 = srcRect.top - bodyRect.top + srcRect.height / 2;
+        const x2 = dstRect.left - bodyRect.left + dstRect.width / 2;
+        const y2 = dstRect.top - bodyRect.top + dstRect.height / 2;
+
+        const dx = x2 - x1, dy = y2 - y1;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        const nx = dx/dist, ny = dy/dist;
+        const r = 33;
+        const ax1 = x1 + nx * r, ay1 = y1 + ny * r;
+        const ax2 = x2 - nx * (r+2), ay2 = y2 - ny * (r+2);
+
+        const cx = (ax1+ax2)/2 + ny * 20;
+        const cy = (ay1+ay2)/2 - nx * 20;
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', `M${ax1},${ay1} Q${cx},${cy} ${ax2},${ay2}`);
+        path.setAttribute('stroke', '#4da8da');
+        path.setAttribute('stroke-width', '1.5');
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke-dasharray', '4,3');
+        path.setAttribute('opacity', '0.7');
+        path.setAttribute('marker-end', 'url(#arr-obj)');
+        svg.appendChild(path);
+      });
+    });
+
+    // Draw root-to-object arrows (from outside the heap body — skip if too complex, just show label)
+    // Instead, highlight root-connected nodes more prominently (done via reachable state)
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function resetAll() {
+    if (gcRunning) return;
+    objects = {};
+    objCounter = 0;
+    roots = [null, null, null];
+    totalFreed = 0;
+    mode = 'idle';
+    selectedSrc = null;
+
+    // Clear heap body (keep svg and empty msg)
+    const heapBody = document.getElementById('heap-body');
+    const toRemove = heapBody.querySelectorAll('.heap-node');
+    toRemove.forEach(el => el.remove());
+    document.getElementById('gc-arrows').innerHTML = '';
+    document.getElementById('heap-empty-msg').style.display = 'block';
+
+    document.getElementById('select-prompt').classList.remove('active');
+    updateRoots();
+    updateCounters();
+    updateControls();
+    document.getElementById('c-reachable').textContent = '—';
+    document.getElementById('c-unreachable').textContent = '—';
+    setStatus('IDLE', 'phase-idle', 'Reset complete. Allocate objects to populate the heap.');
+  }
+
+  // Initial setup
+  updateControls();
+  updateCounters();
+</script>
+</body>
+</html>

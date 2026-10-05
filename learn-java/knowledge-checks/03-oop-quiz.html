@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java OOP Quiz</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #1a1a2e;
+      --panel:    #16213e;
+      --accent:   #e94560;
+      --correct:  #2ecc71;
+      --wrong:    #e94560;
+      --text:     #e0e0e0;
+      --muted:    #8892a4;
+      --border:   #2a3a5c;
+      --opt-hover:#1e2f50;
+      --opt-sel:  #223060;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+    }
+
+    /* ── header ─────────────────────────────────────────── */
+    header {
+      width: 100%;
+      max-width: 780px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .back-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: color .2s;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      flex: 1;
+      text-align: center;
+    }
+
+    /* ── card ────────────────────────────────────────────── */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 32px;
+      width: 100%;
+      max-width: 780px;
+    }
+
+    /* ── progress ────────────────────────────────────────── */
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .progress-bar-track {
+      background: var(--bg);
+      border-radius: 99px;
+      height: 6px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .progress-bar-fill {
+      background: var(--accent);
+      height: 100%;
+      border-radius: 99px;
+      transition: width .35s ease;
+    }
+
+    /* ── question ────────────────────────────────────────── */
+    .question-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .question-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    pre.code-block {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-family: 'Consolas', 'Fira Code', monospace;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin-bottom: 20px;
+      white-space: pre;
+      color: #c9d1d9;
+    }
+
+    /* ── options ─────────────────────────────────────────── */
+    .options { display: flex; flex-direction: column; gap: 10px; }
+
+    .option-btn {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 16px;
+      text-align: left;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 0.97rem;
+      line-height: 1.5;
+      transition: background .15s, border-color .15s, transform .1s;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .option-btn .opt-letter {
+      min-width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .option-btn:hover:not(:disabled) {
+      background: var(--opt-hover);
+      border-color: #3d5a8a;
+    }
+    .option-btn.focused-kb {
+      background: var(--opt-sel);
+      border-color: #5a80c0;
+      outline: none;
+    }
+    .option-btn:disabled { cursor: default; }
+    .option-btn.correct {
+      background: rgba(46,204,113,.15);
+      border-color: var(--correct);
+      color: #fff;
+    }
+    .option-btn.correct .opt-letter { background: var(--correct); }
+    .option-btn.wrong {
+      background: rgba(233,69,96,.15);
+      border-color: var(--wrong);
+      color: #fff;
+    }
+    .option-btn.wrong .opt-letter { background: var(--wrong); }
+
+    /* ── fill-blank ──────────────────────────────────────── */
+    .fill-blank-wrapper {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .fill-input {
+      flex: 1;
+      min-width: 180px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 1rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+    }
+    .fill-input:focus { border-color: var(--accent); }
+    .fill-input.correct { border-color: var(--correct); background: rgba(46,204,113,.1); }
+    .fill-input.wrong   { border-color: var(--wrong);   background: rgba(233,69,96,.1); }
+
+    .submit-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      padding: 12px 24px;
+      color: #fff;
+      font-size: 0.97rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+    }
+    .submit-btn:hover { opacity: .88; }
+    .submit-btn:active { transform: scale(.97); }
+
+    /* ── feedback ────────────────────────────────────────── */
+    .feedback-box {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      font-size: 0.93rem;
+      line-height: 1.6;
+      display: none;
+    }
+    .feedback-box.correct {
+      background: rgba(46,204,113,.12);
+      border: 1px solid var(--correct);
+      color: #a8f0c6;
+      display: block;
+    }
+    .feedback-box.wrong {
+      background: rgba(233,69,96,.12);
+      border: 1px solid var(--wrong);
+      color: #f8b4bf;
+      display: block;
+    }
+    .feedback-box strong { color: #fff; }
+
+    /* ── nav buttons ─────────────────────────────────────── */
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 22px;
+      color: var(--text);
+      font-size: 0.93rem;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+    .nav-btn:hover { background: var(--opt-hover); border-color: #3d5a8a; }
+    .nav-btn:disabled { opacity: .35; cursor: default; }
+    .nav-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .nav-btn.primary:hover { opacity: .88; background: var(--accent); }
+
+    /* ── final screen ────────────────────────────────────── */
+    #screen-final { display: none; }
+    .score-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 5px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .score-pct {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .score-label { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+    .grade-badge {
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin: 18px 0 28px;
+      flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-value { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+    .stat-name  { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+    .final-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .final-btn {
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-size: 0.97rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity .15s;
+    }
+    .final-btn:hover { opacity: .85; }
+    .final-btn.retry  { background: var(--accent); color: #fff; }
+    .final-btn.review { background: var(--panel); border: 1.5px solid var(--border); color: var(--text); }
+
+    /* ── review mode ─────────────────────────────────────── */
+    #screen-review { display: none; }
+    .review-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+    }
+    .review-item {
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .review-item:last-child { border-bottom: none; }
+    .review-q-num {
+      font-size: 0.75rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 6px;
+    }
+    .review-q-text { font-size: 1rem; margin-bottom: 10px; line-height: 1.5; }
+    .review-answer {
+      background: rgba(46,204,113,.12);
+      border: 1px solid var(--correct);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.93rem;
+      color: #a8f0c6;
+      margin-bottom: 8px;
+    }
+    .review-your-answer {
+      background: rgba(233,69,96,.12);
+      border: 1px solid var(--wrong);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.93rem;
+      color: #f8b4bf;
+      margin-bottom: 8px;
+    }
+    .review-explanation {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: 6px;
+    }
+    .back-to-results {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 22px;
+      color: var(--text);
+      font-size: 0.93rem;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: background .15s;
+    }
+    .back-to-results:hover { background: var(--opt-hover); }
+
+    /* ── flash animation ─────────────────────────────────── */
+    @keyframes flash-correct {
+      0%,100% { box-shadow: none; }
+      50%      { box-shadow: 0 0 0 3px var(--correct); }
+    }
+    @keyframes flash-wrong {
+      0%,100% { box-shadow: none; }
+      50%      { box-shadow: 0 0 0 3px var(--wrong); }
+    }
+    .flash-correct { animation: flash-correct .5s ease; }
+    .flash-wrong   { animation: flash-wrong   .5s ease; }
+
+    /* ── responsive ──────────────────────────────────────── */
+    @media (max-width: 520px) {
+      .card { padding: 20px 16px; }
+      .option-btn { font-size: 0.91rem; }
+      .stats-row { gap: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back-link" href="README.md">&#8592; Back to Index</a>
+  <h1>Java OOP Quiz</h1>
+  <div style="width:120px"></div><!-- spacer to center title -->
+</header>
+
+<!-- ── QUIZ SCREEN ──────────────────────────────────────── -->
+<div class="card" id="screen-quiz">
+  <div class="progress-row">
+    <span id="progress-text">Question 1 of 15</span>
+    <span id="timer-text">0:00</span>
+  </div>
+  <div class="progress-bar-track">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+
+  <div class="question-label" id="q-type-label">Multiple Choice</div>
+  <div class="question-text" id="q-text"></div>
+  <pre class="code-block" id="q-code" style="display:none"></pre>
+
+  <!-- MC / TF options -->
+  <div class="options" id="options-container"></div>
+
+  <!-- fill-blank -->
+  <div class="fill-blank-wrapper" id="fill-container" style="display:none">
+    <input class="fill-input" id="fill-input" type="text" placeholder="Type your answer…" autocomplete="off" spellcheck="false" />
+    <button class="submit-btn" id="fill-submit">Submit</button>
+  </div>
+
+  <div class="feedback-box" id="feedback-box"></div>
+
+  <div class="nav-row">
+    <button class="nav-btn" id="btn-prev">&#8592; Previous</button>
+    <button class="nav-btn primary" id="btn-next">Next &#8594;</button>
+  </div>
+</div>
+
+<!-- ── FINAL SCREEN ─────────────────────────────────────── -->
+<div class="card" id="screen-final">
+  <div class="score-circle">
+    <span class="score-pct" id="final-pct">0%</span>
+    <span class="score-label">score</span>
+  </div>
+  <div class="grade-badge" id="final-grade"></div>
+  <div class="stats-row">
+    <div class="stat-item">
+      <div class="stat-value" id="final-correct">0</div>
+      <div class="stat-name">Correct</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="final-wrong">0</div>
+      <div class="stat-name">Wrong</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="final-time">0:00</div>
+      <div class="stat-name">Time</div>
+    </div>
+  </div>
+  <div class="final-btns">
+    <button class="final-btn retry" id="btn-retry">Retry Quiz</button>
+    <button class="final-btn review" id="btn-review">Review Wrong Answers</button>
+  </div>
+</div>
+
+<!-- ── REVIEW SCREEN ────────────────────────────────────── -->
+<div class="card" id="screen-review">
+  <div class="review-title">Review — Missed Questions</div>
+  <div id="review-list"></div>
+  <button class="back-to-results" id="btn-back-results">&#8592; Back to Results</button>
+</div>
+
+<script>
+/* ================================================================
+   QUESTIONS
+================================================================ */
+const QUESTIONS = [
+  {
+    type: "multiple-choice",
+    text: "What is the difference between a class and an object in Java?",
+    options: [
+      "A class is an instance of an object",
+      "An object is a blueprint, a class is an instance",
+      "A class is a blueprint; an object is an instance of that class",
+      "They are identical concepts with different names"
+    ],
+    correct: 2,
+    explanation: "A class defines the structure and behaviour (blueprint). An object is a concrete instance created from that class using 'new'. You can create many objects from one class, each with its own state."
+  },
+  {
+    type: "multiple-choice",
+    text: "Which of the following is true about constructors in Java?",
+    options: [
+      "A constructor must always have a return type",
+      "A constructor name must match the class name and has no return type",
+      "Java does not provide a default constructor if you define none",
+      "Constructors cannot be overloaded"
+    ],
+    correct: 1,
+    explanation: "Constructors share the class name exactly and declare no return type (not even void). Java provides a no-arg default constructor automatically only when you define NO constructors. Constructors can be overloaded."
+  },
+  {
+    type: "true-false",
+    text: "The 'this' keyword in Java refers to the current instance of the class and can be used to distinguish instance variables from local variables with the same name.",
+    options: ["True", "False"],
+    correct: 0,
+    explanation: "'this' refers to the current object instance. It is commonly used in constructors and setters: 'this.name = name;' disambiguates the instance field from the parameter of the same name."
+  },
+  {
+    type: "multiple-choice",
+    text: "Which access modifier makes a field accessible only within the same class?",
+    options: ["public", "protected", "default (no modifier)", "private"],
+    correct: 3,
+    explanation: "'private' is the most restrictive modifier — the field is only visible within the declaring class. Encapsulation best practice dictates making fields private and exposing them through public getters/setters."
+  },
+  {
+    type: "multiple-choice",
+    text: "What keyword is used in Java to inherit from another class?",
+    options: ["implements", "inherits", "extends", "super"],
+    correct: 2,
+    explanation: "'extends' establishes an IS-A relationship: 'class Dog extends Animal'. A subclass inherits all non-private members and can override methods. 'implements' is used for interfaces, not class inheritance."
+  },
+  {
+    type: "true-false",
+    text: "In Java, a class can extend multiple classes simultaneously (multiple inheritance of classes).",
+    options: ["True", "False"],
+    correct: 1,
+    explanation: "Java does NOT support multiple class inheritance — a class can extend only ONE class. This avoids the 'diamond problem'. Multiple inheritance of types is allowed via interfaces (a class can implement many interfaces)."
+  },
+  {
+    type: "multiple-choice",
+    code:
+`class Animal {
+    String speak() { return "..."; }
+}
+
+class Dog extends Animal {
+    @Override
+    String speak() { return "Woof"; }
+}
+
+class Cat extends Animal {
+    @Override
+    String speak() { return "Meow"; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Animal a = new Dog();
+        Animal b = new Cat();
+        System.out.println(a.speak() + " " + b.speak());
+    }
+}`,
+    text: "What does the program above print?",
+    options: ["... ...", "Woof Meow", "Woof ...", "Compilation error"],
+    correct: 1,
+    explanation: "This demonstrates runtime polymorphism. Although 'a' and 'b' are declared as Animal, they hold Dog and Cat objects. Java's virtual dispatch calls the overriding method in the actual object type at runtime, printing 'Woof Meow'."
+  },
+  {
+    type: "multiple-choice",
+    code:
+`class Vehicle {
+    int speed = 60;
+    void show() { System.out.println("Vehicle speed: " + speed); }
+}
+
+class Car extends Vehicle {
+    int speed = 100;
+    @Override
+    void show() {
+        System.out.println("Car speed: " + speed);
+        super.show();
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        new Car().show();
+    }
+}`,
+    text: "What is the output of the program above?",
+    options: [
+      "Car speed: 100\nVehicle speed: 60",
+      "Car speed: 60\nVehicle speed: 60",
+      "Car speed: 100\nVehicle speed: 100",
+      "Compilation error"
+    ],
+    correct: 0,
+    explanation: "Car.speed hides Vehicle.speed (field hiding, not overriding). Inside Car.show(), 'speed' refers to Car's field (100). 'super.show()' calls Vehicle.show() which prints Vehicle's own 'speed' field (60)."
+  },
+  {
+    type: "multiple-choice",
+    code:
+`abstract class Shape {
+    abstract double area();
+    void describe() {
+        System.out.println("Area = " + area());
+    }
+}
+
+class Circle extends Shape {
+    double r;
+    Circle(double r) { this.r = r; }
+    @Override
+    double area() { return Math.PI * r * r; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Shape s = new Circle(1);
+        s.describe();
+    }
+}`,
+    text: "What happens when the program above runs?",
+    options: [
+      "Compilation error — cannot instantiate abstract class",
+      "Prints 'Area = 3.141592653589793'",
+      "Prints 'Area = 0.0'",
+      "NullPointerException at runtime"
+    ],
+    correct: 1,
+    explanation: "A Circle IS-A Shape and provides a concrete area(). describe() is a template-method pattern — it calls area() which dispatches to Circle.area() at runtime via polymorphism. Math.PI * 1 * 1 = 3.141592653589793."
+  },
+  {
+    type: "multiple-choice",
+    text: "What is the primary difference between an abstract class and an interface in Java?",
+    options: [
+      "An abstract class can have constructors and instance state; an interface (prior to Java 8) could only have abstract methods and constants",
+      "An interface can extend a class; an abstract class cannot",
+      "Abstract classes support polymorphism; interfaces do not",
+      "There is no meaningful difference — they are interchangeable"
+    ],
+    correct: 0,
+    explanation: "An abstract class can have constructors, fields, and both abstract and concrete methods. Traditionally, interfaces only had abstract methods and constants. Since Java 8, interfaces may have default/static methods but still cannot hold mutable instance state or constructors."
+  },
+  {
+    type: "fill-blank",
+    text: "To call a superclass constructor from a subclass constructor, you use the keyword ________ as the first statement in the subclass constructor.",
+    correct: "super",
+    explanation: "'super()' invokes the parent class constructor. It must be the very first statement. If you omit it, Java implicitly inserts 'super()' (the no-arg version) — which causes a compile error if the parent has no no-arg constructor."
+  },
+  {
+    type: "multiple-choice",
+    text: "Which statement about the 'final' keyword in Java is CORRECT?",
+    options: [
+      "A final class can be subclassed but its methods cannot be overridden",
+      "A final variable must be initialised at declaration and can never be reassigned",
+      "A final method can be overridden by a subclass",
+      "final applies only to primitive types, not references"
+    ],
+    correct: 1,
+    explanation: "A final variable (field or local) cannot be reassigned after initialisation. A final class cannot be subclassed (e.g. String). A final method cannot be overridden. The keyword applies to classes, methods, and variables of any type."
+  },
+  {
+    type: "multiple-choice",
+    text: "What does the 'instanceof' operator do in Java?",
+    options: [
+      "Creates a new instance of a class",
+      "Tests whether an object is an instance of a specified type at runtime",
+      "Returns the class of an object",
+      "Casts an object to a specified type"
+    ],
+    correct: 1,
+    explanation: "'obj instanceof ClassName' evaluates to true if obj is an instance of ClassName (or a subclass/implementor). It returns false if obj is null. It is typically used before a downcast to avoid ClassCastException."
+  },
+  {
+    type: "true-false",
+    text: "A static member (field or method) in Java belongs to the class itself rather than to any specific instance, and can be accessed without creating an object.",
+    options: ["True", "False"],
+    correct: 0,
+    explanation: "Static members belong to the class. They are shared across all instances and are accessed via the class name (e.g., Math.PI, Collections.sort()). Static methods cannot directly access instance (non-static) members."
+  },
+  {
+    type: "multiple-choice",
+    text: "Which access modifier allows a member to be accessed within the same package AND by subclasses in other packages?",
+    options: ["private", "default (package-private)", "protected", "public"],
+    correct: 2,
+    explanation: "'protected' grants access to: the same class, the same package, and subclasses (even in different packages). 'default' (no modifier) is package-private — subclasses in other packages cannot access it. 'public' is unrestricted; 'private' is same-class only."
+  }
+];
+
+/* ================================================================
+   STATE
+================================================================ */
+let currentIdx   = 0;
+let answers      = new Array(QUESTIONS.length).fill(null); // stored answer per question
+let answered     = new Array(QUESTIONS.length).fill(false);
+let correctFlags = new Array(QUESTIONS.length).fill(false);
+let kbFocusIdx   = -1;
+let timerInterval = null;
+let startTime    = 0;
+let elapsedSec   = 0;
+
+/* ================================================================
+   DOM REFS
+================================================================ */
+const screenQuiz   = document.getElementById('screen-quiz');
+const screenFinal  = document.getElementById('screen-final');
+const screenReview = document.getElementById('screen-review');
+
+const progressText = document.getElementById('progress-text');
+const progressFill = document.getElementById('progress-fill');
+const timerText    = document.getElementById('timer-text');
+const qTypeLabel   = document.getElementById('q-type-label');
+const qText        = document.getElementById('q-text');
+const qCode        = document.getElementById('q-code');
+const optionsCont  = document.getElementById('options-container');
+const fillCont     = document.getElementById('fill-container');
+const fillInput    = document.getElementById('fill-input');
+const fillSubmit   = document.getElementById('fill-submit');
+const feedbackBox  = document.getElementById('feedback-box');
+const btnPrev      = document.getElementById('btn-prev');
+const btnNext      = document.getElementById('btn-next');
+
+/* ================================================================
+   HELPERS
+================================================================ */
+function fmtTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function gradeLabel(pct) {
+  if (pct >= 95) return '🏆 Expert!';
+  if (pct >= 80) return '👍 Good Job!';
+  if (pct >= 60) return '📈 Getting There';
+  return '📚 Needs Work';
+}
+
+function show(el) { el.style.display = ''; }
+function hide(el) { el.style.display = 'none'; }
+
+/* ================================================================
+   TIMER
+================================================================ */
+function startTimer() {
+  startTime = Date.now() - elapsedSec * 1000;
+  timerInterval = setInterval(() => {
+    elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+    timerText.textContent = fmtTime(elapsedSec);
+  }, 500);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+}
+
+/* ================================================================
+   RENDER
+================================================================ */
+function render() {
+  const q   = QUESTIONS[currentIdx];
+  const ans = answered[currentIdx];
+
+  // progress
+  progressText.textContent = `Question ${currentIdx + 1} of ${QUESTIONS.length}`;
+  progressFill.style.width = `${((currentIdx) / QUESTIONS.length) * 100}%`;
+
+  // type label
+  const labels = { 'multiple-choice': 'Multiple Choice', 'true-false': 'True / False', 'fill-blank': 'Fill in the Blank' };
+  qTypeLabel.textContent = labels[q.type] || 'Question';
+
+  // question text
+  qText.textContent = q.text;
+
+  // code block
+  if (q.code) {
+    qCode.textContent = q.code;
+    show(qCode);
+  } else {
+    hide(qCode);
+  }
+
+  // reset feedback
+  feedbackBox.className = 'feedback-box';
+  feedbackBox.textContent = '';
+
+  // hide both input areas
+  hide(optionsCont);
+  hide(fillCont);
+  optionsCont.innerHTML = '';
+  kbFocusIdx = -1;
+
+  if (q.type === 'fill-blank') {
+    show(fillCont);
+    fillInput.value = answers[currentIdx] !== null ? answers[currentIdx] : '';
+    fillInput.className = 'fill-input';
+    fillInput.disabled = ans;
+    fillSubmit.style.display = ans ? 'none' : '';
+
+    if (ans) {
+      const isOk = correctFlags[currentIdx];
+      fillInput.classList.add(isOk ? 'correct' : 'wrong');
+      showFeedback(isOk, q);
+    }
+  } else {
+    show(optionsCont);
+    const letters = ['A','B','C','D','E'];
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.disabled  = ans;
+
+      const letter = document.createElement('span');
+      letter.className = 'opt-letter';
+      letter.textContent = letters[i];
+      btn.appendChild(letter);
+
+      const lbl = document.createElement('span');
+      lbl.textContent = opt;
+      btn.appendChild(lbl);
+
+      if (ans) {
+        if (i === q.correct) btn.classList.add('correct');
+        if (answers[currentIdx] === i && i !== q.correct) btn.classList.add('wrong');
+      }
+
+      btn.addEventListener('click', () => selectOption(i));
+      optionsCont.appendChild(btn);
+    });
+
+    if (ans) showFeedback(correctFlags[currentIdx], q);
+  }
+
+  // nav
+  btnPrev.disabled = currentIdx === 0;
+  btnNext.textContent = (currentIdx === QUESTIONS.length - 1) ? 'Finish' : 'Next →';
+  btnNext.disabled = !answered[currentIdx] && currentIdx === QUESTIONS.length - 1 ? true : false;
+  // Allow next only if answered or not last
+  if (!ans && currentIdx < QUESTIONS.length - 1) {
+    btnNext.disabled = false;
+    // But visually indicate skipping
+    btnNext.style.opacity = '0.55';
+  } else if (ans) {
+    btnNext.style.opacity = '1';
+    btnNext.disabled = false;
+  } else if (currentIdx === QUESTIONS.length - 1 && !ans) {
+    btnNext.disabled = true;
+    btnNext.style.opacity = '0.35';
+  }
+}
+
+/* ================================================================
+   ANSWER LOGIC
+================================================================ */
+function selectOption(i) {
+  if (answered[currentIdx]) return;
+  answered[currentIdx] = true;
+  answers[currentIdx]  = i;
+  const q = QUESTIONS[currentIdx];
+  correctFlags[currentIdx] = (i === q.correct);
+
+  // update buttons
+  const btns = optionsCont.querySelectorAll('.option-btn');
+  btns.forEach((btn, idx) => {
+    btn.disabled = true;
+    if (idx === q.correct) btn.classList.add('correct');
+    if (idx === i && i !== q.correct) btn.classList.add('wrong');
+  });
+
+  // flash card
+  const cls = correctFlags[currentIdx] ? 'flash-correct' : 'flash-wrong';
+  screenQuiz.classList.add(cls);
+  setTimeout(() => screenQuiz.classList.remove(cls), 500);
+
+  showFeedback(correctFlags[currentIdx], q);
+  btnNext.disabled = false;
+  btnNext.style.opacity = '1';
+}
+
+function submitFill() {
+  if (answered[currentIdx]) return;
+  const q   = QUESTIONS[currentIdx];
+  const val = fillInput.value.trim();
+  if (!val) return;
+
+  answered[currentIdx] = true;
+  answers[currentIdx]  = val;
+  const isOk = val.toLowerCase() === q.correct.toLowerCase();
+  correctFlags[currentIdx] = isOk;
+
+  fillInput.disabled = true;
+  fillInput.classList.add(isOk ? 'correct' : 'wrong');
+  fillSubmit.style.display = 'none';
+
+  const cls = isOk ? 'flash-correct' : 'flash-wrong';
+  screenQuiz.classList.add(cls);
+  setTimeout(() => screenQuiz.classList.remove(cls), 500);
+
+  showFeedback(isOk, q);
+  btnNext.disabled = false;
+  btnNext.style.opacity = '1';
+}
+
+function showFeedback(isOk, q) {
+  const box = feedbackBox;
+  box.className = 'feedback-box ' + (isOk ? 'correct' : 'wrong');
+
+  let html = isOk
+    ? '<strong>Correct!</strong> '
+    : `<strong>Incorrect.</strong> The correct answer is: <strong>${
+        q.type === 'fill-blank' ? q.correct : q.options[q.correct]
+      }</strong><br>`;
+  html += q.explanation;
+  box.innerHTML = html;
+}
+
+/* ================================================================
+   NAVIGATION
+================================================================ */
+function goNext() {
+  if (currentIdx < QUESTIONS.length - 1) {
+    currentIdx++;
+    render();
+  } else if (answered[currentIdx]) {
+    showFinal();
+  }
+}
+
+function goPrev() {
+  if (currentIdx > 0) {
+    currentIdx--;
+    render();
+  }
+}
+
+btnNext.addEventListener('click', goNext);
+btnPrev.addEventListener('click', goPrev);
+fillSubmit.addEventListener('click', submitFill);
+fillInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitFill();
+});
+
+/* ================================================================
+   KEYBOARD NAVIGATION
+================================================================ */
+document.addEventListener('keydown', e => {
+  if (screenQuiz.style.display === 'none') return;
+  const q = QUESTIONS[currentIdx];
+  if (q.type === 'fill-blank') return;
+  if (answered[currentIdx]) {
+    if (e.key === 'ArrowRight' || e.key === 'Enter') goNext();
+    if (e.key === 'ArrowLeft')  goPrev();
+    return;
+  }
+
+  const btns = Array.from(optionsCont.querySelectorAll('.option-btn'));
+  if (!btns.length) return;
+
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+    e.preventDefault();
+    if (kbFocusIdx >= 0) btns[kbFocusIdx].classList.remove('focused-kb');
+    kbFocusIdx = (kbFocusIdx + 1) % btns.length;
+    btns[kbFocusIdx].classList.add('focused-kb');
+  } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+    e.preventDefault();
+    if (kbFocusIdx >= 0) btns[kbFocusIdx].classList.remove('focused-kb');
+    kbFocusIdx = (kbFocusIdx - 1 + btns.length) % btns.length;
+    btns[kbFocusIdx].classList.add('focused-kb');
+  } else if ((e.key === 'Enter' || e.key === ' ') && kbFocusIdx >= 0) {
+    e.preventDefault();
+    selectOption(kbFocusIdx);
+  }
+});
+
+/* ================================================================
+   FINAL SCREEN
+================================================================ */
+function showFinal() {
+  stopTimer();
+  const correct = correctFlags.filter(Boolean).length;
+  const total   = QUESTIONS.length;
+  const pct     = Math.round((correct / total) * 100);
+
+  document.getElementById('final-pct').textContent     = pct + '%';
+  document.getElementById('final-grade').textContent   = gradeLabel(pct);
+  document.getElementById('final-correct').textContent = correct;
+  document.getElementById('final-wrong').textContent   = total - correct;
+  document.getElementById('final-time').textContent    = fmtTime(elapsedSec);
+
+  progressFill.style.width = '100%';
+
+  hide(screenQuiz);
+  show(screenFinal);
+}
+
+document.getElementById('btn-retry').addEventListener('click', () => {
+  resetQuiz();
+});
+
+document.getElementById('btn-review').addEventListener('click', () => {
+  buildReview();
+  hide(screenFinal);
+  show(screenReview);
+  screenReview.scrollIntoView({ behavior: 'smooth' });
+});
+
+document.getElementById('btn-back-results').addEventListener('click', () => {
+  hide(screenReview);
+  show(screenFinal);
+  screenFinal.scrollIntoView({ behavior: 'smooth' });
+});
+
+/* ================================================================
+   REVIEW MODE
+================================================================ */
+function buildReview() {
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+  const missed = QUESTIONS
+    .map((q, i) => ({ q, i }))
+    .filter(({ i }) => answered[i] && !correctFlags[i]);
+
+  if (missed.length === 0) {
+    list.innerHTML = '<p style="color:var(--correct);font-size:1rem;">Perfect score — nothing to review!</p>';
+    return;
+  }
+
+  missed.forEach(({ q, i }) => {
+    const div = document.createElement('div');
+    div.className = 'review-item';
+
+    const num = document.createElement('div');
+    num.className = 'review-q-num';
+    num.textContent = `Question ${i + 1}`;
+    div.appendChild(num);
+
+    if (q.code) {
+      const pre = document.createElement('pre');
+      pre.className = 'code-block';
+      pre.textContent = q.code;
+      div.appendChild(pre);
+    }
+
+    const qt = document.createElement('div');
+    qt.className = 'review-q-text';
+    qt.textContent = q.text;
+    div.appendChild(qt);
+
+    // correct answer
+    const ca = document.createElement('div');
+    ca.className = 'review-answer';
+    const correctStr = q.type === 'fill-blank'
+      ? q.correct
+      : q.options[q.correct];
+    ca.innerHTML = `<strong>Correct answer:</strong> ${correctStr}`;
+    div.appendChild(ca);
+
+    // user's answer
+    const ua = document.createElement('div');
+    ua.className = 'review-your-answer';
+    let userStr;
+    if (q.type === 'fill-blank') {
+      userStr = answers[i] !== null ? `"${answers[i]}"` : '(no answer)';
+    } else {
+      userStr = answers[i] !== null ? q.options[answers[i]] : '(skipped)';
+    }
+    ua.innerHTML = `<strong>Your answer:</strong> ${userStr}`;
+    div.appendChild(ua);
+
+    // explanation
+    const expl = document.createElement('div');
+    expl.className = 'review-explanation';
+    expl.textContent = q.explanation;
+    div.appendChild(expl);
+
+    list.appendChild(div);
+  });
+}
+
+/* ================================================================
+   RESET
+================================================================ */
+function resetQuiz() {
+  currentIdx   = 0;
+  answers      = new Array(QUESTIONS.length).fill(null);
+  answered     = new Array(QUESTIONS.length).fill(false);
+  correctFlags = new Array(QUESTIONS.length).fill(false);
+  kbFocusIdx   = -1;
+  elapsedSec   = 0;
+  timerText.textContent = '0:00';
+
+  hide(screenFinal);
+  hide(screenReview);
+  show(screenQuiz);
+
+  stopTimer();
+  startTimer();
+  render();
+  screenQuiz.scrollIntoView({ behavior: 'smooth' });
+}
+
+/* ================================================================
+   INIT
+================================================================ */
+startTimer();
+render();
+</script>
+</body>
+</html>

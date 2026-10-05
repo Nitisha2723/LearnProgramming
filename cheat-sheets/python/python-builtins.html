@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Built-in Functions Reference</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#1a1a2e; color:#e0e0e0; font-family:'Segoe UI',system-ui,sans-serif; }
+header { background:#16213e; padding:18px 30px; border-bottom:2px solid #0f3460; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+header h1 { font-size:1.7rem; color:#e94560; }
+.search { padding:8px 16px; background:#1a1a2e; border:1px solid #0f3460; border-radius:20px; color:#e0e0e0; font-size:0.88rem; outline:none; width:260px; }
+.search:focus { border-color:#e94560; }
+.filter-bar { background:#16213e; padding:10px 30px; display:flex; gap:8px; flex-wrap:wrap; border-bottom:1px solid #0f3460; }
+.filter-btn { padding:4px 12px; border:1px solid #0f3460; border-radius:16px; cursor:pointer; font-size:0.8rem; background:transparent; color:#a0c4ff; transition:all 0.2s; }
+.filter-btn.active, .filter-btn:hover { background:#0f3460; color:#fff; }
+.container { max-width:1400px; margin:0 auto; padding:20px 30px; }
+.category { margin-bottom:36px; }
+.cat-title { font-size:1.2rem; color:#a0c4ff; border-bottom:1px solid #0f3460; padding-bottom:8px; margin-bottom:16px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:14px; }
+.card { background:#16213e; border:1px solid #0f3460; border-radius:8px; overflow:hidden; transition:border-color 0.2s; }
+.card:hover { border-color:#4a7ad4; }
+.card.hidden { display:none; }
+.card-top { padding:10px 14px; background:#0f3460; display:flex; justify-content:space-between; align-items:baseline; }
+.fn-name { font-family:monospace; font-size:0.95rem; color:#ffd080; font-weight:600; }
+.fn-sig { font-family:monospace; font-size:0.74rem; color:#a0b0c0; max-width:55%; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; }
+.cat-tag { font-size:0.7rem; padding:2px 7px; border-radius:10px; white-space:nowrap; }
+.card-body { padding:12px 14px; }
+pre { margin:0; border-radius:5px; font-size:0.79rem; }
+.desc { color:#a0b0c0; font-size:0.82rem; margin-bottom:8px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Python Built-in Functions</h1>
+    <p style="color:#a0a0b0;margin-top:3px;font-size:0.88rem">All 69+ built-in functions with examples</p>
+  </div>
+  <input class="search" type="text" placeholder="Search functions..." oninput="filterFns(this.value)">
+</header>
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="filterCat('all',this)">All</button>
+  <button class="filter-btn" onclick="filterCat('math',this)">Math &amp; Numbers</button>
+  <button class="filter-btn" onclick="filterCat('sequences',this)">Sequences &amp; Iterables</button>
+  <button class="filter-btn" onclick="filterCat('type',this)">Types &amp; Conversion</button>
+  <button class="filter-btn" onclick="filterCat('io',this)">I/O &amp; Objects</button>
+  <button class="filter-btn" onclick="filterCat('functional',this)">Functional</button>
+</div>
+<div class="container">
+
+<div class="category" id="cat-sequences">
+  <h3 class="cat-title">Sequences &amp; Iterables</h3>
+  <div class="grid">
+
+    <div class="card" data-cat="sequences" data-name="len">
+      <div class="card-top">
+        <span class="fn-name">len()</span>
+        <span class="fn-sig">len(s)</span>
+        <span class="cat-tag" style="background:#1e3a6a;color:#90c4ff">sequences</span>
+      </div>
+      <div class="card-body">
+        <p class="desc">Return the length (number of items) of an object.</p>
+        <pre><code class="language-python">len([1, 2, 3])         # 3
+len("hello")           # 5
+len({"a": 1, "b": 2})  # 2
+len(range(10))         # 10</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="sequences" data-name="range">
+      <div class="card-top">
+        <span class="fn-name">range()</span>
+        <span class="fn-sig">range(stop) / range(start, stop[, step])</span>
+        <span class="cat-tag" style="background:#1e3a6a;color:#90c4ff">sequences</span>
+      </div>
+      <div class="card-body">
+        <p class="desc">Create an immutable sequence of numbers.</p>
+        <pre><code class="language-python">list(range(5))           # [0, 1, 2, 3, 4]
+list(range(2, 8))        # [2, 3, 4, 5, 6, 7]
+list(range(0, 10, 2))    # [0, 2, 4, 6, 8]
+list(range(10, 0, -2))   # [10, 8, 6, 4, 2]
+for i in range(1_000_000): pass  # memory-efficient!</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="sequences" data-name="enumerate">
+      <div class="card-top">
+        <span class="fn-name">enumerate()</span>
+        <span class="fn-sig">enumerate(iterable, start=0)</span>
+        <span class="cat-tag" style="background:#1e3a6a;color:#90c4ff">sequences</span>
+      </div>
+      <div class="card-body">
+        <p class="desc">Return (index, value) pairs from an iterable.</p>
+        <pre><code class="language-python">fruits = ["apple", "banana", "cherry"]
+for i, fruit in enumerate(fruits):
+    print(i, fruit)   # 0 apple, 1 banana, 2 cherry
+
+# Start from 1
+for i, fruit in enumerate(fruits, start=1):
+    print(i, fruit)   # 1 apple, 2 banana, 3 cherry
+
+# Create index mapping
+{v: i for i, v in enumerate(fruits)}
+# {'apple': 0, 'banana': 1, 'cherry': 2}</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="sequences" data-name="zip">
+      <div class="card-top">
+        <span class="fn-name">zip()</span>
+        <span class="fn-sig">zip(*iterables, strict=False)</span>
+        <span class="cat-tag" style="background:#1e3a6a;color:#90c4ff">sequences</span>
+      </div>
+      <div class="card-body">
+        <p class="desc">Aggregate elements from multiple iterables into tuples.</p>
+        <pre><code class="language-python">names = ["Alice", "Bob", "Charlie"]
+scores = [95, 87, 92]
+
+list(zip(names, scores))
+# [('Alice', 95), ('Bob', 87), ('Charlie', 92)]
+
+# Unzip
+zipped = list(zip(names, scores))
+n, s = zip(*zipped)
+
+# Pad to longest (Python 3.10+)
+from itertools import zip_longest
+list(zip_longest([1,2,3], [4,5], fillvalue=0))
+# [(1,4), (2,5), (3,0)]</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="sequences" data-name="sorted">
+      <div class="card-top">
+        <span class="fn-name">sorted()</span>
+        <span class="fn-sig">sorted(iterable, key=None, reverse=False)</span>
+        <span class="cat-tag" style="background:#1e3a6a;color:#90c4ff">sequences</span>
+      </div>
+      <div class="card-body">
+        <p class="desc">Return a new sorted list (stable sort).</p>
+        <pre><code class="language-python">sorted([3, 1, 4, 1, 5])        # [1, 1, 3, 4, 5]
+sorted("hello")                 # ['e', 'h', 'l', 'l', 'o']
+sorted([3,1,4], reverse=True)  # [4, 3, 1]
+
+# Key function
+words = ["banana", "apple", "cherry"]
+sorted(words, key=len)          # by length
+sorted(words, key=str.lower)    # case-insensitive
+
+people = [{"name": "Bob", "age": 30}, {"name": "Alice", "age": 25}]
+sorted(people, key=lambda p: p["age"])
+
+# Multi-key sort
+sorted(people, key=lambda p: (p["age"], p["name"]))</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="sequences" data-name="reversed">
+      <div class="card-top">
+        <span class="fn-name">reversed()</span>
+        <span class="fn-sig">reversed(seq)</span>
+        <span class="cat-tag" style="background:#1e3a6a;color:#90c4ff">sequences</span>
+      </div>
+      <div class="card-body">
+        <p class="desc">Return a reverse iterator (doesn't copy the list).</p>
+        <pre><code class="language-python">list(reversed([1, 2, 3]))   # [3, 2, 1]
+list(reversed("hello"))     # ['o', 'l', 'l', 'e', 'h']
+list(reversed(range(5)))    # [4, 3, 2, 1, 0]
+
+for item in reversed(my_list):
+    print(item)
+
+# Slicing alternative (creates copy)
+my_list[::-1]</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="sequences" data-name="map">
+      <div class="card-top">
+        <span class="fn-name">map()</span>
+        <span class="fn-sig">map(func, *iterables)</span>
+        <span class="cat-tag" style="background:#1e3a6a;color:#90c4ff">sequences</span>
+      </div>
+      <div class="card-body">
+        <p class="desc">Apply a function to each item of an iterable.</p>
+        <pre><code class="language-python">list(map(str, [1, 2, 3]))       # ['1', '2', '3']
+list(map(abs, [-1, 2, -3]))     # [1, 2, 3]
+list(map(int, "123"))           # [1, 2, 3]
+
+# Multiple iterables
+list(map(lambda x,y: x+y, [1,2,3], [4,5,6]))
+# [5, 7, 9]
+
+# List comprehension is usually preferred
+[str(x) for x in [1, 2, 3]]    # same as map(str, ...)</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="sequences" data-name="filter">
+      <div class="card-top">
+        <span class="fn-name">filter()</span>
+        <span class="fn-sig">filter(func, iterable)</span>
+        <span class="cat-tag" style="background:#1e3a6a;color:#90c4ff">sequences</span>
+      </div>
+      <div class="card-body">
+        <p class="desc">Return elements for which function returns True.</p>
+        <pre><code class="language-python">list(filter(None, [0, 1, "", "a", False, True]))
+# [1, 'a', True]  (removes falsy values)
+
+list(filter(lambda x: x > 0, [-1, 2, -3, 4]))
+# [2, 4]
+
+# Comprehension equivalent (often preferred)
+[x for x in data if x > 0]</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="sequences functional" data-name="reduce">
+      <div class="card-top">
+        <span class="fn-name">functools.reduce()</span>
+        <span class="fn-sig">reduce(func, iterable[, initial])</span>
+        <span class="cat-tag" style="background:#3a2800;color:#ffd080">functional</span>
+      </div>
+      <div class="card-body">
+        <p class="desc">Apply a function cumulatively to reduce an iterable to a single value.</p>
+        <pre><code class="language-python">from functools import reduce
+
+reduce(lambda x, y: x + y, [1,2,3,4])  # 10
+reduce(lambda x, y: x * y, [1,2,3,4])  # 24
+
+# With initial value
+reduce(lambda x, y: x + y, [1,2,3], 10)  # 16
+
+# Flatten nested list
+reduce(lambda x, y: x + y, [[1,2],[3,4],[5]])
+# [1, 2, 3, 4, 5]</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="sequences" data-name="max min">
+      <div class="card-top">
+        <span class="fn-name">max() / min()</span>
+        <span class="fn-sig">max(iterable, key=None, default=...)</span>
+        <span class="cat-tag" style="background:#1e3a6a;color:#90c4ff">sequences</span>
+      </div>
+      <div class="card-body">
+        <p class="desc">Return the largest/smallest item.</p>
+        <pre><code class="language-python">max([1, 3, 2])           # 3
+min([1, 3, 2])           # 1
+max(1, 2, 3)             # 3  (as args)
+
+# Key function
+max(["apple","banana","fig"], key=len) # "banana"
+min(people, key=lambda p: p["age"])
+
+# Default for empty
+max([], default=0)       # 0 (not ValueError)</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="sequences math" data-name="sum">
+      <div class="card-top">
+        <span class="fn-name">sum()</span>
+        <span class="fn-sig">sum(iterable, start=0)</span>
+        <span class="cat-tag" style="background:#1e3a6a;color:#90c4ff">sequences</span>
+      </div>
+      <div class="card-body">
+        <p class="desc">Sum items of an iterable, optionally starting from a value.</p>
+        <pre><code class="language-python">sum([1, 2, 3, 4])        # 10
+sum([1.5, 2.5])          # 4.0
+sum(range(100))          # 4950
+
+# Start value
+sum([1, 2, 3], 10)       # 16
+
+# Flatten lists
+sum([[1,2],[3,4]], [])   # [1, 2, 3, 4]  (inefficient)
+# Prefer: list(chain.from_iterable(...)) for performance</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="sequences" data-name="any all">
+      <div class="card-top">
+        <span class="fn-name">any() / all()</span>
+        <span class="fn-sig">any(iterable) / all(iterable)</span>
+        <span class="cat-tag" style="background:#1e3a6a;color:#90c4ff">sequences</span>
+      </div>
+      <div class="card-body">
+        <p class="desc">Test if any/all items in iterable are truthy.</p>
+        <pre><code class="language-python">any([False, True, False])   # True
+any([])                      # False (vacuously)
+all([True, True, True])      # True
+all([True, False, True])     # False
+all([])                      # True (vacuously)
+
+# With generator expression (short-circuits!)
+any(x > 0 for x in large_list)
+all(x > 0 for x in large_list)
+
+# Practical examples
+any(s.startswith("http") for s in urls)
+all(isinstance(x, int) for x in data)</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="sequences" data-name="list tuple set dict frozenset">
+      <div class="card-top">
+        <span class="fn-name">list() / tuple() / set() / dict()</span>
+        <span class="fn-sig">list(iterable=())</span>
+        <span class="cat-tag" style="background:#1e3a6a;color:#90c4ff">sequences</span>
+      </div>
+      <div class="card-body">
+        <p class="desc">Create collection from an iterable.</p>
+        <pre><code class="language-python">list("hello")              # ['h','e','l','l','o']
+list(range(5))             # [0,1,2,3,4]
+tuple([1, 2, 3])           # (1, 2, 3)
+set([1, 2, 2, 3])          # {1, 2, 3}
+frozenset([1, 2, 3])       # frozenset({1, 2, 3})
+
+dict(a=1, b=2)             # {'a': 1, 'b': 2}
+dict([("a",1),("b",2)])    # {'a': 1, 'b': 2}
+dict(zip(keys, values))    # from parallel lists</code></pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="category" id="cat-math">
+  <h3 class="cat-title">Math &amp; Numbers</h3>
+  <div class="grid">
+
+    <div class="card" data-cat="math" data-name="abs">
+      <div class="card-top">
+        <span class="fn-name">abs()</span>
+        <span class="fn-sig">abs(x)</span>
+        <span class="cat-tag" style="background:#0d3325;color:#7de2b5">math</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python">abs(-5)        # 5
+abs(-3.14)     # 3.14
+abs(3+4j)      # 5.0 (complex magnitude)</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="math" data-name="round">
+      <div class="card-top">
+        <span class="fn-name">round()</span>
+        <span class="fn-sig">round(number, ndigits=None)</span>
+        <span class="cat-tag" style="background:#0d3325;color:#7de2b5">math</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python">round(3.7)        # 4
+round(3.14159, 2) # 3.14
+round(2.5)        # 2  (banker's rounding!)
+round(3.5)        # 4  (rounds to even)
+round(1234, -2)   # 1200</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="math" data-name="pow divmod">
+      <div class="card-top">
+        <span class="fn-name">pow() / divmod()</span>
+        <span class="fn-sig">pow(base, exp, mod=None)</span>
+        <span class="cat-tag" style="background:#0d3325;color:#7de2b5">math</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python">pow(2, 10)        # 1024
+pow(2, 10, 1000)  # 24 (modular exponentiation)
+2 ** 10           # same as pow(2, 10)
+
+divmod(17, 5)     # (3, 2)  → (quotient, remainder)
+17 // 5, 17 % 5   # same result</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="math" data-name="bin oct hex">
+      <div class="card-top">
+        <span class="fn-name">bin() / oct() / hex()</span>
+        <span class="fn-sig">bin(x) / oct(x) / hex(x)</span>
+        <span class="cat-tag" style="background:#0d3325;color:#7de2b5">math</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python">bin(10)     # '0b1010'
+oct(8)      # '0o10'
+hex(255)    # '0xff'
+
+# Parse back to int
+int('0b1010', 0)  # 10
+int('0xff', 0)    # 255
+int('ff', 16)     # 255</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="math" data-name="int float complex">
+      <div class="card-top">
+        <span class="fn-name">int() / float() / complex()</span>
+        <span class="fn-sig">int(x=0, base=10)</span>
+        <span class="cat-tag" style="background:#0d3325;color:#7de2b5">math</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python">int(3.9)         # 3 (truncates, doesn't round)
+int("42")        # 42
+int("ff", 16)    # 255
+int("101", 2)    # 5
+
+float("3.14")    # 3.14
+float("inf")     # inf
+float("nan")     # nan
+
+complex(3, 4)    # (3+4j)
+(3+4j).real      # 3.0
+(3+4j).imag      # 4.0</code></pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="category" id="cat-type">
+  <h3 class="cat-title">Types &amp; Introspection</h3>
+  <div class="grid">
+
+    <div class="card" data-cat="type" data-name="type isinstance issubclass">
+      <div class="card-top">
+        <span class="fn-name">type() / isinstance() / issubclass()</span>
+        <span class="fn-sig">isinstance(obj, classinfo)</span>
+        <span class="cat-tag" style="background:#3d2060;color:#d0a0ff">type</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python">type(42)            # &lt;class 'int'&gt;
+type("hello")       # &lt;class 'str'&gt;
+type([]) is list    # True
+
+isinstance(42, int)       # True
+isinstance(42, (int, float))  # True (union check)
+isinstance(True, int)     # True! (bool is subclass of int)
+
+issubclass(bool, int)     # True
+issubclass(int, object)   # True (everything is object)</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="type" data-name="dir getattr setattr hasattr delattr">
+      <div class="card-top">
+        <span class="fn-name">dir() / getattr() / setattr()</span>
+        <span class="fn-sig">getattr(obj, name[, default])</span>
+        <span class="cat-tag" style="background:#3d2060;color:#d0a0ff">type</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python">dir("hello")   # lists all string methods/attrs
+dir([])        # lists all list methods/attrs
+
+obj = MyClass()
+getattr(obj, "name")           # obj.name
+getattr(obj, "missing", "def") # "def" if not found
+setattr(obj, "name", "Alice")  # obj.name = "Alice"
+hasattr(obj, "name")           # True
+delattr(obj, "name")           # del obj.name
+
+# Dynamic dispatch
+method_name = "upper"
+getattr("hello", method_name)()  # "HELLO"</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="type" data-name="repr str format">
+      <div class="card-top">
+        <span class="fn-name">repr() / str() / format()</span>
+        <span class="fn-sig">repr(object) / format(value, spec)</span>
+        <span class="cat-tag" style="background:#3d2060;color:#d0a0ff">type</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python">repr("hello")    # "'hello'" (quotes included)
+repr([1,2,3])    # '[1, 2, 3]'
+str("hello")     # "hello"  (for humans)
+str([1,2,3])     # '[1, 2, 3]'
+
+# format() with format spec
+format(3.14159, ".2f")   # "3.14"
+format(1000000, ",")     # "1,000,000"
+format(0.25, "%")        # "25.00%"
+format(42, "08b")        # "00101010" (binary, 8 wide)</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="type" data-name="vars locals globals">
+      <div class="card-top">
+        <span class="fn-name">vars() / locals() / globals()</span>
+        <span class="fn-sig">vars([object])</span>
+        <span class="cat-tag" style="background:#3d2060;color:#d0a0ff">type</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python">class Dog:
+    def __init__(self):
+        self.name = "Rex"
+        self.age = 5
+
+d = Dog()
+vars(d)     # {'name': 'Rex', 'age': 5}
+d.__dict__  # same thing
+
+vars()      # current local namespace as dict
+locals()    # same
+globals()   # module global namespace as dict</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="type" data-name="id hash">
+      <div class="card-top">
+        <span class="fn-name">id() / hash()</span>
+        <span class="fn-sig">id(object) / hash(object)</span>
+        <span class="cat-tag" style="background:#3d2060;color:#d0a0ff">type</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python">a = "hello"
+b = "hello"
+id(a)       # memory address (e.g., 140234...)
+id(b)       # may be same (string interning)
+a is b      # maybe True due to interning
+
+hash("hello")   # consistent across run
+hash((1, 2))    # tuples are hashable
+# hash([1, 2]) → TypeError! (lists not hashable)</code></pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="category" id="cat-io">
+  <h3 class="cat-title">I/O &amp; Objects</h3>
+  <div class="grid">
+
+    <div class="card" data-cat="io" data-name="print">
+      <div class="card-top">
+        <span class="fn-name">print()</span>
+        <span class="fn-sig">print(*objects, sep=' ', end='\n', file=sys.stdout)</span>
+        <span class="cat-tag" style="background:#2a1a3e;color:#c0a0ff">I/O</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python">print("Hello", "World")          # Hello World
+print("Hello", "World", sep="-") # Hello-World
+print("No newline", end="")      # no \n at end
+print()                           # blank line
+
+import sys
+print("Error!", file=sys.stderr)  # print to stderr
+print(f"{name!r}", flush=True)    # force flush</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="io" data-name="input">
+      <div class="card-top">
+        <span class="fn-name">input()</span>
+        <span class="fn-sig">input(prompt=None)</span>
+        <span class="cat-tag" style="background:#2a1a3e;color:#c0a0ff">I/O</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python">name = input("Enter name: ")  # returns str
+age = int(input("Enter age: "))  # convert type
+
+# With error handling
+while True:
+    try:
+        n = int(input("Enter number: "))
+        break
+    except ValueError:
+        print("Please enter a valid number")</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="io" data-name="open file">
+      <div class="card-top">
+        <span class="fn-name">open()</span>
+        <span class="fn-sig">open(file, mode='r', encoding=None)</span>
+        <span class="cat-tag" style="background:#2a1a3e;color:#c0a0ff">I/O</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python"># Read entire file
+with open("data.txt", "r", encoding="utf-8") as f:
+    content = f.read()
+
+# Read lines
+with open("data.txt") as f:
+    lines = f.readlines()  # list of lines
+    for line in f:         # memory-efficient
+
+# Write
+with open("out.txt", "w") as f:
+    f.write("Hello\n")
+
+# Append
+with open("log.txt", "a") as f:
+    f.write("entry\n")
+
+# Binary
+with open("image.png", "rb") as f:
+    data = f.read()</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="io" data-name="callable object super property">
+      <div class="card-top">
+        <span class="fn-name">callable() / super() / property()</span>
+        <span class="fn-sig">callable(object)</span>
+        <span class="cat-tag" style="background:#2a1a3e;color:#c0a0ff">objects</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python">callable(print)        # True
+callable(42)           # False
+callable(lambda: None) # True
+
+# super() in inheritance
+class Dog(Animal):
+    def __init__(self, name, breed):
+        super().__init__(name)  # call Animal.__init__
+        self.breed = breed
+
+    def speak(self):
+        return super().speak() + " (woof)"
+
+# property decorator
+class Temperature:
+    def __init__(self): self._celsius = 0
+
+    @property
+    def fahrenheit(self):
+        return self._celsius * 9/5 + 32
+
+    @fahrenheit.setter
+    def fahrenheit(self, val):
+        self._celsius = (val - 32) * 5/9</code></pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="category" id="cat-functional">
+  <h3 class="cat-title">Functional Utilities</h3>
+  <div class="grid">
+
+    <div class="card" data-cat="functional" data-name="functools lru_cache cache">
+      <div class="card-top">
+        <span class="fn-name">functools.lru_cache / cache</span>
+        <span class="fn-sig">@lru_cache(maxsize=128)</span>
+        <span class="cat-tag" style="background:#3a2800;color:#ffd080">functional</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python">from functools import lru_cache, cache
+
+@lru_cache(maxsize=128)  # bounded cache
+def fibonacci(n):
+    if n < 2: return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+@cache  # unbounded cache (Python 3.9+)
+def expensive_computation(n):
+    return n ** 2
+
+fibonacci.cache_info()  # CacheInfo(hits=..., misses=...)
+fibonacci.cache_clear()  # clear the cache</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="functional" data-name="functools partial">
+      <div class="card-top">
+        <span class="fn-name">functools.partial()</span>
+        <span class="fn-sig">partial(func, *args, **kwargs)</span>
+        <span class="cat-tag" style="background:#3a2800;color:#ffd080">functional</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python">from functools import partial
+
+def power(base, exp):
+    return base ** exp
+
+square = partial(power, exp=2)
+cube = partial(power, exp=3)
+
+square(5)   # 25
+cube(3)     # 27
+
+# Practical uses
+double = partial(map, lambda x: x*2)
+list(double([1, 2, 3]))  # [2, 4, 6]
+
+print_error = partial(print, file=sys.stderr)
+print_error("Something went wrong!")</code></pre>
+      </div>
+    </div>
+
+    <div class="card" data-cat="functional" data-name="itertools">
+      <div class="card-top">
+        <span class="fn-name">itertools module</span>
+        <span class="fn-sig">import itertools as it</span>
+        <span class="cat-tag" style="background:#3a2800;color:#ffd080">functional</span>
+      </div>
+      <div class="card-body">
+        <pre><code class="language-python">import itertools as it
+
+# Infinite iterators
+it.count(10, 2)              # 10, 12, 14, ...
+it.cycle([1, 2, 3])          # 1,2,3,1,2,3,...
+it.repeat(9, 3)              # 9,9,9
+
+# Finite iterators
+list(it.chain([1,2],[3,4]))  # [1,2,3,4]
+list(it.chain.from_iterable([[1,2],[3,4]]))  # same
+list(it.islice(it.count(), 5))  # [0,1,2,3,4]
+list(it.takewhile(lambda x: x<5, [1,2,6,3]))  # [1,2]
+list(it.dropwhile(lambda x: x<5, [1,2,6,3]))  # [6,3]
+list(it.compress("ABCDE", [1,0,1,0,1]))  # ['A','C','E']
+
+# Combinatorial
+list(it.product("AB", repeat=2))  # AA,AB,BA,BB
+list(it.permutations("ABC", 2))  # AB,AC,BA,BC,CA,CB
+list(it.combinations("ABC", 2))  # AB,AC,BC
+list(it.combinations_with_replacement("AB", 2))  # AA,AB,BB</code></pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<script>
+hljs.highlightAll();
+
+let currentCat = 'all';
+
+function filterFns(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('.card').forEach(card => {
+    const name = card.dataset.name || '';
+    const text = card.textContent.toLowerCase();
+    const catMatch = currentCat === 'all' || (card.dataset.cat || '').includes(currentCat);
+    const textMatch = q.length === 0 || name.includes(q) || text.includes(q);
+    card.classList.toggle('hidden', !catMatch || !textMatch);
+  });
+}
+
+function filterCat(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterFns(document.querySelector('.search').value);
+}
+</script>
+</body>
+</html>

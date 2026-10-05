@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java REST API with Spring Boot Quiz</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #1a1a2e;
+      --panel:    #16213e;
+      --accent:   #e94560;
+      --accent2:  #0f3460;
+      --text:     #e0e0e0;
+      --muted:    #8888aa;
+      --correct:  #2ecc71;
+      --wrong:    #e74c3c;
+      --border:   #2a2a4e;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    a.back-link {
+      align-self: flex-start;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      margin-bottom: 1.25rem;
+      transition: color 0.2s;
+    }
+    a.back-link:hover { color: var(--accent); }
+
+    h1 {
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      color: var(--accent);
+      text-align: center;
+      margin-bottom: 0.25rem;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.875rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── Progress ── */
+    .progress-wrap {
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 1rem;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .progress-bar-bg {
+      background: var(--panel);
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem 2rem;
+      width: 100%;
+      max-width: 700px;
+      position: relative;
+      transition: border-color 0.3s;
+    }
+    .card.flash-correct { border-color: var(--correct); animation: flashGreen 0.6s ease; }
+    .card.flash-wrong   { border-color: var(--wrong);   animation: flashRed   0.6s ease; }
+    @keyframes flashGreen {
+      0%   { background: var(--panel); }
+      30%  { background: #1a3a28; }
+      100% { background: var(--panel); }
+    }
+    @keyframes flashRed {
+      0%   { background: var(--panel); }
+      30%  { background: #3a1a1a; }
+      100% { background: var(--panel); }
+    }
+
+    .q-type-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      padding: 1px 6px;
+      margin-bottom: 0.75rem;
+    }
+
+    .question-text {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+    }
+
+    pre.code-block {
+      background: #0a0a18;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin-bottom: 1.25rem;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      color: #c9d1d9;
+    }
+
+    /* ── Options ── */
+    .options { display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .option-btn {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.2s, background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .option-btn:hover:not(:disabled) { border-color: var(--accent); background: #1e1e38; }
+    .option-btn.focused  { border-color: var(--accent); background: #1e1e38; outline: 2px solid var(--accent); outline-offset: 2px; }
+    .option-btn.correct  { border-color: var(--correct); background: #0d2a1c; color: #7fffc4; }
+    .option-btn.wrong    { border-color: var(--wrong);   background: #2a0d0d; color: #ff8a80; }
+    .option-btn:disabled { cursor: default; }
+
+    .option-letter {
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .option-btn.correct .option-letter { background: var(--correct); color: #0d2a1c; }
+    .option-btn.wrong   .option-letter { background: var(--wrong);   color: #fff; }
+
+    /* ── Fill blank ── */
+    .fill-blank-wrap { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .fill-blank-input {
+      flex: 1;
+      min-width: 180px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 1rem;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    .fill-blank-input:focus { outline: none; border-color: var(--accent); }
+    .fill-blank-input.correct { border-color: var(--correct); }
+    .fill-blank-input.wrong   { border-color: var(--wrong); }
+
+    .submit-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      padding: 0.65rem 1.4rem;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .submit-btn:hover { opacity: 0.88; }
+    .submit-btn:active { transform: scale(0.97); }
+
+    /* ── Feedback ── */
+    .feedback {
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      display: none;
+    }
+    .feedback.show { display: block; }
+    .feedback.correct-fb { background: #0d2a1c; border: 1px solid var(--correct); color: #7fffc4; }
+    .feedback.wrong-fb   { background: #2a0d0d; border: 1px solid var(--wrong);   color: #ff8a80; }
+    .feedback strong { color: inherit; }
+
+    /* ── Navigation ── */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.25rem;
+      gap: 0.75rem;
+    }
+    .nav-btn {
+      background: var(--accent2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem 1.2rem;
+      color: var(--text);
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .nav-btn:hover { background: #1a4a80; border-color: var(--accent); }
+    .nav-btn:disabled { opacity: 0.35; cursor: default; }
+
+    /* ── Results ── */
+    #results-screen {
+      width: 100%;
+      max-width: 700px;
+      display: none;
+    }
+    .results-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+    }
+    .score-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: conic-gradient(var(--accent) calc(var(--pct) * 3.6deg), var(--bg) 0deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      position: relative;
+    }
+    .score-circle::after {
+      content: '';
+      position: absolute;
+      inset: 12px;
+      border-radius: 50%;
+      background: var(--panel);
+    }
+    .score-number {
+      position: relative;
+      z-index: 1;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .grade-badge {
+      display: inline-block;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 0.35rem 1.2rem;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+    }
+    .grade-needs  { background: #3a1a1a; color: var(--wrong); border: 1px solid var(--wrong); }
+    .grade-getting{ background: #3a2800; color: #f39c12;     border: 1px solid #f39c12; }
+    .grade-good   { background: #0d2a1c; color: var(--correct); border: 1px solid var(--correct); }
+    .grade-expert { background: #0a1f38; color: #74b9ff;    border: 1px solid #74b9ff; }
+
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 1rem 0 1.5rem;
+      flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-num { font-size: 1.5rem; font-weight: 700; color: var(--text); }
+    .stat-lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .results-actions {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      padding: 0.7rem 1.5rem;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-secondary {
+      background: transparent;
+      border: 1.5px solid var(--accent);
+      border-radius: 8px;
+      padding: 0.7rem 1.5rem;
+      color: var(--accent);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-secondary:hover { background: rgba(233,69,96,0.1); }
+
+    /* ── Review mode ── */
+    #review-screen {
+      width: 100%;
+      max-width: 700px;
+      display: none;
+    }
+    .review-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .review-header h2 { font-size: 1.2rem; color: var(--accent); }
+    .review-item {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .review-q-num { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; margin-bottom: 0.4rem; }
+    .review-q-text { font-size: 0.95rem; margin-bottom: 0.75rem; line-height: 1.55; }
+    .review-answer {
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      margin-bottom: 0.3rem;
+    }
+    .review-answer.your-wrong  { background: #2a0d0d; color: #ff8a80; border: 1px solid var(--wrong); }
+    .review-answer.the-correct { background: #0d2a1c; color: #7fffc4; border: 1px solid var(--correct); }
+    .review-explanation {
+      font-size: 0.83rem;
+      color: var(--muted);
+      margin-top: 0.6rem;
+      line-height: 1.5;
+      border-left: 2px solid var(--accent);
+      padding-left: 0.75rem;
+    }
+
+    /* ── Keyboard hint ── */
+    .kbd-hint {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 0.75rem;
+    }
+    kbd {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-size: 0.7rem;
+    }
+
+    @media (max-width: 520px) {
+      .card { padding: 1.25rem 1rem; }
+      .nav-btn { padding: 0.5rem 0.8rem; font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<a class="back-link" href="README.md">&#8592; Back to Index</a>
+<h1>Java REST API with Spring Boot</h1>
+<p class="subtitle">REST Principles &bull; Spring Annotations &bull; HTTP Status Codes &bull; Testing &bull; 15 Questions</p>
+
+<!-- Progress -->
+<div class="progress-wrap" id="progress-wrap">
+  <div class="progress-label">
+    <span id="prog-label">Question 1 of 15</span>
+    <span id="timer-label">0:00</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- Quiz card -->
+<div class="card" id="quiz-card">
+  <span class="q-type-badge" id="q-type-badge">Multiple Choice</span>
+  <p class="question-text" id="question-text"></p>
+  <pre class="code-block" id="code-block" style="display:none"></pre>
+  <div class="options" id="options-container"></div>
+  <div class="feedback" id="feedback"></div>
+  <div class="nav">
+    <button class="nav-btn" id="prev-btn" disabled>&#8592; Previous</button>
+    <button class="nav-btn" id="next-btn">Next &#8594;</button>
+  </div>
+</div>
+<p class="kbd-hint">
+  <kbd>&#8593;</kbd><kbd>&#8595;</kbd> navigate &nbsp;&bull;&nbsp;
+  <kbd>Enter</kbd> / <kbd>Space</kbd> confirm &nbsp;&bull;&nbsp;
+  <kbd>&#8592;</kbd><kbd>&#8594;</kbd> previous / next
+</p>
+
+<!-- Results -->
+<div id="results-screen">
+  <div class="results-card">
+    <div class="score-circle" id="score-circle">
+      <span class="score-number" id="score-number">0%</span>
+    </div>
+    <div class="grade-badge" id="grade-badge"></div>
+    <p id="grade-message" style="color:var(--muted);font-size:0.9rem;margin-bottom:0.5rem"></p>
+    <div class="stats-row">
+      <div class="stat-item"><div class="stat-num" id="stat-correct">0</div><div class="stat-lbl">Correct</div></div>
+      <div class="stat-item"><div class="stat-num" id="stat-wrong">0</div><div class="stat-lbl">Wrong</div></div>
+      <div class="stat-item"><div class="stat-num" id="stat-time">0:00</div><div class="stat-lbl">Time</div></div>
+    </div>
+    <div class="results-actions">
+      <button class="btn-primary"   id="retry-btn">&#8635; Retry</button>
+      <button class="btn-secondary" id="review-btn">Review Wrong Answers</button>
+    </div>
+  </div>
+</div>
+
+<!-- Review -->
+<div id="review-screen">
+  <div class="review-header">
+    <h2>Review: Wrong Answers</h2>
+    <button class="btn-secondary" id="back-to-results-btn">&#8592; Back to Results</button>
+  </div>
+  <div id="review-list"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  QUESTIONS
+// ═══════════════════════════════════════════════════════════════
+const questions = [
+  {
+    id: 1,
+    type: "multiple-choice",
+    text: "Which two core principles define a RESTful API?",
+    options: [
+      "Stateless communication and resource-based URLs",
+      "Persistent connections and server-side sessions",
+      "XML-only responses and SOAP envelope wrapping",
+      "WebSocket upgrades and bidirectional streaming"
+    ],
+    correct: 0,
+    explanation: "REST (Representational State Transfer) requires stateless communication—each request contains all information needed to process it, with no server-side session state. Resources are identified by URLs (e.g., /api/users/42), and clients interact with them using standard HTTP verbs (GET, POST, PUT, DELETE). Statelessness enables horizontal scaling because any server can handle any request."
+  },
+  {
+    id: 2,
+    type: "multiple-choice",
+    text: "What is the difference between @RestController and @Controller in Spring?",
+    options: [
+      "@RestController handles REST requests; @Controller only handles HTML form submissions",
+      "@RestController = @Controller + @ResponseBody, so every method's return value is written directly to the HTTP response body as JSON/XML",
+      "@Controller is deprecated; always use @RestController",
+      "@RestController requires a ResponseEntity wrapper; @Controller does not"
+    ],
+    correct: 1,
+    explanation: "@RestController is a convenience annotation that combines @Controller and @ResponseBody. Without @ResponseBody, Spring MVC tries to resolve the return value as a view name (template). With it, the object is serialized (usually to JSON via Jackson) and written to the response body. Use @Controller when you need to return views (Thymeleaf); use @RestController for REST APIs."
+  },
+  {
+    id: 3,
+    type: "multiple-choice",
+    code: `@GetMapping("/api/users/{id}")
+public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
+    return userService.findById(id)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+}`,
+    text: "What HTTP status codes can this endpoint return?",
+    options: [
+      "200 OK only",
+      "200 OK when the user exists; 404 Not Found when it doesn't",
+      "200 OK when found; 204 No Content when not found",
+      "201 Created when found; 404 Not Found when not found"
+    ],
+    correct: 1,
+    explanation: "ResponseEntity.ok(body) returns 200 OK with the serialized UserDto body. ResponseEntity.notFound().build() returns 404 Not Found with no body. The Optional.map/orElse pattern neatly handles both branches. This is idiomatic Spring Boot: return 200 for success, 404 when a resource doesn't exist, instead of returning null or throwing an exception for the not-found case."
+  },
+  {
+    id: 4,
+    type: "multiple-choice",
+    text: "What is the difference between @PathVariable and @RequestParam?",
+    options: [
+      "@PathVariable reads from the URL path segment (e.g., /users/42); @RequestParam reads from the query string (e.g., /users?id=42)",
+      "@PathVariable is for POST bodies; @RequestParam is for GET queries",
+      "@PathVariable is required; @RequestParam is always optional",
+      "They are identical—use either one interchangeably"
+    ],
+    correct: 0,
+    explanation: "@PathVariable Long id extracts a value embedded in the URL path, defined with {id} in the mapping (e.g., /users/42). @RequestParam String name reads from the query string (?name=Alice). Path variables identify a specific resource; query parameters filter or paginate a collection. Both can be optional (required=false), but path variables usually represent the resource identity."
+  },
+  {
+    id: 5,
+    type: "multiple-choice",
+    text: "Which HTTP status code should a POST /api/users endpoint return when a new user is successfully created?",
+    options: ["200 OK", "201 Created", "204 No Content", "202 Accepted"],
+    correct: 1,
+    explanation: "201 Created is the semantically correct status for a successful resource creation. By convention, the response should also include a Location header pointing to the new resource (e.g., Location: /api/users/42). 200 OK means success but implies the resource already existed. 204 No Content means success with no response body, typically used for DELETE or PUT. 202 Accepted means the request was accepted but processing is asynchronous."
+  },
+  {
+    id: 6,
+    type: "multiple-choice",
+    text: "What is the purpose of ResponseEntity<T> and why use it instead of returning T directly?",
+    options: [
+      "ResponseEntity wraps the response to allow setting the HTTP status code, headers, and body explicitly",
+      "ResponseEntity is required for all Spring Boot endpoints—returning T directly throws a compile error",
+      "ResponseEntity adds automatic JSON serialization that T alone lacks",
+      "ResponseEntity enables asynchronous processing of the response"
+    ],
+    correct: 0,
+    explanation: "Returning T directly is fine when you always want 200 OK with a body. ResponseEntity<T> gives you full control: set any status code (201, 204, 404), add headers (Location, Cache-Control), or omit the body. Example: ResponseEntity.status(HttpStatus.CREATED).header('Location', '/api/users/' + id).body(dto). This makes your API semantically correct and production-quality."
+  },
+  {
+    id: 7,
+    type: "multiple-choice",
+    text: "What does @ControllerAdvice do in Spring Boot?",
+    options: [
+      "It marks a class as a REST controller with built-in advice caching",
+      "It defines a global exception handler that applies to all controllers in the application",
+      "It enables AOP advice (before/after) around controller method calls",
+      "It configures Spring Security advice for all endpoints"
+    ],
+    correct: 1,
+    explanation: "@ControllerAdvice (or @RestControllerAdvice for REST) lets you define @ExceptionHandler methods in one place that handle exceptions thrown by any controller—no try/catch in each controller needed. For example, a handler for ResourceNotFoundException returns 404, and a handler for MethodArgumentNotValidException returns 422 with validation error details. This keeps controllers clean and centralizes error handling logic."
+  },
+  {
+    id: 8,
+    type: "multiple-choice",
+    code: `@PostMapping("/api/users")
+public ResponseEntity<UserDto> createUser(
+        @Valid @RequestBody CreateUserRequest req) {
+    UserDto created = userService.create(req);
+    return ResponseEntity.status(201).body(created);
+}`,
+    text: "What does @Valid do in this method signature?",
+    options: [
+      "It marks the parameter as required and returns 400 if missing",
+      "It triggers Bean Validation on the CreateUserRequest object, returning 400/422 if constraints like @NotBlank or @Size fail",
+      "It validates that the JSON can be deserialized—throwing 415 for non-JSON bodies",
+      "It checks that the authenticated user has the 'VALID' role before proceeding"
+    ],
+    correct: 1,
+    explanation: "@Valid triggers JSR-380 Bean Validation on the bound object. If CreateUserRequest has fields annotated with @NotBlank, @Size, @Email, @Min, etc., Spring validates them before the method runs. If validation fails, Spring throws MethodArgumentNotValidException, which by default returns a 400 Bad Request. You can customize this in @ControllerAdvice to return 422 Unprocessable Entity with field-level error details."
+  },
+  {
+    id: 9,
+    type: "multiple-choice",
+    text: "Why should you use DTOs (Data Transfer Objects) instead of exposing JPA entities directly from REST controllers?",
+    options: [
+      "JPA entities cannot be serialized to JSON",
+      "Exposing entities leaks database structure, triggers lazy-loading issues, risks circular references, and couples your API contract to your database schema",
+      "DTOs are required by Spring Boot's auto-configuration",
+      "Entities can only be used inside @Repository classes"
+    ],
+    correct: 1,
+    explanation: "Directly serializing JPA entities has multiple problems: you expose internal DB columns (including sensitive ones), Jackson may trigger lazy-loading N+1 queries during serialization, bidirectional relationships cause infinite recursion, and any schema change breaks your API contract. DTOs give you full control over what you expose, let you add computed fields, and decouple your API from your persistence model."
+  },
+  {
+    id: 10,
+    type: "multiple-choice",
+    text: "What is @SpringBootApplication equivalent to?",
+    options: [
+      "@Configuration + @ComponentScan + @EnableJpaRepositories",
+      "@Configuration + @EnableAutoConfiguration + @ComponentScan",
+      "@SpringBootTest + @AutoConfigureMockMvc + @ComponentScan",
+      "@RestController + @EnableWebMvc + @Configuration"
+    ],
+    correct: 1,
+    explanation: "@SpringBootApplication is a convenience annotation that combines three annotations: @Configuration (marks the class as a source of Spring bean definitions), @EnableAutoConfiguration (tells Spring Boot to auto-configure beans based on classpath contents, e.g., if H2 is on the classpath, configure an in-memory DataSource), and @ComponentScan (scans the current package and subpackages for @Component, @Service, @Repository, @Controller beans)."
+  },
+  {
+    id: 11,
+    type: "multiple-choice",
+    text: "Which dependency injection style is preferred in Spring Boot and why?",
+    options: [
+      "Field injection (@Autowired on the field) — simplest and most concise",
+      "Constructor injection — makes dependencies explicit, allows final fields, and enables testing without a Spring container",
+      "Setter injection — most flexible; allows changing dependencies at runtime",
+      "Method injection — recommended for prototype-scoped beans only"
+    ],
+    correct: 1,
+    explanation: "Constructor injection is the recommended approach. Benefits: dependencies are declared as final (immutable), the class clearly states what it needs, NullPointerExceptions are impossible (the object can't be constructed without all deps), and you can test with plain new MyService(mockRepo) without starting a Spring context. Field injection (@Autowired) hides dependencies and makes unit testing awkward. Spring 4.3+ auto-wires single-constructor classes without @Autowired."
+  },
+  {
+    id: 12,
+    type: "multiple-choice",
+    text: "What is the difference between PUT and PATCH?",
+    options: [
+      "PUT replaces the entire resource; PATCH applies a partial update to the resource",
+      "PUT creates a resource; PATCH updates it",
+      "PUT is idempotent; PATCH is not idempotent and always creates a new version",
+      "They are interchangeable—use either for updates"
+    ],
+    correct: 0,
+    explanation: "PUT replaces the entire resource with the request body—if you omit a field, it should be set to null/default. PATCH applies a partial update, only changing the fields present in the request body. Both should be idempotent (calling them multiple times with the same data produces the same result). In practice, PATCH is more user-friendly for APIs because clients don't need to send the full representation."
+  },
+  {
+    id: 13,
+    type: "multiple-choice",
+    text: "What is the difference between @WebMvcTest and @SpringBootTest for testing a Spring Boot REST API?",
+    options: [
+      "@WebMvcTest loads only the web layer (controllers, filters, converters); @SpringBootTest loads the full application context",
+      "@WebMvcTest runs integration tests against a real server; @SpringBootTest uses mocks",
+      "@WebMvcTest requires a running database; @SpringBootTest uses an in-memory database",
+      "They are identical; @WebMvcTest is just an alias for @SpringBootTest(webEnvironment=MOCK)"
+    ],
+    correct: 0,
+    explanation: "@WebMvcTest(UserController.class) loads only the web layer—controllers, filters, argument resolvers, converters—without starting a full context. Service and repository beans must be mocked with @MockBean. This makes tests fast and focused. @SpringBootTest loads the entire ApplicationContext, including all beans and auto-configuration, enabling true integration tests. Use @WebMvcTest for controller unit tests and @SpringBootTest for end-to-end integration tests."
+  },
+  {
+    id: 14,
+    type: "multiple-choice",
+    code: `mockMvc.perform(get("/api/users/1")
+        .contentType(MediaType.APPLICATION_JSON))
+    .andExpect(status().isOk())
+    .andExpect(jsonPath("$.name").value("Alice"));`,
+    text: "What does this MockMvc test verify?",
+    options: [
+      "It makes a real HTTP call to a running server and checks the database",
+      "It dispatches a GET /api/users/1 request through the Spring MVC layer and asserts a 200 response with JSON field name='Alice'",
+      "It only verifies that the controller method compiles without errors",
+      "It checks that the UserRepository.findById(1) returns a user named Alice"
+    ],
+    correct: 1,
+    explanation: "MockMvc tests the Spring MVC pipeline without starting a real HTTP server. perform(get(...)) dispatches the request through DispatcherServlet. andExpect(status().isOk()) asserts the HTTP status is 200. andExpect(jsonPath('$.name').value('Alice')) uses the JSONPath expression $.name to extract the 'name' field from the JSON response body and asserts it equals 'Alice'. The underlying service is typically mocked with Mockito."
+  },
+  {
+    id: 15,
+    type: "multiple-choice",
+    text: "Which REST URL design follows best practices?",
+    options: [
+      "/getUserById?id=42 and /createNewUser",
+      "/api/v1/users/42 and /api/v1/users (POST to create)",
+      "/api/user/getAll and /api/user/deleteUser/42",
+      "/REST/Users/Get/42 and /REST/Users/Create"
+    ],
+    correct: 1,
+    explanation: "REST URL best practices: use nouns not verbs (/users not /getUsers), use plural nouns (/users not /user), embed the ID in the path (/users/42), use HTTP verbs for actions (GET /users/42 to get, POST /users to create, PUT /users/42 to update, DELETE /users/42 to delete), version via URL prefix (/api/v1/). Avoid verbs like /getUserById or /createUser in the URL—that's RPC style, not REST."
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+let current      = 0;
+let answers      = new Array(questions.length).fill(null);
+let focusedIdx   = 0;
+let startTime    = Date.now();
+let timerInterval;
+let quizDone     = false;
+
+// ═══════════════════════════════════════════════════════════════
+//  DOM REFS
+// ═══════════════════════════════════════════════════════════════
+const quizCard         = document.getElementById('quiz-card');
+const qTypeBadge       = document.getElementById('q-type-badge');
+const questionText     = document.getElementById('question-text');
+const codeBlock        = document.getElementById('code-block');
+const optionsContainer = document.getElementById('options-container');
+const feedback         = document.getElementById('feedback');
+const prevBtn          = document.getElementById('prev-btn');
+const nextBtn          = document.getElementById('next-btn');
+const progLabel        = document.getElementById('prog-label');
+const timerLabel       = document.getElementById('timer-label');
+const progressFill     = document.getElementById('progress-fill');
+const progressWrap     = document.getElementById('progress-wrap');
+const resultsScreen    = document.getElementById('results-screen');
+const reviewScreen     = document.getElementById('review-screen');
+
+// ═══════════════════════════════════════════════════════════════
+//  TIMER
+// ═══════════════════════════════════════════════════════════════
+function formatTime(ms) {
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  return `${m}:${String(s % 60).padStart(2, '0')}`;
+}
+
+function startTimer() {
+  startTime = Date.now();
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timerLabel.textContent = formatTime(Date.now() - startTime);
+  }, 500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER QUESTION
+// ═══════════════════════════════════════════════════════════════
+function typeBadgeText(q) {
+  if (q.type === 'true-false')  return 'True / False';
+  if (q.type === 'fill-blank')  return 'Fill in the Blank';
+  if (q.code)                   return 'Code Reading';
+  return 'Multiple Choice';
+}
+
+function render() {
+  const q        = questions[current];
+  const answered = answers[current] !== null;
+
+  progLabel.textContent    = `Question ${current + 1} of ${questions.length}`;
+  progressFill.style.width = ((current) / questions.length * 100) + '%';
+
+  qTypeBadge.textContent   = typeBadgeText(q);
+  questionText.textContent = q.text;
+
+  if (q.code) {
+    codeBlock.style.display = 'block';
+    codeBlock.textContent   = q.code;
+  } else {
+    codeBlock.style.display = 'none';
+  }
+
+  optionsContainer.innerHTML = '';
+  feedback.className = 'feedback';
+  feedback.innerHTML = '';
+  quizCard.className = 'card';
+
+  prevBtn.disabled    = (current === 0);
+  nextBtn.textContent = (current === questions.length - 1) ? 'Finish' : 'Next →';
+
+  // ── Fill-blank ──
+  if (q.type === 'fill-blank') {
+    const wrap  = document.createElement('div');
+    wrap.className = 'fill-blank-wrap';
+
+    const input = document.createElement('input');
+    input.type  = 'text';
+    input.className = 'fill-blank-input';
+    input.placeholder = 'Type your answer…';
+    input.setAttribute('aria-label', 'Fill in the blank answer');
+
+    const submitBtn = document.createElement('button');
+    submitBtn.textContent = 'Submit';
+    submitBtn.className   = 'submit-btn';
+
+    wrap.appendChild(input);
+    wrap.appendChild(submitBtn);
+    optionsContainer.appendChild(wrap);
+
+    if (answered) {
+      input.value        = answers[current].value;
+      input.disabled     = true;
+      submitBtn.disabled = true;
+      const isCorrect    = answers[current].correct;
+      input.classList.add(isCorrect ? 'correct' : 'wrong');
+      showFeedback(q, isCorrect, answers[current].value);
+    } else {
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') submitBtn.click(); });
+      submitBtn.addEventListener('click', () => {
+        const val = input.value.trim();
+        if (!val) return;
+        const isCorrect = val.toLowerCase() === q.correct.toLowerCase();
+        answers[current] = { value: val, correct: isCorrect };
+        input.disabled   = true;
+        submitBtn.disabled = true;
+        input.classList.add(isCorrect ? 'correct' : 'wrong');
+        flashCard(isCorrect);
+        showFeedback(q, isCorrect, val);
+      });
+      setTimeout(() => input.focus(), 50);
+    }
+    return;
+  }
+
+  // ── Multiple-choice / True-False ──
+  focusedIdx = answered ? answers[current].selectedIdx : 0;
+
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.setAttribute('role', 'radio');
+    btn.setAttribute('tabindex', '0');
+
+    const letter = document.createElement('span');
+    letter.className = 'option-letter';
+    letter.textContent = String.fromCharCode(65 + i);
+
+    const label = document.createElement('span');
+    label.textContent = opt;
+
+    btn.appendChild(letter);
+    btn.appendChild(label);
+
+    if (answered) {
+      btn.disabled = true;
+      const sel = answers[current].selectedIdx;
+      if (i === q.correct)              btn.classList.add('correct');
+      if (i === sel && i !== q.correct) btn.classList.add('wrong');
+    } else {
+      btn.addEventListener('click', () => selectOption(i));
+    }
+
+    if (!answered && i === focusedIdx) btn.classList.add('focused');
+    optionsContainer.appendChild(btn);
+  });
+
+  if (answered) showFeedback(q, answers[current].correct, null);
+}
+
+function selectOption(idx) {
+  const q = questions[current];
+  if (answers[current] !== null) return;
+
+  const isCorrect = idx === q.correct;
+  answers[current] = { selectedIdx: idx, correct: isCorrect };
+
+  flashCard(isCorrect);
+
+  const btns = optionsContainer.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    btn.classList.remove('focused');
+    if (i === q.correct)              btn.classList.add('correct');
+    if (i === idx && !isCorrect)      btn.classList.add('wrong');
+  });
+
+  showFeedback(q, isCorrect, null);
+}
+
+function flashCard(isCorrect) {
+  quizCard.className = 'card';
+  void quizCard.offsetWidth;
+  quizCard.className = 'card ' + (isCorrect ? 'flash-correct' : 'flash-wrong');
+}
+
+function showFeedback(q, isCorrect, userValue) {
+  feedback.innerHTML = '';
+  let html = '';
+
+  if (isCorrect) {
+    html = `<strong>&#10003; Correct!</strong> `;
+  } else {
+    if (q.type === 'fill-blank') {
+      html = `<strong>&#10007; Wrong.</strong> Your answer: "<em>${escHtml(userValue)}</em>". Correct: "<strong>${escHtml(q.correct)}</strong>". `;
+    } else {
+      html = `<strong>&#10007; Wrong.</strong> Correct answer: <strong>${escHtml(q.options[q.correct])}</strong>. `;
+    }
+  }
+  html += escHtml(q.explanation);
+  feedback.innerHTML = html;
+  feedback.className = 'feedback show ' + (isCorrect ? 'correct-fb' : 'wrong-fb');
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  KEYBOARD
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (quizDone) return;
+  const q = questions[current];
+  if (!q) return;
+
+  const isChoice = q.type !== 'fill-blank';
+  const optBtns  = optionsContainer.querySelectorAll('.option-btn');
+  const answered = answers[current] !== null;
+
+  if (isChoice) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      if (!answered && e.key === 'ArrowDown') {
+        e.preventDefault();
+        optBtns[focusedIdx]?.classList.remove('focused');
+        focusedIdx = (focusedIdx + 1) % q.options.length;
+        optBtns[focusedIdx]?.classList.add('focused');
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault(); goNext();
+      }
+    }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      if (!answered && e.key === 'ArrowUp') {
+        e.preventDefault();
+        optBtns[focusedIdx]?.classList.remove('focused');
+        focusedIdx = (focusedIdx - 1 + q.options.length) % q.options.length;
+        optBtns[focusedIdx]?.classList.add('focused');
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault(); goPrev();
+      }
+    }
+    if ((e.key === 'Enter' || e.key === ' ') && !answered) {
+      e.preventDefault();
+      selectOption(focusedIdx);
+    }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+function goPrev() { if (current > 0) { current--; render(); } }
+function goNext() {
+  if (current < questions.length - 1) { current++; render(); }
+  else showResults();
+}
+
+prevBtn.addEventListener('click', goPrev);
+nextBtn.addEventListener('click', goNext);
+
+// ═══════════════════════════════════════════════════════════════
+//  RESULTS
+// ═══════════════════════════════════════════════════════════════
+function showResults() {
+  clearInterval(timerInterval);
+  quizDone = true;
+
+  const elapsed = Date.now() - startTime;
+  const correct = answers.filter(a => a && a.correct).length;
+  const pct     = Math.round((correct / questions.length) * 100);
+
+  quizCard.style.display     = 'none';
+  progressWrap.style.display = 'none';
+  document.querySelector('.kbd-hint').style.display = 'none';
+
+  document.getElementById('score-circle').style.setProperty('--pct', pct);
+  document.getElementById('score-number').textContent = pct + '%';
+
+  let gradeText, gradeClass, gradeMsg;
+  if (pct < 60)      { gradeText = 'Needs Work';    gradeClass = 'grade-needs';   gradeMsg = 'Keep studying — you\'ll get there!'; }
+  else if (pct < 80) { gradeText = 'Getting There'; gradeClass = 'grade-getting'; gradeMsg = 'Solid effort. Review the explanations and try again.'; }
+  else if (pct < 95) { gradeText = 'Good Job!';     gradeClass = 'grade-good';    gradeMsg = 'Strong performance. Almost expert-level!'; }
+  else               { gradeText = 'Expert!';        gradeClass = 'grade-expert';  gradeMsg = 'Outstanding! You know Spring Boot REST APIs inside and out.'; }
+
+  const gradeBadge = document.getElementById('grade-badge');
+  gradeBadge.textContent = gradeText;
+  gradeBadge.className   = 'grade-badge ' + gradeClass;
+  document.getElementById('grade-message').textContent = gradeMsg;
+
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-wrong').textContent   = questions.length - correct;
+  document.getElementById('stat-time').textContent    = formatTime(elapsed);
+
+  resultsScreen.style.display = 'block';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RETRY
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('retry-btn').addEventListener('click', () => {
+  answers  = new Array(questions.length).fill(null);
+  current  = 0;
+  quizDone = false;
+
+  resultsScreen.style.display = 'none';
+  reviewScreen.style.display  = 'none';
+  quizCard.style.display      = '';
+  progressWrap.style.display  = '';
+  document.querySelector('.kbd-hint').style.display = '';
+
+  startTimer();
+  render();
+});
+
+// ═══════════════════════════════════════════════════════════════
+//  REVIEW WRONG ANSWERS
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('review-btn').addEventListener('click', () => {
+  resultsScreen.style.display = 'none';
+  reviewScreen.style.display  = 'block';
+  renderReview();
+});
+
+document.getElementById('back-to-results-btn').addEventListener('click', () => {
+  reviewScreen.style.display  = 'none';
+  resultsScreen.style.display = 'block';
+});
+
+function renderReview() {
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+
+  const wrong = answers
+    .map((a, i) => ({ a, q: questions[i], i }))
+    .filter(({ a }) => a && !a.correct);
+
+  if (wrong.length === 0) {
+    list.innerHTML = '<p style="color:var(--correct);text-align:center;padding:2rem">&#10003; You got everything right!</p>';
+    return;
+  }
+
+  wrong.forEach(({ a, q, i }) => {
+    const item = document.createElement('div');
+    item.className = 'review-item';
+
+    let userAnswerHtml, correctAnswerHtml;
+    if (q.type === 'fill-blank') {
+      userAnswerHtml    = `Your answer: "${escHtml(a.value)}"`;
+      correctAnswerHtml = `Correct: "${escHtml(q.correct)}"`;
+    } else {
+      userAnswerHtml    = `Your answer: ${escHtml(q.options[a.selectedIdx])}`;
+      correctAnswerHtml = `Correct: ${escHtml(q.options[q.correct])}`;
+    }
+
+    const codeHtml = q.code
+      ? `<pre class="code-block" style="margin-bottom:0.75rem">${escHtml(q.code)}</pre>`
+      : '';
+
+    item.innerHTML = `
+      <div class="review-q-num">Question ${i + 1}</div>
+      <div class="review-q-text">${escHtml(q.text)}</div>
+      ${codeHtml}
+      <div class="review-answer your-wrong">&#10007; ${escHtml(userAnswerHtml)}</div>
+      <div class="review-answer the-correct">&#10003; ${escHtml(correctAnswerHtml)}</div>
+      <div class="review-explanation">${escHtml(q.explanation)}</div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+startTimer();
+render();
+</script>
+</body>
+</html>

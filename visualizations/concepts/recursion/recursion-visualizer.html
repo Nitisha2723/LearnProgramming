@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recursion Visualizer - Fibonacci Tree</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #1a1a2e;
+    color: #eee;
+    font-family: system-ui, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: #16213e;
+    padding: 16px 24px;
+    border-bottom: 2px solid #0f3460;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  header h1 {
+    font-size: 1.4rem;
+    color: #e94560;
+    flex: 1;
+    min-width: 200px;
+  }
+  .back-link {
+    color: #64b5f6;
+    text-decoration: none;
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+  .back-link:hover { opacity: 1; text-decoration: underline; }
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .controls label { font-size: 0.9rem; color: #aaa; }
+  input[type="number"] {
+    width: 60px;
+    padding: 6px 10px;
+    background: #0f3460;
+    border: 1px solid #e94560;
+    color: #eee;
+    border-radius: 6px;
+    font-size: 1rem;
+    text-align: center;
+  }
+  button {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: #e94560;
+    color: #fff;
+  }
+  .btn-primary:hover { background: #c73652; }
+  .btn-primary:disabled { background: #555; cursor: default; }
+  .btn-speed {
+    background: #0f3460;
+    color: #eee;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+  }
+  .btn-speed.active { background: #e94560; color: #fff; }
+  .btn-speed:hover:not(.active) { background: #1a4a7a; }
+  .speed-group { display: flex; gap: 4px; align-items: center; }
+  .speed-label { font-size: 0.8rem; color: #888; margin-right: 4px; }
+  .main-layout {
+    display: flex;
+    flex: 1;
+    gap: 0;
+    overflow: hidden;
+  }
+  .call-stack-panel {
+    width: 240px;
+    min-width: 240px;
+    background: #16213e;
+    border-right: 2px solid #0f3460;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    overflow: hidden;
+  }
+  .call-stack-panel h2 {
+    font-size: 0.95rem;
+    color: #64b5f6;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #0f3460;
+    padding-bottom: 8px;
+  }
+  .stack-frames {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 6px;
+    padding-right: 4px;
+  }
+  .stack-frame {
+    background: #0f3460;
+    border: 1px solid #1a5080;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 0.78rem;
+    font-family: 'Courier New', monospace;
+    color: #aad4f5;
+    animation: frameIn 0.25s ease-out;
+    transition: all 0.3s;
+  }
+  .stack-frame.popping {
+    animation: frameOut 0.25s ease-in forwards;
+  }
+  .stack-frame .fn-name { color: #64b5f6; font-weight: bold; }
+  .stack-frame .return-val { color: #81c995; }
+  @keyframes frameIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes frameOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(-20px); }
+  }
+  .depth-indicator {
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: #888;
+    text-align: center;
+  }
+  .tree-area {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+    padding: 20px;
+  }
+  #tree-canvas {
+    display: block;
+    margin: 0 auto;
+  }
+  .stats-bar {
+    background: #16213e;
+    border-top: 2px solid #0f3460;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+  }
+  .stat-label { color: #888; }
+  .stat-value { color: #e94560; font-weight: bold; font-size: 1rem; }
+  .stat-hint {
+    color: #ffd54f;
+    font-size: 0.82rem;
+    margin-left: auto;
+    display: none;
+  }
+  .warning {
+    display: none;
+    background: #3a2000;
+    border: 1px solid #ff9800;
+    color: #ff9800;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    margin-left: 8px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Recursion Visualizer &mdash; Fibonacci Tree</h1>
+  <div class="controls">
+    <label for="nInput">n =</label>
+    <input type="number" id="nInput" value="5" min="1" max="10">
+    <button class="btn-primary" id="vizBtn" onclick="startVisualization()">Visualize</button>
+    <button class="btn-primary" id="resetBtn" onclick="resetAll()" style="background:#0f3460;">Reset</button>
+    <span class="warning" id="warningMsg">Warning: n &gt; 7 may be slow!</span>
+  </div>
+  <div class="speed-group">
+    <span class="speed-label">Speed:</span>
+    <button class="btn-speed" onclick="setSpeed('slow')">Slow</button>
+    <button class="btn-speed active" id="speed-medium" onclick="setSpeed('medium')">Medium</button>
+    <button class="btn-speed" onclick="setSpeed('fast')">Fast</button>
+  </div>
+  <a href="../../README.md" class="back-link">&#8592; Back to Index</a>
+</header>
+
+<div class="main-layout">
+  <div class="call-stack-panel">
+    <h2>Call Stack</h2>
+    <div class="stack-frames" id="stackFrames"></div>
+    <div class="depth-indicator" id="depthIndicator">Max depth: 0</div>
+  </div>
+  <div class="tree-area">
+    <canvas id="tree-canvas"></canvas>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat">
+    <span class="stat-label">Total calls:</span>
+    <span class="stat-value" id="totalCalls">0</span>
+  </div>
+  <div class="stat">
+    <span class="stat-label">Unique values computed:</span>
+    <span class="stat-value" id="uniqueVals">0</span>
+  </div>
+  <div class="stat">
+    <span class="stat-label">Redundant calls:</span>
+    <span class="stat-value" id="redundantCalls">0</span>
+  </div>
+  <div class="stat-hint" id="memoHint">
+    Tip: Memoization would reduce calls to just <span id="memoCount">0</span>!
+  </div>
+</div>
+
+<script>
+// ---- CONFIG ----
+const COLORS = {
+  bg: '#1a1a2e',
+  panel: '#16213e',
+  accent: '#0f3460',
+  highlight: '#e94560',
+  text: '#eee',
+  calling: '#1565c0',
+  callingBorder: '#42a5f5',
+  callingGlow: '#64b5f6',
+  returned: '#1b5e20',
+  returnedBorder: '#66bb6a',
+  returnedText: '#a5d6a7',
+  redundant: '#5d4037',
+  redundantBorder: '#ff8f00',
+  edge: '#334',
+  nodeText: '#eee',
+};
+
+let speedMs = { slow: 700, medium: 300, fast: 80 };
+let currentSpeed = 'medium';
+let animDelay = speedMs[currentSpeed];
+let running = false;
+let cancelFlag = false;
+
+const canvas = document.getElementById('tree-canvas');
+const ctx = canvas.getContext('2d');
+
+// Tree node storage
+let nodes = {}; // key: "fib_n_id" => { id, n, x, y, state, returnVal, parentId, childIds, callCount }
+let nodeIdCounter = 0;
+let allSteps = []; // sequence of animation steps
+let stackFramesArr = [];
+let maxDepth = 0;
+let totalCallsCount = 0;
+let callCounts = {}; // how many times fib(n) called
+
+function setSpeed(s) {
+  currentSpeed = s;
+  animDelay = speedMs[s];
+  document.querySelectorAll('.btn-speed').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[onclick="setSpeed('${s}')"]`).classList.add('active');
+}
+
+document.getElementById('nInput').addEventListener('input', function() {
+  const v = parseInt(this.value);
+  document.getElementById('warningMsg').style.display = (v > 7) ? 'inline' : 'none';
+});
+
+function resetAll() {
+  cancelFlag = true;
+  setTimeout(() => {
+    cancelFlag = false;
+    running = false;
+    nodes = {};
+    nodeIdCounter = 0;
+    allSteps = [];
+    stackFramesArr = [];
+    maxDepth = 0;
+    totalCallsCount = 0;
+    callCounts = {};
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    document.getElementById('stackFrames').innerHTML = '';
+    document.getElementById('depthIndicator').textContent = 'Max depth: 0';
+    document.getElementById('totalCalls').textContent = '0';
+    document.getElementById('uniqueVals').textContent = '0';
+    document.getElementById('redundantCalls').textContent = '0';
+    document.getElementById('memoHint').style.display = 'none';
+    document.getElementById('vizBtn').disabled = false;
+  }, 100);
+}
+
+// ---- Tree Layout ----
+// Build tree structure first, then assign positions
+function buildTreeStructure(n, parentId, depth) {
+  const id = nodeIdCounter++;
+  nodes[id] = {
+    id, n, depth, parentId,
+    childIds: [],
+    state: 'pending',
+    returnVal: null,
+    x: 0, y: 0,
+  };
+  if (parentId !== null) {
+    nodes[parentId].childIds.push(id);
+  }
+  if (n <= 1) return id;
+  buildTreeStructure(n - 1, id, depth + 1);
+  buildTreeStructure(n - 2, id, depth + 1);
+  return id;
+}
+
+function assignPositions(rootId) {
+  // Count leaves under each node for Reingold-Tilford-like layout
+  function countLeaves(id) {
+    const node = nodes[id];
+    if (node.childIds.length === 0) return 1;
+    return node.childIds.reduce((s, cid) => s + countLeaves(cid), 0);
+  }
+
+  const nodeRadius = 28;
+  const hSpacing = 68;
+  const vSpacing = 80;
+
+  // Assign x by DFS left-to-right with leaf counter
+  let leafCounter = 0;
+  function assignX(id) {
+    const node = nodes[id];
+    if (node.childIds.length === 0) {
+      node.x = leafCounter * hSpacing;
+      leafCounter++;
+    } else {
+      node.childIds.forEach(cid => assignX(cid));
+      const firstChild = nodes[node.childIds[0]];
+      const lastChild = nodes[node.childIds[node.childIds.length - 1]];
+      node.x = (firstChild.x + lastChild.x) / 2;
+    }
+  }
+  assignX(rootId);
+
+  // Assign y by depth
+  function assignY(id) {
+    const node = nodes[id];
+    node.y = node.depth * vSpacing + nodeRadius + 10;
+    node.childIds.forEach(cid => assignY(cid));
+  }
+  assignY(rootId);
+
+  // Compute canvas size needed
+  const allX = Object.values(nodes).map(n => n.x);
+  const allY = Object.values(nodes).map(n => n.y);
+  const minX = Math.min(...allX);
+  const maxX = Math.max(...allX);
+  const maxY = Math.max(...allY);
+
+  // Shift so minimum x = nodeRadius
+  const shift = -minX + nodeRadius + 10;
+  Object.values(nodes).forEach(n => { n.x += shift; });
+
+  return { width: maxX - minX + nodeRadius * 2 + 20, height: maxY + nodeRadius + 20 };
+}
+
+// ---- Animation Steps ----
+function buildSteps(rootId) {
+  // DFS traversal to build ordered steps
+  function dfs(id, parentId, depth) {
+    const node = nodes[id];
+    maxDepth = Math.max(maxDepth, depth);
+    totalCallsCount++;
+    callCounts[node.n] = (callCounts[node.n] || 0) + 1;
+
+    allSteps.push({ type: 'call', id, parentId, depth });
+
+    if (node.n <= 1) {
+      allSteps.push({ type: 'return', id, val: node.n });
+    } else {
+      dfs(node.childIds[0], id, depth + 1);
+      dfs(node.childIds[1], id, depth + 1);
+      allSteps.push({ type: 'return', id, val: null }); // computed after children
+    }
+  }
+  dfs(rootId, null, 0);
+}
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function drawAll() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Draw edges first
+  Object.values(nodes).forEach(node => {
+    if (node.state === 'pending') return;
+    node.childIds.forEach(cid => {
+      const child = nodes[cid];
+      if (child.state === 'pending') return;
+      ctx.beginPath();
+      ctx.moveTo(node.x, node.y);
+      ctx.lineTo(child.x, child.y);
+      ctx.strokeStyle = '#334466';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+  });
+  // Draw nodes
+  Object.values(nodes).forEach(node => {
+    if (node.state === 'pending') return;
+    drawNode(node);
+  });
+}
+
+function drawNode(node) {
+  const R = 26;
+  const isRedundant = callCounts[node.n] > 1 && node.n > 1;
+
+  ctx.save();
+
+  // Glow
+  if (node.state === 'calling') {
+    ctx.shadowColor = COLORS.callingGlow;
+    ctx.shadowBlur = 16;
+  } else if (node.state === 'returned' && isRedundant) {
+    ctx.shadowColor = '#ff8f00';
+    ctx.shadowBlur = 12;
+  }
+
+  // Fill
+  if (node.state === 'calling') {
+    ctx.fillStyle = COLORS.calling;
+  } else if (node.state === 'returned') {
+    ctx.fillStyle = isRedundant ? COLORS.redundant : COLORS.returned;
+  }
+
+  ctx.beginPath();
+  ctx.arc(node.x, node.y, R, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Border
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = node.state === 'calling' ? COLORS.callingBorder :
+                    (isRedundant ? COLORS.redundantBorder : COLORS.returnedBorder);
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.restore();
+
+  // Text
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 11px system-ui';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(`fib(${node.n})`, node.x, node.y - (node.returnVal !== null ? 5 : 0));
+
+  if (node.returnVal !== null) {
+    ctx.fillStyle = node.state === 'returned' && !isRedundant ? '#a5d6a7' : '#ffd54f';
+    ctx.font = 'bold 12px system-ui';
+    ctx.fillText(`= ${node.returnVal}`, node.x, node.y + 8);
+  }
+}
+
+// ---- Stack UI ----
+function pushStackFrame(id, depth) {
+  const node = nodes[id];
+  const frame = document.createElement('div');
+  frame.className = 'stack-frame';
+  frame.id = `frame-${id}`;
+  const parentLabel = node.parentId !== null ? `← fib(${nodes[node.parentId].n})` : 'entry';
+  frame.innerHTML = `<span class="fn-name">fib(${node.n})</span> <span style="color:#888;font-size:0.75em">${parentLabel}</span>`;
+  document.getElementById('stackFrames').prepend(frame);
+  stackFramesArr.push(id);
+  document.getElementById('depthIndicator').textContent = `Max depth: ${maxDepth}`;
+}
+
+function popStackFrame(id, val) {
+  const frame = document.getElementById(`frame-${id}`);
+  if (!frame) return;
+  const node = nodes[id];
+  frame.innerHTML += ` <span class="return-val">→ ${val}</span>`;
+  frame.classList.add('popping');
+  setTimeout(() => {
+    if (frame.parentNode) frame.parentNode.removeChild(frame);
+  }, 280);
+}
+
+// ---- Main Visualization ----
+async function startVisualization() {
+  if (running) return;
+  resetAll();
+  await delay(150);
+  running = true;
+  cancelFlag = false;
+
+  const n = Math.max(1, Math.min(10, parseInt(document.getElementById('nInput').value) || 5));
+  document.getElementById('vizBtn').disabled = true;
+
+  // Build tree
+  nodeIdCounter = 0;
+  nodes = {};
+  const rootId = buildTreeStructure(n, null, 0);
+  const { width, height } = assignPositions(rootId);
+
+  canvas.width = Math.max(width, 400);
+  canvas.height = Math.max(height, 200);
+
+  buildSteps(rootId);
+
+  // Update stats pre-calc
+  document.getElementById('totalCalls').textContent = totalCallsCount;
+  document.getElementById('memoCount').textContent = n + 1;
+
+  // Reset node states to pending for animation
+  Object.values(nodes).forEach(nd => { nd.state = 'pending'; nd.returnVal = null; });
+  totalCallsCount = 0;
+  callCounts = {};
+
+  // Execute steps
+  const returnVals = {};
+  let stepCallCounts = {};
+
+  for (let step of allSteps) {
+    if (cancelFlag) break;
+
+    if (step.type === 'call') {
+      nodes[step.id].state = 'calling';
+      totalCallsCount++;
+      const nn = nodes[step.id].n;
+      stepCallCounts[nn] = (stepCallCounts[nn] || 0) + 1;
+      callCounts = { ...stepCallCounts };
+      drawAll();
+      pushStackFrame(step.id, step.depth);
+      document.getElementById('totalCalls').textContent = totalCallsCount;
+      await delay(animDelay);
+
+    } else if (step.type === 'return') {
+      const node = nodes[step.id];
+      let val = step.val;
+      if (val === null) {
+        // compute from children
+        const c1 = returnVals[node.childIds[0]];
+        const c2 = returnVals[node.childIds[1]];
+        val = c1 + c2;
+      }
+      returnVals[step.id] = val;
+      node.returnVal = val;
+      node.state = 'returned';
+      drawAll();
+      popStackFrame(step.id, val);
+
+      // Update unique & redundant
+      const uniqueSet = new Set(Object.values(nodes).filter(nd => nd.state === 'returned').map(nd => nd.n));
+      document.getElementById('uniqueVals').textContent = uniqueSet.size;
+      const redundant = Object.values(stepCallCounts).reduce((s, v) => s + Math.max(0, v - 1), 0);
+      document.getElementById('redundantCalls').textContent = redundant;
+
+      await delay(animDelay * 0.7);
+    }
+  }
+
+  if (!cancelFlag) {
+    document.getElementById('memoHint').style.display = 'flex';
+    document.getElementById('vizBtn').disabled = false;
+    running = false;
+  }
+}
+
+// Initial empty canvas
+canvas.width = 600;
+canvas.height = 300;
+ctx.fillStyle = '#16213e';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+ctx.fillStyle = '#444';
+ctx.font = '16px system-ui';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.fillText('Enter a value and click "Visualize" to start', canvas.width / 2, canvas.height / 2);
+</script>
+</body>
+</html>

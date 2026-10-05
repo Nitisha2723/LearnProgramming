@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python Interview Prep Quiz</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #1a1a2e;
+      --panel: #16213e;
+      --accent: #e94560;
+      --accent-hover: #c73652;
+      --correct: #2ecc71;
+      --wrong: #e74c3c;
+      --text: #e0e0e0;
+      --muted: #8892a4;
+      --border: #2a3a5c;
+      --code-bg: #0d1b2a;
+      --option-hover: #1e3560;
+      --option-selected: #1e3560;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Layout ───────────────────────────────────────── */
+    .top-bar {
+      padding: 12px 20px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .top-bar a { font-size: 0.9rem; color: var(--muted); }
+    .top-bar a:hover { color: var(--text); text-decoration: none; }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .subtitle { color: var(--muted); font-size: 0.92rem; margin-bottom: 24px; }
+
+    /* ── Progress ─────────────────────────────────────── */
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .progress-label { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+    .progress-bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+    .progress-score { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+
+    /* ── Card ─────────────────────────────────────────── */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 28px 22px;
+      position: relative;
+      transition: border-color 0.3s;
+    }
+    .card.flash-correct { border-color: var(--correct); }
+    .card.flash-wrong   { border-color: var(--wrong); }
+
+    .question-type-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--accent);
+      background: rgba(233,69,96,0.12);
+      border: 1px solid rgba(233,69,96,0.3);
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin-bottom: 14px;
+    }
+
+    .question-text {
+      font-size: 1.05rem;
+      font-weight: 500;
+      margin-bottom: 18px;
+      line-height: 1.55;
+    }
+
+    pre.code-snippet {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.87rem;
+      line-height: 1.6;
+      color: #c9d1d9;
+      margin-bottom: 18px;
+      tab-size: 4;
+    }
+
+    /* ── Options ──────────────────────────────────────── */
+    .options { display: flex; flex-direction: column; gap: 10px; }
+
+    .option-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text);
+      font-size: 0.97rem;
+      transition: background 0.15s, border-color 0.15s;
+      width: 100%;
+    }
+    .option-btn:hover:not(:disabled) { background: var(--option-hover); border-color: var(--accent); }
+    .option-btn.selected { background: var(--option-selected); border-color: #5577cc; }
+    .option-btn.correct  { background: rgba(46,204,113,0.15); border-color: var(--correct); }
+    .option-btn.wrong    { background: rgba(231,76,60,0.15);  border-color: var(--wrong); }
+    .option-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .option-btn:disabled { cursor: default; }
+
+    .option-key {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 28px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .option-btn.selected .option-key { background: #2a3a70; border-color: #5577cc; color: var(--text); }
+    .option-btn.correct  .option-key { background: rgba(46,204,113,0.3); border-color: var(--correct); color: var(--correct); }
+    .option-btn.wrong    .option-key { background: rgba(231,76,60,0.3);  border-color: var(--wrong); color: var(--wrong); }
+
+    /* ── Fill-blank ───────────────────────────────────── */
+    .fill-wrap {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+      flex-wrap: wrap;
+    }
+    .fill-input {
+      flex: 1;
+      min-width: 180px;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: 'Fira Code', monospace;
+      font-size: 0.97rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .fill-input:focus { border-color: var(--accent); }
+    .fill-input:disabled { opacity: 0.65; cursor: default; }
+    .fill-input.correct { border-color: var(--correct); background: rgba(46,204,113,0.08); }
+    .fill-input.wrong   { border-color: var(--wrong);   background: rgba(231,76,60,0.08); }
+
+    .submit-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 22px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .submit-btn:hover:not(:disabled) { background: var(--accent-hover); }
+    .submit-btn:disabled { opacity: 0.5; cursor: default; }
+
+    /* ── Feedback ─────────────────────────────────────── */
+    .feedback {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 0.93rem;
+      display: none;
+      line-height: 1.55;
+    }
+    .feedback.show { display: block; }
+    .feedback.correct-fb { background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.35); }
+    .feedback.wrong-fb   { background: rgba(231,76,60,0.10);  border: 1px solid rgba(231,76,60,0.3); }
+    .feedback strong { display: block; margin-bottom: 6px; font-size: 0.96rem; }
+    .feedback .correct-answer { color: var(--correct); font-weight: 600; }
+    .feedback .explanation { color: var(--muted); margin-top: 8px; }
+
+    /* ── Navigation ───────────────────────────────────── */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+      gap: 10px;
+    }
+    .nav-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 0.93rem;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) { background: var(--option-hover); border-color: var(--accent); }
+    .nav-btn:disabled { opacity: 0.35; cursor: default; }
+    .nav-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+    .nav-btn.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+    /* ── Results ──────────────────────────────────────── */
+    #results-screen { display: none; }
+    .results-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 36px 28px;
+      text-align: center;
+    }
+    .score-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 5px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .score-pct { font-size: 2.2rem; font-weight: 800; color: var(--accent); line-height: 1; }
+    .score-lbl { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+    .grade-text {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .results-meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 28px;
+    }
+    .results-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .results-actions .nav-btn { padding: 12px 28px; font-size: 0.95rem; }
+
+    /* ── Review mode ──────────────────────────────────── */
+    #review-screen { display: none; }
+    .review-item {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 22px 22px 18px;
+      margin-bottom: 16px;
+    }
+    .review-item .question-text { font-size: 0.97rem; margin-bottom: 14px; }
+    .review-item pre.code-snippet { font-size: 0.83rem; margin-bottom: 14px; }
+    .review-answer {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .review-answer .your-ans { color: var(--wrong); font-weight: 600; }
+    .review-answer .right-ans { color: var(--correct); font-weight: 600; }
+    .review-explanation {
+      font-size: 0.88rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+      margin-top: 10px;
+      line-height: 1.55;
+    }
+
+    /* ── Utility ──────────────────────────────────────── */
+    .hidden { display: none !important; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+    /* ── Responsive ───────────────────────────────────── */
+    @media (max-width: 520px) {
+      .card { padding: 20px 16px 18px; }
+      h1 { font-size: 1.3rem; }
+      .nav-btn { padding: 9px 14px; font-size: 0.87rem; }
+      .score-circle { width: 110px; height: 110px; }
+      .score-pct { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="README.md">&#8592; Back to Index</a>
+</div>
+
+<div class="container">
+  <h1>Python Interview Prep</h1>
+  <p class="subtitle">15 questions covering algorithms, data structures &amp; Python gotchas</p>
+
+  <!-- ── Quiz screen ─────────────────────────────────── -->
+  <div id="quiz-screen">
+    <div class="progress-wrap">
+      <span class="progress-label" id="progress-label">Question 1 of 15</span>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill" style="width:6.67%"></div>
+      </div>
+      <span class="progress-score" id="progress-score">Score: 0</span>
+    </div>
+
+    <div class="card" id="question-card">
+      <div class="question-type-badge" id="q-badge"></div>
+      <div class="question-text" id="q-text"></div>
+      <pre class="code-snippet hidden" id="q-code"></pre>
+      <div id="q-options"></div>
+      <div class="feedback" id="q-feedback"></div>
+    </div>
+
+    <div class="nav">
+      <button class="nav-btn" id="btn-prev" onclick="navigate(-1)" disabled>&#8592; Previous</button>
+      <button class="nav-btn primary" id="btn-next" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+  </div>
+
+  <!-- ── Results screen ─────────────────────────────────── -->
+  <div id="results-screen">
+    <div class="results-card">
+      <div class="score-circle">
+        <div class="score-pct" id="res-pct">0%</div>
+        <div class="score-lbl">Score</div>
+      </div>
+      <div class="grade-text" id="res-grade"></div>
+      <div class="results-meta" id="res-meta"></div>
+      <div class="results-actions">
+        <button class="nav-btn" onclick="retryQuiz()">&#8635; Retry</button>
+        <button class="nav-btn primary" id="btn-review" onclick="showReview()">Review Wrong Answers</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Review screen ─────────────────────────────────── -->
+  <div id="review-screen">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+      <h2 style="font-size:1.2rem;color:var(--accent);">Wrong Answer Review</h2>
+      <button class="nav-btn" onclick="backToResults()">&#8592; Back to Results</button>
+    </div>
+    <div id="review-list"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   QUESTION BANK
+═══════════════════════════════════════════════════════════ */
+const QUESTIONS = [
+  // 1 — Two-pointer
+  {
+    type: "multiple-choice",
+    badge: "Algorithms",
+    text: "The two-pointer technique is best suited for which type of input?",
+    options: [
+      "Unsorted arrays only",
+      "Sorted arrays or problems requiring simultaneous iteration from both ends",
+      "Hash maps and dictionaries",
+      "Linked lists exclusively"
+    ],
+    correct: 1,
+    explanation: "Two-pointer works most cleanly on sorted arrays (e.g., finding a pair that sums to a target) or on problems like 'valid palindrome' where you shrink inward from both ends. It achieves O(n) time vs O(n²) for a naive nested-loop approach."
+  },
+
+  // 2 — Sliding window
+  {
+    type: "multiple-choice",
+    badge: "Algorithms",
+    text: "When using the sliding window pattern to find the longest substring with at most k distinct characters, what data structure tracks character frequencies inside the window?",
+    options: [
+      "A sorted list",
+      "A set",
+      "A dictionary (hash map)",
+      "A deque"
+    ],
+    correct: 2,
+    explanation: "A dictionary maps each character to its count within the current window. When the number of keys exceeds k, you shrink the window from the left until the constraint is satisfied again. This keeps the algorithm at O(n) time."
+  },
+
+  // 3 — List comp vs map/filter
+  {
+    type: "true-false",
+    badge: "Performance",
+    text: "List comprehensions are generally faster than equivalent map()/filter() calls with lambda functions in CPython.",
+    options: ["True", "False"],
+    correct: 0,
+    explanation: "True. List comprehensions are optimized at the bytecode level in CPython and avoid the overhead of repeatedly calling a Python-level lambda. map()/filter() with a built-in function (like str or int) can be faster because built-ins run in C, but with a lambda the overhead exceeds that of a comprehension."
+  },
+
+  // 4 — Dict frequency counter
+  {
+    type: "multiple-choice",
+    badge: "Data Structures",
+    text: "Which built-in is the most Pythonic way to build a frequency-counter dictionary from a list?",
+    options: [
+      "dict()",
+      "collections.OrderedDict()",
+      "collections.Counter()",
+      "collections.defaultdict(int)"
+    ],
+    correct: 2,
+    explanation: "collections.Counter() is purpose-built for counting hashable objects. It is a dict subclass, so it supports all dict operations, plus extras like most_common(). defaultdict(int) also works but requires a manual loop; Counter accepts any iterable directly."
+  },
+
+  // 5 — Balanced brackets
+  {
+    type: "multiple-choice",
+    badge: "Algorithms",
+    text: "To check whether a string of brackets is balanced (e.g., '({[]})'), the ideal data structure is:",
+    options: [
+      "A queue (FIFO)",
+      "A stack (LIFO)",
+      "A sorted list",
+      "A binary search tree"
+    ],
+    correct: 1,
+    explanation: "A stack (LIFO) naturally mirrors bracket nesting: push every opening bracket, and for each closing bracket verify it matches the top of the stack and pop it. If the stack is empty at the end the string is balanced. This is O(n) time and O(n) space."
+  },
+
+  // 6 — BFS with deque
+  {
+    type: "multiple-choice",
+    badge: "Algorithms",
+    text: "Why is collections.deque preferred over a plain list when implementing BFS?",
+    options: [
+      "deque uses less memory than a list",
+      "deque.popleft() is O(1) whereas list.pop(0) is O(n)",
+      "deque is thread-safe by default",
+      "deque supports slicing which list does not"
+    ],
+    correct: 1,
+    explanation: "list.pop(0) must shift all remaining elements left, making it O(n). collections.deque is a doubly-linked structure; both appendleft/append and popleft/pop are O(1). For BFS processing thousands of nodes this difference is critical."
+  },
+
+  // 7 — lru_cache
+  {
+    type: "multiple-choice",
+    badge: "Python",
+    text: "Which decorator adds memoization to a recursive function without extra code?",
+    options: [
+      "@staticmethod",
+      "@property",
+      "@functools.lru_cache",
+      "@classmethod"
+    ],
+    correct: 2,
+    explanation: "@functools.lru_cache (or @functools.cache in Python 3.9+) transparently caches call results keyed by the arguments. This turns an exponential recursive Fibonacci into O(n). Arguments must be hashable; the cache is stored on the function object."
+  },
+
+  // 8 — CAP theorem
+  {
+    type: "multiple-choice",
+    badge: "System Design",
+    text: "The CAP theorem states that a distributed system can guarantee at most two of three properties. Which trio is correct?",
+    options: [
+      "Concurrency, Atomicity, Partition tolerance",
+      "Consistency, Availability, Partition tolerance",
+      "Caching, Atomicity, Performance",
+      "Clustering, Availability, Persistence"
+    ],
+    correct: 1,
+    explanation: "CAP stands for Consistency (every read gets the most recent write), Availability (every request gets a non-error response), and Partition tolerance (the system continues despite network partitions). In practice, partitions happen, so the real choice is between CP (e.g., HBase) and AP (e.g., Cassandra)."
+  },
+
+  // 9 — Horizontal scaling
+  {
+    type: "true-false",
+    badge: "System Design",
+    text: "Horizontal scaling (scaling out) means adding more CPU cores or RAM to an existing machine.",
+    options: ["True", "False"],
+    correct: 1,
+    explanation: "False. Horizontal scaling means adding more machines (nodes) to a pool. Vertical scaling means upgrading a single machine's CPU, RAM, or storage. Horizontal scaling is generally preferred for web services because there is no single point of failure and cost increases linearly."
+  },
+
+  // 10 — GIL
+  {
+    type: "multiple-choice",
+    badge: "Python Internals",
+    text: "In CPython, the Global Interpreter Lock (GIL) has the largest negative impact on:",
+    options: [
+      "I/O-bound tasks using threading",
+      "CPU-bound tasks using threading",
+      "Asyncio event loops",
+      "Subprocess calls"
+    ],
+    correct: 1,
+    explanation: "The GIL prevents multiple threads from executing Python bytecodes simultaneously. For I/O-bound tasks, threads release the GIL while waiting on I/O so they do benefit. For CPU-bound tasks (number crunching), threads cannot truly run in parallel — use multiprocessing, C extensions, or Python 3.13+ free-threaded mode to bypass it."
+  },
+
+  // 11 — Generator memory
+  {
+    type: "multiple-choice",
+    badge: "Python",
+    text: "What is the primary memory advantage of a generator expression over a list comprehension producing the same values?",
+    options: [
+      "Generators cache results, so they use less CPU",
+      "Generators yield values lazily, holding only one value in memory at a time",
+      "Generators are stored in a hash map internally",
+      "Generators bypass the GIL"
+    ],
+    correct: 1,
+    explanation: "A list comprehension evaluates every element immediately and stores the full list in memory — O(n) space. A generator expression is lazy: it produces one value at a time when iterated, using O(1) space. This is critical when processing large files or infinite sequences."
+  },
+
+  // 12 — is vs == (code output)
+  {
+    type: "multiple-choice",
+    badge: "Python Gotcha",
+    text: "What does the following code print?",
+    code: `a = 256\nb = 256\nc = 257\nd = 257\nprint(a is b, c is d)`,
+    options: [
+      "True True",
+      "False False",
+      "True False",
+      "False True"
+    ],
+    correct: 2,
+    explanation: "CPython caches small integers (typically -5 to 256) as singletons, so 'a is b' is True. Integers outside this range (like 257) may be allocated separately, so 'c is d' is often False. 'is' tests identity (same object in memory), not equality. Always use '==' to compare values."
+  },
+
+  // 13 — Mutable default argument (code output)
+  {
+    type: "multiple-choice",
+    badge: "Python Gotcha",
+    text: "What is the output of this code?",
+    code: `def append_item(item, lst=[]):\n    lst.append(item)\n    return lst\n\nprint(append_item(1))\nprint(append_item(2))`,
+    options: [
+      "[1]\n[2]",
+      "[1]\n[1, 2]",
+      "[1, 2]\n[1, 2]",
+      "Error: mutable default not allowed"
+    ],
+    correct: 1,
+    explanation: "Default argument values are evaluated ONCE when the function is defined, not on each call. The list [] is created once and persists across calls. After the first call it contains [1]; after the second it contains [1, 2]. The fix: use 'lst=None' and set 'if lst is None: lst = []' inside the body."
+  },
+
+  // 14 — Late binding closure (code output)
+  {
+    type: "multiple-choice",
+    badge: "Python Gotcha",
+    text: "What does this code print?",
+    code: `fns = [lambda: i for i in range(3)]\nprint([f() for f in fns])`,
+    options: [
+      "[0, 1, 2]",
+      "[2, 2, 2]",
+      "[0, 0, 0]",
+      "Error"
+    ],
+    correct: 1,
+    explanation: "Python closures capture variables by reference, not by value — this is 'late binding'. All three lambdas reference the same variable 'i'. By the time the lambdas are called, the for-loop has completed and 'i' equals 2. Fix: use a default argument 'lambda i=i: i' to capture the current value at definition time."
+  },
+
+  // 15 — sorted() vs .sort()
+  {
+    type: "fill-blank",
+    badge: "Python",
+    text: "sorted() returns a ________ sorted list leaving the original unchanged, while list.sort() sorts ________ and returns None.",
+    correct: "new",
+    explanation: "sorted(iterable) is a built-in that returns a new list from any iterable without modifying the original. list.sort() is an in-place method that mutates the existing list and returns None. sorted() also accepts any iterable (tuples, generators), while .sort() is only available on lists."
+  }
+];
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════ */
+let current = 0;
+let score = 0;
+let answered = new Array(QUESTIONS.length).fill(null); // null = unanswered, {correct, chosen, text}
+let startTime = Date.now();
+let fillSubmitted = new Array(QUESTIONS.length).fill(false);
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════════════════════ */
+function render() {
+  const q = QUESTIONS[current];
+  const state = answered[current];
+  const total = QUESTIONS.length;
+
+  // Progress
+  document.getElementById('progress-label').textContent = `Question ${current + 1} of ${total}`;
+  document.getElementById('progress-fill').style.width = `${((current + 1) / total) * 100}%`;
+  document.getElementById('progress-score').textContent = `Score: ${score}`;
+
+  // Badge
+  document.getElementById('q-badge').textContent = q.badge;
+
+  // Question text
+  document.getElementById('q-text').textContent = q.text;
+
+  // Code snippet
+  const codeEl = document.getElementById('q-code');
+  if (q.code) {
+    codeEl.textContent = q.code;
+    codeEl.classList.remove('hidden');
+  } else {
+    codeEl.classList.add('hidden');
+  }
+
+  // Options / fill
+  const optionsEl = document.getElementById('q-options');
+  optionsEl.innerHTML = '';
+
+  if (q.type === 'fill-blank') {
+    renderFill(q, state, optionsEl);
+  } else {
+    renderOptions(q, state, optionsEl);
+  }
+
+  // Feedback
+  renderFeedback(q, state);
+
+  // Card flash
+  const card = document.getElementById('question-card');
+  card.classList.remove('flash-correct', 'flash-wrong');
+  if (state) {
+    card.classList.add(state.correct ? 'flash-correct' : 'flash-wrong');
+  }
+
+  // Nav buttons
+  document.getElementById('btn-prev').disabled = current === 0;
+  const nextBtn = document.getElementById('btn-next');
+  if (current === total - 1) {
+    nextBtn.textContent = 'Finish';
+    nextBtn.onclick = () => { if (allAnswered()) finishQuiz(); else navigate(1); };
+  } else {
+    nextBtn.textContent = 'Next →';
+    nextBtn.onclick = () => navigate(1);
+  }
+}
+
+function renderOptions(q, state, container) {
+  const KEYS = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.setAttribute('role', 'radio');
+    btn.setAttribute('aria-checked', 'false');
+    btn.dataset.index = i;
+
+    const keySpan = document.createElement('span');
+    keySpan.className = 'option-key';
+    keySpan.textContent = KEYS[i] || i;
+
+    const textSpan = document.createElement('span');
+    textSpan.textContent = opt;
+
+    btn.appendChild(keySpan);
+    btn.appendChild(textSpan);
+
+    if (state !== null) {
+      btn.disabled = true;
+      if (i === q.correct) btn.classList.add('correct');
+      if (i === state.chosen && !state.correct) btn.classList.add('wrong');
+    } else {
+      btn.addEventListener('click', () => selectOption(i));
+    }
+
+    container.appendChild(btn);
+  });
+}
+
+function renderFill(q, state, container) {
+  const wrap = document.createElement('div');
+  wrap.className = 'fill-wrap';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'fill-input';
+  input.placeholder = 'Type your answer…';
+  input.setAttribute('aria-label', 'Fill in the blank');
+
+  const subBtn = document.createElement('button');
+  subBtn.className = 'submit-btn';
+  subBtn.textContent = 'Submit';
+
+  if (state !== null) {
+    input.value = state.chosenText || '';
+    input.disabled = true;
+    subBtn.disabled = true;
+    input.classList.add(state.correct ? 'correct' : 'wrong');
+  } else {
+    const doSubmit = () => {
+      const val = input.value.trim();
+      if (!val) return;
+      submitFill(val, input, subBtn);
+    };
+    subBtn.addEventListener('click', doSubmit);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') doSubmit(); });
+  }
+
+  wrap.appendChild(input);
+  wrap.appendChild(subBtn);
+  container.appendChild(wrap);
+
+  if (state === null) setTimeout(() => input.focus(), 50);
+}
+
+function renderFeedback(q, state) {
+  const fb = document.getElementById('q-feedback');
+  fb.className = 'feedback';
+  if (!state) { fb.style.display = 'none'; return; }
+
+  fb.style.display = '';
+  fb.classList.add('show');
+
+  if (state.correct) {
+    fb.classList.add('correct-fb');
+    fb.innerHTML = `<strong style="color:var(--correct)">✓ Correct!</strong><div class="explanation">${escHtml(q.explanation)}</div>`;
+  } else {
+    fb.classList.add('wrong-fb');
+    let correctText = '';
+    if (q.type === 'fill-blank') {
+      correctText = q.correct;
+    } else {
+      correctText = q.options[q.correct];
+    }
+    fb.innerHTML = `<strong style="color:var(--wrong)">✗ Incorrect.</strong><div>Correct answer: <span class="correct-answer">${escHtml(correctText)}</span></div><div class="explanation">${escHtml(q.explanation)}</div>`;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INTERACTIONS
+═══════════════════════════════════════════════════════════ */
+function selectOption(idx) {
+  if (answered[current] !== null) return;
+  const q = QUESTIONS[current];
+  const isCorrect = idx === q.correct;
+  if (isCorrect) score++;
+  answered[current] = { correct: isCorrect, chosen: idx };
+  render();
+}
+
+function submitFill(val, inputEl, btnEl) {
+  if (answered[current] !== null) return;
+  const q = QUESTIONS[current];
+  const isCorrect = val.toLowerCase() === q.correct.toLowerCase();
+  if (isCorrect) score++;
+  answered[current] = { correct: isCorrect, chosen: null, chosenText: val };
+  inputEl.disabled = true;
+  btnEl.disabled = true;
+  render();
+}
+
+function navigate(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= QUESTIONS.length) return;
+  current = next;
+  render();
+}
+
+function allAnswered() {
+  return answered.every(a => a !== null);
+}
+
+function finishQuiz() {
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  const pct = Math.round((score / QUESTIONS.length) * 100);
+
+  let grade, gradeColor;
+  if (pct >= 95)      { grade = 'Expert!';        gradeColor = '#27ae60'; }
+  else if (pct >= 80) { grade = 'Good Job!';       gradeColor = '#2ecc71'; }
+  else if (pct >= 60) { grade = 'Getting There';   gradeColor = '#f39c12'; }
+  else                { grade = 'Needs Work';       gradeColor = '#e74c3c'; }
+
+  document.getElementById('quiz-screen').style.display = 'none';
+  const rs = document.getElementById('results-screen');
+  rs.style.display = 'block';
+
+  document.getElementById('res-pct').textContent = pct + '%';
+  const gradeEl = document.getElementById('res-grade');
+  gradeEl.textContent = grade;
+  gradeEl.style.color = gradeColor;
+
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+  document.getElementById('res-meta').textContent =
+    `${score} / ${QUESTIONS.length} correct · Time: ${timeStr}`;
+
+  const wrongCount = answered.filter(a => a && !a.correct).length;
+  const revBtn = document.getElementById('btn-review');
+  if (wrongCount === 0) {
+    revBtn.disabled = true;
+    revBtn.textContent = 'No Wrong Answers!';
+  } else {
+    revBtn.disabled = false;
+    revBtn.textContent = `Review ${wrongCount} Wrong Answer${wrongCount > 1 ? 's' : ''}`;
+  }
+}
+
+function retryQuiz() {
+  current = 0;
+  score = 0;
+  answered = new Array(QUESTIONS.length).fill(null);
+  fillSubmitted = new Array(QUESTIONS.length).fill(false);
+  startTime = Date.now();
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('review-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  render();
+}
+
+function showReview() {
+  document.getElementById('results-screen').style.display = 'none';
+  const reviewEl = document.getElementById('review-screen');
+  reviewEl.style.display = 'block';
+
+  const listEl = document.getElementById('review-list');
+  listEl.innerHTML = '';
+
+  const KEYS = ['A', 'B', 'C', 'D'];
+
+  QUESTIONS.forEach((q, i) => {
+    const state = answered[i];
+    if (!state || state.correct) return;
+
+    const item = document.createElement('div');
+    item.className = 'review-item';
+
+    // Question number + text
+    const qNum = document.createElement('div');
+    qNum.style.cssText = 'font-size:0.78rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em;';
+    qNum.textContent = `Q${i + 1} · ${q.badge}`;
+    item.appendChild(qNum);
+
+    const qText = document.createElement('div');
+    qText.className = 'question-text';
+    qText.textContent = q.text;
+    item.appendChild(qText);
+
+    if (q.code) {
+      const pre = document.createElement('pre');
+      pre.className = 'code-snippet';
+      pre.textContent = q.code;
+      item.appendChild(pre);
+    }
+
+    // Your answer
+    const yourDiv = document.createElement('div');
+    yourDiv.className = 'review-answer';
+    let yourText = '';
+    if (q.type === 'fill-blank') {
+      yourText = state.chosenText || '(no answer)';
+    } else {
+      yourText = state.chosen !== null ? `${KEYS[state.chosen]}: ${q.options[state.chosen]}` : '(no answer)';
+    }
+    yourDiv.innerHTML = `Your answer: <span class="your-ans">${escHtml(yourText)}</span>`;
+    item.appendChild(yourDiv);
+
+    // Correct answer
+    const corrDiv = document.createElement('div');
+    corrDiv.className = 'review-answer';
+    let corrText = '';
+    if (q.type === 'fill-blank') {
+      corrText = q.correct;
+    } else {
+      corrText = `${KEYS[q.correct]}: ${q.options[q.correct]}`;
+    }
+    corrDiv.innerHTML = `Correct answer: <span class="right-ans">${escHtml(corrText)}</span>`;
+    item.appendChild(corrDiv);
+
+    // Explanation
+    const expDiv = document.createElement('div');
+    expDiv.className = 'review-explanation';
+    expDiv.textContent = q.explanation;
+    item.appendChild(expDiv);
+
+    listEl.appendChild(item);
+  });
+}
+
+function backToResults() {
+  document.getElementById('review-screen').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'block';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   KEYBOARD
+═══════════════════════════════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  // Only active during quiz
+  if (document.getElementById('quiz-screen').style.display === 'none') return;
+
+  const q = QUESTIONS[current];
+  if (q.type === 'fill-blank') return; // let native input handle keys
+
+  const state = answered[current];
+
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (current < QUESTIONS.length - 1) navigate(1);
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (current > 0) navigate(-1);
+  } else if (!state) {
+    // A-D or 1-4 to select option
+    const keyMap = { 'a': 0, 'b': 1, 'c': 2, 'd': 3, '1': 0, '2': 1, '3': 2, '4': 3 };
+    const idx = keyMap[e.key.toLowerCase()];
+    if (idx !== undefined && idx < q.options.length) {
+      selectOption(idx);
+    }
+    // Enter/Space to confirm highlighted option
+    if ((e.key === 'Enter' || e.key === ' ') && document.activeElement.classList.contains('option-btn')) {
+      e.preventDefault();
+      const idx2 = parseInt(document.activeElement.dataset.index, 10);
+      if (!isNaN(idx2)) selectOption(idx2);
+    }
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════════════ */
+function escHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════ */
+render();
+</script>
+</body>
+</html>

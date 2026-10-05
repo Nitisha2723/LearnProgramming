@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python Database Programming Quiz</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #1a1a2e;
+      --panel: #16213e;
+      --accent: #e94560;
+      --accent-hover: #c73652;
+      --correct: #2ecc71;
+      --wrong: #e74c3c;
+      --text: #e0e0e0;
+      --muted: #8892a4;
+      --border: #2a3a5c;
+      --code-bg: #0d1b2a;
+      --option-hover: #1e3560;
+      --option-selected: #1e3560;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      padding: 12px 20px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .top-bar a { font-size: 0.9rem; color: var(--muted); }
+    .top-bar a:hover { color: var(--text); text-decoration: none; }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .subtitle { color: var(--muted); font-size: 0.92rem; margin-bottom: 24px; }
+
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .progress-label { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+    .progress-bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+    .progress-score { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 28px 22px;
+      position: relative;
+      transition: border-color 0.3s;
+    }
+    .card.flash-correct { border-color: var(--correct); }
+    .card.flash-wrong   { border-color: var(--wrong); }
+
+    .question-type-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--accent);
+      background: rgba(233,69,96,0.12);
+      border: 1px solid rgba(233,69,96,0.3);
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin-bottom: 14px;
+    }
+
+    .question-text {
+      font-size: 1.05rem;
+      font-weight: 500;
+      margin-bottom: 18px;
+      line-height: 1.55;
+    }
+
+    pre.code-snippet {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.87rem;
+      line-height: 1.6;
+      color: #c9d1d9;
+      margin-bottom: 18px;
+      tab-size: 4;
+    }
+
+    .options { display: flex; flex-direction: column; gap: 10px; }
+
+    .option-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text);
+      font-size: 0.97rem;
+      transition: background 0.15s, border-color 0.15s;
+      width: 100%;
+    }
+    .option-btn:hover:not(:disabled) { background: var(--option-hover); border-color: var(--accent); }
+    .option-btn.selected { background: var(--option-selected); border-color: #5577cc; }
+    .option-btn.correct  { background: rgba(46,204,113,0.15); border-color: var(--correct); }
+    .option-btn.wrong    { background: rgba(231,76,60,0.15);  border-color: var(--wrong); }
+    .option-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .option-btn:disabled { cursor: default; }
+
+    .option-key {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 28px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .option-btn.selected .option-key { background: #2a3a70; border-color: #5577cc; color: var(--text); }
+    .option-btn.correct  .option-key { background: rgba(46,204,113,0.3); border-color: var(--correct); color: var(--correct); }
+    .option-btn.wrong    .option-key { background: rgba(231,76,60,0.3);  border-color: var(--wrong); color: var(--wrong); }
+
+    .feedback {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 0.93rem;
+      display: none;
+      line-height: 1.55;
+    }
+    .feedback.show { display: block; }
+    .feedback.correct-fb { background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.35); }
+    .feedback.wrong-fb   { background: rgba(231,76,60,0.10);  border: 1px solid rgba(231,76,60,0.3); }
+    .feedback strong { display: block; margin-bottom: 6px; font-size: 0.96rem; }
+    .feedback .correct-answer { color: var(--correct); font-weight: 600; }
+    .feedback .explanation { color: var(--muted); margin-top: 8px; }
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+      gap: 10px;
+    }
+    .nav-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 0.93rem;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) { background: var(--option-hover); border-color: var(--accent); }
+    .nav-btn:disabled { opacity: 0.35; cursor: default; }
+    .nav-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+    .nav-btn.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+    #results-screen { display: none; }
+    .results-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 36px 28px;
+      text-align: center;
+    }
+    .score-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 5px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .score-pct { font-size: 2.2rem; font-weight: 800; color: var(--accent); line-height: 1; }
+    .score-lbl { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+    .grade-text { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+    .results-meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 28px; }
+    .results-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .results-actions .nav-btn { padding: 12px 28px; font-size: 0.95rem; }
+
+    #review-screen { display: none; }
+    .review-item {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 22px;
+      margin-bottom: 16px;
+    }
+    .review-item.review-correct { border-left: 4px solid var(--correct); }
+    .review-item.review-wrong   { border-left: 4px solid var(--wrong); }
+    .review-q { font-size: 0.97rem; font-weight: 500; margin-bottom: 10px; }
+    .review-meta { font-size: 0.88rem; color: var(--muted); margin-top: 8px; }
+    .review-meta span { font-weight: 600; }
+    .review-meta .ca { color: var(--correct); }
+    .review-meta .wa { color: var(--wrong); }
+    .review-expl { font-size: 0.88rem; color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+
+    .kbd-hint { font-size: 0.8rem; color: var(--muted); text-align: center; margin-top: 12px; }
+    kbd {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.78rem;
+      font-family: monospace;
+    }
+
+    @media (max-width: 520px) {
+      .card { padding: 20px 16px 16px; }
+      h1 { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="README.md">&#8592; Back to Index</a>
+</div>
+
+<div class="container">
+  <h1>Python Database Programming</h1>
+  <p class="subtitle">sqlite3 &amp; SQLAlchemy &mdash; 15 questions</p>
+
+  <!-- Quiz screen -->
+  <div id="quiz-screen">
+    <div class="progress-wrap">
+      <span class="progress-label" id="progress-label">Question 1 / 15</span>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <span class="progress-score" id="progress-score">Score: 0</span>
+    </div>
+
+    <div class="card" id="question-card">
+      <div class="question-type-badge" id="q-badge">Concept</div>
+      <p class="question-text" id="q-text"></p>
+      <pre class="code-snippet" id="q-code" style="display:none"></pre>
+      <div class="options" id="q-options"></div>
+      <div class="feedback" id="q-feedback">
+        <strong id="fb-verdict"></strong>
+        <div id="fb-correct-answer" class="correct-answer"></div>
+        <div id="fb-explanation" class="explanation"></div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button class="nav-btn" id="btn-prev" disabled>&#8592; Prev</button>
+      <span></span>
+      <button class="nav-btn primary" id="btn-next" disabled>Next &#8594;</button>
+    </div>
+    <p class="kbd-hint"><kbd>A</kbd>&ndash;<kbd>D</kbd> select &nbsp;|&nbsp; <kbd>Enter</kbd> next &nbsp;|&nbsp; <kbd>&#8592;</kbd><kbd>&#8594;</kbd> navigate</p>
+  </div>
+
+  <!-- Results screen -->
+  <div id="results-screen">
+    <div class="results-card">
+      <div class="score-circle">
+        <div class="score-pct" id="res-pct">0%</div>
+        <div class="score-lbl">Score</div>
+      </div>
+      <div class="grade-text" id="res-grade"></div>
+      <div class="results-meta" id="res-meta"></div>
+      <div class="results-actions">
+        <button class="nav-btn" id="btn-review">Review Wrong Answers</button>
+        <button class="nav-btn primary" id="btn-restart">Restart Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review screen -->
+  <div id="review-screen">
+    <h2 style="margin-bottom:20px;color:var(--accent)">Review Wrong Answers</h2>
+    <div id="review-list"></div>
+    <button class="nav-btn primary" id="btn-back-results" style="margin-top:8px">&#8592; Back to Results</button>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    type: "Concept",
+    text: "What does `sqlite3.connect(':memory:')` do?",
+    options: [
+      "Creates a database file named ':memory:' on disk",
+      "Opens an in-memory database that disappears when the connection closes",
+      "Loads an existing database from RAM",
+      "Raises an error because ':memory:' is not a valid path"
+    ],
+    correct: 1,
+    explanation: "The special string ':memory:' tells sqlite3 to create a temporary database entirely in RAM. It is fast and useful for testing, but all data is lost when the connection is closed."
+  },
+  {
+    type: "Concept",
+    text: "After setting `conn.row_factory = sqlite3.Row`, how do you access the 'email' column from a fetched row?",
+    options: [
+      "row.get('email')",
+      "row['email']",
+      "row.email()",
+      "row.column('email')"
+    ],
+    correct: 1,
+    explanation: "Setting conn.row_factory = sqlite3.Row wraps each row in a sqlite3.Row object that supports column access by name using square-bracket syntax: row['email']. You can also use row[0] for index access."
+  },
+  {
+    type: "Concept",
+    text: "Which placeholder syntax does sqlite3 use for parameterized queries, and why should you always use it?",
+    options: [
+      "% (percent sign) — it formats the string before sending it",
+      "? (question mark) — the driver handles escaping, preventing SQL injection",
+      "{} (curly braces) — Python's built-in f-string format",
+      "$ (dollar sign) — ANSI SQL standard placeholder"
+    ],
+    correct: 1,
+    explanation: "sqlite3 uses ? placeholders. The driver passes values to the database engine separately from the SQL text, so user input is never interpreted as SQL. This is the primary defense against SQL injection."
+  },
+  {
+    type: "Concept",
+    text: "What is the difference between `cursor.fetchone()` and `cursor.fetchall()`?",
+    options: [
+      "fetchone() returns a list of one row; fetchall() returns a generator",
+      "fetchone() returns the first remaining row (or None); fetchall() returns all remaining rows as a list",
+      "fetchone() advances the cursor; fetchall() resets it to the beginning",
+      "There is no difference — they are aliases"
+    ],
+    correct: 1,
+    explanation: "fetchone() retrieves the next single row from the result set (or None if exhausted). fetchall() retrieves every remaining row as a list of rows. For large result sets, fetchmany(n) or iterating the cursor directly is more memory-efficient."
+  },
+  {
+    type: "Concept",
+    text: "When do you need to call `conn.commit()` in sqlite3?",
+    options: [
+      "After every SELECT statement",
+      "Only when closing the connection",
+      "After INSERT, UPDATE, or DELETE to persist changes; SELECT does not need it",
+      "sqlite3 auto-commits every statement, so commit() is never needed"
+    ],
+    correct: 2,
+    explanation: "sqlite3 operates in transaction mode by default. After DML statements (INSERT/UPDATE/DELETE) you must call conn.commit() to write changes to disk. If you call conn.rollback() or close without committing, changes are discarded."
+  },
+  {
+    type: "Code Reading",
+    text: "What is printed when this code runs?",
+    code: `with sqlite3.connect(":memory:") as conn:
+    conn.execute("CREATE TABLE t (id INTEGER, name TEXT)")
+    conn.execute("INSERT INTO t VALUES (?, ?)", (1, "Alice"))
+    row = conn.execute("SELECT name FROM t WHERE id=?", (1,)).fetchone()
+    print(row[0])`,
+    options: [
+      "Alice",
+      "(1, 'Alice')",
+      "None",
+      "A sqlite3.Row object"
+    ],
+    correct: 0,
+    explanation: "The SELECT returns one row with one column ('name'). fetchone() returns that row as a tuple, so row[0] is the string 'Alice'. No row_factory is set, so rows are plain tuples."
+  },
+  {
+    type: "Concept",
+    text: "What does the context manager `with sqlite3.connect('db.sqlite') as conn:` do on exit?",
+    options: [
+      "Automatically calls conn.close()",
+      "Calls conn.commit() on success or conn.rollback() on exception, but does NOT close the connection",
+      "Both commits and closes the connection",
+      "Nothing — it is purely for syntax cleanliness"
+    ],
+    correct: 1,
+    explanation: "The sqlite3 connection context manager commits on a clean exit and rolls back if an exception is raised. It does NOT close the connection; you must call conn.close() separately if needed."
+  },
+  {
+    type: "Concept",
+    text: "Which SQLAlchemy `create_engine()` connection string would connect to a local SQLite file named `app.db`?",
+    options: [
+      "sqlite://app.db",
+      "sqlite:///app.db",
+      "sqlite://localhost/app.db",
+      "sqlite+pysqlite:app.db"
+    ],
+    correct: 1,
+    explanation: "SQLAlchemy uses the URL format dialect+driver://user:pass@host/dbname. For SQLite, the path follows three slashes. sqlite:///app.db means a relative path; sqlite:////abs/path/app.db (four slashes) is absolute."
+  },
+  {
+    type: "Concept",
+    text: "In modern SQLAlchemy (2.x), how do you define an ORM model class?",
+    options: [
+      "Inherit from `db.Model` (Flask-SQLAlchemy style only)",
+      "Inherit from `Base` created by `declarative_base()` or `DeclarativeBase`",
+      "Decorate the class with `@sqlalchemy.model`",
+      "Inherit from `sqlalchemy.Table`"
+    ],
+    correct: 1,
+    explanation: "In SQLAlchemy 2.x you create a Base class by subclassing DeclarativeBase (or calling declarative_base() in older style) and then inherit from it. The ORM reads __tablename__ and mapped_column() definitions to map the class to a table."
+  },
+  {
+    type: "Code Reading",
+    text: "What does this SQLAlchemy model definition declare?",
+    code: `from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import String
+
+class Base(DeclarativeBase):
+    pass
+
+class User(Base):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))`,
+    options: [
+      "A Python dataclass with no database connection",
+      "An ORM model mapping the 'users' table with an integer primary key and a string name column",
+      "A Pydantic schema for validating user input",
+      "A migration script that creates the 'users' table immediately"
+    ],
+    correct: 1,
+    explanation: "This is a SQLAlchemy 2.x declarative ORM model. Mapped[int] and Mapped[str] are type annotations; mapped_column() provides column configuration. The class maps to the 'users' table with id as the primary key."
+  },
+  {
+    type: "Concept",
+    text: "In SQLAlchemy, what does `relationship()` do?",
+    options: [
+      "Creates a foreign key constraint in the database",
+      "Defines a Python-level link between two ORM classes so you can navigate from one to the other",
+      "Executes a JOIN query automatically on every access",
+      "Validates that referenced rows exist before inserting"
+    ],
+    correct: 1,
+    explanation: "relationship() defines a Python attribute on one model that transparently loads related objects from another model. The actual foreign key constraint is separate (via ForeignKey). SQLAlchemy handles the JOIN logic behind the scenes when you access the attribute."
+  },
+  {
+    type: "Concept",
+    text: "Which sequence of Session calls correctly adds a new User and persists it?",
+    options: [
+      "session.get(user) → session.commit()",
+      "session.add(user) → session.commit()",
+      "session.insert(user) → session.flush()",
+      "session.save(user) → session.write()"
+    ],
+    correct: 1,
+    explanation: "session.add(obj) stages the object for insertion (equivalent to marking it 'pending'). session.commit() flushes the pending changes to the database and commits the transaction. session.flush() sends SQL but does not commit the transaction."
+  },
+  {
+    type: "Code Reading",
+    text: "What does this SQLAlchemy query return?",
+    code: `result = session.query(User).filter(User.name == "Alice").first()`,
+    options: [
+      "A list of all User objects named 'Alice'",
+      "The first User object whose name is 'Alice', or None if not found",
+      "A SQL string that can be executed later",
+      "A boolean indicating whether 'Alice' exists"
+    ],
+    correct: 1,
+    explanation: "session.query(User).filter(...) builds a SELECT query. .first() adds LIMIT 1 and returns the first mapped object, or None if no row matches. Use .all() to get every matching row as a list."
+  },
+  {
+    type: "Concept",
+    text: "What is the N+1 query problem in SQLAlchemy, and which option fixes it?",
+    options: [
+      "Using N sessions for N models — fixed by using a single session",
+      "Loading a list of N objects, then accessing a relationship on each causing N extra queries — fixed by eager loading with selectinload()",
+      "Calling commit() N+1 times — fixed by batching with bulk_insert_mappings()",
+      "Defining N relationships in one model — fixed by limiting to 1"
+    ],
+    correct: 1,
+    explanation: "N+1 happens when you load N rows and then access a lazy-loaded relationship on each row, causing N additional queries. Adding .options(selectinload(User.posts)) to the query fetches related rows in one extra SELECT, eliminating the N extra queries."
+  },
+  {
+    type: "Concept",
+    text: "When should you prefer plain `sqlite3` over SQLAlchemy?",
+    options: [
+      "Always — sqlite3 is faster in all cases",
+      "For simple, self-contained scripts or tools where you control all SQL and don't need an ORM abstraction",
+      "When you need multiple database backends (PostgreSQL, MySQL, etc.)",
+      "When building large applications that will be maintained by a team"
+    ],
+    correct: 1,
+    explanation: "sqlite3 is part of the standard library, has zero dependencies, and is ideal for simple scripts, data migration tools, or embedded use. SQLAlchemy is better for larger applications needing ORM abstractions, multiple backend support, connection pooling, and maintainability at scale."
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = new Array(QUESTIONS.length).fill(null); // null | {chosen, correct}
+
+function getGrade(pct) {
+  if (pct >= 93) return { label: "Excellent! ★★★", color: "#2ecc71" };
+  if (pct >= 80) return { label: "Good job! ★★☆", color: "#27ae60" };
+  if (pct >= 60) return { label: "Keep practicing ★☆☆", color: "#f39c12" };
+  return { label: "Review the material", color: "#e74c3c" };
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[current];
+  const total = QUESTIONS.length;
+
+  document.getElementById('progress-label').textContent = `Question ${current + 1} / ${total}`;
+  document.getElementById('progress-fill').style.width = `${((current + 1) / total) * 100}%`;
+  document.getElementById('progress-score').textContent = `Score: ${score}`;
+
+  document.getElementById('q-badge').textContent = q.type;
+  document.getElementById('q-text').textContent = q.text;
+
+  const codeEl = document.getElementById('q-code');
+  if (q.code) {
+    codeEl.textContent = q.code;
+    codeEl.style.display = 'block';
+  } else {
+    codeEl.style.display = 'none';
+  }
+
+  const optionsEl = document.getElementById('q-options');
+  optionsEl.innerHTML = '';
+  const keys = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.setAttribute('data-index', i);
+    btn.innerHTML = `<span class="option-key">${keys[i]}</span><span>${opt}</span>`;
+    btn.addEventListener('click', () => selectOption(i));
+    optionsEl.appendChild(btn);
+  });
+
+  const fb = document.getElementById('q-feedback');
+  fb.className = 'feedback';
+  document.getElementById('fb-verdict').textContent = '';
+  document.getElementById('fb-correct-answer').textContent = '';
+  document.getElementById('fb-explanation').textContent = '';
+
+  const card = document.getElementById('question-card');
+  card.className = 'card';
+
+  // Restore state if already answered
+  const state = answered[current];
+  if (state !== null) {
+    applyAnswerState(state.chosen, state.wasCorrect, false);
+    document.getElementById('btn-next').disabled = false;
+  } else {
+    document.getElementById('btn-next').disabled = true;
+  }
+
+  document.getElementById('btn-prev').disabled = current === 0;
+  if (current === total - 1 && answered[current] !== null) {
+    document.getElementById('btn-next').textContent = 'See Results';
+    document.getElementById('btn-next').disabled = false;
+  } else {
+    document.getElementById('btn-next').textContent = 'Next →';
+  }
+}
+
+function applyAnswerState(chosen, wasCorrect, animate) {
+  const q = QUESTIONS[current];
+  const btns = document.querySelectorAll('.option-btn');
+
+  btns.forEach(b => b.disabled = true);
+  btns[q.correct].classList.add('correct');
+  if (!wasCorrect) btns[chosen].classList.add('wrong');
+
+  const fb = document.getElementById('q-feedback');
+  const verdict = document.getElementById('fb-verdict');
+  const ca = document.getElementById('fb-correct-answer');
+  const expl = document.getElementById('fb-explanation');
+
+  if (wasCorrect) {
+    fb.className = 'feedback correct-fb show';
+    verdict.textContent = '✓ Correct!';
+  } else {
+    fb.className = 'feedback wrong-fb show';
+    verdict.textContent = '✗ Incorrect';
+    ca.textContent = `Correct answer: ${['A','B','C','D'][q.correct]}. ${q.options[q.correct]}`;
+  }
+  expl.textContent = q.explanation;
+
+  if (animate) {
+    const card = document.getElementById('question-card');
+    card.classList.add(wasCorrect ? 'flash-correct' : 'flash-wrong');
+    setTimeout(() => card.className = 'card', 800);
+  }
+
+  document.getElementById('btn-next').disabled = false;
+  if (current === QUESTIONS.length - 1) {
+    document.getElementById('btn-next').textContent = 'See Results';
+  }
+}
+
+function selectOption(i) {
+  if (answered[current] !== null) return;
+  const q = QUESTIONS[current];
+  const wasCorrect = (i === q.correct);
+  if (wasCorrect) score++;
+  answered[current] = { chosen: i, wasCorrect };
+  applyAnswerState(i, wasCorrect, true);
+  document.getElementById('progress-score').textContent = `Score: ${score}`;
+}
+
+function showResults() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'block';
+
+  const pct = Math.round((score / QUESTIONS.length) * 100);
+  const grade = getGrade(pct);
+
+  document.getElementById('res-pct').textContent = `${pct}%`;
+  const gradeEl = document.getElementById('res-grade');
+  gradeEl.textContent = grade.label;
+  gradeEl.style.color = grade.color;
+  document.getElementById('res-meta').textContent =
+    `You answered ${score} out of ${QUESTIONS.length} questions correctly.`;
+
+  const wrongCount = answered.filter(a => a && !a.wasCorrect).length;
+  document.getElementById('btn-review').style.display = wrongCount > 0 ? 'inline-block' : 'none';
+}
+
+function showReview() {
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('review-screen').style.display = 'block';
+
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+
+  QUESTIONS.forEach((q, i) => {
+    const state = answered[i];
+    if (!state || state.wasCorrect) return;
+
+    const div = document.createElement('div');
+    div.className = 'review-item review-wrong';
+    const codeHTML = q.code
+      ? `<pre class="code-snippet">${escHtml(q.code)}</pre>`
+      : '';
+    div.innerHTML = `
+      <div class="review-q">Q${i+1}: ${escHtml(q.text)}</div>
+      ${codeHTML}
+      <div class="review-meta">
+        Your answer: <span class="wa">${['A','B','C','D'][state.chosen]}. ${escHtml(q.options[state.chosen])}</span>
+      </div>
+      <div class="review-meta">
+        Correct answer: <span class="ca">${['A','B','C','D'][q.correct]}. ${escHtml(q.options[q.correct])}</span>
+      </div>
+      <div class="review-expl">${escHtml(q.explanation)}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function restart() {
+  current = 0; score = 0;
+  answered = new Array(QUESTIONS.length).fill(null);
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('review-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  renderQuestion();
+}
+
+document.getElementById('btn-next').addEventListener('click', () => {
+  if (current === QUESTIONS.length - 1) {
+    showResults();
+  } else {
+    current++;
+    renderQuestion();
+  }
+});
+
+document.getElementById('btn-prev').addEventListener('click', () => {
+  if (current > 0) { current--; renderQuestion(); }
+});
+
+document.getElementById('btn-restart').addEventListener('click', restart);
+document.getElementById('btn-review').addEventListener('click', showReview);
+document.getElementById('btn-back-results').addEventListener('click', () => {
+  document.getElementById('review-screen').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'block';
+});
+
+document.addEventListener('keydown', e => {
+  if (document.getElementById('quiz-screen').style.display === 'none') return;
+  const keyMap = { 'a': 0, 'b': 1, 'c': 2, 'd': 3 };
+  const k = e.key.toLowerCase();
+  if (k in keyMap && answered[current] === null) {
+    selectOption(keyMap[k]);
+  } else if ((e.key === 'Enter' || e.key === 'ArrowRight') && !document.getElementById('btn-next').disabled) {
+    document.getElementById('btn-next').click();
+  } else if (e.key === 'ArrowLeft' && !document.getElementById('btn-prev').disabled) {
+    document.getElementById('btn-prev').click();
+  }
+});
+
+renderQuestion();
+</script>
+</body>
+</html>

@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Testing Guide — TDD, Pyramid &amp; Best Practices</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#1a1a2e; color:#e0e0e0; font-family:'Segoe UI',system-ui,sans-serif; }
+header { background:#16213e; padding:20px 30px; border-bottom:2px solid #0f3460; }
+header h1 { font-size:1.8rem; color:#e94560; }
+header p { color:#a0a0b0; margin-top:4px; }
+.tabs { background:#16213e; padding:0 30px; border-bottom:1px solid #0f3460; display:flex; gap:0; }
+.tab { padding:12px 20px; cursor:pointer; font-size:0.88rem; border-bottom:3px solid transparent; transition:all 0.2s; color:#a0b0c0; }
+.tab:hover { color:#e0e0e0; }
+.tab.active { color:#e94560; border-bottom-color:#e94560; }
+.tab-content { display:none; padding:30px; max-width:1400px; margin:0 auto; }
+.tab-content.active { display:block; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:18px; margin-bottom:24px; }
+.card { background:#16213e; border:1px solid #0f3460; border-radius:10px; overflow:hidden; }
+.card-header { background:#0f3460; padding:10px 16px; font-weight:600; color:#a0c4ff; font-size:0.88rem; }
+.card-body { padding:14px; }
+pre { margin:0; border-radius:6px; font-size:0.8rem; }
+.desc { color:#a0b0c0; font-size:0.84rem; margin-bottom:10px; }
+.tip { background:#0d3325; border-left:3px solid #4caf50; padding:8px 12px; border-radius:0 6px 6px 0; margin-top:10px; font-size:0.82rem; color:#90ee90; }
+.warn { background:#2a1a0e; border-left:3px solid #ff9800; padding:8px 12px; border-radius:0 6px 6px 0; margin-top:10px; font-size:0.82rem; color:#ffd08a; }
+.section-title { font-size:1.3rem; color:#e94560; border-left:4px solid #e94560; padding-left:12px; margin:28px 0 16px; }
+/* Pyramid */
+.pyramid { display:flex; flex-direction:column; align-items:center; gap:6px; margin:30px auto; width:100%; max-width:600px; }
+.pyramid-level { border-radius:8px; display:flex; flex-direction:column; justify-content:center; align-items:center; cursor:pointer; transition:all 0.2s; position:relative; padding:14px 20px; text-align:center; }
+.pyramid-level:hover { filter:brightness(1.2); transform:scale(1.02); }
+.pyramid-level h3 { font-size:1rem; font-weight:700; }
+.pyramid-level p { font-size:0.78rem; opacity:0.85; margin-top:2px; }
+.pyramid-level .count { font-size:1.6rem; font-weight:bold; }
+.level-unit { background:#1b5e20; color:#a5d6a7; width:80%; }
+.level-integration { background:#1a237e; color:#90caf9; width:60%; }
+.level-e2e { background:#b71c1c; color:#ef9a9a; width:40%; }
+.detail-panel { background:#16213e; border:1px solid #0f3460; border-radius:10px; padding:20px; margin-top:20px; display:none; }
+.detail-panel.open { display:block; }
+/* TDD cycle */
+.tdd-cycle { display:flex; justify-content:center; gap:0; margin:30px auto; flex-wrap:wrap; }
+.tdd-step { padding:20px 24px; text-align:center; border-radius:10px; flex:1; min-width:200px; max-width:260px; }
+.tdd-step h3 { font-size:1.1rem; font-weight:700; margin-bottom:8px; }
+.tdd-step p { font-size:0.82rem; opacity:0.85; }
+.red-step { background:#5a1a1a; border:2px solid #e94560; margin-right:8px; }
+.green-step { background:#0a3a0a; border:2px solid #4caf50; margin-right:8px; }
+.blue-step { background:#0a1f3a; border:2px solid #4a9eff; }
+.arrow { display:flex; align-items:center; color:#a0b0c0; font-size:1.5rem; margin: 0 6px; }
+/* Rules checklist */
+.checklist { list-style:none; }
+.checklist li { padding:10px 14px; border-left:3px solid transparent; margin-bottom:8px; border-radius:0 8px 8px 0; background:#16213e; display:flex; gap:12px; align-items:flex-start; }
+.checklist li.good { border-color:#4caf50; }
+.checklist li.bad { border-color:#e94560; }
+.checklist li .icon { font-size:1.1rem; flex-shrink:0; margin-top:1px; }
+.checklist li .text strong { display:block; margin-bottom:2px; }
+.checklist li .text span { color:#a0b0c0; font-size:0.82rem; }
+/* lang tabs */
+.lang-tabs { display:flex; gap:4px; margin-bottom:10px; }
+.lang-tab { padding:4px 12px; border:1px solid #0f3460; border-radius:6px; cursor:pointer; font-size:0.8rem; background:transparent; color:#a0c4ff; transition:all 0.2s; }
+.lang-tab.active { background:#0f3460; color:white; }
+.lang-panel { display:none; }
+.lang-panel.active { display:block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Testing Guide</h1>
+  <p>Testing pyramid, TDD cycle, and best practices for Java and Python</p>
+</header>
+<div class="tabs">
+  <div class="tab active" onclick="showTab('pyramid')">Testing Pyramid</div>
+  <div class="tab" onclick="showTab('tdd')">TDD Cycle</div>
+  <div class="tab" onclick="showTab('unit')">Unit Testing</div>
+  <div class="tab" onclick="showTab('mocking')">Mocking &amp; Stubs</div>
+  <div class="tab" onclick="showTab('practices')">Best Practices</div>
+</div>
+
+<div id="tab-pyramid" class="tab-content active">
+  <h2 class="section-title">The Testing Pyramid</h2>
+  <div class="pyramid">
+    <div class="pyramid-level level-e2e" onclick="toggleDetail('e2e')">
+      <h3>End-to-End Tests</h3>
+      <p>Fewest (5-10%) — Slow, expensive, brittle</p>
+    </div>
+    <div class="pyramid-level level-integration" onclick="toggleDetail('integration')">
+      <h3>Integration Tests</h3>
+      <p>Some (20-30%) — Test component interaction</p>
+    </div>
+    <div class="pyramid-level level-unit" onclick="toggleDetail('unit-pyramid')">
+      <h3>Unit Tests</h3>
+      <p>Most (60-70%) — Fast, isolated, reliable</p>
+    </div>
+  </div>
+
+  <div id="detail-e2e" class="detail-panel">
+    <h3 style="color:#ef9a9a;margin-bottom:12px">End-to-End Tests</h3>
+    <div class="grid">
+      <div>
+        <p class="desc">Test complete user workflows through the entire application stack (UI → API → DB).</p>
+        <ul class="checklist">
+          <li class="good"><span class="icon">✓</span><div class="text"><strong>Best for</strong><span>Critical user journeys: login, checkout, signup</span></div></li>
+          <li class="bad"><span class="icon">✗</span><div class="text"><strong>Avoid for</strong><span>Every feature — too slow and flaky</span></div></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-header">Tools</div>
+        <div class="card-body">
+          <p class="desc"><strong>Java:</strong> Selenium, Playwright, Cypress, TestContainers</p>
+          <p class="desc"><strong>Python:</strong> Selenium, Playwright, pytest + requests, Behave (BDD)</p>
+          <p class="desc"><strong>Key metrics:</strong> ~minutes per test, run in CI nightly or pre-release</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="detail-integration" class="detail-panel">
+    <h3 style="color:#90caf9;margin-bottom:12px">Integration Tests</h3>
+    <div class="grid">
+      <div>
+        <p class="desc">Test interactions between components: service + repository, controller + service, multiple modules together.</p>
+        <ul class="checklist">
+          <li class="good"><span class="icon">✓</span><div class="text"><strong>Use real dependencies</strong><span>Real DB (in-memory or TestContainers), real HTTP clients</span></div></li>
+          <li class="good"><span class="icon">✓</span><div class="text"><strong>Test contracts</strong><span>Verify JSON serialization, DB schema, API contracts</span></div></li>
+          <li class="bad"><span class="icon">✗</span><div class="text"><strong>Don't test all paths</strong><span>Unit tests cover edge cases; integration tests cover happy paths</span></div></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-header">Tools</div>
+        <div class="card-body">
+          <p class="desc"><strong>Java:</strong> Spring Boot Test (@SpringBootTest), TestContainers, H2 in-memory DB, RestAssured, WireMock</p>
+          <p class="desc"><strong>Python:</strong> pytest + TestContainers, SQLAlchemy + SQLite, httpx TestClient, responses (mock HTTP)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="detail-unit-pyramid" class="detail-panel">
+    <h3 style="color:#a5d6a7;margin-bottom:12px">Unit Tests</h3>
+    <p class="desc">Test individual units in complete isolation. No DB, no network, no filesystem — mock all external dependencies.</p>
+    <div class="grid">
+      <div>
+        <ul class="checklist">
+          <li class="good"><span class="icon">✓</span><div class="text"><strong>Fast</strong><span>Should run in milliseconds; full suite in seconds</span></div></li>
+          <li class="good"><span class="icon">✓</span><div class="text"><strong>Isolated</strong><span>One test failing shouldn't affect others</span></div></li>
+          <li class="good"><span class="icon">✓</span><div class="text"><strong>Deterministic</strong><span>Same input always gives same result</span></div></li>
+          <li class="good"><span class="icon">✓</span><div class="text"><strong>Self-documenting</strong><span>Test name explains what behavior is tested</span></div></li>
+          <li class="bad"><span class="icon">✗</span><div class="text"><strong>Don't test implementation</strong><span>Test behavior (what), not implementation (how)</span></div></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-header">Tools</div>
+        <div class="card-body">
+          <p class="desc"><strong>Java:</strong> JUnit 5, Mockito, AssertJ, Hamcrest</p>
+          <p class="desc"><strong>Python:</strong> pytest, unittest, unittest.mock, pytest-mock</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Other Test Types</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="card-header">Property-Based Testing</div>
+      <div class="card-body">
+        <p class="desc">Generate random inputs to find edge cases automatically.</p>
+        <pre><code class="language-python"># Python: hypothesis
+from hypothesis import given, strategies as st
+
+@given(st.lists(st.integers()))
+def test_sort_preserves_length(lst):
+    assert len(sorted(lst)) == len(lst)
+
+@given(st.text())
+def test_encode_decode_roundtrip(s):
+    assert s.encode().decode() == s</code></pre>
+        <div class="tip">Java: jqwik library provides similar property-based testing</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Contract Testing</div>
+      <div class="card-body">
+        <p class="desc">Verify that API providers and consumers agree on interface contracts.</p>
+        <p class="desc"><strong>Tools:</strong> Pact (Java/Python), Spring Cloud Contract</p>
+        <ul style="padding-left:16px;margin-top:8px;color:#a0b0c0;font-size:0.84rem">
+          <li>Consumer defines expected request/response contracts</li>
+          <li>Provider verifies it honors the contracts</li>
+          <li>Catches breaking API changes before deployment</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Mutation Testing</div>
+      <div class="card-body">
+        <p class="desc">Verify test quality by introducing bugs (mutations) and checking that tests catch them.</p>
+        <p class="desc"><strong>Java:</strong> PIT (pitest) — industry standard<br><strong>Python:</strong> mutmut, cosmic-ray</p>
+        <div class="tip">Mutation score &gt; 80% indicates high-quality test suite</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-tdd" class="tab-content">
+  <h2 class="section-title">Test-Driven Development (TDD)</h2>
+  <div class="tdd-cycle">
+    <div class="tdd-step red-step">
+      <h3 style="color:#e94560">1. Red 🔴</h3>
+      <p>Write a failing test first. The test describes the behavior you want to implement. It MUST fail.</p>
+    </div>
+    <div class="arrow">→</div>
+    <div class="tdd-step green-step">
+      <h3 style="color:#4caf50">2. Green 🟢</h3>
+      <p>Write the minimum code to make the test pass. Don't over-engineer — just make it green.</p>
+    </div>
+    <div class="arrow">→</div>
+    <div class="tdd-step blue-step">
+      <h3 style="color:#4a9eff">3. Refactor 🔵</h3>
+      <p>Improve the code while keeping tests green. Remove duplication, improve names, extract methods.</p>
+    </div>
+    <div class="arrow">→</div>
+    <div class="tdd-step red-step" style="opacity:0.5">
+      <h3 style="color:#e94560">Repeat</h3>
+      <p>Write the next failing test for the next piece of behavior. Keep cycles small (minutes).</p>
+    </div>
+  </div>
+
+  <h2 class="section-title">TDD Example: FizzBuzz</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="card-header">Step 1: Red — Write failing test first</div>
+      <div class="card-body">
+        <div class="lang-tabs">
+          <button class="lang-tab active" onclick="switchLang(this,'tdd1')">Java</button>
+          <button class="lang-tab" onclick="switchLang(this,'tdd1')">Python</button>
+        </div>
+        <div class="lang-panel active" id="tdd1-java">
+          <pre><code class="language-java">@Test
+void returns_1_for_number_1() {
+    FizzBuzz fb = new FizzBuzz();
+    assertEquals("1", fb.convert(1));
+}
+// FizzBuzz class doesn't exist yet → COMPILE ERROR (Red)</code></pre>
+        </div>
+        <div class="lang-panel" id="tdd1-python">
+          <pre><code class="language-python">def test_returns_1_for_number_1():
+    assert fizzbuzz(1) == "1"
+# Function doesn't exist → NameError (Red)</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Step 2: Green — Minimum code to pass</div>
+      <div class="card-body">
+        <div class="lang-tabs">
+          <button class="lang-tab active" onclick="switchLang(this,'tdd2')">Java</button>
+          <button class="lang-tab" onclick="switchLang(this,'tdd2')">Python</button>
+        </div>
+        <div class="lang-panel active" id="tdd2-java">
+          <pre><code class="language-java">public class FizzBuzz {
+    public String convert(int n) {
+        return "1";  // Hardcoded! But test passes
+    }
+}</code></pre>
+        </div>
+        <div class="lang-panel" id="tdd2-python">
+          <pre><code class="language-python">def fizzbuzz(n):
+    return "1"  # Hardcoded! But test passes</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">More tests drive better design</div>
+      <div class="card-body">
+        <div class="lang-tabs">
+          <button class="lang-tab active" onclick="switchLang(this,'tdd3')">Java</button>
+          <button class="lang-tab" onclick="switchLang(this,'tdd3')">Python</button>
+        </div>
+        <div class="lang-panel active" id="tdd3-java">
+          <pre><code class="language-java">// Each new test forces better implementation
+@Test void returns_2_for_2() { assertEquals("2", fb.convert(2)); }
+@Test void returns_Fizz_for_3() { assertEquals("Fizz", fb.convert(3)); }
+@Test void returns_Buzz_for_5() { assertEquals("Buzz", fb.convert(5)); }
+@Test void returns_FizzBuzz_for_15() { assertEquals("FizzBuzz", fb.convert(15)); }
+
+// Final implementation (after refactoring)
+public String convert(int n) {
+    if (n % 15 == 0) return "FizzBuzz";
+    if (n % 3 == 0)  return "Fizz";
+    if (n % 5 == 0)  return "Buzz";
+    return String.valueOf(n);
+}</code></pre>
+        </div>
+        <div class="lang-panel" id="tdd3-python">
+          <pre><code class="language-python">def test_returns_2_for_2():  assert fizzbuzz(2) == "2"
+def test_returns_fizz_for_3(): assert fizzbuzz(3) == "Fizz"
+def test_returns_buzz_for_5(): assert fizzbuzz(5) == "Buzz"
+def test_returns_fizzbuzz_for_15(): assert fizzbuzz(15) == "FizzBuzz"
+
+# Final implementation
+def fizzbuzz(n: int) -> str:
+    if n % 15 == 0: return "FizzBuzz"
+    if n % 3 == 0:  return "Fizz"
+    if n % 5 == 0:  return "Buzz"
+    return str(n)</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">TDD Benefits &amp; Misconceptions</div>
+      <div class="card-body">
+        <ul class="checklist">
+          <li class="good"><span class="icon">✓</span><div class="text"><strong>Forces good design</strong><span>Hard-to-test code = poorly designed code</span></div></li>
+          <li class="good"><span class="icon">✓</span><div class="text"><strong>Documentation</strong><span>Tests show how to use the code</span></div></li>
+          <li class="good"><span class="icon">✓</span><div class="text"><strong>Confidence</strong><span>Refactor freely — tests catch regressions</span></div></li>
+          <li class="bad"><span class="icon">✗</span><div class="text"><strong>Not about 100% coverage</strong><span>TDD is a design tool, not a coverage metric</span></div></li>
+          <li class="bad"><span class="icon">✗</span><div class="text"><strong>Not slower</strong><span>Debugging time saved &gt; test writing time</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-unit" class="tab-content">
+  <h2 class="section-title">Unit Testing in Java (JUnit 5)</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="card-header">JUnit 5 Essentials</div>
+      <div class="card-body">
+        <pre><code class="language-java">import org.junit.jupiter.api.*;
+import static org.assertj.core.api.Assertions.*;
+
+class CalculatorTest {
+
+    @Test
+    @DisplayName("should add two positive numbers correctly")
+    void add_twoPositiveNumbers_returnsSum() {
+        // Arrange
+        Calculator calc = new Calculator();
+        // Act
+        int result = calc.add(2, 3);
+        // Assert
+        assertThat(result).isEqualTo(5);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"1,2,3", "0,0,0", "-1,1,0", "100,200,300"})
+    void add_parameterized(int a, int b, int expected) {
+        assertThat(new Calculator().add(a, b)).isEqualTo(expected);
+    }
+
+    @Test
+    void divide_byZero_throwsException() {
+        Calculator calc = new Calculator();
+        assertThatThrownBy(() -> calc.divide(10, 0))
+            .isInstanceOf(ArithmeticException.class)
+            .hasMessageContaining("zero");
+    }
+
+    @BeforeEach void setUp() { /* runs before each test */ }
+    @AfterEach  void tearDown() { /* runs after each test */ }
+    @BeforeAll  static void setUpClass() { /* once before all */ }
+    @AfterAll   static void tearDownClass() { /* once after all */ }
+
+    @Disabled("Skipped until bug #123 is fixed")
+    @Test void skippedTest() { }
+
+    @Nested
+    class WhenDividing {
+        @Test void exactDivision() { /* nested test */ }
+    }
+}</code></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">AssertJ — Fluent Assertions</div>
+      <div class="card-body">
+        <pre><code class="language-java">// Primitives and objects
+assertThat(result).isEqualTo(42);
+assertThat(name).isEqualTo("Alice").isNotNull();
+assertThat(value).isGreaterThan(0).isLessThan(100);
+assertThat(text).startsWith("Hello").endsWith("!");
+assertThat(text).contains("World").doesNotContain("Foo");
+
+// Collections
+assertThat(list).hasSize(3)
+                .containsExactly(1, 2, 3)
+                .doesNotContain(4);
+assertThat(list).extracting("name")
+                .containsExactlyInAnyOrder("Alice", "Bob");
+
+// Maps
+assertThat(map).containsKey("name")
+               .containsEntry("age", 30);
+
+// Exceptions
+assertThatThrownBy(() -> sut.doSomething())
+    .isInstanceOf(IllegalArgumentException.class)
+    .hasMessage("Invalid input");
+
+// Soft assertions (don't stop on first failure)
+SoftAssertions softly = new SoftAssertions();
+softly.assertThat(result.getName()).isEqualTo("Alice");
+softly.assertThat(result.getAge()).isEqualTo(30);
+softly.assertAll();</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Unit Testing in Python (pytest)</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="card-header">pytest Essentials</div>
+      <div class="card-body">
+        <pre><code class="language-python">import pytest
+
+# Simple test
+def test_add_two_positive_numbers():
+    result = Calculator().add(2, 3)
+    assert result == 5
+
+# Parametrized tests
+@pytest.mark.parametrize("a,b,expected", [
+    (1, 2, 3),
+    (0, 0, 0),
+    (-1, 1, 0),
+    (100, 200, 300),
+])
+def test_add_parametrized(a, b, expected):
+    assert Calculator().add(a, b) == expected
+
+# Exception testing
+def test_divide_by_zero():
+    with pytest.raises(ZeroDivisionError, match="division by zero"):
+        Calculator().divide(10, 0)
+
+# Fixtures (dependency injection for tests)
+@pytest.fixture
+def calculator():
+    return Calculator()
+
+@pytest.fixture
+def db_session():
+    session = create_test_session()
+    yield session  # test runs here
+    session.rollback()  # cleanup
+
+def test_with_fixture(calculator):
+    assert calculator.add(1, 2) == 3
+
+# Marks
+@pytest.mark.skip(reason="Bug #123 not fixed")
+def test_skipped(): pass
+
+@pytest.mark.slow
+def test_performance(): pass  # run with: pytest -m slow</code></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">pytest Fixtures — Advanced</div>
+      <div class="card-body">
+        <pre><code class="language-python">import pytest
+from typing import Generator
+
+# Scoped fixtures
+@pytest.fixture(scope="module")  # once per module
+def database_connection():
+    conn = create_connection()
+    yield conn
+    conn.close()
+
+@pytest.fixture(scope="session")  # once per test run
+def test_server():
+    server = start_test_server()
+    yield server
+    server.stop()
+
+# Fixture factory
+@pytest.fixture
+def make_user():
+    def factory(name="Alice", age=30, **kwargs):
+        return User(name=name, age=age, **kwargs)
+    return factory
+
+def test_user_greeting(make_user):
+    user = make_user(name="Bob")
+    assert user.greet() == "Hello, Bob!"
+
+# conftest.py — shared fixtures across test files
+# pytest automatically loads fixtures from conftest.py
+
+# Parametrize with fixtures
+@pytest.fixture(params=["mysql", "postgres", "sqlite"])
+def db(request):
+    return create_db(request.param)
+
+def test_user_save(db):
+    # Runs 3 times, once for each db type
+    user = User("Alice")
+    db.save(user)
+    assert db.find(user.id) == user</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-mocking" class="tab-content">
+  <h2 class="section-title">Mocking &amp; Test Doubles</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="card-header">Test Double Types</div>
+      <div class="card-body">
+        <p class="desc">Different types of fakes for different purposes:</p>
+        <table style="width:100%;border-collapse:collapse;font-size:0.82rem">
+          <tr style="background:#0f3460">
+            <th style="padding:8px 12px;text-align:left">Type</th>
+            <th style="padding:8px 12px;text-align:left">Description</th>
+            <th style="padding:8px 12px;text-align:left">Use for</th>
+          </tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #0f3460">Dummy</td><td style="padding:8px 12px;border-bottom:1px solid #0f3460">Passed but never used</td><td style="padding:8px 12px;border-bottom:1px solid #0f3460">Filling parameter lists</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #0f3460">Stub</td><td style="padding:8px 12px;border-bottom:1px solid #0f3460">Returns fixed values</td><td style="padding:8px 12px;border-bottom:1px solid #0f3460">Providing indirect input</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #0f3460">Fake</td><td style="padding:8px 12px;border-bottom:1px solid #0f3460">Working implementation, simpler</td><td style="padding:8px 12px;border-bottom:1px solid #0f3460">In-memory DB, fake API</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #0f3460">Spy</td><td style="padding:8px 12px;border-bottom:1px solid #0f3460">Records calls, optional stub</td><td style="padding:8px 12px;border-bottom:1px solid #0f3460">Verifying indirect output</td></tr>
+          <tr><td style="padding:8px 12px">Mock</td><td style="padding:8px 12px">Verifies expected behavior</td><td style="padding:8px 12px">Behavior verification</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Mockito (Java)</div>
+      <div class="card-body">
+        <pre><code class="language-java">import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.*;
+
+@ExtendWith(MockitoExtension.class)
+class OrderServiceTest {
+
+    @Mock private OrderRepository repository;
+    @Mock private EmailService emailService;
+    @InjectMocks private OrderService orderService;
+
+    @Test
+    void placeOrder_validOrder_savesAndNotifies() {
+        // Arrange: stub repository
+        Order order = new Order("item1", 100.0);
+        when(repository.save(order)).thenReturn(42L);
+
+        // Act
+        long orderId = orderService.place(order);
+
+        // Assert: verify interactions
+        assertThat(orderId).isEqualTo(42L);
+        verify(repository).save(order);
+        verify(emailService).sendConfirmation(42L, order.getEmail());
+        verifyNoMoreInteractions(emailService);
+    }
+
+    @Test
+    void getOrder_notFound_throwsException() {
+        when(repository.findById(anyLong()))
+            .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> orderService.getOrder(99L))
+            .isInstanceOf(OrderNotFoundException.class);
+    }
+
+    // Argument captors
+    @Captor ArgumentCaptor&lt;Order&gt; orderCaptor;
+
+    @Test
+    void verifyExactArgument() {
+        orderService.place(new Order("item", 50.0));
+        verify(repository).save(orderCaptor.capture());
+        assertThat(orderCaptor.getValue().getTotal()).isEqualTo(50.0);
+    }
+}</code></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">unittest.mock (Python)</div>
+      <div class="card-body">
+        <pre><code class="language-python">from unittest.mock import Mock, MagicMock, patch, call
+import pytest
+
+class TestOrderService:
+    @pytest.fixture
+    def repository(self):
+        return Mock()
+
+    @pytest.fixture
+    def service(self, repository):
+        return OrderService(repository=repository)
+
+    def test_place_order_saves_to_repository(self, service, repository):
+        order = Order("item1", 100.0)
+        repository.save.return_value = 42
+
+        order_id = service.place(order)
+
+        assert order_id == 42
+        repository.save.assert_called_once_with(order)
+
+    def test_place_order_raises_on_db_error(self, service, repository):
+        repository.save.side_effect = DatabaseError("Connection failed")
+        with pytest.raises(OrderError):
+            service.place(Order("item", 10.0))
+
+    # patch: replace at the import location
+    @patch("myapp.services.send_email")
+    def test_place_order_sends_email(self, mock_send, service):
+        service.place(Order("item", 10.0))
+        mock_send.assert_called_once()
+        args = mock_send.call_args
+        assert "order_id" in args.kwargs
+
+    # Context manager style
+    def test_with_patch(self, service):
+        with patch("myapp.services.datetime") as mock_dt:
+            mock_dt.now.return_value = datetime(2024, 1, 1)
+            result = service.get_timestamp()
+            assert result == datetime(2024, 1, 1)</code></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">pytest-mock (Pythonic Style)</div>
+      <div class="card-body">
+        <pre><code class="language-python">import pytest
+
+def test_order_service(mocker):
+    # mocker fixture from pytest-mock
+    mock_repo = mocker.Mock()
+    mock_repo.save.return_value = 42
+
+    # patch at module level
+    mocker.patch("myapp.send_email")
+
+    service = OrderService(repository=mock_repo)
+    order_id = service.place(Order("item", 50.0))
+
+    assert order_id == 42
+    mock_repo.save.assert_called_once()
+
+# Spy: wrap real object, still calls real methods
+def test_with_spy(mocker):
+    calculator = Calculator()
+    spy = mocker.spy(calculator, "add")
+
+    result = calculator.add(2, 3)
+
+    assert result == 5                    # real method called
+    spy.assert_called_once_with(2, 3)    # verified
+
+# Auto-spec: Mock that validates method signatures
+mock_repo = mocker.create_autospec(OrderRepository)
+# Now mock_repo.save() raises TypeError if called with wrong args!</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-practices" class="tab-content">
+  <h2 class="section-title">Testing Best Practices</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="card-header">FIRST Principles</div>
+      <div class="card-body">
+        <ul class="checklist">
+          <li class="good"><span class="icon">F</span><div class="text"><strong>Fast</strong><span>Tests should run in milliseconds, not seconds. Full suite &lt; 1 minute.</span></div></li>
+          <li class="good"><span class="icon">I</span><div class="text"><strong>Independent</strong><span>Tests don't depend on each other. Any order, any subset should work.</span></div></li>
+          <li class="good"><span class="icon">R</span><div class="text"><strong>Repeatable</strong><span>Same result on any machine, any time, any environment.</span></div></li>
+          <li class="good"><span class="icon">S</span><div class="text"><strong>Self-Validating</strong><span>Tests either pass or fail — no manual inspection needed.</span></div></li>
+          <li class="good"><span class="icon">T</span><div class="text"><strong>Timely</strong><span>Write tests before (TDD) or alongside the code, not months later.</span></div></li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">AAA Pattern — Arrange, Act, Assert</div>
+      <div class="card-body">
+        <pre><code class="language-java">@Test
+void should_apply_discount_for_vip_customer() {
+    // ARRANGE: set up the state
+    Customer vip = new Customer("Alice", CustomerTier.VIP);
+    Order order = new Order(vip, List.of(new Item("phone", 1000.0)));
+    DiscountService service = new DiscountService();
+
+    // ACT: execute the behavior being tested (ONE line ideally)
+    double discountedTotal = service.applyDiscount(order);
+
+    // ASSERT: verify the outcome
+    assertThat(discountedTotal).isEqualTo(900.0); // 10% VIP discount
+}</code></pre>
+        <div class="tip">When assertions get complex, consider extracting a helper method</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Naming Conventions</div>
+      <div class="card-body">
+        <p class="desc">Good test names act as living documentation:</p>
+        <pre><code class="language-java">// Pattern: methodName_scenario_expectedBehavior
+void add_twoPositives_returnsSum() {}
+void divide_byZero_throwsArithmetic() {}
+void placeOrder_insufficientStock_returnsError() {}
+void findUser_nonExistentId_returnsEmpty() {}
+
+// Or Given/When/Then style (BDD)
+void givenVipCustomer_whenApplyingDiscount_thenReceives10Percent() {}</code></pre>
+        <pre><code class="language-python"># Python: descriptive, snake_case
+def test_add_returns_sum_of_two_positives(): ...
+def test_divide_raises_zero_division_error(): ...
+def test_place_order_with_insufficient_stock(): ...
+
+# Class grouping (often clearer)
+class TestUserService:
+    class WhenUserExists:
+        def test_returns_user_data(self): ...
+        def test_updates_last_seen(self): ...
+    class WhenUserNotFound:
+        def test_raises_not_found_error(self): ...</code></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">What NOT to Test</div>
+      <div class="card-body">
+        <ul class="checklist">
+          <li class="bad"><span class="icon">✗</span><div class="text"><strong>Don't test trivial getters/setters</strong><span>Unless they have logic, testing x.getName() == name wastes time</span></div></li>
+          <li class="bad"><span class="icon">✗</span><div class="text"><strong>Don't test framework code</strong><span>Don't test that Spring @Autowired works or that JPA saves</span></div></li>
+          <li class="bad"><span class="icon">✗</span><div class="text"><strong>Don't test private methods directly</strong><span>Test through the public API; if private method is complex, extract a class</span></div></li>
+          <li class="bad"><span class="icon">✗</span><div class="text"><strong>Don't test implementations, test behavior</strong><span>Tests should survive refactoring without changing</span></div></li>
+          <li class="bad"><span class="icon">✗</span><div class="text"><strong>Don't over-mock</strong><span>Too many mocks = testing mock config, not real behavior</span></div></li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Test Coverage — What It Means</div>
+      <div class="card-body">
+        <p class="desc">Coverage tells you what code was executed, not what was verified.</p>
+        <ul class="checklist">
+          <li class="good"><span class="icon">✓</span><div class="text"><strong>Use as a floor, not a target</strong><span>80% coverage should be minimum, not the goal</span></div></li>
+          <li class="good"><span class="icon">✓</span><div class="text"><strong>Branch coverage &gt; line coverage</strong><span>Tests all if/else paths, not just lines executed</span></div></li>
+          <li class="bad"><span class="icon">✗</span><div class="text"><strong>100% coverage ≠ good tests</strong><span>assert(true) covers code without testing anything</span></div></li>
+        </ul>
+        <div class="tip">Java: JaCoCo. Python: pytest-cov / coverage.py</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Test Code Quality</div>
+      <div class="card-body">
+        <ul class="checklist">
+          <li class="good"><span class="icon">✓</span><div class="text"><strong>One assertion per test (ideally)</strong><span>Makes failure messages clear; easier to diagnose</span></div></li>
+          <li class="good"><span class="icon">✓</span><div class="text"><strong>Use builder pattern or factories for test data</strong><span>ObjectMother/TestDataBuilder pattern reduces duplication</span></div></li>
+          <li class="good"><span class="icon">✓</span><div class="text"><strong>Keep tests DRY — but not too DRY</strong><span>Some duplication in tests is OK; clarity &gt; deduplication</span></div></li>
+          <li class="bad"><span class="icon">✗</span><div class="text"><strong>Don't add logic to tests</strong><span>if/for/while in tests = tests that need their own tests</span></div></li>
+          <li class="bad"><span class="icon">✗</span><div class="text"><strong>Don't use random data without seeds</strong><span>Use fixed values or property-based testing libraries</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+hljs.highlightAll();
+
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  document.querySelectorAll('.tab')[['pyramid','tdd','unit','mocking','practices'].indexOf(id)].classList.add('active');
+}
+
+function toggleDetail(id) {
+  const panel = document.getElementById('detail-' + id);
+  panel.classList.toggle('open');
+}
+
+function switchLang(btn, prefix) {
+  const parent = btn.closest('.card-body');
+  parent.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const idx = Array.from(parent.querySelectorAll('.lang-tab')).indexOf(btn);
+  const langs = ['java', 'python'];
+  parent.querySelectorAll('.lang-panel').forEach((p, i) => {
+    p.classList.toggle('active', i === idx);
+  });
+}
+</script>
+</body>
+</html>

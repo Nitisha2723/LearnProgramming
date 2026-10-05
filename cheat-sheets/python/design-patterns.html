@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Patterns — Python</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#1a1a2e; color:#e0e0e0; font-family:'Segoe UI',system-ui,sans-serif; }
+header { background:#16213e; padding:20px 30px; border-bottom:2px solid #0f3460; }
+header h1 { font-size:1.8rem; color:#e94560; }
+header p { color:#a0a0b0; margin-top:4px; }
+.filter-bar { background:#16213e; padding:12px 30px; display:flex; gap:10px; flex-wrap:wrap; border-bottom:1px solid #0f3460; align-items:center; }
+.filter-btn { padding:5px 14px; border:1px solid #0f3460; border-radius:20px; cursor:pointer; font-size:0.82rem; transition:all 0.2s; background:transparent; color:#a0c4ff; }
+.filter-btn:hover, .filter-btn.active { color:white; }
+.filter-btn[data-cat="all"].active { background:#e94560; border-color:#e94560; }
+.filter-btn[data-cat="creational"].active { background:#3b82f6; border-color:#3b82f6; }
+.filter-btn[data-cat="structural"].active { background:#10b981; border-color:#10b981; }
+.filter-btn[data-cat="behavioral"].active { background:#f59e0b; border-color:#f59e0b; color:#1a1a2e; }
+.search { padding:6px 14px; background:#1a1a2e; border:1px solid #0f3460; border-radius:20px; color:#e0e0e0; font-size:0.85rem; outline:none; width:220px; }
+.search:focus { border-color:#e94560; }
+.container { max-width:1400px; margin:0 auto; padding:24px 30px; }
+.category-title { font-size:1.1rem; font-weight:600; padding:8px 16px; border-radius:6px; margin:30px 0 16px; display:inline-block; }
+.creational-title { background:#1e2f5a; color:#90c4ff; }
+.structural-title { background:#0d3325; color:#7de2b5; }
+.behavioral-title { background:#3a2800; color:#ffd080; }
+.patterns-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(380px,1fr)); gap:18px; margin-bottom:30px; }
+.pattern-card { background:#16213e; border:1px solid #0f3460; border-radius:10px; overflow:hidden; transition:border-color 0.2s; cursor:pointer; }
+.pattern-card:hover { border-color:#e94560; }
+.pattern-card.hidden { display:none; }
+.card-top { padding:14px 16px; display:flex; justify-content:space-between; align-items:flex-start; }
+.pattern-name { font-weight:700; font-size:1rem; }
+.cat-badge { padding:2px 10px; border-radius:12px; font-size:0.72rem; font-weight:600; }
+.creational .cat-badge { background:#1e3a6a; color:#90c4ff; }
+.structural .cat-badge { background:#0d3325; color:#7de2b5; }
+.behavioral .cat-badge { background:#3a2800; color:#ffd080; }
+.pattern-desc { padding:0 16px 6px; color:#a0b0c0; font-size:0.85rem; }
+.python-note { padding:0 16px 10px; color:#90ee90; font-size:0.8rem; font-style:italic; }
+.pattern-code { display:none; padding:16px; border-top:1px solid #0f3460; }
+.pattern-code.open { display:block; }
+pre { margin:0; border-radius:6px; font-size:0.79rem; }
+.use-when { padding:10px 16px; background:#0d1525; font-size:0.82rem; color:#90d0a0; border-top:1px solid #0f3460; }
+.use-when strong { color:#a0c4ff; }
+.toggle-hint { font-size:0.75rem; color:#606880; padding:0 16px 10px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Design Patterns — Python</h1>
+  <p>GoF design patterns implemented in Pythonic style. Click any card to expand.</p>
+</header>
+<div class="filter-bar">
+  <button class="filter-btn active" data-cat="all" onclick="filter('all')">All (23)</button>
+  <button class="filter-btn" data-cat="creational" onclick="filter('creational')">Creational (5)</button>
+  <button class="filter-btn" data-cat="structural" onclick="filter('structural')">Structural (7)</button>
+  <button class="filter-btn" data-cat="behavioral" onclick="filter('behavioral')">Behavioral (11)</button>
+  <input type="text" class="search" placeholder="Search patterns..." oninput="search(this.value)">
+</div>
+<div class="container">
+
+<span class="category-title creational-title">Creational Patterns</span>
+<div class="patterns-grid">
+
+  <div class="pattern-card creational" data-name="singleton creational" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Singleton</span>
+      <span class="cat-badge">Creational</span>
+    </div>
+    <p class="pattern-desc">Ensure a class has only one instance.</p>
+    <p class="python-note">Python: use modules (they're singletons) or __new__ override</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python"># Option 1: Module as Singleton (simplest Pythonic approach)
+# config.py — the module itself is a singleton
+import os
+DATABASE_URL = os.getenv("DB_URL", "sqlite:///app.db")
+DEBUG = os.getenv("DEBUG", "false").lower() == "true"
+# Usage: import config; config.DATABASE_URL
+
+# Option 2: __new__ override
+class Singleton:
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+class AppConfig(Singleton):
+    def __init__(self):
+        if not hasattr(self, '_initialized'):
+            self.debug = False
+            self.db_url = "sqlite:///app.db"
+            self._initialized = True
+
+# Option 3: Decorator approach
+def singleton(cls):
+    instances = {}
+    def get_instance(*args, **kwargs):
+        if cls not in instances:
+            instances[cls] = cls(*args, **kwargs)
+        return instances[cls]
+    return get_instance
+
+@singleton
+class Logger:
+    def log(self, msg): print(f"[LOG] {msg}")</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Need shared config, logging, connection pools. Prefer module-level singletons in Python — cleaner than class-based.</div>
+  </div>
+
+  <div class="pattern-card creational" data-name="factory method creational" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Factory Method</span>
+      <span class="cat-badge">Creational</span>
+    </div>
+    <p class="pattern-desc">Delegate object creation to subclasses or factory functions.</p>
+    <p class="python-note">Python: often just a function or classmethod, no need for abstract classes</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">from abc import ABC, abstractmethod
+from typing import Protocol
+
+# Pythonic: factory function
+def create_payment(method: str, amount: float):
+    creators = {
+        "credit_card": CreditCardPayment,
+        "paypal": PayPalPayment,
+        "crypto": CryptoPayment,
+    }
+    cls = creators.get(method)
+    if not cls:
+        raise ValueError(f"Unknown payment method: {method}")
+    return cls(amount)
+
+# Classic OOP approach with classmethod factory
+class Notification:
+    def send(self, message: str) -> None:
+        raise NotImplementedError
+
+    @classmethod
+    def for_channel(cls, channel: str) -> "Notification":
+        channels = {"email": EmailNotification, "sms": SmsNotification}
+        return channels[channel]()
+
+class EmailNotification(Notification):
+    def send(self, message: str) -> None:
+        print(f"Email: {message}")
+
+class SmsNotification(Notification):
+    def send(self, message: str) -> None:
+        print(f"SMS: {message}")
+
+# Usage
+notif = Notification.for_channel("email")
+notif.send("Hello!")
+
+# Registry pattern (open for extension)
+PAYMENT_REGISTRY = {}
+
+def register_payment(name):
+    def decorator(cls):
+        PAYMENT_REGISTRY[name] = cls
+        return cls
+    return decorator
+
+@register_payment("stripe")
+class StripePayment:
+    def process(self, amount): ...</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Creating objects whose exact type shouldn't be specified by client; factory functions are idiomatic Python.</div>
+  </div>
+
+  <div class="pattern-card creational" data-name="abstract factory creational" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Abstract Factory</span>
+      <span class="cat-badge">Creational</span>
+    </div>
+    <p class="pattern-desc">Create families of related objects through a common interface.</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">from typing import Protocol
+
+# Product protocols
+class Button(Protocol):
+    def render(self) -> str: ...
+
+class Checkbox(Protocol):
+    def render(self) -> str: ...
+
+# Abstract factory protocol
+class UIFactory(Protocol):
+    def create_button(self) -> Button: ...
+    def create_checkbox(self) -> Checkbox: ...
+
+# Windows family
+class WindowsButton:
+    def render(self) -> str: return "Windows Button"
+
+class WindowsCheckbox:
+    def render(self) -> str: return "Windows Checkbox"
+
+class WindowsFactory:
+    def create_button(self) -> Button: return WindowsButton()
+    def create_checkbox(self) -> Checkbox: return WindowsCheckbox()
+
+# Mac family
+class MacButton:
+    def render(self) -> str: return "Mac Button"
+
+class MacCheckbox:
+    def render(self) -> str: return "Mac Checkbox"
+
+class MacFactory:
+    def create_button(self) -> Button: return MacButton()
+    def create_checkbox(self) -> Checkbox: return MacCheckbox()
+
+# Client - doesn't know about concrete products
+def build_ui(factory: UIFactory) -> None:
+    btn = factory.create_button()
+    chk = factory.create_checkbox()
+    print(btn.render(), chk.render())
+
+import platform
+factory = WindowsFactory() if platform.system() == "Windows" else MacFactory()
+build_ui(factory)</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> System needs families of related objects that must be used together; switch entire UI/DB toolkit at once.</div>
+  </div>
+
+  <div class="pattern-card creational" data-name="builder creational" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Builder</span>
+      <span class="cat-badge">Creational</span>
+    </div>
+    <p class="pattern-desc">Construct complex objects step by step with a fluent interface.</p>
+    <p class="python-note">Python: dataclasses + keyword args often replace builders; use for complex construction</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">from dataclasses import dataclass, field
+from typing import Self
+
+@dataclass
+class QueryBuilder:
+    _table: str = ""
+    _conditions: list[str] = field(default_factory=list)
+    _columns: list[str] = field(default_factory=list)
+    _limit: int | None = None
+    _order_by: str | None = None
+
+    def select(self, *columns: str) -> Self:
+        self._columns.extend(columns)
+        return self
+
+    def from_table(self, table: str) -> Self:
+        self._table = table
+        return self
+
+    def where(self, condition: str) -> Self:
+        self._conditions.append(condition)
+        return self
+
+    def order_by(self, column: str) -> Self:
+        self._order_by = column
+        return self
+
+    def limit(self, n: int) -> Self:
+        self._limit = n
+        return self
+
+    def build(self) -> str:
+        cols = ", ".join(self._columns) or "*"
+        sql = f"SELECT {cols} FROM {self._table}"
+        if self._conditions:
+            sql += " WHERE " + " AND ".join(self._conditions)
+        if self._order_by:
+            sql += f" ORDER BY {self._order_by}"
+        if self._limit:
+            sql += f" LIMIT {self._limit}"
+        return sql
+
+# Fluent API
+query = (QueryBuilder()
+    .select("name", "email")
+    .from_table("users")
+    .where("age > 18")
+    .where("active = true")
+    .order_by("name")
+    .limit(10)
+    .build())
+# SELECT name, email FROM users WHERE age > 18 AND active = true ORDER BY name LIMIT 10</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Object requires many optional parameters; step-by-step construction; query builders, config builders.</div>
+  </div>
+
+  <div class="pattern-card creational" data-name="prototype creational" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Prototype</span>
+      <span class="cat-badge">Creational</span>
+    </div>
+    <p class="pattern-desc">Create new objects by copying existing ones.</p>
+    <p class="python-note">Python: copy.copy() and copy.deepcopy() are built-in</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">import copy
+from dataclasses import dataclass, field
+
+@dataclass
+class Document:
+    title: str
+    content: str
+    tags: list[str] = field(default_factory=list)
+
+    def __copy__(self):
+        # Shallow copy
+        return Document(self.title, self.content, self.tags[:])
+
+    def __deepcopy__(self, memo):
+        # Deep copy — creates new objects for all references
+        return Document(
+            copy.deepcopy(self.title, memo),
+            copy.deepcopy(self.content, memo),
+            copy.deepcopy(self.tags, memo)
+        )
+
+original = Document("Report", "Long content...", ["finance", "q4"])
+
+# Shallow copy
+shallow = copy.copy(original)  # or original.__copy__()
+shallow.title = "Report (copy)"
+shallow.tags.append("draft")   # SHARED: affects original too!
+
+# Deep copy
+deep = copy.deepcopy(original)
+deep.tags.append("archive")    # independent: doesn't affect original
+
+# Prototype registry
+class DocumentTemplate:
+    _registry: dict[str, "Document"] = {}
+
+    @classmethod
+    def register(cls, name: str, template: "Document"):
+        cls._registry[name] = template
+
+    @classmethod
+    def clone(cls, name: str) -> "Document":
+        return copy.deepcopy(cls._registry[name])
+
+DocumentTemplate.register("invoice", Document("Invoice", "..."))
+new_invoice = DocumentTemplate.clone("invoice")</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Creating an object is expensive; need many similar objects; use copy.deepcopy() in Python.</div>
+  </div>
+
+</div>
+
+<span class="category-title structural-title">Structural Patterns</span>
+<div class="patterns-grid">
+
+  <div class="pattern-card structural" data-name="adapter structural" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Adapter</span>
+      <span class="cat-badge">Structural</span>
+    </div>
+    <p class="pattern-desc">Wrap an incompatible interface to make it compatible.</p>
+    <p class="python-note">Python: monkey-patching or __getattr__ can also serve as adapters</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">from typing import Protocol
+
+# Target interface (what we want)
+class JsonDataSource(Protocol):
+    def get_data(self) -> dict: ...
+
+# Existing incompatible class
+class XmlDataSource:
+    def fetch_xml(self) -> str:
+        return "&lt;data&gt;&lt;name&gt;Alice&lt;/name&gt;&lt;/data&gt;"
+
+# Adapter: wraps XmlDataSource, presents JsonDataSource interface
+class XmlToJsonAdapter:
+    def __init__(self, xml_source: XmlDataSource):
+        self.xml_source = xml_source
+
+    def get_data(self) -> dict:
+        xml = self.xml_source.fetch_xml()
+        # Parse and convert XML to dict
+        return {"name": "Alice"}  # simplified
+
+# Usage
+xml_source = XmlDataSource()
+adapter = XmlToJsonAdapter(xml_source)
+data = adapter.get_data()  # Works as JsonDataSource!
+
+# Pythonic: function adapter (no class needed)
+def adapt_xml_source(xml_source: XmlDataSource):
+    def get_data() -> dict:
+        xml = xml_source.fetch_xml()
+        return parse_xml(xml)
+    xml_source.get_data = get_data  # add method dynamically!
+    return xml_source</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Integrating third-party libraries with incompatible APIs; wrapping legacy code.</div>
+  </div>
+
+  <div class="pattern-card structural" data-name="decorator structural" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Decorator</span>
+      <span class="cat-badge">Structural</span>
+    </div>
+    <p class="pattern-desc">Dynamically add behavior to objects. In Python, @decorators do this for functions.</p>
+    <p class="python-note">Python: the @ decorator syntax is built into the language!</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">from functools import wraps
+import time
+
+# Python's built-in decorator syntax IS the Decorator pattern
+def log_calls(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        print(f"Calling {func.__name__}")
+        result = func(*args, **kwargs)
+        print(f"{func.__name__} returned {result}")
+        return result
+    return wrapper
+
+def timer(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        result = func(*args, **kwargs)
+        elapsed = time.perf_counter() - start
+        print(f"{func.__name__} took {elapsed:.4f}s")
+        return result
+    return wrapper
+
+# Stack decorators (apply bottom-up)
+@log_calls
+@timer
+def calculate(x, y):
+    return x ** y
+
+# Class-based decorator for objects
+class NotificationDecorator:
+    def __init__(self, notification):
+        self._notification = notification
+
+    def send(self, message: str) -> None:
+        self._notification.send(message)
+
+class SlackNotification(NotificationDecorator):
+    def send(self, message: str) -> None:
+        formatted = f"[Slack] {message}"
+        super().send(formatted)
+
+class LoggingNotification(NotificationDecorator):
+    def send(self, message: str) -> None:
+        print(f"LOG: Sending '{message}'")
+        super().send(message)
+
+# Stack at runtime
+notification = LoggingNotification(SlackNotification(EmailNotification()))
+notification.send("Hello!")</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Adding behavior at runtime without subclassing; cross-cutting concerns like logging, caching, auth.</div>
+  </div>
+
+  <div class="pattern-card structural" data-name="proxy structural" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Proxy</span>
+      <span class="cat-badge">Structural</span>
+    </div>
+    <p class="pattern-desc">Control access to an object through a surrogate.</p>
+    <p class="python-note">Python: __getattr__ enables transparent proxy; use for lazy loading, caching</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">from functools import lru_cache
+
+# Caching proxy using @lru_cache (most Pythonic)
+class DataService:
+    def get_data(self, key: str) -> str:
+        print(f"Fetching {key} from DB...")
+        return f"data_for_{key}"
+
+class CachedDataService:
+    def __init__(self, real: DataService):
+        self._real = real
+        self._cache: dict = {}
+
+    def get_data(self, key: str) -> str:
+        if key not in self._cache:
+            self._cache[key] = self._real.get_data(key)
+        return self._cache[key]
+
+# Virtual proxy (lazy loading)
+class HeavyImage:
+    def __init__(self, filename: str):
+        self.filename = filename
+        print(f"Loading {filename}...")  # expensive!
+        self.data = b"image_bytes"
+
+class LazyImage:
+    def __init__(self, filename: str):
+        self.filename = filename
+        self._image: HeavyImage | None = None
+
+    def display(self) -> None:
+        if self._image is None:
+            self._image = HeavyImage(self.filename)  # load on demand
+        self._image.data  # use
+
+# Transparent proxy using __getattr__
+class LoggingProxy:
+    def __init__(self, obj):
+        object.__setattr__(self, '_obj', obj)
+
+    def __getattr__(self, name):
+        attr = getattr(self._obj, name)
+        if callable(attr):
+            def logged(*args, **kwargs):
+                print(f"Calling {name}({args}, {kwargs})")
+                return attr(*args, **kwargs)
+            return logged
+        return attr</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Lazy initialization, access control, logging, caching, remote service calls.</div>
+  </div>
+
+  <div class="pattern-card structural" data-name="facade structural" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Facade</span>
+      <span class="cat-badge">Structural</span>
+    </div>
+    <p class="pattern-desc">Provide a simplified interface to a complex subsystem.</p>
+    <p class="python-note">Python: module-level functions often serve as facades</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python"># Complex subsystems
+class AudioMixer:
+    def load(self, track): print(f"Loading {track}")
+    def mix(self): print("Mixing...")
+    def output(self): return b"audio_bytes"
+
+class VideoDecoder:
+    def decode(self, file): return "video_frames"
+
+class FileWriter:
+    def write(self, data, path): print(f"Writing to {path}")
+
+# Facade: simple API for complex workflow
+class VideoConverter:
+    """Simple facade over audio/video processing pipeline."""
+
+    def __init__(self):
+        self._audio = AudioMixer()
+        self._video = VideoDecoder()
+        self._writer = FileWriter()
+
+    def convert(self, input_path: str, output_path: str) -> None:
+        """One simple method instead of orchestrating 4 classes."""
+        frames = self._video.decode(input_path)
+        self._audio.load(input_path)
+        self._audio.mix()
+        audio = self._audio.output()
+        self._writer.write(audio, output_path)
+        print(f"Converted {input_path} → {output_path}")
+
+# Module-level facade (most Pythonic)
+_converter = VideoConverter()
+
+def convert_video(input_path: str, output_path: str) -> None:
+    """Public API — hides all complexity."""
+    _converter.convert(input_path, output_path)
+
+# Usage
+convert_video("movie.mov", "movie.mp4")</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Simplifying complex library/framework APIs; providing a clean public API for a package.</div>
+  </div>
+
+  <div class="pattern-card structural" data-name="composite structural" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Composite</span>
+      <span class="cat-badge">Structural</span>
+    </div>
+    <p class="pattern-desc">Compose objects into tree structures for uniform treatment.</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">from __future__ import annotations
+from abc import ABC, abstractmethod
+from typing import Iterator
+
+class FileSystemItem(ABC):
+    def __init__(self, name: str):
+        self.name = name
+
+    @abstractmethod
+    def size(self) -> int: ...
+
+    @abstractmethod
+    def display(self, indent: str = "") -> None: ...
+
+# Leaf
+class File(FileSystemItem):
+    def __init__(self, name: str, size_bytes: int):
+        super().__init__(name)
+        self._size = size_bytes
+
+    def size(self) -> int: return self._size
+
+    def display(self, indent: str = "") -> None:
+        print(f"{indent}📄 {self.name} ({self._size}B)")
+
+# Composite
+class Directory(FileSystemItem):
+    def __init__(self, name: str):
+        super().__init__(name)
+        self._children: list[FileSystemItem] = []
+
+    def add(self, item: FileSystemItem) -> None:
+        self._children.append(item)
+
+    def size(self) -> int:
+        return sum(child.size() for child in self._children)
+
+    def display(self, indent: str = "") -> None:
+        print(f"{indent}📁 {self.name}/")
+        for child in self._children:
+            child.display(indent + "  ")
+
+# Usage — treat files and directories uniformly
+root = Directory("project")
+root.add(File("README.md", 2048))
+src = Directory("src")
+src.add(File("main.py", 4096))
+src.add(File("utils.py", 1024))
+root.add(src)
+root.display()
+print(f"Total size: {root.size()}B")</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Tree structures (file systems, UI hierarchies, expression trees); treat leaves and composites uniformly.</div>
+  </div>
+
+  <div class="pattern-card structural" data-name="bridge structural" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Bridge</span>
+      <span class="cat-badge">Structural</span>
+    </div>
+    <p class="pattern-desc">Decouple abstraction from implementation so they can vary independently.</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">from typing import Protocol
+
+# Implementation protocol
+class Renderer(Protocol):
+    def render_circle(self, x: float, y: float, r: float) -> None: ...
+
+class VectorRenderer:
+    def render_circle(self, x: float, y: float, r: float) -> None:
+        print(f"SVG &lt;circle cx='{x}' cy='{y}' r='{r}'/&gt;")
+
+class RasterRenderer:
+    def render_circle(self, x: float, y: float, r: float) -> None:
+        print(f"Drawing circle pixels at ({x},{y}) r={r}")
+
+# Abstraction bridge to implementation
+class Shape:
+    def __init__(self, renderer: Renderer):
+        self.renderer = renderer
+
+    def draw(self) -> None:
+        raise NotImplementedError
+
+class Circle(Shape):
+    def __init__(self, x: float, y: float, radius: float, renderer: Renderer):
+        super().__init__(renderer)
+        self.x, self.y, self.radius = x, y, radius
+
+    def draw(self) -> None:
+        self.renderer.render_circle(self.x, self.y, self.radius)
+
+    def resize(self, factor: float) -> "Circle":
+        return Circle(self.x, self.y, self.radius * factor, self.renderer)
+
+# Swap renderer at runtime
+c = Circle(1, 2, 5, VectorRenderer())
+c.draw()  # SVG output
+
+c2 = Circle(1, 2, 5, RasterRenderer())
+c2.draw()  # Pixel output</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Both abstraction and implementation should be extensible via subclassing; avoid exponential class explosion.</div>
+  </div>
+
+  <div class="pattern-card structural" data-name="flyweight structural" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Flyweight</span>
+      <span class="cat-badge">Structural</span>
+    </div>
+    <p class="pattern-desc">Share common state between many fine-grained objects.</p>
+    <p class="python-note">Python: __slots__ reduces per-object memory; sys.intern() for string sharing</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">import sys
+from dataclasses import dataclass
+
+# Flyweight: shared immutable state
+@dataclass(frozen=True)  # frozen = immutable = hashable = shareable
+class TreeType:
+    name: str
+    color: str
+    texture: str  # expensive shared data
+
+# Flyweight factory/pool
+class TreeTypeFactory:
+    _pool: dict[str, TreeType] = {}
+
+    @classmethod
+    def get(cls, name: str, color: str, texture: str) -> TreeType:
+        key = f"{name}_{color}_{texture}"
+        if key not in cls._pool:
+            cls._pool[key] = TreeType(name, color, texture)
+            print(f"Created new TreeType: {key}")
+        return cls._pool[key]
+
+# Context: unique state (position) + shared flyweight
+@dataclass
+class Tree:
+    x: int
+    y: int
+    tree_type: TreeType  # shared flyweight reference
+
+# Usage
+factory = TreeTypeFactory()
+trees = []
+for i in range(1000):
+    # Only ONE TreeType object created for all 1000 trees!
+    t = factory.get("Oak", "green", "bark_texture.png")
+    trees.append(Tree(i * 10, i * 5, t))
+
+print(f"Trees: {len(trees)}, TreeTypes: {len(TreeTypeFactory._pool)}")
+# Trees: 1000, TreeTypes: 1
+
+# Python string interning (built-in flyweight)
+a = sys.intern("frequently_used_key")
+b = sys.intern("frequently_used_key")
+a is b  # True — same object!</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Large numbers of objects with mostly shared state; game entities, text rendering characters.</div>
+  </div>
+
+</div>
+
+<span class="category-title behavioral-title">Behavioral Patterns</span>
+<div class="patterns-grid">
+
+  <div class="pattern-card behavioral" data-name="observer behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Observer</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Notify multiple objects when state changes.</p>
+    <p class="python-note">Python: use __set__ descriptors, or PyDispatcher, or simple callback lists</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">from typing import Callable
+
+# Pythonic: callables as observers
+class EventEmitter:
+    def __init__(self):
+        self._handlers: dict[str, list[Callable]] = {}
+
+    def on(self, event: str, handler: Callable) -> None:
+        self._handlers.setdefault(event, []).append(handler)
+
+    def off(self, event: str, handler: Callable) -> None:
+        self._handlers.get(event, []).remove(handler)
+
+    def emit(self, event: str, *args, **kwargs) -> None:
+        for handler in self._handlers.get(event, []):
+            handler(*args, **kwargs)
+
+class StockMarket(EventEmitter):
+    def __init__(self):
+        super().__init__()
+        self._prices: dict[str, float] = {}
+
+    def update_price(self, symbol: str, price: float) -> None:
+        old_price = self._prices.get(symbol, 0)
+        self._prices[symbol] = price
+        self.emit("price_changed", symbol, price, old_price)
+
+# Register observers as callables (lambdas, methods, etc.)
+market = StockMarket()
+market.on("price_changed", lambda s, new, old: print(f"{s}: ${new:.2f}"))
+market.on("price_changed", lambda s, new, old:
+    print(f"ALERT: {s} changed by {(new-old)/old*100:.1f}%") if old else None)
+
+market.update_price("AAPL", 195.50)</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Event systems, MVC data binding, pubsub; decouple event producers from consumers.</div>
+  </div>
+
+  <div class="pattern-card behavioral" data-name="strategy behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Strategy</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Encapsulate interchangeable algorithms.</p>
+    <p class="python-note">Python: first-class functions eliminate the need for Strategy classes entirely</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">from typing import Callable
+
+# Pythonic: just use functions as strategies!
+SortStrategy = Callable[[list], list]
+
+def bubble_sort(data: list) -> list:
+    data = data.copy()
+    for i in range(len(data)):
+        for j in range(len(data)-i-1):
+            if data[j] > data[j+1]:
+                data[j], data[j+1] = data[j+1], data[j]
+    return data
+
+def python_sort(data: list) -> list:
+    return sorted(data)
+
+# Context uses strategy function
+class Sorter:
+    def __init__(self, strategy: SortStrategy = python_sort):
+        self.strategy = strategy
+
+    def sort(self, data: list) -> list:
+        return self.strategy(data)
+
+sorter = Sorter(bubble_sort)
+result = sorter.sort([3, 1, 4, 1, 5])
+
+# Change strategy at runtime
+sorter.strategy = python_sort
+
+# Or just pass the function directly (most Pythonic)
+data = [3, 1, 4]
+result = sorted(data, key=lambda x: -x)  # Strategy IS the key function
+
+# Real-world: discount strategies
+def no_discount(price: float) -> float: return price
+def ten_percent(price: float) -> float: return price * 0.9
+def flat_discount(price: float, amount: float = 5.0) -> float:
+    return max(0, price - amount)
+
+from functools import partial
+strategies = {
+    "vip": ten_percent,
+    "coupon": partial(flat_discount, amount=10),
+    "regular": no_discount
+}</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Multiple algorithms for the same task; pass functions as strategies in Python — no Strategy class needed.</div>
+  </div>
+
+  <div class="pattern-card behavioral" data-name="command behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Command</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Encapsulate requests as objects for undo/redo, queuing.</p>
+    <p class="python-note">Python: callables, lambdas, or functools.partial can be commands</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">from dataclasses import dataclass
+from typing import Callable
+from collections import deque
+
+# Pythonic: command as callable with undo method
+@dataclass
+class Command:
+    execute: Callable
+    undo: Callable
+    description: str = ""
+
+class TextEditor:
+    def __init__(self):
+        self.content = ""
+        self.history: deque[Command] = deque()
+
+    def execute(self, command: Command) -> None:
+        command.execute()
+        self.history.append(command)
+
+    def undo(self) -> None:
+        if self.history:
+            command = self.history.pop()
+            command.undo()
+            print(f"Undid: {command.description}")
+
+# Create commands using closures
+def make_insert_command(editor: "TextEditor", text: str, pos: int) -> Command:
+    def do():
+        editor.content = editor.content[:pos] + text + editor.content[pos:]
+    def undo():
+        editor.content = editor.content[:pos] + editor.content[pos+len(text):]
+    return Command(do, undo, f"insert '{text}' at {pos}")
+
+editor = TextEditor()
+editor.execute(make_insert_command(editor, "Hello", 0))
+editor.execute(make_insert_command(editor, " World", 5))
+print(editor.content)  # "Hello World"
+editor.undo()
+print(editor.content)  # "Hello"</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Undo/redo, operation queuing, transaction scripts; use callables/closures in Python.</div>
+  </div>
+
+  <div class="pattern-card behavioral" data-name="template method behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Template Method</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Define algorithm skeleton; subclasses fill in steps.</p>
+    <p class="python-note">Python: can also use higher-order functions instead of subclassing</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">from abc import ABC, abstractmethod
+
+class DataProcessor(ABC):
+    # Template method: fixed algorithm
+    def process(self, source: str) -> None:
+        raw = self.read_data(source)
+        parsed = self.parse_data(raw)
+        self.validate(parsed)  # hook - optional
+        self.save_data(parsed)
+
+    @abstractmethod
+    def read_data(self, source: str) -> str: ...
+
+    @abstractmethod
+    def parse_data(self, raw: str) -> dict: ...
+
+    @abstractmethod
+    def save_data(self, data: dict) -> None: ...
+
+    def validate(self, data: dict) -> None:
+        pass  # hook: override for custom validation
+
+class CsvProcessor(DataProcessor):
+    def read_data(self, path: str) -> str:
+        with open(path) as f: return f.read()
+
+    def parse_data(self, raw: str) -> dict:
+        rows = [r.split(",") for r in raw.splitlines()]
+        return {"rows": rows}
+
+    def save_data(self, data: dict) -> None:
+        print(f"Saving {len(data['rows'])} rows")
+
+# Functional alternative using higher-order functions
+def make_processor(reader, parser, saver, validator=None):
+    def process(source):
+        raw = reader(source)
+        parsed = parser(raw)
+        if validator: validator(parsed)
+        saver(parsed)
+    return process</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Algorithm with variant steps; avoid duplicate code; also consider higher-order functions.</div>
+  </div>
+
+  <div class="pattern-card behavioral" data-name="iterator behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Iterator</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Traverse elements without exposing internal structure.</p>
+    <p class="python-note">Python: generators and __iter__/__next__ are first-class citizens</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">from typing import Iterator
+
+# Pythonic: use generators
+def range_step(start: int, stop: int, step: int = 1) -> Iterator[int]:
+    current = start
+    while current < stop:
+        yield current
+        current += step
+
+# Use in for-loops, list(), sum(), etc.
+for n in range_step(0, 20, 3):
+    print(n)  # 0, 3, 6, 9, 12, 15, 18
+
+# Custom iterable class
+class FibonacciSequence:
+    def __init__(self, limit: int):
+        self.limit = limit
+
+    def __iter__(self) -> Iterator[int]:
+        a, b = 0, 1
+        while a <= self.limit:
+            yield a
+            a, b = b, a + b
+
+for n in FibonacciSequence(100):
+    print(n)  # 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89
+
+# Tree traversal generator
+class BinaryTree:
+    def __init__(self, value, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
+
+    def inorder(self) -> Iterator:
+        if self.left: yield from self.left.inorder()
+        yield self.value
+        if self.right: yield from self.right.inorder()
+
+tree = BinaryTree(4, BinaryTree(2, BinaryTree(1), BinaryTree(3)), BinaryTree(5))
+list(tree.inorder())  # [1, 2, 3, 4, 5]</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Custom traversal of collections; use generators in Python — they implement Iterator automatically.</div>
+  </div>
+
+  <div class="pattern-card behavioral" data-name="state behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">State</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Change object behavior based on internal state.</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">from typing import Protocol
+
+class OrderState(Protocol):
+    def confirm(self, order: "Order") -> None: ...
+    def ship(self, order: "Order") -> None: ...
+    def cancel(self, order: "Order") -> None: ...
+
+class PendingState:
+    def confirm(self, order: "Order") -> None:
+        print("Order confirmed!")
+        order.state = ShippedState() if order.items else ProcessingState()
+
+    def ship(self, order: "Order") -> None:
+        print("Cannot ship — not confirmed yet")
+
+    def cancel(self, order: "Order") -> None:
+        print("Order cancelled")
+        order.state = CancelledState()
+
+class ProcessingState:
+    def confirm(self, order: "Order") -> None:
+        print("Already confirmed")
+    def ship(self, order: "Order") -> None:
+        print("Order shipped!")
+        order.state = ShippedState()
+    def cancel(self, order: "Order") -> None:
+        print("Order cancelled")
+        order.state = CancelledState()
+
+class ShippedState:
+    def confirm(self, order: "Order") -> None: print("Already shipped")
+    def ship(self, order: "Order") -> None: print("Already shipped")
+    def cancel(self, order: "Order") -> None: print("Cannot cancel shipped order")
+
+class CancelledState:
+    def confirm(self, order): print("Order is cancelled")
+    def ship(self, order): print("Order is cancelled")
+    def cancel(self, order): print("Already cancelled")
+
+class Order:
+    def __init__(self): self.state = PendingState()
+    def confirm(self): self.state.confirm(self)
+    def ship(self): self.state.ship(self)
+    def cancel(self): self.state.cancel(self)
+
+order = Order()
+order.confirm()  # "Order confirmed!"
+order.ship()     # "Order shipped!"
+order.cancel()   # "Cannot cancel shipped order"</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Object behavior depends on state; eliminates large if/elif chains; order workflows, game states.</div>
+  </div>
+
+  <div class="pattern-card behavioral" data-name="chain of responsibility behavioral" onclick="toggle(this)">
+    <div class="card-top">
+      <span class="pattern-name">Chain of Responsibility</span>
+      <span class="cat-badge">Behavioral</span>
+    </div>
+    <p class="pattern-desc">Pass requests along a chain of handlers.</p>
+    <p class="python-note">Python: middleware pipelines (WSGI, ASGI) are classic CoR implementations</p>
+    <p class="toggle-hint">Click to expand</p>
+    <div class="pattern-code">
+      <pre><code class="language-python">from typing import Callable
+
+# Pythonic: middleware pipeline with callables
+Handler = Callable[[dict], dict | None]
+
+def make_auth_middleware(next_handler: Handler) -> Handler:
+    def handle(request: dict) -> dict | None:
+        if "auth_token" not in request:
+            return {"error": "Unauthorized", "status": 401}
+        return next_handler(request)
+    return handle
+
+def make_rate_limit_middleware(next_handler: Handler, limit: int = 100) -> Handler:
+    call_count = {}
+    def handle(request: dict) -> dict | None:
+        user = request.get("user", "anonymous")
+        call_count[user] = call_count.get(user, 0) + 1
+        if call_count[user] > limit:
+            return {"error": "Rate limit exceeded", "status": 429}
+        return next_handler(request)
+    return handle
+
+def make_logging_middleware(next_handler: Handler) -> Handler:
+    def handle(request: dict) -> dict | None:
+        print(f"Request: {request.get('path', '/')}")
+        response = next_handler(request)
+        print(f"Response: {response}")
+        return response
+    return handle
+
+# Build pipeline (applies right to left)
+def handle_request(request: dict) -> dict:
+    return {"data": "result", "status": 200}
+
+pipeline = make_logging_middleware(
+    make_auth_middleware(
+        make_rate_limit_middleware(
+            handle_request
+        )
+    )
+)
+
+pipeline({"path": "/api/data", "auth_token": "abc123", "user": "alice"})</code></pre>
+    </div>
+    <div class="use-when"><strong>Use when:</strong> Middleware pipelines, validation chains, request processing; Django/FastAPI middleware use this pattern.</div>
+  </div>
+
+</div>
+</div>
+
+<script>
+hljs.highlightAll();
+
+function toggle(card) {
+  const code = card.querySelector('.pattern-code');
+  const hint = card.querySelector('.toggle-hint');
+  code.classList.toggle('open');
+  hint.textContent = code.classList.contains('open') ? 'Click to collapse' : 'Click to expand';
+}
+
+function filter(cat) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.filter-btn[data-cat="${cat}"]`).classList.add('active');
+  document.querySelectorAll('.pattern-card').forEach(card => {
+    card.classList.toggle('hidden', cat !== 'all' && !card.classList.contains(cat));
+  });
+}
+
+function search(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('.pattern-card').forEach(card => {
+    const text = (card.dataset.name + ' ' + card.textContent).toLowerCase();
+    card.classList.toggle('hidden', q.length > 0 && !text.includes(q));
+  });
+}
+</script>
+</body>
+</html>

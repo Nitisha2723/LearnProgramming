@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Comprehensions - Complete Reference</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #1a1a2e;
+    --panel: #16213e;
+    --panel2: #0f3460;
+    --accent: #e94560;
+    --accent2: #533483;
+    --text: #e0e0e0;
+    --text-dim: #a0a0b0;
+    --border: #2a2a4e;
+    --green: #4caf50;
+    --blue: #2196f3;
+    --yellow: #ffc107;
+    --purple: #9c27b0;
+    --orange: #ff9800;
+    --teal: #00bcd4;
+    --font-mono: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, #0f3460, #533483);
+    padding: 2.5rem 2rem 2rem;
+    text-align: center;
+    border-bottom: 2px solid var(--accent);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% -20%, rgba(233,69,96,0.2) 0%, transparent 70%);
+  }
+  header h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    position: relative;
+  }
+  header h1 span { color: var(--accent); }
+  header p {
+    color: var(--text-dim);
+    margin-top: 0.5rem;
+    font-size: 1.05rem;
+    position: relative;
+  }
+
+  /* ── Nav tabs ── */
+  nav {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  nav::-webkit-scrollbar { display: none; }
+  nav button {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  nav button:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── Main layout ── */
+  main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  section { display: none; }
+  section.active { display: block; }
+
+  /* ── Section heading ── */
+  .section-title {
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .section-title .badge {
+    font-size: 0.7rem;
+    background: var(--accent);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .section-desc {
+    color: var(--text-dim);
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+  }
+
+  /* ── Cards / panels ── */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--teal);
+  }
+
+  /* ── Side-by-side comparison ── */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  @media (max-width: 700px) { .compare { grid-template-columns: 1fr; } }
+  .compare-box {
+    background: #0d0d1f;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .compare-box .label {
+    padding: 0.5rem 1rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+  .compare-box.comp .label { background: rgba(76,175,80,0.15); color: var(--green); border-bottom: 1px solid rgba(76,175,80,0.3); }
+  .compare-box.loop .label { background: rgba(33,150,243,0.15); color: var(--blue); border-bottom: 1px solid rgba(33,150,243,0.3); }
+  .compare-box.mapf .label { background: rgba(255,193,7,0.15); color: var(--yellow); border-bottom: 1px solid rgba(255,193,7,0.3); }
+  .compare-box pre { margin: 0; }
+  .compare-box pre code { border-radius: 0 !important; }
+
+  /* ── Syntax highlight blocks ── */
+  pre { border-radius: 8px; overflow: hidden; margin: 0.5rem 0; }
+  pre code.hljs { padding: 1.2rem !important; font-family: var(--font-mono) !important; font-size: 0.88rem !important; line-height: 1.55 !important; }
+
+  /* ── Syntax formula ── */
+  .syntax-formula {
+    background: var(--panel2);
+    border: 1px solid var(--accent2);
+    border-radius: 10px;
+    padding: 1.2rem 1.5rem;
+    margin: 1rem 0;
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    line-height: 1.8;
+  }
+  .sf-keyword { color: var(--accent); font-weight: 700; }
+  .sf-expr    { color: #f8f8f2; }
+  .sf-var     { color: var(--teal); }
+  .sf-iter    { color: var(--yellow); }
+  .sf-cond    { color: var(--purple); }
+  .sf-optional { color: var(--text-dim); font-style: italic; font-size: 0.82em; }
+
+  /* ── Tags ── */
+  .tag {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin: 0.15rem;
+  }
+  .tag-list   { background: rgba(76,175,80,0.15);   color: var(--green);  border: 1px solid rgba(76,175,80,0.3); }
+  .tag-dict   { background: rgba(33,150,243,0.15);  color: var(--blue);   border: 1px solid rgba(33,150,243,0.3); }
+  .tag-set    { background: rgba(255,193,7,0.15);   color: var(--yellow); border: 1px solid rgba(255,193,7,0.3); }
+  .tag-gen    { background: rgba(156,39,176,0.15);  color: #ce93d8;       border: 1px solid rgba(156,39,176,0.3); }
+  .tag-fast   { background: rgba(0,188,212,0.15);   color: var(--teal);   border: 1px solid rgba(0,188,212,0.3); }
+  .tag-lazy   { background: rgba(255,152,0,0.15);   color: var(--orange); border: 1px solid rgba(255,152,0,0.3); }
+
+  /* ── Performance table ── */
+  .perf-table-wrap { overflow-x: auto; margin: 1rem 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  th {
+    background: var(--panel2);
+    padding: 0.8rem 1rem;
+    text-align: left;
+    font-weight: 700;
+    color: var(--teal);
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:hover td { background: rgba(255,255,255,0.03); }
+  .perf-best   { color: var(--green); font-weight: 700; }
+  .perf-mid    { color: var(--yellow); }
+  .perf-slow   { color: var(--accent); }
+  .perf-bar {
+    display: inline-block;
+    height: 8px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  /* ── Interactive builder ── */
+  .builder {
+    background: var(--panel2);
+    border: 1px solid var(--accent2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .builder h3 { color: var(--orange); margin-bottom: 1rem; }
+  .builder-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+    align-items: flex-end;
+  }
+  .ctrl-group { display: flex; flex-direction: column; gap: 0.4rem; flex: 1; min-width: 140px; }
+  .ctrl-group label { font-size: 0.8rem; color: var(--text-dim); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+  .ctrl-group input, .ctrl-group select {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    font-family: var(--font-mono);
+  }
+  .ctrl-group input:focus, .ctrl-group select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .build-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.55rem 1.4rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    align-self: flex-end;
+  }
+  .build-btn:hover { background: #c73652; transform: translateY(-1px); }
+  .build-output {
+    background: #0d0d1f;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    min-height: 60px;
+    white-space: pre-wrap;
+    color: #f8f8f2;
+  }
+
+  /* ── Pattern grid ── */
+  .pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.2rem;
+    margin-top: 1rem;
+  }
+  .pattern-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .pattern-card .phead {
+    padding: 0.7rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .phead-filter  { background: rgba(76,175,80,0.12);  color: var(--green);  border-bottom: 1px solid rgba(76,175,80,0.2); }
+  .phead-transform { background: rgba(33,150,243,0.12); color: var(--blue);  border-bottom: 1px solid rgba(33,150,243,0.2); }
+  .phead-flatten { background: rgba(255,193,7,0.12);   color: var(--yellow); border-bottom: 1px solid rgba(255,193,7,0.2); }
+  .phead-nested  { background: rgba(156,39,176,0.12);  color: #ce93d8;       border-bottom: 1px solid rgba(156,39,176,0.2); }
+  .phead-dict    { background: rgba(0,188,212,0.12);   color: var(--teal);   border-bottom: 1px solid rgba(0,188,212,0.2); }
+  .phead-set     { background: rgba(255,152,0,0.12);   color: var(--orange); border-bottom: 1px solid rgba(255,152,0,0.2); }
+  .pattern-card pre { margin: 0; border-radius: 0; }
+  .pattern-card pre code.hljs { font-size: 0.82rem !important; padding: 0.9rem 1rem !important; }
+  .pattern-card .pnote {
+    padding: 0.5rem 1rem;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── 2D builder ── */
+  .grid-builder {
+    background: var(--panel2);
+    border: 1px solid var(--accent2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .grid-builder h3 { color: var(--teal); margin-bottom: 1rem; }
+  .grid-preview {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    margin-top: 1rem;
+  }
+  .matrix-visual {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    background: #0d0d1f;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    min-width: 180px;
+  }
+  .matrix-row { display: flex; gap: 4px; justify-content: center; margin: 2px 0; }
+  .matrix-cell {
+    width: 36px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  /* ── Tip box ── */
+  .tip {
+    background: rgba(0,188,212,0.08);
+    border-left: 3px solid var(--teal);
+    border-radius: 0 8px 8px 0;
+    padding: 0.9rem 1.2rem;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    color: #b2ebf2;
+  }
+  .tip strong { color: var(--teal); }
+
+  .warn {
+    background: rgba(233,69,96,0.08);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 0.9rem 1.2rem;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    color: #ffcdd2;
+  }
+  .warn strong { color: var(--accent); }
+
+  /* ── Type overview row ── */
+  .type-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .type-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem;
+    text-align: center;
+    transition: transform 0.2s, border-color 0.2s;
+    cursor: default;
+  }
+  .type-card:hover { transform: translateY(-3px); border-color: var(--accent2); }
+  .type-card .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+  .type-card .name { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .type-card .bracket { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 700; }
+  .type-card .tdesc { font-size: 0.78rem; color: var(--text-dim); margin-top: 0.4rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Python <span>Comprehensions</span></h1>
+  <p>Complete reference — syntax, patterns, performance, and interactive examples</p>
+</header>
+
+<nav>
+  <button class="active" onclick="showTab('overview')">Overview</button>
+  <button onclick="showTab('list')">List</button>
+  <button onclick="showTab('dict')">Dict</button>
+  <button onclick="showTab('set')">Set</button>
+  <button onclick="showTab('gen')">Generator</button>
+  <button onclick="showTab('nested')">Nested</button>
+  <button onclick="showTab('compare')">Compare</button>
+  <button onclick="showTab('patterns')">Patterns</button>
+  <button onclick="showTab('perf')">Performance</button>
+</nav>
+
+<main>
+
+<!-- ════════════════════ OVERVIEW ════════════════════ -->
+<section id="overview" class="active">
+  <div class="section-title">Python Comprehensions <span class="badge">OVERVIEW</span></div>
+  <div class="section-desc">Concise, readable, and often faster alternatives to for loops for creating collections.</div>
+
+  <div class="type-row">
+    <div class="type-card">
+      <div class="icon">📋</div>
+      <div class="bracket" style="color:var(--green)">[ ]</div>
+      <div class="name" style="color:var(--green)">List</div>
+      <div class="tdesc">Creates a list. Eager evaluation. Random access.</div>
+      <div style="margin-top:0.6rem"><span class="tag tag-list">ordered</span><span class="tag tag-list">mutable</span></div>
+    </div>
+    <div class="type-card">
+      <div class="icon">📖</div>
+      <div class="bracket" style="color:var(--blue)">{ : }</div>
+      <div class="name" style="color:var(--blue)">Dict</div>
+      <div class="tdesc">Creates a dict with key:value pairs.</div>
+      <div style="margin-top:0.6rem"><span class="tag tag-dict">key-value</span><span class="tag tag-dict">unique keys</span></div>
+    </div>
+    <div class="type-card">
+      <div class="icon">🔵</div>
+      <div class="bracket" style="color:var(--yellow)">{ }</div>
+      <div class="name" style="color:var(--yellow)">Set</div>
+      <div class="tdesc">Creates a set. No duplicates. No order.</div>
+      <div style="margin-top:0.6rem"><span class="tag tag-set">unique</span><span class="tag tag-set">unordered</span></div>
+    </div>
+    <div class="type-card">
+      <div class="icon">♾️</div>
+      <div class="bracket" style="color:#ce93d8">( )</div>
+      <div class="name" style="color:#ce93d8">Generator</div>
+      <div class="tdesc">Lazy iterator. Memory-efficient for large data.</div>
+      <div style="margin-top:0.6rem"><span class="tag tag-gen">lazy</span><span class="tag tag-gen">one-pass</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>General Syntax</h3>
+    <div class="syntax-formula">
+<span class="sf-keyword">[</span><span class="sf-expr">expression</span>  <span class="sf-keyword">for</span> <span class="sf-var">item</span> <span class="sf-keyword">in</span> <span class="sf-iter">iterable</span>  <span class="sf-cond">if condition</span><span class="sf-keyword">]</span>  <span class="sf-optional">← list</span>
+<span class="sf-keyword">{</span><span class="sf-var">key</span>: <span class="sf-expr">value</span>  <span class="sf-keyword">for</span> <span class="sf-var">item</span> <span class="sf-keyword">in</span> <span class="sf-iter">iterable</span>  <span class="sf-cond">if condition</span><span class="sf-keyword">}</span>  <span class="sf-optional">← dict</span>
+<span class="sf-keyword">{</span><span class="sf-expr">expression</span>  <span class="sf-keyword">for</span> <span class="sf-var">item</span> <span class="sf-keyword">in</span> <span class="sf-iter">iterable</span>  <span class="sf-cond">if condition</span><span class="sf-keyword">}</span>  <span class="sf-optional">← set</span>
+<span class="sf-keyword">(</span><span class="sf-expr">expression</span>  <span class="sf-keyword">for</span> <span class="sf-var">item</span> <span class="sf-keyword">in</span> <span class="sf-iter">iterable</span>  <span class="sf-cond">if condition</span><span class="sf-keyword">)</span>  <span class="sf-optional">← generator</span>
+    </div>
+    <div class="tip"><strong>Reading tip:</strong> Read comprehensions inside-out: start with the <code>for</code> clause, then apply the filter, then compute the expression. E.g., "for each x in numbers, if x is even, yield x²".</div>
+  </div>
+
+  <div class="card">
+    <h3>Quick Comparison</h3>
+    <pre><code class="language-python"># All four types — same data, different collection
+numbers = range(1, 6)   # 1, 2, 3, 4, 5
+
+lst  = [x * 2      for x in numbers]           # [2, 4, 6, 8, 10]
+dct  = {x: x ** 2  for x in numbers}           # {1:1, 2:4, 3:9, 4:16, 5:25}
+st   = {x % 3      for x in numbers}           # {0, 1, 2}  (unique remainders)
+gen  = (x * 2      for x in numbers)           # generator object — lazy
+
+print(lst)         # [2, 4, 6, 8, 10]
+print(dct)         # {1: 1, 2: 4, 3: 9, 4: 16, 5: 25}
+print(st)          # {0, 1, 2}
+print(next(gen))   # 2  (first value computed on demand)
+print(list(gen))   # [4, 6, 8, 10]  (rest — generator now exhausted)</code></pre>
+  </div>
+</section>
+
+<!-- ════════════════════ LIST ════════════════════ -->
+<section id="list">
+  <div class="section-title">List Comprehension <span class="badge">[ ]</span></div>
+  <div class="section-desc">Creates a new list. Evaluated eagerly. Supports random access, len(), indexing.</div>
+
+  <div class="card">
+    <h3>Syntax</h3>
+    <div class="syntax-formula">
+<span class="sf-keyword">[</span> <span class="sf-expr">expression</span>  <span class="sf-keyword">for</span> <span class="sf-var">var</span> <span class="sf-keyword">in</span> <span class="sf-iter">iterable</span>  <span class="sf-cond">[if condition]</span> <span class="sf-keyword">]</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Basic Examples</h3>
+    <pre><code class="language-python"># 1. Squares of 0-9
+squares = [x**2 for x in range(10)]
+# [0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
+
+# 2. Even numbers only (with filter)
+evens = [x for x in range(20) if x % 2 == 0]
+# [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]
+
+# 3. String manipulation
+words = ['hello', 'world', 'python']
+upper = [w.upper() for w in words]
+# ['HELLO', 'WORLD', 'PYTHON']
+
+# 4. Conditional expression (ternary) in expression
+labels = ['even' if x % 2 == 0 else 'odd' for x in range(6)]
+# ['even', 'odd', 'even', 'odd', 'even', 'odd']
+
+# 5. Calling functions
+import math
+roots = [math.sqrt(x) for x in [4, 9, 16, 25]]
+# [2.0, 3.0, 4.0, 5.0]</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>Side-by-side: Comprehension vs For Loop</h3>
+    <div class="compare">
+      <div class="compare-box comp">
+        <div class="label">Comprehension</div>
+        <pre><code class="language-python"># Squares of evens in 0-19
+result = [
+    x**2
+    for x in range(20)
+    if x % 2 == 0
+]</code></pre>
+      </div>
+      <div class="compare-box loop">
+        <div class="label">Equivalent For Loop</div>
+        <pre><code class="language-python"># Same result, more verbose
+result = []
+for x in range(20):
+    if x % 2 == 0:
+        result.append(x**2)</code></pre>
+      </div>
+    </div>
+    <div class="tip"><strong>Both produce:</strong> [0, 4, 16, 36, 64, 100, 144, 196, 256, 324]</div>
+  </div>
+
+  <div class="card">
+    <h3>With enumerate() and zip()</h3>
+    <pre><code class="language-python"># enumerate — access index and value
+letters = ['a', 'b', 'c', 'd']
+indexed = [(i, ch.upper()) for i, ch in enumerate(letters)]
+# [(0, 'A'), (1, 'B'), (2, 'C'), (3, 'D')]
+
+# zip — combine two iterables
+names  = ['Alice', 'Bob', 'Carol']
+scores = [92, 78, 88]
+report = [f"{n}: {s}" for n, s in zip(names, scores)]
+# ['Alice: 92', 'Bob: 78', 'Carol: 88']
+
+# Multiple for clauses — Cartesian product
+pairs = [(x, y) for x in [1,2,3] for y in ['a','b']]
+# [(1,'a'), (1,'b'), (2,'a'), (2,'b'), (3,'a'), (3,'b')]</code></pre>
+  </div>
+
+  <div class="warn"><strong>Pitfall:</strong> Avoid side effects (like <code>print()</code>) inside comprehensions. They create a list of <code>None</code> values and are harder to debug. Use a plain for loop instead.</div>
+</section>
+
+<!-- ════════════════════ DICT ════════════════════ -->
+<section id="dict">
+  <div class="section-title">Dict Comprehension <span class="badge">{ : }</span></div>
+  <div class="section-desc">Creates a dictionary. Keys must be hashable and unique (last value wins on duplicate keys).</div>
+
+  <div class="card">
+    <h3>Syntax</h3>
+    <div class="syntax-formula">
+<span class="sf-keyword">{</span> <span class="sf-var">key_expr</span>: <span class="sf-expr">value_expr</span>  <span class="sf-keyword">for</span> <span class="sf-var">var</span> <span class="sf-keyword">in</span> <span class="sf-iter">iterable</span>  <span class="sf-cond">[if condition]</span> <span class="sf-keyword">}</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Basic Examples</h3>
+    <pre><code class="language-python"># 1. Word to length mapping
+words = ['apple', 'banana', 'cherry']
+lengths = {w: len(w) for w in words}
+# {'apple': 5, 'banana': 6, 'cherry': 6}
+
+# 2. Invert a dictionary (swap keys and values)
+original = {'a': 1, 'b': 2, 'c': 3}
+inverted = {v: k for k, v in original.items()}
+# {1: 'a', 2: 'b', 3: 'c'}
+
+# 3. Filter entries — keep only high scores
+scores = {'Alice': 92, 'Bob': 55, 'Carol': 88, 'Dave': 40}
+passing = {name: score for name, score in scores.items() if score >= 70}
+# {'Alice': 92, 'Carol': 88}
+
+# 4. Transform values
+prices = {'apple': 1.0, 'banana': 0.5, 'cherry': 2.0}
+discounted = {item: round(price * 0.9, 2) for item, price in prices.items()}
+# {'apple': 0.9, 'banana': 0.45, 'cherry': 1.8}
+
+# 5. Build from two lists using zip
+keys   = ['name', 'age', 'city']
+values = ['Alice', 30, 'Berlin']
+record = {k: v for k, v in zip(keys, values)}
+# {'name': 'Alice', 'age': 30, 'city': 'Berlin'}</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>Side-by-side: Comprehension vs For Loop</h3>
+    <div class="compare">
+      <div class="compare-box comp">
+        <div class="label">Dict Comprehension</div>
+        <pre><code class="language-python">data = [('a', 1), ('b', 2), ('c', 3)]
+
+result = {
+    k.upper(): v * 10
+    for k, v in data
+    if v > 1
+}
+# {'B': 20, 'C': 30}</code></pre>
+      </div>
+      <div class="compare-box loop">
+        <div class="label">Equivalent For Loop</div>
+        <pre><code class="language-python">data = [('a', 1), ('b', 2), ('c', 3)]
+
+result = {}
+for k, v in data:
+    if v > 1:
+        result[k.upper()] = v * 10
+# {'B': 20, 'C': 30}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Grouping / Counting Pattern</h3>
+    <pre><code class="language-python"># Count character frequencies (dict comprehension style)
+text = "mississippi"
+freq = {ch: text.count(ch) for ch in set(text)}
+# {'m': 1, 'i': 4, 's': 4, 'p': 2}
+
+# Better with Counter (but dict comp is fine for understanding):
+from collections import Counter
+Counter(text)   # Counter({'i': 4, 's': 4, 'p': 2, 'm': 1})
+
+# Categorise numbers
+nums = range(1, 11)
+parity = {n: ('even' if n % 2 == 0 else 'odd') for n in nums}
+# {1:'odd', 2:'even', ..., 10:'even'}</code></pre>
+  </div>
+</section>
+
+<!-- ════════════════════ SET ════════════════════ -->
+<section id="set">
+  <div class="section-title">Set Comprehension <span class="badge">{ }</span></div>
+  <div class="section-desc">Creates a set. Duplicates are automatically removed. Unordered — use when uniqueness matters.</div>
+
+  <div class="card">
+    <h3>Syntax</h3>
+    <div class="syntax-formula">
+<span class="sf-keyword">{</span> <span class="sf-expr">expression</span>  <span class="sf-keyword">for</span> <span class="sf-var">var</span> <span class="sf-keyword">in</span> <span class="sf-iter">iterable</span>  <span class="sf-cond">[if condition]</span> <span class="sf-keyword">}</span>
+    </div>
+    <div class="warn"><strong>Disambiguation:</strong> <code>{}</code> creates an empty dict, NOT a set. Use <code>set()</code> for empty sets.</div>
+  </div>
+
+  <div class="card">
+    <h3>Basic Examples</h3>
+    <pre><code class="language-python"># 1. Unique remainders
+{x % 5 for x in range(20)}
+# {0, 1, 2, 3, 4}
+
+# 2. Remove duplicates while transforming
+words = ['Hello', 'world', 'HELLO', 'Python', 'world']
+unique_lower = {w.lower() for w in words}
+# {'hello', 'world', 'python'}
+
+# 3. Set of lengths
+sentences = ['hi there', 'hello world', 'bye']
+lengths = {len(s) for s in sentences}
+# {3, 8, 11}
+
+# 4. Filtering primes (simple sieve concept)
+def is_prime(n):
+    return n > 1 and all(n % i != 0 for i in range(2, int(n**0.5)+1))
+
+primes = {n for n in range(2, 50) if is_prime(n)}
+# {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47}</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>Side-by-side: Comprehension vs For Loop</h3>
+    <div class="compare">
+      <div class="compare-box comp">
+        <div class="label">Set Comprehension</div>
+        <pre><code class="language-python">data = [1, 2, 2, 3, 4, 4, 5]
+
+evens = {
+    x for x in data
+    if x % 2 == 0
+}
+# {2, 4}</code></pre>
+      </div>
+      <div class="compare-box loop">
+        <div class="label">Equivalent For Loop</div>
+        <pre><code class="language-python">data = [1, 2, 2, 3, 4, 4, 5]
+
+evens = set()
+for x in data:
+    if x % 2 == 0:
+        evens.add(x)
+# {2, 4}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Set Operations with Comprehensions</h3>
+    <pre><code class="language-python">a = {1, 2, 3, 4, 5}
+b = {3, 4, 5, 6, 7}
+
+# Intersection via comprehension
+inter = {x for x in a if x in b}       # {3, 4, 5}
+
+# Difference via comprehension
+diff  = {x for x in a if x not in b}   # {1, 2}
+
+# Symmetric difference via comprehension
+sym   = {x for x in a | b if x not in a & b}  # {1, 2, 6, 7}</code></pre>
+  </div>
+</section>
+
+<!-- ════════════════════ GENERATOR ════════════════════ -->
+<section id="gen">
+  <div class="section-title">Generator Expression <span class="badge">( )</span></div>
+  <div class="section-desc">Lazy iteration — values computed on demand. Memory-efficient for large datasets. Cannot be reused after exhaustion.</div>
+
+  <div class="card">
+    <h3>Syntax</h3>
+    <div class="syntax-formula">
+<span class="sf-keyword">(</span> <span class="sf-expr">expression</span>  <span class="sf-keyword">for</span> <span class="sf-var">var</span> <span class="sf-keyword">in</span> <span class="sf-iter">iterable</span>  <span class="sf-cond">[if condition]</span> <span class="sf-keyword">)</span>
+    </div>
+    <div class="tip"><strong>Memory:</strong> A generator expression for 1 million integers uses ~100 bytes vs ~8MB for a list comprehension.</div>
+  </div>
+
+  <div class="card">
+    <h3>Basic Examples</h3>
+    <pre><code class="language-python"># 1. Creating a generator
+gen = (x**2 for x in range(1_000_000))  # No memory used yet!
+print(next(gen))   # 0    — compute one at a time
+print(next(gen))   # 1
+print(next(gen))   # 4
+
+# 2. Pass directly to functions that accept iterables
+total = sum(x**2 for x in range(100))        # 328350
+maxi  = max(len(w) for w in ['hi', 'world']) # 5
+joined = ', '.join(str(x) for x in [1,2,3]) # '1, 2, 3'
+
+# Note: no double parentheses needed inside sum/max/etc.
+# sum((x**2 for x in range(100)))  ← also valid, but redundant ()
+
+# 3. any() / all() — short-circuits early
+has_neg  = any(x < 0 for x in [1, 2, -3, 4])  # True (stops at -3)
+all_pos  = all(x > 0 for x in [1, 2,  3, 4])  # True
+
+# 4. Converting to other types
+lst  = list(x**2 for x in range(5))  # [0, 1, 4, 9, 16]
+tpl  = tuple(x**2 for x in range(5)) # (0, 1, 4, 9, 16)</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>Side-by-side: Comprehension vs For Loop</h3>
+    <div class="compare">
+      <div class="compare-box comp">
+        <div class="label">Generator Expression</div>
+        <pre><code class="language-python">import sys
+
+gen = (x**2 for x in range(10**6))
+print(sys.getsizeof(gen))
+# ~104 bytes
+
+# Consume one item
+print(next(gen))  # 0</code></pre>
+      </div>
+      <div class="compare-box loop">
+        <div class="label">List Comprehension (for contrast)</div>
+        <pre><code class="language-python">import sys
+
+lst = [x**2 for x in range(10**6)]
+print(sys.getsizeof(lst))
+# ~8,448,728 bytes (~8 MB)
+
+# Same access
+print(lst[0])  # 0</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Generator Chaining (Pipeline)</h3>
+    <pre><code class="language-python"># Process a large CSV file without loading it all into memory
+# Each step is lazy — only pulls data when needed
+
+with open('large_data.csv') as f:
+    lines  = (line.strip() for line in f)
+    rows   = (line.split(',') for line in lines if line)
+    nums   = (float(row[2]) for row in rows if row[2].replace('.','').isdigit())
+    total  = sum(nums)          # Entire pipeline runs here, line by line
+    print(total)</code></pre>
+    <div class="tip"><strong>Pipeline pattern:</strong> Chain generator expressions to build a lazy data processing pipeline. Memory usage stays constant regardless of file size.</div>
+  </div>
+
+  <div class="warn"><strong>One-shot:</strong> Generators are exhausted after a single pass. Calling <code>list(gen)</code> twice on the same generator object gives <code>[]</code> the second time. Create a new generator expression if you need to iterate again.</div>
+</section>
+
+<!-- ════════════════════ NESTED ════════════════════ -->
+<section id="nested">
+  <div class="section-title">Nested Comprehensions <span class="badge">ADVANCED</span></div>
+  <div class="section-desc">Comprehensions inside comprehensions — powerful but keep readability in mind.</div>
+
+  <div class="card">
+    <h3>Multiple for Clauses</h3>
+    <pre><code class="language-python"># ── Cartesian product (equivalent to nested loops) ──
+colors = ['red', 'green', 'blue']
+sizes  = ['S', 'M', 'L']
+
+combos = [(c, s) for c in colors for s in sizes]
+# Equivalent to:
+combos = []
+for c in colors:
+    for s in sizes:
+        combos.append((c, s))
+
+# ── Flattening a 2D list ──
+matrix = [[1,2,3], [4,5,6], [7,8,9]]
+
+flat = [x for row in matrix for x in row]
+# [1, 2, 3, 4, 5, 6, 7, 8, 9]
+# Read: "for each row in matrix, for each x in row, yield x"</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>Nested Comprehension (inner expression is a comprehension)</h3>
+    <pre><code class="language-python"># ── Create a 3×3 identity-like matrix ──
+identity = [[1 if row == col else 0
+             for col in range(3)]
+            for row in range(3)]
+# [[1, 0, 0],
+#  [0, 1, 0],
+#  [0, 0, 1]]
+
+# ── Transpose a matrix ──
+matrix = [[1,2,3],
+          [4,5,6],
+          [7,8,9]]
+
+transposed = [[row[i] for row in matrix] for i in range(3)]
+# [[1, 4, 7],
+#  [2, 5, 8],
+#  [3, 6, 9]]
+# Equivalent to list(zip(*matrix))
+
+# ── Filter within nested ──
+data = [[1,2,3], [4,5,6], [7,8,9]]
+evens_only = [[x for x in row if x % 2 == 0] for row in data]
+# [[2], [4, 6], [8]]</code></pre>
+  </div>
+
+  <!-- Interactive 2D builder -->
+  <div class="grid-builder">
+    <h3>Interactive 2D List Builder</h3>
+    <p style="color:var(--text-dim);font-size:0.9rem;margin-bottom:1rem">Adjust parameters to build a 2D list comprehension and see the result.</p>
+    <div class="builder-controls">
+      <div class="ctrl-group">
+        <label>Rows</label>
+        <input type="number" id="gb-rows" value="4" min="1" max="8">
+      </div>
+      <div class="ctrl-group">
+        <label>Cols</label>
+        <input type="number" id="gb-cols" value="4" min="1" max="8">
+      </div>
+      <div class="ctrl-group">
+        <label>Expression</label>
+        <select id="gb-expr">
+          <option value="r*cols+c">row*cols + col (flat index)</option>
+          <option value="r*c">row * col (multiply)</option>
+          <option value="r+c">row + col (sum)</option>
+          <option value="r==c?1:0">1 if row==col else 0 (identity)</option>
+          <option value="max(r,c)">max(row, col)</option>
+          <option value="abs(r-c)">abs(row - col)</option>
+        </select>
+      </div>
+      <button class="build-btn" onclick="buildGrid()">Build</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;flex-wrap:wrap">
+      <div>
+        <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:0.4rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Generated Code</div>
+        <div class="build-output" id="gb-code"></div>
+      </div>
+      <div>
+        <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:0.4rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Visual Result</div>
+        <div class="matrix-visual" id="gb-visual"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Depth Warning</h3>
+    <pre><code class="language-python"># ✅ Two levels — readable
+flat = [x for row in matrix for x in row]
+
+# ⚠️  Three levels — getting complex
+deep = [x for block in cube for row in block for x in row]
+
+# ❌ Consider using explicit loops beyond 2-3 levels
+result = []
+for block in cube:
+    for row in block:
+        for x in row:
+            result.append(x)</code></pre>
+    <div class="warn"><strong>Readability rule:</strong> If you need more than 2 <code>for</code> clauses in one comprehension, break it into a regular for loop or helper function. Comprehensions should simplify code, not obscure it.</div>
+  </div>
+</section>
+
+<!-- ════════════════════ COMPARE INTERACTIVE ════════════════════ -->
+<section id="compare">
+  <div class="section-title">Side-by-Side Comparison <span class="badge">INTERACTIVE</span></div>
+  <div class="section-desc">Pick a scenario and see the comprehension versus the equivalent for-loop and map() side by side.</div>
+
+  <div class="builder" style="margin-bottom:1.5rem">
+    <h3>Choose Scenario</h3>
+    <div style="display:flex;flex-wrap:wrap;gap:0.6rem;margin-top:0.8rem" id="scenario-btns">
+      <button class="build-btn" style="background:var(--green)" onclick="setScenario(0)">Filter Evens</button>
+      <button class="build-btn" style="background:var(--blue)"  onclick="setScenario(1)">Square Numbers</button>
+      <button class="build-btn" style="background:var(--yellow);color:#000" onclick="setScenario(2)">Uppercase Strings</button>
+      <button class="build-btn" style="background:var(--purple)" onclick="setScenario(3)">Filter &amp; Transform</button>
+      <button class="build-btn" style="background:var(--orange)" onclick="setScenario(4)">Flatten 2D List</button>
+      <button class="build-btn" style="background:var(--teal);color:#000" onclick="setScenario(5)">Build Dict</button>
+    </div>
+  </div>
+
+  <div id="compare-output" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem"></div>
+</section>
+
+<!-- ════════════════════ PATTERNS ════════════════════ -->
+<section id="patterns">
+  <div class="section-title">Common Patterns <span class="badge">COOKBOOK</span></div>
+  <div class="section-desc">Real-world patterns for filtering, transforming, flattening, and more.</div>
+
+  <div class="pattern-grid" id="pattern-grid"></div>
+</section>
+
+<!-- ════════════════════ PERFORMANCE ════════════════════ -->
+<section id="perf">
+  <div class="section-title">Performance Guide <span class="badge">BENCHMARKS</span></div>
+  <div class="section-desc">Typical relative performance characteristics. Actual results vary by Python version and hardware.</div>
+
+  <div class="card">
+    <h3>Typical Relative Speed (n=1,000,000 integers)</h3>
+    <div class="perf-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Approach</th>
+          <th>Relative Speed</th>
+          <th>Memory</th>
+          <th>Readability</th>
+          <th>Use When</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>List comprehension</strong><br><code>[x**2 for x in data]</code></td>
+          <td><span class="perf-bar" style="width:90px;background:var(--green)"></span><span class="perf-best">Fastest (1×)</span></td>
+          <td>O(n) — stores all</td>
+          <td>Excellent</td>
+          <td>Default choice for list creation</td>
+        </tr>
+        <tr>
+          <td><strong>Generator expression</strong><br><code>(x**2 for x in data)</code></td>
+          <td><span class="perf-bar" style="width:85px;background:var(--green)"></span><span class="perf-best">~1× (lazy)</span></td>
+          <td>O(1) — constant</td>
+          <td>Excellent</td>
+          <td>Large data, one-pass, piped to sum/max</td>
+        </tr>
+        <tr>
+          <td><strong>map() (built-in)</strong><br><code>map(lambda x: x**2, data)</code></td>
+          <td><span class="perf-bar" style="width:75px;background:var(--yellow)"></span><span class="perf-mid">~0.9–1.1×</span></td>
+          <td>O(1) — lazy</td>
+          <td>Fair</td>
+          <td>Named functions (not lambdas)</td>
+        </tr>
+        <tr>
+          <td><strong>for loop + append</strong><br><code>for x in data: result.append()</code></td>
+          <td><span class="perf-bar" style="width:45px;background:var(--accent)"></span><span class="perf-slow">~1.5–2× slower</span></td>
+          <td>O(n)</td>
+          <td>Verbose</td>
+          <td>Complex logic, side effects, debugging</td>
+        </tr>
+        <tr>
+          <td><strong>for loop + pre-alloc</strong><br><code>result = [None]*n; result[i]=…</code></td>
+          <td><span class="perf-bar" style="width:82px;background:var(--yellow)"></span><span class="perf-mid">~0.95×</span></td>
+          <td>O(n)</td>
+          <td>Poor</td>
+          <td>Rarely — premature optimisation</td>
+        </tr>
+        <tr>
+          <td><strong>numpy vectorised</strong><br><code>data**2</code> (array)</td>
+          <td><span class="perf-bar" style="width:130px;background:var(--teal)"></span><span style="color:var(--teal);font-weight:700">10–100× faster</span></td>
+          <td>O(n) contiguous</td>
+          <td>Good (domain)</td>
+          <td>Numeric operations on large arrays</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Timing it Yourself</h3>
+    <pre><code class="language-python">import timeit, sys
+
+N = 1_000_000
+
+# List comprehension
+t1 = timeit.timeit('[x**2 for x in range(N)]',     globals={'N':N}, number=5)
+# Generator (materialised for fair comparison)
+t2 = timeit.timeit('list(x**2 for x in range(N))', globals={'N':N}, number=5)
+# map
+t3 = timeit.timeit('list(map(lambda x: x**2, range(N)))', globals={'N':N}, number=5)
+
+print(f"List comp:     {t1:.3f}s")
+print(f"Generator:     {t2:.3f}s")
+print(f"map + lambda:  {t3:.3f}s")
+
+# Memory comparison (size of created objects)
+lst = [x for x in range(N)]
+gen = (x for x in range(N))
+print(f"List:      {sys.getsizeof(lst):,} bytes")  # ~8,448,728
+print(f"Generator: {sys.getsizeof(gen):,} bytes")  # ~104</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>When NOT to Use a Comprehension</h3>
+    <pre><code class="language-python"># ❌ Side effects — don't do this
+results = [print(x) for x in data]   # Creates [None, None, ...]
+
+# ❌ Very complex logic — hurts readability
+result = [
+    process(transform(validate(clean(x))))
+    for x in data
+    if predicate1(x) and predicate2(x) and x not in seen
+    if not skip(x)
+]
+
+# ✅ Use a regular loop instead
+result = []
+for x in data:
+    if not predicate1(x): continue
+    if not predicate2(x): continue
+    if x in seen: continue
+    if skip(x): continue
+    cleaned = clean(x)
+    valid   = validate(cleaned)
+    result.append(process(transform(valid)))</code></pre>
+  </div>
+
+  <div class="tip"><strong>Rule of thumb:</strong> A comprehension should fit on 2–3 lines. If it needs more, extract a helper function or use a loop. Readability &gt; cleverness.</div>
+</section>
+
+</main>
+
+<script>
+// ── Tab Navigation ──
+function showTab(id) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  hljs.highlightAll();
+}
+
+// ── highlight.js init ──
+document.addEventListener('DOMContentLoaded', () => {
+  hljs.highlightAll();
+  buildGrid();
+  setScenario(0);
+  renderPatterns();
+});
+
+// ── 2D Grid Builder ──
+const COLORS = [
+  '#1a237e','#283593','#303f9f','#3949ab',
+  '#394fa0','#2e7d32','#388e3c','#0097a7',
+  '#00838f','#6a1b9a','#7b1fa2','#ad1457',
+  '#c62828','#e65100','#f57f17','#558b2f'
+];
+function buildGrid() {
+  const rows  = parseInt(document.getElementById('gb-rows').value)  || 3;
+  const cols  = parseInt(document.getElementById('gb-cols').value)  || 3;
+  const expr  = document.getElementById('gb-expr').value;
+
+  let pyExpr, fn;
+  if (expr === 'r*cols+c')   { pyExpr = 'r * cols + c'; fn = (r,c) => r*cols+c; }
+  else if (expr === 'r*c')   { pyExpr = 'row * col';    fn = (r,c) => r*c; }
+  else if (expr === 'r+c')   { pyExpr = 'row + col';    fn = (r,c) => r+c; }
+  else if (expr === 'r==c?1:0') { pyExpr = '1 if row == col else 0'; fn = (r,c) => r===c?1:0; }
+  else if (expr === 'max(r,c)') { pyExpr = 'max(row, col)'; fn = (r,c) => Math.max(r,c); }
+  else { pyExpr = 'abs(row - col)'; fn = (r,c) => Math.abs(r-c); }
+
+  // Code
+  document.getElementById('gb-code').textContent =
+    `matrix = [\n    [${pyExpr}\n     for col in range(${cols})]\n    for row in range(${rows})\n]`;
+
+  // Visual
+  const allVals = [];
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      allVals.push(fn(r,c));
+  const mn = Math.min(...allVals), mx = Math.max(...allVals);
+  const norm = mx === mn ? () => 0 : (v) => (v - mn) / (mx - mn);
+
+  let html = '';
+  for (let r = 0; r < rows; r++) {
+    html += '<div class="matrix-row">';
+    for (let c = 0; c < cols; c++) {
+      const v = fn(r,c);
+      const idx = Math.floor(norm(v) * (COLORS.length - 1));
+      const bg = COLORS[idx];
+      html += `<div class="matrix-cell" style="background:${bg};color:#fff">${v}</div>`;
+    }
+    html += '</div>';
+  }
+  document.getElementById('gb-visual').innerHTML = html;
+}
+
+// ── Side-by-side Scenarios ──
+const SCENARIOS = [
+  {
+    title: 'Filter Even Numbers',
+    comp:  `evens = [\n    x\n    for x in range(20)\n    if x % 2 == 0\n]\n# [0,2,4,6,8,10,12,14,16,18]`,
+    loop:  `evens = []\nfor x in range(20):\n    if x % 2 == 0:\n        evens.append(x)`,
+    mapf:  `# map doesn't filter — need filter()\nevens = list(\n    filter(lambda x: x%2==0,\n           range(20))\n)`
+  },
+  {
+    title: 'Square Numbers',
+    comp:  `squares = [x**2 for x in range(10)]\n# [0,1,4,9,16,25,36,49,64,81]`,
+    loop:  `squares = []\nfor x in range(10):\n    squares.append(x**2)`,
+    mapf:  `squares = list(\n    map(lambda x: x**2,\n        range(10))\n)`
+  },
+  {
+    title: 'Uppercase Strings',
+    comp:  `words = ['hi','world','py']\nupper = [w.upper() for w in words]\n# ['HI','WORLD','PY']`,
+    loop:  `upper = []\nfor w in ['hi','world','py']:\n    upper.append(w.upper())`,
+    mapf:  `upper = list(\n    map(str.upper,\n        ['hi','world','py'])\n)`
+  },
+  {
+    title: 'Filter & Transform',
+    comp:  `# Squares of odd numbers only\nresult = [\n    x**2\n    for x in range(10)\n    if x % 2 != 0\n]\n# [1,9,25,49,81]`,
+    loop:  `result = []\nfor x in range(10):\n    if x % 2 != 0:\n        result.append(x**2)`,
+    mapf:  `result = list(\n    map(lambda x: x**2,\n        filter(lambda x: x%2!=0,\n               range(10)))\n)`
+  },
+  {
+    title: 'Flatten 2D List',
+    comp:  `m = [[1,2],[3,4],[5,6]]\nflat = [\n    x\n    for row in m\n    for x in row\n]\n# [1,2,3,4,5,6]`,
+    loop:  `flat = []\nfor row in [[1,2],[3,4],[5,6]]:\n    for x in row:\n        flat.append(x)`,
+    mapf:  `# itertools is clearest here:\nimport itertools\nflat = list(\n    itertools.chain.from_iterable(\n        [[1,2],[3,4],[5,6]])\n)`
+  },
+  {
+    title: 'Build Dictionary',
+    comp:  `words = ['cat','elephant','ox']\nd = {w: len(w) for w in words}\n# {'cat':3,'elephant':8,'ox':2}`,
+    loop:  `d = {}\nfor w in ['cat','elephant','ox']:\n    d[w] = len(w)`,
+    mapf:  `# dict(map(...)) pattern\nd = dict(map(\n    lambda w: (w, len(w)),\n    ['cat','elephant','ox'])\n)`
+  }
+];
+
+function setScenario(i) {
+  const s = SCENARIOS[i];
+  const out = document.getElementById('compare-output');
+  out.innerHTML = `
+    <div class="compare-box comp" style="border-radius:8px">
+      <div class="label">Comprehension</div>
+      <pre><code class="language-python">${s.comp}</code></pre>
+    </div>
+    <div class="compare-box loop" style="border-radius:8px">
+      <div class="label">For Loop</div>
+      <pre><code class="language-python">${s.loop}</code></pre>
+    </div>
+    <div class="compare-box mapf" style="border-radius:8px">
+      <div class="label">map() / filter()</div>
+      <pre><code class="language-python">${s.mapf}</code></pre>
+    </div>
+  `;
+  hljs.highlightAll();
+}
+
+// ── Patterns ──
+const PATTERNS = [
+  { head:'phead-filter', label:'Filter — basic', code:`# Keep items matching a condition
+data = [1, 5, 2, 8, 3, 9, 4]
+big  = [x for x in data if x > 4]
+# [5, 8, 9]
+
+# Filter strings by content
+emails = ['a@x.com', 'b', 'c@y.org']
+valid  = [e for e in emails if '@' in e]
+# ['a@x.com', 'c@y.org']`, note:'if condition acts as a guard before the expression.' },
+
+  { head:'phead-filter', label:'Filter — multiple conditions', code:`data = range(1, 21)
+
+# Divisible by both 3 and 5
+fizzbuzz = [x for x in data if x%3==0 and x%5==0]
+# [15]
+
+# Odd AND greater than 10
+filtered = [x for x in data if x%2!=0 if x>10]
+# [11, 13, 15, 17, 19]
+# (chained if = AND)`, note:'Multiple if clauses are equivalent to and.' },
+
+  { head:'phead-transform', label:'Transform — reshape', code:`# Apply a function
+import math
+angles = [0, 30, 45, 60, 90]
+radians = [math.radians(a) for a in angles]
+
+# Format strings
+values = [3.14159, 2.71828, 1.41421]
+formatted = [f'{v:.2f}' for v in values]
+# ['3.14', '2.72', '1.41']
+
+# Destructure tuples
+pairs = [(1,'a'), (2,'b'), (3,'c')]
+firsts = [x for x, _ in pairs]  # [1, 2, 3]`, note:'Destructuring in the for clause is very Pythonic.' },
+
+  { head:'phead-transform', label:'Transform — conditional expr', code:`# Ternary expression in comprehension
+nums = range(-5, 6)
+abs_vals = [x if x >= 0 else -x for x in nums]
+# [5,4,3,2,1,0,1,2,3,4,5]
+
+# Classify
+labels = [
+    'pos' if x > 0 else ('neg' if x < 0 else 'zero')
+    for x in [-1, 0, 1, 2, -3]
+]
+# ['neg','zero','pos','pos','neg']`, note:'Ternary in the expression slot — not the filter.' },
+
+  { head:'phead-flatten', label:'Flatten — 2D list', code:`matrix = [[1,2,3],[4,5,6],[7,8,9]]
+
+# Flatten
+flat = [x for row in matrix for x in row]
+# [1,2,3,4,5,6,7,8,9]
+
+# Flatten with filter
+positives = [x for row in matrix
+             for x in row if x % 2 == 0]
+# [2, 4, 6, 8]`, note:'Order matters: outer for first, then inner for.' },
+
+  { head:'phead-flatten', label:'Flatten — strings', code:`sentences = ['hello world', 'foo bar baz']
+
+# All words
+words = [w for s in sentences for w in s.split()]
+# ['hello','world','foo','bar','baz']
+
+# Unique chars across all words
+chars = {c for word in words for c in word}
+# {'h','e','l','o','w','r','d','f','b','a','z'}`, note:'Combine flatten with set for unique extraction.' },
+
+  { head:'phead-nested', label:'Nested — 2D construction', code:`rows, cols = 3, 4
+
+# Multiplication table
+table = [[r * c for c in range(1, cols+1)]
+         for r in range(1, rows+1)]
+# [[1,2,3,4],[2,4,6,8],[3,6,9,12]]
+
+# Zero matrix
+zeros = [[0]*cols for _ in range(rows)]
+# [[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+
+# ⚠️  WRONG: [[0]*cols]*rows  — shares row refs!`, note:'Always use a comprehension to build rows — [[val]*cols]*rows shares references.' },
+
+  { head:'phead-dict', label:'Dict — invert & remap', code:`# Swap keys and values
+code2name = {'US':'United States','DE':'Germany'}
+name2code = {v: k for k, v in code2name.items()}
+
+# Remap keys
+data = {'first_name':'Alice','last_name':'Smith'}
+clean = {k.replace('_',' '): v
+         for k, v in data.items()}
+# {'first name':'Alice','last name':'Smith'}
+
+# Nested dict flatten
+nested = {'a':{'x':1},'b':{'x':2}}
+flat = {k: v['x'] for k, v in nested.items()}
+# {'a':1,'b':2}`, note:'dict.items() is idiomatic for dict comprehensions.' },
+
+  { head:'phead-set', label:'Set — dedup & intersect', code:`# Deduplicate while normalising
+tags = ['Python','python','PYTHON','java','Java']
+clean_tags = {t.lower() for t in tags}
+# {'python','java'}
+
+# Find common elements between two lists
+a = [1,2,3,4,5,2,3]
+b = [3,4,5,6,7]
+common = {x for x in a if x in set(b)}
+# {3, 4, 5}
+
+# Unique letters only (no digits)
+text = "h3ll0 w0rld"
+letters = {c for c in text if c.isalpha()}
+# {'h','l','w','r','d'}`, note:'Set comprehensions shine for uniqueness + filtering combined.' },
+
+  { head:'phead-transform', label:'Generator — memory-safe sum', code:`# Sum of squares (no list created)
+total = sum(x**2 for x in range(10**7))
+# 333333283333335000000
+
+# Find first match lazily
+first = next(
+    (x for x in range(10**7) if x**2 > 1000),
+    None
+)
+# 32  (stops immediately, doesn't iterate all)
+
+# Pipeline: file → strip → parse → sum
+# with open('data.txt') as f:
+#     total = sum(float(line.strip())
+#                 for line in f
+#                 if line.strip())`, note:'next(gen, default) is the idiom for "find first match".' },
+];
+
+function renderPatterns() {
+  const grid = document.getElementById('pattern-grid');
+  grid.innerHTML = PATTERNS.map(p => `
+    <div class="pattern-card">
+      <div class="phead ${p.head}">${p.label}</div>
+      <pre><code class="language-python">${p.code}</code></pre>
+      ${p.note ? `<div class="pnote">${p.note}</div>` : ''}
+    </div>
+  `).join('');
+  hljs.highlightAll();
+}
+</script>
+</body>
+</html>

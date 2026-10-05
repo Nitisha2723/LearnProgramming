@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Merge Sort Visualization</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a1a2e;
+      color: #eee;
+      font-family: system-ui, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #16213e;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      border-bottom: 2px solid #0f3460;
+      flex-wrap: wrap;
+    }
+
+    header a {
+      color: #e94560;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border: 1px solid #e94560;
+      border-radius: 6px;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    header a:hover { background: rgba(233,69,96,0.15); }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #eee;
+    }
+
+    .complexity-badge {
+      margin-left: auto;
+      background: #0f3460;
+      color: #e94560;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .main-layout {
+      display: flex;
+      flex: 1;
+      gap: 16px;
+      padding: 16px;
+      min-height: 0;
+    }
+
+    .left-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .right-panel {
+      width: 340px;
+      flex-shrink: 0;
+      background: #16213e;
+      border-radius: 10px;
+      border: 1px solid #0f3460;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ─── Controls ─── */
+    .controls-bar {
+      background: #16213e;
+      border-radius: 10px;
+      border: 1px solid #0f3460;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: #0f3460;
+      color: #eee;
+      border: 1px solid #1a4a8a;
+      border-radius: 7px;
+      padding: 8px 18px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      font-family: inherit;
+    }
+    .btn:hover { background: #1a4a8a; }
+    .btn:active { transform: scale(0.97); }
+    .btn.primary { background: #e94560; border-color: #e94560; color: #fff; }
+    .btn.primary:hover { background: #c73652; }
+
+    .speed-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+      font-size: 0.85rem;
+      color: #aaa;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 120px;
+      height: 6px;
+      background: #0f3460;
+      border-radius: 3px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #e94560;
+      cursor: pointer;
+    }
+
+    /* ─── Stats ─── */
+    .stats-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .stat-card {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 8px;
+      padding: 10px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      min-width: 110px;
+    }
+    .stat-label { font-size: 0.72rem; color: #888; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: #e94560; }
+
+    /* ─── Visualization area ─── */
+    .viz-panel {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 10px;
+      padding: 18px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow: hidden;
+      min-height: 360px;
+    }
+
+    /* Level rows showing divide/merge */
+    .levels-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      gap: 6px;
+      min-height: 0;
+    }
+
+    .level-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .level-label {
+      font-size: 0.72rem;
+      color: #666;
+      width: 52px;
+      flex-shrink: 0;
+      text-align: right;
+      padding-right: 8px;
+      line-height: 1.2;
+    }
+
+    .groups-container {
+      display: flex;
+      flex: 1;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    .group-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.3s;
+    }
+
+    .group-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 3px;
+      white-space: nowrap;
+      letter-spacing: 0.03em;
+    }
+
+    .bars-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
+    .bar {
+      width: 22px;
+      border-radius: 3px 3px 0 0;
+      position: relative;
+      transition: height 0.35s ease, background 0.35s ease, opacity 0.35s ease;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .bar-val {
+      position: absolute;
+      top: -18px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #ccc;
+      white-space: nowrap;
+    }
+
+    .bar.active-compare {
+      outline: 2px solid #fff;
+      outline-offset: 1px;
+    }
+
+    .bar.placing {
+      outline: 2px solid #f9e;
+      outline-offset: 1px;
+    }
+
+    /* Explanation box */
+    .explanation {
+      background: #0f3460;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.9rem;
+      color: #dde;
+      border-left: 4px solid #e94560;
+      line-height: 1.55;
+      min-height: 54px;
+    }
+
+    .explanation .phase-tag {
+      display: inline-block;
+      background: #e94560;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 3px;
+      margin-right: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ─── Code panel ─── */
+    .code-panel-title {
+      background: #0f3460;
+      padding: 10px 16px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #aac;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .code-block {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 0;
+    }
+
+    .code-line {
+      display: flex;
+      align-items: stretch;
+      font-size: 0.78rem;
+      line-height: 1.7;
+      transition: background 0.2s;
+      padding: 0 10px;
+    }
+
+    .code-line .ln {
+      min-width: 26px;
+      color: #555;
+      text-align: right;
+      padding-right: 8px;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .code-line .code-text {
+      font-family: 'Courier New', Courier, monospace;
+      color: #9ac;
+      white-space: pre;
+    }
+
+    .code-line.highlighted {
+      background: rgba(249, 220, 90, 0.18);
+    }
+    .code-line.highlighted .code-text {
+      color: #fdd94a;
+    }
+
+    .kw  { color: #c084fc; }
+    .fn  { color: #67e8f9; }
+    .cm  { color: #6b7280; font-style: italic; }
+    .num { color: #86efac; }
+    .str { color: #fca5a5; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f3460; }
+    ::-webkit-scrollbar-thumb { background: #1a4a8a; border-radius: 3px; }
+
+    /* Done overlay */
+    .done-badge {
+      display: none;
+      background: #e94560;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 4px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.04em;
+    }
+    .done-badge.visible { display: inline-block; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="../../README.md">← Back to Index</a>
+  <h1>Merge Sort</h1>
+  <span class="done-badge" id="doneBadge">SORTED!</span>
+  <span class="complexity-badge">O(n log n)</span>
+</header>
+
+<div class="main-layout">
+  <!-- Left: controls + viz -->
+  <div class="left-panel">
+
+    <div class="controls-bar">
+      <button class="btn primary" id="btnPlay">▶ Play</button>
+      <button class="btn" id="btnStep">Step →</button>
+      <button class="btn" id="btnReset">↺ Reset</button>
+      <div class="speed-group">
+        <span>Speed:</span>
+        <input type="range" id="speedSlider" min="1" max="10" value="5" />
+        <span id="speedLabel">5</span>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-label">Comparisons</span>
+        <span class="stat-value" id="statComparisons">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Depth</span>
+        <span class="stat-value" id="statDepth">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Phase</span>
+        <span class="stat-value" style="font-size:1rem;padding-top:6px;" id="statPhase">—</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Step</span>
+        <span class="stat-value" id="statStep">0</span>
+      </div>
+    </div>
+
+    <div class="viz-panel" id="vizPanel">
+      <div class="levels-container" id="levelsContainer"></div>
+      <div class="explanation" id="explanation">
+        Press <strong>Play</strong> or <strong>Step</strong> to start the merge sort visualization.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right: code panel -->
+  <div class="right-panel">
+    <div class="code-panel-title">Algorithm Code</div>
+    <div class="code-block" id="codeBlock"></div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  DATA & PALETTE
+// ─────────────────────────────────────────────
+const INITIAL_ARRAY = [38, 27, 43, 3, 9, 82, 10, 56, 14, 70, 25, 61];
+const BAR_COLORS = [
+  '#e94560','#3b82f6','#22c55e','#f59e0b',
+  '#a855f7','#06b6d4','#f97316','#84cc16',
+  '#ec4899','#14b8a6','#ef4444','#8b5cf6',
+  '#10b981','#f43f5e','#0ea5e9','#d946ef'
+];
+
+// Each bar keeps an "original index" so we can color it consistently
+// and show the value.
+
+// ─────────────────────────────────────────────
+//  CODE LINES (displayed in right panel)
+// ─────────────────────────────────────────────
+const CODE_LINES = [
+  { text: '<span class="kw">function</span> <span class="fn">mergeSort</span>(arr) {', line: 1 },
+  { text: '  <span class="kw">if</span> (arr.length &lt;= <span class="num">1</span>) <span class="kw">return</span> arr;', line: 2 },
+  { text: '  <span class="cm">// find midpoint</span>', line: 3 },
+  { text: '  <span class="kw">const</span> mid = Math.floor(arr.length / <span class="num">2</span>);', line: 4 },
+  { text: '  <span class="cm">// divide into halves</span>', line: 5 },
+  { text: '  <span class="kw">const</span> left  = arr.slice(<span class="num">0</span>, mid);', line: 6 },
+  { text: '  <span class="kw">const</span> right = arr.slice(mid);', line: 7 },
+  { text: '  <span class="cm">// recurse on each half</span>', line: 8 },
+  { text: '  <span class="kw">return</span> <span class="fn">merge</span>(', line: 9 },
+  { text: '    <span class="fn">mergeSort</span>(left),', line: 10 },
+  { text: '    <span class="fn">mergeSort</span>(right)', line: 11 },
+  { text: '  );', line: 12 },
+  { text: '}', line: 13 },
+  { text: '', line: 14 },
+  { text: '<span class="kw">function</span> <span class="fn">merge</span>(left, right) {', line: 15 },
+  { text: '  <span class="kw">const</span> result = [];', line: 16 },
+  { text: '  <span class="kw">let</span> i = <span class="num">0</span>, j = <span class="num">0</span>;', line: 17 },
+  { text: '  <span class="kw">while</span> (i &lt; left.length &&', line: 18 },
+  { text: '         j &lt; right.length) {', line: 19 },
+  { text: '    <span class="kw">if</span> (left[i] &lt;= right[j]) {', line: 20 },
+  { text: '      result.push(left[i++]);', line: 21 },
+  { text: '    } <span class="kw">else</span> {', line: 22 },
+  { text: '      result.push(right[j++]);', line: 23 },
+  { text: '    }', line: 24 },
+  { text: '  }', line: 25 },
+  { text: '  <span class="kw">return</span> result.concat(', line: 26 },
+  { text: '    left.slice(i),', line: 27 },
+  { text: '    right.slice(j)', line: 28 },
+  { text: '  );', line: 29 },
+  { text: '}', line: 30 },
+];
+
+// ─────────────────────────────────────────────
+//  STEP GENERATION
+//  Each step has:
+//    type: 'divide' | 'merge-compare' | 'merge-place' | 'merge-done' | 'done'
+//    levels: array of LevelData (snapshot of the entire tree at that moment)
+//    depth: current recursion depth
+//    explanation: string
+//    codeLine: line number to highlight
+//    comparisons: running total
+// ─────────────────────────────────────────────
+
+/*
+  A "bar item" = { val: number, origIdx: number }
+  A "group"    = { items: BarItem[], label: string, colorIdx: number }
+  A "level"    = { label: string, groups: Group[] }
+  levels[0]    = top (depth 0), levels[last] = leaves (deepest)
+*/
+
+function generateSteps(arr) {
+  const steps = [];
+  let comparisons = 0;
+
+  // We build a mutable "levels" structure and snapshot it at each step.
+  // levels is an array indexed by depth.
+  // At each depth we store an array of groups.
+  // When we divide, a group at depth d splits into two groups at depth d+1.
+  // When we merge, two groups at depth d combine into one at depth d-1.
+
+  // Start: single group at depth 0
+  const initialItems = arr.map((v, i) => ({ val: v, origIdx: i }));
+
+  // We'll represent levels as: Map<depth, Group[]>
+  // But since we do this recursively, we build steps via recursion.
+
+  // Clone helper
+  const cloneItem = item => ({ ...item });
+  const cloneGroup = g => ({
+    items: g.items.map(cloneItem),
+    label: g.label,
+    colorIdx: g.colorIdx,
+    id: g.id,
+  });
+  const cloneLevels = levels => levels.map(lvl => ({
+    depthLabel: lvl.depthLabel,
+    groups: lvl.groups.map(cloneGroup),
+  }));
+
+  // levels[i] = { depthLabel, groups: [{items, label, colorIdx, id}] }
+  // max depth = log2(n) ceil
+  const maxDepth = Math.ceil(Math.log2(arr.length)) + 1;
+  const levels = [];
+  for (let d = 0; d <= maxDepth; d++) {
+    levels.push({ depthLabel: `Depth ${d}`, groups: [] });
+  }
+
+  let groupIdCounter = 0;
+  const newGroup = (items, label, colorIdx) => ({
+    items: items.map(cloneItem),
+    label,
+    colorIdx,
+    id: groupIdCounter++,
+  });
+
+  // Place initial group at depth 0
+  levels[0].groups.push(newGroup(initialItems, `[${initialItems.map(x=>x.val).join(',')}]`, 0));
+
+  const snap = (type, depth, explanation, codeLine, highlights) => {
+    steps.push({
+      type,
+      levels: cloneLevels(levels),
+      depth,
+      explanation,
+      codeLine,
+      comparisons,
+      highlights: highlights || [],
+    });
+  };
+
+  // Recursive sort; tracks which group at each depth it is operating on
+  // Returns sorted items
+  function rec(items, depth, colorIdx) {
+    if (items.length <= 1) {
+      snap('base-case', depth,
+        `<span class="phase-tag">Base</span>Single element [${items.map(x=>x.val).join(',')}] — already sorted.`,
+        2, []);
+      return items;
+    }
+
+    const mid = Math.floor(items.length / 2);
+    const leftItems  = items.slice(0, mid);
+    const rightItems = items.slice(mid);
+
+    const leftColorIdx  = colorIdx * 2 + 1;
+    const rightColorIdx = colorIdx * 2 + 2;
+
+    // --- DIVIDE step ---
+    // Remove the group from depth and add two groups at depth+1
+    // Find and remove the group at `depth` that matches these items
+    const groupIdx = levels[depth].groups.findIndex(g =>
+      g.items.length === items.length &&
+      g.items.every((it, i) => it.val === items[i].val && it.origIdx === items[i].origIdx)
+    );
+    const parentGroup = levels[depth].groups[groupIdx];
+
+    // Add left and right sub-groups at depth+1
+    const leftLabel  = `[${leftItems.map(x=>x.val).join(',')}]`;
+    const rightLabel = `[${rightItems.map(x=>x.val).join(',')}]`;
+
+    levels[depth + 1].groups.push(newGroup(leftItems,  leftLabel,  leftColorIdx  % BAR_COLORS.length));
+    levels[depth + 1].groups.push(newGroup(rightItems, rightLabel, rightColorIdx % BAR_COLORS.length));
+
+    snap('divide', depth,
+      `<span class="phase-tag">Divide</span>Splitting ${parentGroup.label} → ${leftLabel} and ${rightLabel}`,
+      4, []);
+
+    // Show the split at next line
+    snap('divide', depth,
+      `<span class="phase-tag">Divide</span>Left half: ${leftLabel}&nbsp;&nbsp;|&nbsp;&nbsp;Right half: ${rightLabel}`,
+      6, []);
+
+    // Recurse left
+    const sortedLeft  = rec(leftItems,  depth + 1, leftColorIdx);
+    // Recurse right
+    const sortedRight = rec(rightItems, depth + 1, rightColorIdx);
+
+    // --- MERGE step ---
+    snap('merge-start', depth,
+      `<span class="phase-tag">Merge</span>Merging ${leftLabel} and ${rightLabel} back together.`,
+      15, []);
+
+    // Merge with compare steps
+    const merged = [];
+    let li = 0, ri = 0;
+
+    while (li < sortedLeft.length && ri < sortedRight.length) {
+      comparisons++;
+      const lv = sortedLeft[li].val;
+      const rv = sortedRight[ri].val;
+
+      snap('merge-compare', depth,
+        `<span class="phase-tag">Compare</span>${lv} vs ${rv} → pick <strong>${lv <= rv ? lv : rv}</strong>`,
+        20, [sortedLeft[li].origIdx, sortedRight[ri].origIdx]);
+
+      if (lv <= rv) {
+        merged.push(sortedLeft[li]);
+        li++;
+        snap('merge-place', depth,
+          `<span class="phase-tag">Place</span>Placed <strong>${lv}</strong> from left into merged array.`,
+          21, [sortedLeft[li-1].origIdx]);
+      } else {
+        merged.push(sortedRight[ri]);
+        ri++;
+        snap('merge-place', depth,
+          `<span class="phase-tag">Place</span>Placed <strong>${rv}</strong> from right into merged array.`,
+          23, [sortedRight[ri-1].origIdx]);
+      }
+    }
+
+    // Drain remaining
+    while (li < sortedLeft.length) {
+      merged.push(sortedLeft[li]);
+      li++;
+    }
+    while (ri < sortedRight.length) {
+      merged.push(sortedRight[ri]);
+      ri++;
+    }
+
+    if (li < sortedLeft.length || ri < sortedRight.length) {
+      snap('merge-place', depth,
+        `<span class="phase-tag">Place</span>Appending remaining elements.`,
+        26, []);
+    }
+
+    const mergedLabel = `[${merged.map(x=>x.val).join(',')}]`;
+
+    // Update levels: remove children from depth+1, update parent group at depth
+    // Remove left/right groups from depth+1 that belong to this merge
+    const leftId  = levels[depth + 1].groups.find(g =>
+      g.items.length === sortedLeft.length &&
+      g.items.every((it, i) => it.val === sortedLeft[i].val)
+    )?.id;
+    const rightId = levels[depth + 1].groups.find(g =>
+      g.items.length === sortedRight.length &&
+      g.items.every((it, i) => it.val === sortedRight[i].val)
+    )?.id;
+
+    levels[depth + 1].groups = levels[depth + 1].groups.filter(
+      g => g.id !== leftId && g.id !== rightId
+    );
+
+    // Update (replace) parent group with merged
+    if (groupIdx >= 0 && groupIdx < levels[depth].groups.length) {
+      levels[depth].groups[groupIdx] = newGroup(merged, mergedLabel, colorIdx % BAR_COLORS.length);
+    }
+
+    snap('merge-done', depth,
+      `<span class="phase-tag">Merged</span>Result: ${mergedLabel}`,
+      26, []);
+
+    return merged;
+  }
+
+  snap('init', 0,
+    `<span class="phase-tag">Start</span>Array: [${initialItems.map(x=>x.val).join(', ')}] — beginning merge sort.`,
+    1, []);
+
+  rec(initialItems, 0, 0);
+
+  snap('done', 0,
+    `<span class="phase-tag">Done</span>Array is fully sorted! Total comparisons: ${comparisons}.`,
+    30, []);
+
+  return steps;
+}
+
+// ─────────────────────────────────────────────
+//  RENDER
+// ─────────────────────────────────────────────
+
+const BAR_HEIGHT_MAX = 90; // px
+const BAR_HEIGHT_MIN = 8;
+
+function valToHeight(val) {
+  const lo = Math.min(...INITIAL_ARRAY);
+  const hi = Math.max(...INITIAL_ARRAY);
+  return BAR_HEIGHT_MIN + ((val - lo) / (hi - lo)) * (BAR_HEIGHT_MAX - BAR_HEIGHT_MIN);
+}
+
+function renderLevels(levels, highlights) {
+  const container = document.getElementById('levelsContainer');
+  container.innerHTML = '';
+
+  // Only render levels that have at least one group with items
+  const visibleLevels = levels.filter(lvl => lvl.groups.some(g => g.items.length > 0));
+
+  visibleLevels.forEach((lvl, li) => {
+    const row = document.createElement('div');
+    row.className = 'level-row';
+
+    const lbl = document.createElement('div');
+    lbl.className = 'level-label';
+    lbl.textContent = lvl.depthLabel;
+    row.appendChild(lbl);
+
+    const groupsCont = document.createElement('div');
+    groupsCont.className = 'groups-container';
+
+    lvl.groups.filter(g => g.items.length > 0).forEach(group => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'group-wrapper';
+
+      const glbl = document.createElement('div');
+      glbl.className = 'group-label';
+      const color = BAR_COLORS[group.colorIdx % BAR_COLORS.length];
+      glbl.style.background = color + '33';
+      glbl.style.color = color;
+      glbl.style.border = `1px solid ${color}66`;
+      glbl.textContent = group.label;
+      wrapper.appendChild(glbl);
+
+      const barsRow = document.createElement('div');
+      barsRow.className = 'bars-row';
+
+      group.items.forEach(item => {
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        const h = valToHeight(item.val);
+        bar.style.height = h + 'px';
+        bar.style.background = BAR_COLORS[item.origIdx % BAR_COLORS.length];
+
+        if (highlights.includes(item.origIdx)) {
+          bar.classList.add('active-compare');
+        }
+
+        const valLbl = document.createElement('span');
+        valLbl.className = 'bar-val';
+        valLbl.textContent = item.val;
+        bar.appendChild(valLbl);
+
+        barsRow.appendChild(bar);
+      });
+
+      wrapper.appendChild(barsRow);
+      groupsCont.appendChild(wrapper);
+    });
+
+    row.appendChild(groupsCont);
+    container.appendChild(row);
+  });
+}
+
+function renderCodePanel(highlightLine) {
+  const block = document.getElementById('codeBlock');
+  block.innerHTML = '';
+  CODE_LINES.forEach(({ text, line }) => {
+    const div = document.createElement('div');
+    div.className = 'code-line' + (line === highlightLine ? ' highlighted' : '');
+    div.innerHTML = `<span class="ln">${line}</span><span class="code-text">${text}</span>`;
+    block.appendChild(div);
+  });
+
+  // Scroll highlighted line into view
+  const highlighted = block.querySelector('.highlighted');
+  if (highlighted) {
+    highlighted.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+}
+
+function applyStep(step) {
+  renderLevels(step.levels, step.highlights || []);
+  document.getElementById('explanation').innerHTML = step.explanation;
+  document.getElementById('statComparisons').textContent = step.comparisons;
+  document.getElementById('statDepth').textContent = step.depth;
+  document.getElementById('statStep').textContent = currentStepIdx + 1;
+  document.getElementById('statPhase').textContent =
+    step.type === 'done'         ? 'Done'    :
+    step.type.startsWith('merge') ? 'Merge'  :
+    step.type === 'divide'       ? 'Divide'  :
+    step.type === 'base-case'    ? 'Base'    : 'Init';
+  renderCodePanel(step.codeLine);
+
+  if (step.type === 'done') {
+    document.getElementById('doneBadge').classList.add('visible');
+    stopPlay();
+  }
+}
+
+// ─────────────────────────────────────────────
+//  PLAYBACK
+// ─────────────────────────────────────────────
+let steps = [];
+let currentStepIdx = -1;
+let playTimer = null;
+let isPlaying = false;
+
+function getDelay() {
+  const speed = parseInt(document.getElementById('speedSlider').value, 10);
+  // speed 1 = 1800ms, speed 10 = 80ms
+  return Math.round(1800 - (speed - 1) * (1720 / 9));
+}
+
+function startPlay() {
+  if (isPlaying) return;
+  isPlaying = true;
+  document.getElementById('btnPlay').textContent = '⏸ Pause';
+
+  function tick() {
+    if (currentStepIdx < steps.length - 1) {
+      currentStepIdx++;
+      applyStep(steps[currentStepIdx]);
+      if (isPlaying && currentStepIdx < steps.length - 1 && steps[currentStepIdx].type !== 'done') {
+        playTimer = setTimeout(tick, getDelay());
+      } else {
+        isPlaying = false;
+        document.getElementById('btnPlay').textContent = '▶ Play';
+      }
+    } else {
+      isPlaying = false;
+      document.getElementById('btnPlay').textContent = '▶ Play';
+    }
+  }
+  tick();
+}
+
+function stopPlay() {
+  isPlaying = false;
+  clearTimeout(playTimer);
+  document.getElementById('btnPlay').textContent = '▶ Play';
+}
+
+function stepForward() {
+  stopPlay();
+  if (currentStepIdx < steps.length - 1) {
+    currentStepIdx++;
+    applyStep(steps[currentStepIdx]);
+  }
+}
+
+function reset() {
+  stopPlay();
+  steps = generateSteps(INITIAL_ARRAY);
+  currentStepIdx = -1;
+  document.getElementById('doneBadge').classList.remove('visible');
+
+  // Show initial state (step 0 = init snap)
+  currentStepIdx = 0;
+  applyStep(steps[0]);
+  document.getElementById('statComparisons').textContent = '0';
+  document.getElementById('statDepth').textContent = '0';
+  document.getElementById('statStep').textContent = '1';
+  document.getElementById('statPhase').textContent = 'Init';
+}
+
+// ─────────────────────────────────────────────
+//  WIRE UP
+// ─────────────────────────────────────────────
+document.getElementById('btnPlay').addEventListener('click', () => {
+  if (isPlaying) {
+    stopPlay();
+  } else {
+    if (currentStepIdx >= steps.length - 1) reset();
+    startPlay();
+  }
+});
+
+document.getElementById('btnStep').addEventListener('click', stepForward);
+document.getElementById('btnReset').addEventListener('click', reset);
+
+document.getElementById('speedSlider').addEventListener('input', function() {
+  document.getElementById('speedLabel').textContent = this.value;
+});
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+renderCodePanel(1);
+reset();
+</script>
+</body>
+</html>

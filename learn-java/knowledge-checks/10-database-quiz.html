@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java Database Programming Quiz</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #1a1a2e;
+      --panel:    #16213e;
+      --accent:   #e94560;
+      --accent2:  #0f3460;
+      --text:     #e0e0e0;
+      --muted:    #8888aa;
+      --correct:  #2ecc71;
+      --wrong:    #e74c3c;
+      --border:   #2a2a4e;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    a.back-link {
+      align-self: flex-start;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      margin-bottom: 1.25rem;
+      transition: color 0.2s;
+    }
+    a.back-link:hover { color: var(--accent); }
+
+    h1 {
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      color: var(--accent);
+      text-align: center;
+      margin-bottom: 0.25rem;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.875rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── Progress ── */
+    .progress-wrap {
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 1rem;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .progress-bar-bg {
+      background: var(--panel);
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem 2rem;
+      width: 100%;
+      max-width: 700px;
+      position: relative;
+      transition: border-color 0.3s;
+    }
+    .card.flash-correct { border-color: var(--correct); animation: flashGreen 0.6s ease; }
+    .card.flash-wrong   { border-color: var(--wrong);   animation: flashRed   0.6s ease; }
+    @keyframes flashGreen {
+      0%   { background: var(--panel); }
+      30%  { background: #1a3a28; }
+      100% { background: var(--panel); }
+    }
+    @keyframes flashRed {
+      0%   { background: var(--panel); }
+      30%  { background: #3a1a1a; }
+      100% { background: var(--panel); }
+    }
+
+    .q-type-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      padding: 1px 6px;
+      margin-bottom: 0.75rem;
+    }
+
+    .question-text {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+    }
+
+    pre.code-block {
+      background: #0a0a18;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin-bottom: 1.25rem;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      color: #c9d1d9;
+    }
+
+    /* ── Options ── */
+    .options { display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .option-btn {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.2s, background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .option-btn:hover:not(:disabled) { border-color: var(--accent); background: #1e1e38; }
+    .option-btn.focused  { border-color: var(--accent); background: #1e1e38; outline: 2px solid var(--accent); outline-offset: 2px; }
+    .option-btn.correct  { border-color: var(--correct); background: #0d2a1c; color: #7fffc4; }
+    .option-btn.wrong    { border-color: var(--wrong);   background: #2a0d0d; color: #ff8a80; }
+    .option-btn:disabled { cursor: default; }
+
+    .option-letter {
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .option-btn.correct .option-letter { background: var(--correct); color: #0d2a1c; }
+    .option-btn.wrong   .option-letter { background: var(--wrong);   color: #fff; }
+
+    /* ── Fill blank ── */
+    .fill-blank-wrap { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .fill-blank-input {
+      flex: 1;
+      min-width: 180px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 1rem;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    .fill-blank-input:focus { outline: none; border-color: var(--accent); }
+    .fill-blank-input.correct { border-color: var(--correct); }
+    .fill-blank-input.wrong   { border-color: var(--wrong); }
+
+    .submit-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      padding: 0.65rem 1.4rem;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .submit-btn:hover { opacity: 0.88; }
+    .submit-btn:active { transform: scale(0.97); }
+
+    /* ── Feedback ── */
+    .feedback {
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      display: none;
+    }
+    .feedback.show { display: block; }
+    .feedback.correct-fb { background: #0d2a1c; border: 1px solid var(--correct); color: #7fffc4; }
+    .feedback.wrong-fb   { background: #2a0d0d; border: 1px solid var(--wrong);   color: #ff8a80; }
+    .feedback strong { color: inherit; }
+
+    /* ── Navigation ── */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.25rem;
+      gap: 0.75rem;
+    }
+    .nav-btn {
+      background: var(--accent2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem 1.2rem;
+      color: var(--text);
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .nav-btn:hover { background: #1a4a80; border-color: var(--accent); }
+    .nav-btn:disabled { opacity: 0.35; cursor: default; }
+
+    /* ── Results ── */
+    #results-screen {
+      width: 100%;
+      max-width: 700px;
+      display: none;
+    }
+    .results-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+    }
+    .score-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: conic-gradient(var(--accent) calc(var(--pct) * 3.6deg), var(--bg) 0deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      position: relative;
+    }
+    .score-circle::after {
+      content: '';
+      position: absolute;
+      inset: 12px;
+      border-radius: 50%;
+      background: var(--panel);
+    }
+    .score-number {
+      position: relative;
+      z-index: 1;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .grade-badge {
+      display: inline-block;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 0.35rem 1.2rem;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+    }
+    .grade-needs  { background: #3a1a1a; color: var(--wrong); border: 1px solid var(--wrong); }
+    .grade-getting{ background: #3a2800; color: #f39c12;     border: 1px solid #f39c12; }
+    .grade-good   { background: #0d2a1c; color: var(--correct); border: 1px solid var(--correct); }
+    .grade-expert { background: #0a1f38; color: #74b9ff;    border: 1px solid #74b9ff; }
+
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 1rem 0 1.5rem;
+      flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-num { font-size: 1.5rem; font-weight: 700; color: var(--text); }
+    .stat-lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .results-actions {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      padding: 0.7rem 1.5rem;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-secondary {
+      background: transparent;
+      border: 1.5px solid var(--accent);
+      border-radius: 8px;
+      padding: 0.7rem 1.5rem;
+      color: var(--accent);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-secondary:hover { background: rgba(233,69,96,0.1); }
+
+    /* ── Review mode ── */
+    #review-screen {
+      width: 100%;
+      max-width: 700px;
+      display: none;
+    }
+    .review-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .review-header h2 { font-size: 1.2rem; color: var(--accent); }
+    .review-item {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .review-q-num { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; margin-bottom: 0.4rem; }
+    .review-q-text { font-size: 0.95rem; margin-bottom: 0.75rem; line-height: 1.55; }
+    .review-answer {
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      margin-bottom: 0.3rem;
+    }
+    .review-answer.your-wrong  { background: #2a0d0d; color: #ff8a80; border: 1px solid var(--wrong); }
+    .review-answer.the-correct { background: #0d2a1c; color: #7fffc4; border: 1px solid var(--correct); }
+    .review-explanation {
+      font-size: 0.83rem;
+      color: var(--muted);
+      margin-top: 0.6rem;
+      line-height: 1.5;
+      border-left: 2px solid var(--accent);
+      padding-left: 0.75rem;
+    }
+
+    /* ── Keyboard hint ── */
+    .kbd-hint {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 0.75rem;
+    }
+    kbd {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-size: 0.7rem;
+    }
+
+    @media (max-width: 520px) {
+      .card { padding: 1.25rem 1rem; }
+      .nav-btn { padding: 0.5rem 0.8rem; font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<a class="back-link" href="README.md">&#8592; Back to Index</a>
+<h1>Java Database Programming</h1>
+<p class="subtitle">JDBC &bull; SQL &bull; Transactions &bull; Connection Pooling &bull; 15 Questions</p>
+
+<!-- Progress -->
+<div class="progress-wrap" id="progress-wrap">
+  <div class="progress-label">
+    <span id="prog-label">Question 1 of 15</span>
+    <span id="timer-label">0:00</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- Quiz card -->
+<div class="card" id="quiz-card">
+  <span class="q-type-badge" id="q-type-badge">Multiple Choice</span>
+  <p class="question-text" id="question-text"></p>
+  <pre class="code-block" id="code-block" style="display:none"></pre>
+  <div class="options" id="options-container"></div>
+  <div class="feedback" id="feedback"></div>
+  <div class="nav">
+    <button class="nav-btn" id="prev-btn" disabled>&#8592; Previous</button>
+    <button class="nav-btn" id="next-btn">Next &#8594;</button>
+  </div>
+</div>
+<p class="kbd-hint">
+  <kbd>&#8593;</kbd><kbd>&#8595;</kbd> navigate &nbsp;&bull;&nbsp;
+  <kbd>Enter</kbd> / <kbd>Space</kbd> confirm &nbsp;&bull;&nbsp;
+  <kbd>&#8592;</kbd><kbd>&#8594;</kbd> previous / next
+</p>
+
+<!-- Results -->
+<div id="results-screen">
+  <div class="results-card">
+    <div class="score-circle" id="score-circle">
+      <span class="score-number" id="score-number">0%</span>
+    </div>
+    <div class="grade-badge" id="grade-badge"></div>
+    <p id="grade-message" style="color:var(--muted);font-size:0.9rem;margin-bottom:0.5rem"></p>
+    <div class="stats-row">
+      <div class="stat-item"><div class="stat-num" id="stat-correct">0</div><div class="stat-lbl">Correct</div></div>
+      <div class="stat-item"><div class="stat-num" id="stat-wrong">0</div><div class="stat-lbl">Wrong</div></div>
+      <div class="stat-item"><div class="stat-num" id="stat-time">0:00</div><div class="stat-lbl">Time</div></div>
+    </div>
+    <div class="results-actions">
+      <button class="btn-primary"   id="retry-btn">&#8635; Retry</button>
+      <button class="btn-secondary" id="review-btn">Review Wrong Answers</button>
+    </div>
+  </div>
+</div>
+
+<!-- Review -->
+<div id="review-screen">
+  <div class="review-header">
+    <h2>Review: Wrong Answers</h2>
+    <button class="btn-secondary" id="back-to-results-btn">&#8592; Back to Results</button>
+  </div>
+  <div id="review-list"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  QUESTIONS
+// ═══════════════════════════════════════════════════════════════
+const questions = [
+  {
+    id: 1,
+    type: "multiple-choice",
+    text: "What are the three parameters required by DriverManager.getConnection()?",
+    options: [
+      "host, port, database",
+      "url, username, password",
+      "driver, schema, credentials",
+      "connection, user, timeout"
+    ],
+    correct: 1,
+    explanation: "DriverManager.getConnection(url, user, password) is the standard signature. The url includes the JDBC protocol, host, port, and database name (e.g., 'jdbc:mysql://localhost:3306/mydb'). The driver class used to be registered manually but since JDBC 4.0 it is loaded automatically via ServiceLoader."
+  },
+  {
+    id: 2,
+    type: "multiple-choice",
+    text: "Why should you use PreparedStatement instead of Statement when accepting user input?",
+    options: [
+      "PreparedStatement is faster because it caches the query plan",
+      "PreparedStatement prevents SQL injection by separating SQL code from data",
+      "Statement does not support SELECT queries",
+      "PreparedStatement automatically commits transactions"
+    ],
+    correct: 1,
+    explanation: "The primary security reason is SQL injection prevention. PreparedStatement sends the SQL template to the database first (with ? placeholders), and the database compiles it. User data is then sent as typed parameters, so it can never be interpreted as SQL code. The performance benefit (cached query plan) is secondary."
+  },
+  {
+    id: 3,
+    type: "multiple-choice",
+    text: "What does the ? placeholder represent in a PreparedStatement?",
+    options: [
+      "A wildcard that matches any column name",
+      "A positional parameter placeholder for a typed value to be bound later",
+      "A SQL comment marker",
+      "An optional clause that may be omitted"
+    ],
+    correct: 1,
+    explanation: "Each ? is a positional parameter. You bind a value to it using ps.setString(1, value), ps.setInt(2, id), etc.—where the first argument is the 1-based position. The database driver handles escaping and type conversion, ensuring the value is never executed as SQL code."
+  },
+  {
+    id: 4,
+    type: "multiple-choice",
+    code: `PreparedStatement ps = conn.prepareStatement(
+    "SELECT name FROM users WHERE id = ?"
+);
+ps.setInt(1, 42);
+ResultSet rs = ps.executeQuery();
+if (rs.next()) {
+    System.out.println(rs.getString("name"));
+}`,
+    text: "What does this code do if a user with id=42 named 'Alice' exists?",
+    options: [
+      "Prints nothing because rs.next() returns false for the first row",
+      "Throws an exception because getString() requires a column index",
+      "Prints 'Alice'",
+      "Prints '42'"
+    ],
+    correct: 2,
+    explanation: "ps.setInt(1, 42) binds the value 42 to the first ? parameter. executeQuery() runs the SELECT and returns a ResultSet. rs.next() advances the cursor to the first row and returns true if a row exists. rs.getString('name') retrieves the value of the 'name' column from that row. Column names and indices (1-based) are both valid arguments to getString()."
+  },
+  {
+    id: 5,
+    type: "multiple-choice",
+    text: "What is the difference between executeQuery() and executeUpdate()?",
+    options: [
+      "executeQuery() returns a ResultSet; executeUpdate() returns an int (rows affected)",
+      "executeQuery() is for DDL; executeUpdate() is for DML",
+      "executeQuery() returns an int; executeUpdate() returns a ResultSet",
+      "They are interchangeable—both return ResultSet"
+    ],
+    correct: 0,
+    explanation: "executeQuery() is used for SELECT statements and returns a ResultSet containing the query results. executeUpdate() is used for INSERT, UPDATE, DELETE, and DDL statements; it returns an int representing the number of rows affected (or 0 for DDL). Using the wrong method throws a SQLException."
+  },
+  {
+    id: 6,
+    type: "multiple-choice",
+    text: "Which try-with-resources pattern correctly closes a JDBC Connection, Statement, and ResultSet?",
+    options: [
+      "try (Connection conn = ...; Statement stmt = ...; ResultSet rs = ...) { ... }",
+      "You must close them manually in a finally block; they do not implement AutoCloseable",
+      "try (ResultSet rs = ...) { ... } — Connection and Statement close automatically",
+      "Only Connection needs closing; Statement and ResultSet are garbage-collected"
+    ],
+    correct: 0,
+    explanation: "Since Java 7, Connection, Statement, and ResultSet all implement AutoCloseable. Declaring them in a try-with-resources statement guarantees they are closed in reverse order (rs, stmt, conn) even if an exception occurs. This is the recommended approach to prevent resource leaks."
+  },
+  {
+    id: 7,
+    type: "multiple-choice",
+    text: "What do the ACID properties stand for?",
+    options: [
+      "Access, Concurrency, Integrity, Durability",
+      "Atomicity, Consistency, Isolation, Durability",
+      "Atomicity, Concurrency, Integrity, Distribution",
+      "Availability, Consistency, Isolation, Delivery"
+    ],
+    correct: 1,
+    explanation: "ACID is the set of properties that guarantee database transaction reliability: Atomicity (all-or-nothing), Consistency (data remains valid before and after), Isolation (concurrent transactions don't interfere), and Durability (committed data survives crashes). These are enforced by the database's transaction manager."
+  },
+  {
+    id: 8,
+    type: "multiple-choice",
+    text: "What is the purpose of connection.setAutoCommit(false)?",
+    options: [
+      "It prevents other threads from using the same connection",
+      "It disables auto-close so the connection stays open indefinitely",
+      "It begins a manual transaction so you can commit or rollback multiple statements as a unit",
+      "It speeds up queries by batching all SQL until commit() is called"
+    ],
+    correct: 2,
+    explanation: "By default, JDBC connections have auto-commit enabled—each statement is its own transaction. Calling setAutoCommit(false) starts a manual transaction. You can then execute multiple SQL statements and either commit() them all atomically or rollback() all changes if an error occurs. This is essential for operations that must succeed or fail together (e.g., bank transfers)."
+  },
+  {
+    id: 9,
+    type: "multiple-choice",
+    code: `connection.setAutoCommit(false);
+try {
+    stmt.executeUpdate("UPDATE accounts SET balance = balance - 100 WHERE id = 1");
+    stmt.executeUpdate("UPDATE accounts SET balance = balance + 100 WHERE id = 2");
+    connection.commit();
+} catch (SQLException e) {
+    connection.rollback();
+}`,
+    text: "What does this transaction code guarantee?",
+    options: [
+      "Either both balance updates succeed together, or neither takes effect",
+      "The second UPDATE waits for the first to complete before executing",
+      "Both updates are batched into a single SQL statement for performance",
+      "The transaction retries automatically if a deadlock is detected"
+    ],
+    correct: 0,
+    explanation: "This is a classic atomic transfer. With auto-commit off, both UPDATE statements are part of one transaction. If both succeed, commit() makes both changes permanent. If either throws a SQLException, rollback() undoes any partial changes—guaranteeing the Atomicity property. Without this, a crash between the two updates would leave accounts in an inconsistent state."
+  },
+  {
+    id: 10,
+    type: "multiple-choice",
+    text: "What is the H2 in-memory database JDBC URL format?",
+    options: [
+      "jdbc:h2:memory://localhost/testdb",
+      "jdbc:h2:mem:testdb",
+      "jdbc:memory:h2:testdb",
+      "jdbc:h2:inmem:testdb"
+    ],
+    correct: 1,
+    explanation: "The correct format is jdbc:h2:mem:testdb. The 'mem:' prefix tells H2 to create an in-memory database named 'testdb' that lives only for the duration of the JVM process. H2 is widely used in Spring Boot tests with @DataJpaTest. By default, each connection opens its own private in-memory database; append ;DB_CLOSE_DELAY=-1 to share it across connections."
+  },
+  {
+    id: 11,
+    type: "multiple-choice",
+    text: "Why is connection pooling important? What problem does it solve?",
+    options: [
+      "It eliminates the need for try-with-resources since pooled connections never leak",
+      "Creating a new database connection is expensive (TCP handshake, authentication, memory). A pool reuses connections to avoid that overhead on every request.",
+      "It converts synchronous JDBC calls into non-blocking async calls",
+      "It automatically retries failed SQL queries up to three times"
+    ],
+    correct: 1,
+    explanation: "Establishing a JDBC connection involves a TCP handshake, TLS negotiation, authentication, and server-side resource allocation—often taking 20–200ms. In a web app handling thousands of requests per second, creating a new connection per request is fatal to performance. A connection pool (HikariCP, c3p0, DBCP) maintains a warm pool of open connections that threads borrow and return."
+  },
+  {
+    id: 12,
+    type: "multiple-choice",
+    text: "How do you retrieve the auto-generated primary key after an INSERT?",
+    options: [
+      "Call getLastInsertId() on the Statement after executeUpdate()",
+      "Prepare the statement with Statement.RETURN_GENERATED_KEYS, then call getGeneratedKeys() on it",
+      "Execute a SELECT MAX(id) query immediately after the INSERT",
+      "Auto-generated keys are returned directly by executeUpdate() as its int return value"
+    ],
+    correct: 1,
+    explanation: "You must prepare the statement with: PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS). After executeUpdate(), call ResultSet keys = ps.getGeneratedKeys() and read the key with keys.getLong(1). Relying on SELECT MAX(id) is a race condition in concurrent environments. executeUpdate() only returns the count of affected rows."
+  },
+  {
+    id: 13,
+    type: "multiple-choice",
+    text: "What is the default transaction isolation level for most JDBC drivers (including MySQL and PostgreSQL)?",
+    options: [
+      "READ_UNCOMMITTED",
+      "READ_COMMITTED",
+      "REPEATABLE_READ",
+      "SERIALIZABLE"
+    ],
+    correct: 1,
+    explanation: "READ_COMMITTED is the default for most databases. It prevents dirty reads (reading uncommitted data) but allows non-repeatable reads (the same row returning different values if re-read within a transaction). REPEATABLE_READ prevents non-repeatable reads. SERIALIZABLE prevents phantom reads but has the highest locking overhead. MySQL's InnoDB actually defaults to REPEATABLE_READ, but READ_COMMITTED is the most common JDBC/application default."
+  },
+  {
+    id: 14,
+    type: "multiple-choice",
+    text: "What is the Repository pattern in the context of JDBC?",
+    options: [
+      "A design pattern that stores JDBC connections in a central registry",
+      "An abstraction layer that encapsulates all database access logic for a domain object, exposing only domain-level methods like findById() and save()",
+      "A pattern that replaces JDBC entirely with an ORM framework",
+      "A pattern for caching SQL query results in memory"
+    ],
+    correct: 1,
+    explanation: "The Repository pattern (from Domain-Driven Design) wraps all data access logic behind an interface like UserRepository with methods findById(long id), findAll(), save(User u), delete(long id). The JDBC implementation lives inside the repository class. Callers never see SQL or ResultSet—they work with domain objects. This makes testing easy (mock the repository) and allows swapping JDBC for an ORM later."
+  },
+  {
+    id: 15,
+    type: "multiple-choice",
+    code: `String userInput = request.getParameter("id");
+// BAD:
+Statement stmt = conn.createStatement();
+ResultSet rs = stmt.executeQuery(
+    "SELECT * FROM users WHERE id = " + userInput
+);`,
+    text: "If userInput is '1 OR 1=1', what SQL is actually executed—and what attack is this?",
+    options: [
+      "SELECT * FROM users WHERE id = '1 OR 1=1' — a syntax error, no data returned",
+      "SELECT * FROM users WHERE id = 1 OR 1=1 — returns ALL rows; this is a SQL injection attack",
+      "The JDBC driver sanitizes the input, so the query executes safely",
+      "The query returns only users with id = 1 because OR has lower precedence"
+    ],
+    correct: 1,
+    explanation: "String concatenation produces: SELECT * FROM users WHERE id = 1 OR 1=1. Since 1=1 is always true, this returns every row in the users table—a SQL injection attack. Worse inputs can DROP tables or exfiltrate passwords. PreparedStatement prevents this completely: ps.setString(1, '1 OR 1=1') treats the entire string as a data value, not SQL code, so the query safely returns zero rows."
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+let current      = 0;
+let answers      = new Array(questions.length).fill(null);
+let focusedIdx   = 0;
+let startTime    = Date.now();
+let timerInterval;
+let quizDone     = false;
+
+// ═══════════════════════════════════════════════════════════════
+//  DOM REFS
+// ═══════════════════════════════════════════════════════════════
+const quizCard         = document.getElementById('quiz-card');
+const qTypeBadge       = document.getElementById('q-type-badge');
+const questionText     = document.getElementById('question-text');
+const codeBlock        = document.getElementById('code-block');
+const optionsContainer = document.getElementById('options-container');
+const feedback         = document.getElementById('feedback');
+const prevBtn          = document.getElementById('prev-btn');
+const nextBtn          = document.getElementById('next-btn');
+const progLabel        = document.getElementById('prog-label');
+const timerLabel       = document.getElementById('timer-label');
+const progressFill     = document.getElementById('progress-fill');
+const progressWrap     = document.getElementById('progress-wrap');
+const resultsScreen    = document.getElementById('results-screen');
+const reviewScreen     = document.getElementById('review-screen');
+
+// ═══════════════════════════════════════════════════════════════
+//  TIMER
+// ═══════════════════════════════════════════════════════════════
+function formatTime(ms) {
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  return `${m}:${String(s % 60).padStart(2, '0')}`;
+}
+
+function startTimer() {
+  startTime = Date.now();
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timerLabel.textContent = formatTime(Date.now() - startTime);
+  }, 500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER QUESTION
+// ═══════════════════════════════════════════════════════════════
+function typeBadgeText(q) {
+  if (q.type === 'true-false')  return 'True / False';
+  if (q.type === 'fill-blank')  return 'Fill in the Blank';
+  if (q.code)                   return 'Code Reading';
+  return 'Multiple Choice';
+}
+
+function render() {
+  const q        = questions[current];
+  const answered = answers[current] !== null;
+
+  progLabel.textContent    = `Question ${current + 1} of ${questions.length}`;
+  progressFill.style.width = ((current) / questions.length * 100) + '%';
+
+  qTypeBadge.textContent = typeBadgeText(q);
+  questionText.textContent = q.text;
+
+  if (q.code) {
+    codeBlock.style.display = 'block';
+    codeBlock.textContent   = q.code;
+  } else {
+    codeBlock.style.display = 'none';
+  }
+
+  optionsContainer.innerHTML = '';
+  feedback.className = 'feedback';
+  feedback.innerHTML = '';
+  quizCard.className = 'card';
+
+  prevBtn.disabled    = (current === 0);
+  nextBtn.textContent = (current === questions.length - 1) ? 'Finish' : 'Next →';
+
+  // ── Fill-blank ──
+  if (q.type === 'fill-blank') {
+    const wrap  = document.createElement('div');
+    wrap.className = 'fill-blank-wrap';
+
+    const input = document.createElement('input');
+    input.type  = 'text';
+    input.className = 'fill-blank-input';
+    input.placeholder = 'Type your answer…';
+    input.setAttribute('aria-label', 'Fill in the blank answer');
+
+    const submitBtn = document.createElement('button');
+    submitBtn.textContent = 'Submit';
+    submitBtn.className   = 'submit-btn';
+
+    wrap.appendChild(input);
+    wrap.appendChild(submitBtn);
+    optionsContainer.appendChild(wrap);
+
+    if (answered) {
+      input.value        = answers[current].value;
+      input.disabled     = true;
+      submitBtn.disabled = true;
+      const isCorrect    = answers[current].correct;
+      input.classList.add(isCorrect ? 'correct' : 'wrong');
+      showFeedback(q, isCorrect, answers[current].value);
+    } else {
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') submitBtn.click(); });
+      submitBtn.addEventListener('click', () => {
+        const val = input.value.trim();
+        if (!val) return;
+        const isCorrect = val.toLowerCase() === q.correct.toLowerCase();
+        answers[current] = { value: val, correct: isCorrect };
+        input.disabled   = true;
+        submitBtn.disabled = true;
+        input.classList.add(isCorrect ? 'correct' : 'wrong');
+        flashCard(isCorrect);
+        showFeedback(q, isCorrect, val);
+      });
+      setTimeout(() => input.focus(), 50);
+    }
+    return;
+  }
+
+  // ── Multiple-choice / True-False ──
+  focusedIdx = answered ? answers[current].selectedIdx : 0;
+
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.setAttribute('role', 'radio');
+    btn.setAttribute('tabindex', '0');
+
+    const letter = document.createElement('span');
+    letter.className = 'option-letter';
+    letter.textContent = String.fromCharCode(65 + i);
+
+    const label = document.createElement('span');
+    label.textContent = opt;
+
+    btn.appendChild(letter);
+    btn.appendChild(label);
+
+    if (answered) {
+      btn.disabled = true;
+      const sel = answers[current].selectedIdx;
+      if (i === q.correct)              btn.classList.add('correct');
+      if (i === sel && i !== q.correct) btn.classList.add('wrong');
+    } else {
+      btn.addEventListener('click', () => selectOption(i));
+    }
+
+    if (!answered && i === focusedIdx) btn.classList.add('focused');
+    optionsContainer.appendChild(btn);
+  });
+
+  if (answered) showFeedback(q, answers[current].correct, null);
+}
+
+function selectOption(idx) {
+  const q = questions[current];
+  if (answers[current] !== null) return;
+
+  const isCorrect = idx === q.correct;
+  answers[current] = { selectedIdx: idx, correct: isCorrect };
+
+  flashCard(isCorrect);
+
+  const btns = optionsContainer.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    btn.classList.remove('focused');
+    if (i === q.correct)              btn.classList.add('correct');
+    if (i === idx && !isCorrect)      btn.classList.add('wrong');
+  });
+
+  showFeedback(q, isCorrect, null);
+}
+
+function flashCard(isCorrect) {
+  quizCard.className = 'card';
+  void quizCard.offsetWidth;
+  quizCard.className = 'card ' + (isCorrect ? 'flash-correct' : 'flash-wrong');
+}
+
+function showFeedback(q, isCorrect, userValue) {
+  feedback.innerHTML = '';
+  let html = '';
+
+  if (isCorrect) {
+    html = `<strong>&#10003; Correct!</strong> `;
+  } else {
+    if (q.type === 'fill-blank') {
+      html = `<strong>&#10007; Wrong.</strong> Your answer: "<em>${escHtml(userValue)}</em>". Correct: "<strong>${escHtml(q.correct)}</strong>". `;
+    } else {
+      html = `<strong>&#10007; Wrong.</strong> Correct answer: <strong>${escHtml(q.options[q.correct])}</strong>. `;
+    }
+  }
+  html += escHtml(q.explanation);
+  feedback.innerHTML = html;
+  feedback.className = 'feedback show ' + (isCorrect ? 'correct-fb' : 'wrong-fb');
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  KEYBOARD
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (quizDone) return;
+  const q = questions[current];
+  if (!q) return;
+
+  const isChoice = q.type !== 'fill-blank';
+  const optBtns  = optionsContainer.querySelectorAll('.option-btn');
+  const answered = answers[current] !== null;
+
+  if (isChoice) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      if (!answered && e.key === 'ArrowDown') {
+        e.preventDefault();
+        optBtns[focusedIdx]?.classList.remove('focused');
+        focusedIdx = (focusedIdx + 1) % q.options.length;
+        optBtns[focusedIdx]?.classList.add('focused');
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault(); goNext();
+      }
+    }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      if (!answered && e.key === 'ArrowUp') {
+        e.preventDefault();
+        optBtns[focusedIdx]?.classList.remove('focused');
+        focusedIdx = (focusedIdx - 1 + q.options.length) % q.options.length;
+        optBtns[focusedIdx]?.classList.add('focused');
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault(); goPrev();
+      }
+    }
+    if ((e.key === 'Enter' || e.key === ' ') && !answered) {
+      e.preventDefault();
+      selectOption(focusedIdx);
+    }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+function goPrev() { if (current > 0) { current--; render(); } }
+function goNext() {
+  if (current < questions.length - 1) { current++; render(); }
+  else showResults();
+}
+
+prevBtn.addEventListener('click', goPrev);
+nextBtn.addEventListener('click', goNext);
+
+// ═══════════════════════════════════════════════════════════════
+//  RESULTS
+// ═══════════════════════════════════════════════════════════════
+function showResults() {
+  clearInterval(timerInterval);
+  quizDone = true;
+
+  const elapsed = Date.now() - startTime;
+  const correct = answers.filter(a => a && a.correct).length;
+  const pct     = Math.round((correct / questions.length) * 100);
+
+  quizCard.style.display     = 'none';
+  progressWrap.style.display = 'none';
+  document.querySelector('.kbd-hint').style.display = 'none';
+
+  document.getElementById('score-circle').style.setProperty('--pct', pct);
+  document.getElementById('score-number').textContent = pct + '%';
+
+  let gradeText, gradeClass, gradeMsg;
+  if (pct < 60)      { gradeText = 'Needs Work';    gradeClass = 'grade-needs';   gradeMsg = 'Keep studying — you\'ll get there!'; }
+  else if (pct < 80) { gradeText = 'Getting There'; gradeClass = 'grade-getting'; gradeMsg = 'Solid effort. Review the explanations and try again.'; }
+  else if (pct < 95) { gradeText = 'Good Job!';     gradeClass = 'grade-good';    gradeMsg = 'Strong performance. Almost expert-level!'; }
+  else               { gradeText = 'Expert!';        gradeClass = 'grade-expert';  gradeMsg = 'Outstanding! You know JDBC inside and out.'; }
+
+  const gradeBadge = document.getElementById('grade-badge');
+  gradeBadge.textContent = gradeText;
+  gradeBadge.className   = 'grade-badge ' + gradeClass;
+  document.getElementById('grade-message').textContent = gradeMsg;
+
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-wrong').textContent   = questions.length - correct;
+  document.getElementById('stat-time').textContent    = formatTime(elapsed);
+
+  resultsScreen.style.display = 'block';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RETRY
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('retry-btn').addEventListener('click', () => {
+  answers  = new Array(questions.length).fill(null);
+  current  = 0;
+  quizDone = false;
+
+  resultsScreen.style.display = 'none';
+  reviewScreen.style.display  = 'none';
+  quizCard.style.display      = '';
+  progressWrap.style.display  = '';
+  document.querySelector('.kbd-hint').style.display = '';
+
+  startTimer();
+  render();
+});
+
+// ═══════════════════════════════════════════════════════════════
+//  REVIEW WRONG ANSWERS
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('review-btn').addEventListener('click', () => {
+  resultsScreen.style.display = 'none';
+  reviewScreen.style.display  = 'block';
+  renderReview();
+});
+
+document.getElementById('back-to-results-btn').addEventListener('click', () => {
+  reviewScreen.style.display  = 'none';
+  resultsScreen.style.display = 'block';
+});
+
+function renderReview() {
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+
+  const wrong = answers
+    .map((a, i) => ({ a, q: questions[i], i }))
+    .filter(({ a }) => a && !a.correct);
+
+  if (wrong.length === 0) {
+    list.innerHTML = '<p style="color:var(--correct);text-align:center;padding:2rem">&#10003; You got everything right!</p>';
+    return;
+  }
+
+  wrong.forEach(({ a, q, i }) => {
+    const item = document.createElement('div');
+    item.className = 'review-item';
+
+    let userAnswerHtml, correctAnswerHtml;
+    if (q.type === 'fill-blank') {
+      userAnswerHtml    = `Your answer: "${escHtml(a.value)}"`;
+      correctAnswerHtml = `Correct: "${escHtml(q.correct)}"`;
+    } else {
+      userAnswerHtml    = `Your answer: ${escHtml(q.options[a.selectedIdx])}`;
+      correctAnswerHtml = `Correct: ${escHtml(q.options[q.correct])}`;
+    }
+
+    const codeHtml = q.code
+      ? `<pre class="code-block" style="margin-bottom:0.75rem">${escHtml(q.code)}</pre>`
+      : '';
+
+    item.innerHTML = `
+      <div class="review-q-num">Question ${i + 1}</div>
+      <div class="review-q-text">${escHtml(q.text)}</div>
+      ${codeHtml}
+      <div class="review-answer your-wrong">&#10007; ${escHtml(userAnswerHtml)}</div>
+      <div class="review-answer the-correct">&#10003; ${escHtml(correctAnswerHtml)}</div>
+      <div class="review-explanation">${escHtml(q.explanation)}</div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+startTimer();
+render();
+</script>
+</body>
+</html>

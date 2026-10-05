@@ -1,0 +1,2155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Streams API - Interactive Reference</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --panel: #16213e;
+    --panel2: #0f3460;
+    --accent: #e94560;
+    --accent2: #533483;
+    --accent3: #0f9b8e;
+    --text: #e0e0e0;
+    --text-dim: #9090a0;
+    --border: #2a2a4e;
+    --creation-color: #4caf50;
+    --intermediate-color: #2196f3;
+    --terminal-color: #ff9800;
+    --special-color: #9c27b0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--panel2) 0%, var(--panel) 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+    background: linear-gradient(90deg, var(--accent), #ff8a65);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    white-space: nowrap;
+  }
+
+  nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: 2rem;
+    flex-wrap: wrap;
+  }
+
+  nav button {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 0.35rem 0.9rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: all 0.2s;
+  }
+
+  nav button:hover, nav button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  header .subtitle {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  section { display: none; }
+  section.active { display: block; }
+
+  .section-title {
+    font-size: 1.4rem;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 1.4rem;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* ── CATEGORY LEGEND ─────────────────── */
+  .legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  /* ── OPERATION CARDS ─────────────────── */
+  .category-section {
+    margin-bottom: 3rem;
+  }
+
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    border-left: 4px solid;
+  }
+
+  .category-header.creation {
+    background: rgba(76,175,80,0.1);
+    border-color: var(--creation-color);
+  }
+  .category-header.intermediate {
+    background: rgba(33,150,243,0.1);
+    border-color: var(--intermediate-color);
+  }
+  .category-header.terminal {
+    background: rgba(255,152,0,0.1);
+    border-color: var(--terminal-color);
+  }
+  .category-header.special {
+    background: rgba(156,39,176,0.1);
+    border-color: var(--special-color);
+  }
+
+  .category-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .category-header .cat-desc {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    margin-left: auto;
+  }
+
+  .ops-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1rem;
+  }
+
+  .op-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.15s;
+    cursor: pointer;
+  }
+
+  .op-card:hover {
+    border-color: var(--accent2);
+    transform: translateY(-1px);
+  }
+
+  .op-card.expanded {
+    border-color: var(--accent);
+  }
+
+  .op-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.9rem 1rem;
+  }
+
+  .op-card .cat-badge {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  .op-card-title {
+    flex: 1;
+  }
+
+  .op-card-title .op-name {
+    font-family: monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #80cbc4;
+  }
+
+  .op-card-title .op-sig {
+    font-family: monospace;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    margin-top: 1px;
+    word-break: break-all;
+  }
+
+  .op-card-title .op-desc {
+    font-size: 0.82rem;
+    color: var(--text);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  .op-card-expand {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.2rem;
+    transition: transform 0.2s;
+  }
+
+  .op-card.expanded .op-card-expand {
+    transform: rotate(180deg);
+    color: var(--accent);
+  }
+
+  .op-card-body {
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .op-card.expanded .op-card-body {
+    display: block;
+  }
+
+  .op-io {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: rgba(15, 52, 96, 0.5);
+    flex-wrap: wrap;
+  }
+
+  .op-io .io-label {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    min-width: 40px;
+  }
+
+  .op-io .io-val {
+    font-family: monospace;
+    font-size: 0.78rem;
+    background: var(--panel2);
+    padding: 2px 7px;
+    border-radius: 4px;
+    color: #b2ebf2;
+  }
+
+  .op-io .arrow {
+    color: var(--accent);
+    font-size: 0.9rem;
+  }
+
+  .op-card pre { margin: 0; }
+  pre code.hljs { background: transparent; padding: 0.8rem 1rem; font-size: 0.78rem; }
+
+  /* ── PIPELINE BUILDER ────────────────── */
+  .pipeline-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .pipeline-ops-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    position: sticky;
+    top: 90px;
+  }
+
+  .pipeline-ops-panel h3 {
+    font-size: 0.9rem;
+    color: var(--accent);
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pipeline-cat-group {
+    margin-bottom: 0.8rem;
+  }
+
+  .pipeline-cat-group .cat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-dim);
+    margin-bottom: 0.3rem;
+  }
+
+  .pipeline-op-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.25rem 0.6rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-family: monospace;
+    margin: 2px;
+    transition: all 0.15s;
+  }
+
+  .pipeline-op-btn:hover {
+    border-color: var(--accent2);
+    color: #b39ddb;
+  }
+
+  .pipeline-op-btn.creation   { border-left: 3px solid var(--creation-color); }
+  .pipeline-op-btn.intermediate { border-left: 3px solid var(--intermediate-color); }
+  .pipeline-op-btn.terminal   { border-left: 3px solid var(--terminal-color); }
+
+  .pipeline-canvas {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    min-height: 200px;
+  }
+
+  .pipeline-canvas h3 {
+    font-size: 0.9rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .pipeline-track {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    min-height: 48px;
+    margin-bottom: 1.2rem;
+  }
+
+  .pipeline-step {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.35rem 0.7rem;
+    font-family: monospace;
+    font-size: 0.78rem;
+    position: relative;
+  }
+
+  .pipeline-step .remove-btn {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 0 2px;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+
+  .pipeline-step .remove-btn:hover { color: var(--accent); }
+
+  .pipeline-step.creation     { border-left: 3px solid var(--creation-color); color: #a5d6a7; }
+  .pipeline-step.intermediate { border-left: 3px solid var(--intermediate-color); color: #90caf9; }
+  .pipeline-step.terminal     { border-left: 3px solid var(--terminal-color); color: #ffcc80; }
+
+  .pipeline-arrow {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  .pipeline-placeholder {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-style: italic;
+  }
+
+  .pipeline-result {
+    background: rgba(15, 154, 142, 0.1);
+    border: 1px solid var(--accent3);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .pipeline-result h4 {
+    font-size: 0.82rem;
+    color: var(--accent3);
+    margin-bottom: 0.6rem;
+  }
+
+  .pipeline-result pre {
+    margin: 0;
+    font-size: 0.8rem;
+  }
+
+  .pipeline-result .error {
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-style: italic;
+  }
+
+  .pipeline-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .pipeline-controls button {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: all 0.15s;
+  }
+
+  .pipeline-controls button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── PATTERNS SECTION ────────────────── */
+  .patterns-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .pattern-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .pattern-card-header {
+    background: var(--panel2);
+    padding: 0.7rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+
+  .pattern-card-header .pattern-name {
+    font-weight: 700;
+    color: #b39ddb;
+    font-size: 0.95rem;
+  }
+
+  .pattern-card-header .pattern-tag {
+    font-size: 0.7rem;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-left: auto;
+    background: rgba(83,52,131,0.4);
+    color: #ce93d8;
+    border: 1px solid var(--accent2);
+  }
+
+  .pattern-card pre { margin: 0; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 900px) {
+    nav { margin-left: 0; margin-top: 0.5rem; }
+    header { flex-wrap: wrap; }
+    .pipeline-layout { grid-template-columns: 1fr; }
+    .pipeline-ops-panel { position: static; }
+    .patterns-grid { grid-template-columns: 1fr; }
+    .ops-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>&#127754; Java Streams API</h1>
+  <nav>
+    <button class="active" onclick="showSection('operations',this)">Operations</button>
+    <button onclick="showSection('pipeline',this)">Pipeline Builder</button>
+    <button onclick="showSection('patterns',this)">Common Patterns</button>
+  </nav>
+  <span class="subtitle">Interactive Reference</span>
+</header>
+
+<main>
+
+<!-- ====== OPERATIONS SECTION ====== -->
+<section id="operations" class="active">
+  <h2 class="section-title">Stream Operations Reference</h2>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--creation-color)"></div> Creation</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--intermediate-color)"></div> Intermediate (lazy)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--terminal-color)"></div> Terminal (eager, triggers pipeline)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--special-color)"></div> Collectors</div>
+  </div>
+
+  <div id="operations-content"></div>
+</section>
+
+<!-- ====== PIPELINE BUILDER ====== -->
+<section id="pipeline">
+  <h2 class="section-title">Build a Pipeline</h2>
+  <p style="color:var(--text-dim);margin-bottom:1.5rem;font-size:0.88rem;">Click operations to chain them. The pipeline shows a code preview and simulated result.</p>
+
+  <div class="pipeline-layout">
+    <div class="pipeline-ops-panel">
+      <h3>&#43; Add Operation</h3>
+      <div id="pipeline-op-palette"></div>
+    </div>
+
+    <div class="pipeline-canvas">
+      <h3>&#128295; Your Pipeline</h3>
+
+      <div class="pipeline-controls">
+        <button onclick="clearPipeline()">&#128465; Clear</button>
+        <button onclick="undoPipeline()">&#8617; Undo</button>
+      </div>
+
+      <div class="pipeline-track" id="pipeline-track">
+        <span class="pipeline-placeholder">Add operations from the left panel...</span>
+      </div>
+
+      <div class="pipeline-result" id="pipeline-result">
+        <h4>Generated Code</h4>
+        <pre><code class="language-java" id="pipeline-code">// Add operations to build your stream pipeline</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== PATTERNS SECTION ====== -->
+<section id="patterns">
+  <h2 class="section-title">Common Stream Patterns</h2>
+  <div class="patterns-grid" id="patterns-grid"></div>
+</section>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════
+
+const OPS = [
+  // ─── CREATION ────────────────────────────────────
+  {
+    category: 'creation',
+    name: 'Collection.stream()',
+    sig: 'default Stream<E> stream()',
+    desc: 'Create a sequential stream from any Collection.',
+    input: 'List<String> ["a","b","c"]',
+    output: 'Stream<String>',
+    example: `List<String> words = List.of("hello","world","java","streams");
+
+// Sequential stream
+Stream<String> stream = words.stream();
+stream.filter(w -> w.length() > 4)
+      .map(String::toUpperCase)
+      .forEach(System.out::println);
+// HELLO WORLD STREAMS`
+  },
+  {
+    category: 'creation',
+    name: 'Stream.of()',
+    sig: 'static Stream<T> Stream.of(T... values)',
+    desc: 'Create a stream from varargs.',
+    input: 'values: "a","b","c"',
+    output: 'Stream<String>',
+    example: `Stream<String> s = Stream.of("one","two","three");
+s.forEach(System.out::println);
+
+// With array
+String[] arr = {"apple","banana","cherry"};
+Stream<String> fromArray = Stream.of(arr);
+
+// Single value
+Stream<Integer> single = Stream.of(42);`
+  },
+  {
+    category: 'creation',
+    name: 'Stream.iterate()',
+    sig: 'static Stream<T> Stream.iterate(T seed, UnaryOperator<T> f)',
+    desc: 'Create an infinite ordered sequential stream by iterative application of a function.',
+    input: 'seed: 0, f: n→n+2',
+    output: 'Stream<Integer> 0,2,4,6,...',
+    example: `// Infinite even numbers (must limit!)
+Stream.iterate(0, n -> n + 2)
+      .limit(10)
+      .forEach(System.out::print); // 0 2 4 6 8 10 12 14 16 18
+
+// Java 9: with predicate (like for-loop)
+Stream.iterate(1, n -> n < 1000, n -> n * 2)
+      .forEach(System.out::print); // 1 2 4 8 16 32 64 128 256 512
+
+// Fibonacci
+Stream.iterate(new long[]{0,1}, f -> new long[]{f[1], f[0]+f[1]})
+      .limit(10)
+      .map(f -> f[0])
+      .forEach(n -> System.out.print(n + " ")); // 0 1 1 2 3 5 8 13 21 34`
+  },
+  {
+    category: 'creation',
+    name: 'Stream.generate()',
+    sig: 'static Stream<T> Stream.generate(Supplier<T> s)',
+    desc: 'Create an infinite stream from a Supplier.',
+    input: 'Supplier: Math::random',
+    output: 'Stream<Double>',
+    example: `// Random numbers
+Stream.generate(Math::random)
+      .limit(5)
+      .forEach(System.out::println);
+
+// Constant stream
+Stream.generate(() -> "hello")
+      .limit(3)
+      .forEach(System.out::println); // hello hello hello
+
+// UUID generation
+Stream.generate(UUID::randomUUID)
+      .limit(3)
+      .map(UUID::toString)
+      .forEach(System.out::println);`
+  },
+  {
+    category: 'creation',
+    name: 'Stream.builder()',
+    sig: 'static Builder<T> Stream.builder()',
+    desc: 'Incrementally build a stream using a mutable builder.',
+    input: 'elements added via accept()',
+    output: 'Stream<T>',
+    example: `Stream.Builder<String> builder = Stream.builder();
+builder.accept("first");
+builder.accept("second");
+if (someCondition) builder.accept("conditional");
+builder.accept("last");
+
+Stream<String> stream = builder.build();
+stream.forEach(System.out::println);`
+  },
+  {
+    category: 'creation',
+    name: 'IntStream / LongStream / DoubleStream',
+    sig: 'IntStream.range(int start, int end)',
+    desc: 'Primitive streams avoid boxing overhead. range() is exclusive, rangeClosed() is inclusive.',
+    input: 'start: 1, end: 6',
+    output: 'IntStream 1,2,3,4,5',
+    example: `// IntStream.range — half-open [1, 6)
+IntStream.range(1, 6).forEach(System.out::print); // 1 2 3 4 5
+
+// IntStream.rangeClosed — closed [1, 5]
+IntStream.rangeClosed(1, 5).sum(); // 15
+
+// Convert to object stream
+IntStream.range(0, 5)
+    .mapToObj(i -> "item-" + i)
+    .forEach(System.out::println);
+
+// Char stream
+"hello".chars()                  // IntStream of char codes
+    .filter(c -> c != 'l')
+    .mapToObj(c -> String.valueOf((char)c))
+    .forEach(System.out::print); // heo`
+  },
+  {
+    category: 'creation',
+    name: 'Files.lines()',
+    sig: 'static Stream<String> Files.lines(Path path)',
+    desc: 'Lazily stream lines from a file. Must close with try-with-resources.',
+    input: 'Path to file',
+    output: 'Stream<String> (one per line)',
+    example: `// Count non-empty lines
+Path path = Path.of("data.txt");
+try (Stream<String> lines = Files.lines(path)) {
+    long count = lines.filter(l -> !l.isBlank()).count();
+    System.out.println("Non-empty lines: " + count);
+}
+
+// Read words from file
+try (Stream<String> lines = Files.lines(path)) {
+    List<String> words = lines
+        .flatMap(line -> Arrays.stream(line.split("\\\\s+")))
+        .filter(w -> !w.isEmpty())
+        .distinct()
+        .sorted()
+        .collect(Collectors.toList());
+}`
+  },
+  {
+    category: 'creation',
+    name: 'Stream.concat()',
+    sig: 'static Stream<T> Stream.concat(Stream<T> a, Stream<T> b)',
+    desc: 'Lazily concatenate two streams.',
+    input: 'Stream[1,2] + Stream[3,4]',
+    output: 'Stream[1,2,3,4]',
+    example: `List<Integer> first  = List.of(1, 2, 3);
+List<Integer> second = List.of(4, 5, 6);
+
+Stream<Integer> combined = Stream.concat(
+    first.stream(), second.stream()
+);
+combined.forEach(System.out::print); // 1 2 3 4 5 6
+
+// Concat multiple streams
+Stream<String> all = Stream.of(
+    Stream.of("a","b"),
+    Stream.of("c","d"),
+    Stream.of("e","f")
+).flatMap(s -> s);`
+  },
+  {
+    category: 'creation',
+    name: 'Collection.parallelStream()',
+    sig: 'default Stream<E> parallelStream()',
+    desc: 'Create a parallel stream that uses the common ForkJoinPool.',
+    input: 'Collection (large)',
+    output: 'Parallel Stream<E>',
+    example: `// Sum of 1 million numbers in parallel
+long sum = LongStream.rangeClosed(1, 1_000_000)
+    .parallel()
+    .sum(); // Uses all available CPU cores
+
+// Parallel processing of files
+List<Path> files = ...; // list of file paths
+Map<Path, Long> sizes = files.parallelStream()
+    .collect(Collectors.toMap(
+        p -> p,
+        p -> { try { return Files.size(p); } catch(Exception e){ return -1L; } }
+    ));
+
+// Note: only safe for independent, stateless operations`
+  },
+
+  // ─── INTERMEDIATE ─────────────────────────────────
+  {
+    category: 'intermediate',
+    name: 'filter()',
+    sig: 'Stream<T> filter(Predicate<? super T> predicate)',
+    desc: 'Keep only elements matching the predicate.',
+    input: '[1,2,3,4,5,6]',
+    output: '[2,4,6]  (n→n%2==0)',
+    example: `List<Integer> nums = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+
+// Simple filter
+List<Integer> evens = nums.stream()
+    .filter(n -> n % 2 == 0)
+    .collect(Collectors.toList()); // [2,4,6,8,10]
+
+// Multiple conditions
+List<String> words = List.of("apple","ant","banana","avocado","cherry");
+List<String> aWords = words.stream()
+    .filter(w -> w.startsWith("a"))
+    .filter(w -> w.length() > 3)
+    .collect(Collectors.toList()); // [apple, avocado]
+
+// Negate predicate
+Predicate<String> isEmpty = String::isEmpty;
+List<String> nonEmpty = List.of("a","","b","","c").stream()
+    .filter(isEmpty.negate())
+    .collect(Collectors.toList()); // [a, b, c]`
+  },
+  {
+    category: 'intermediate',
+    name: 'map()',
+    sig: 'Stream<R> map(Function<? super T, ? extends R> mapper)',
+    desc: 'Transform each element using a mapping function.',
+    input: '["alice","bob","carol"]',
+    output: '["ALICE","BOB","CAROL"]',
+    example: `List<String> names = List.of("alice","bob","carol","dave");
+
+// Transform to uppercase
+List<String> upper = names.stream()
+    .map(String::toUpperCase)
+    .collect(Collectors.toList());
+
+// Extract field
+record Person(String name, int age) {}
+List<Person> people = List.of(
+    new Person("Alice",30), new Person("Bob",25), new Person("Carol",35));
+List<String> personNames = people.stream()
+    .map(Person::name)
+    .collect(Collectors.toList()); // ["Alice","Bob","Carol"]
+
+// Transform type
+List<Integer> lengths = names.stream()
+    .map(String::length)
+    .collect(Collectors.toList()); // [5,3,5,4]`
+  },
+  {
+    category: 'intermediate',
+    name: 'flatMap()',
+    sig: 'Stream<R> flatMap(Function<? super T, ? extends Stream<R>> mapper)',
+    desc: 'Map each element to a stream, then flatten all into one stream.',
+    input: '[["a","b"],["c","d"]]',
+    output: '["a","b","c","d"]',
+    example: `// Flatten nested lists
+List<List<Integer>> nested = List.of(
+    List.of(1,2,3), List.of(4,5), List.of(6,7,8,9)
+);
+List<Integer> flat = nested.stream()
+    .flatMap(Collection::stream)
+    .collect(Collectors.toList()); // [1,2,3,4,5,6,7,8,9]
+
+// Split sentences into words
+List<String> sentences = List.of("hello world","java streams","flat map");
+List<String> words = sentences.stream()
+    .flatMap(s -> Arrays.stream(s.split(" ")))
+    .collect(Collectors.toList()); // [hello,world,java,streams,flat,map]
+
+// flatMapToInt for primitive
+OptionalInt sum = List.of("1 2 3","4 5","6").stream()
+    .flatMapToInt(s -> Arrays.stream(s.split(" ")).mapToInt(Integer::parseInt))
+    .reduce(Integer::sum);`
+  },
+  {
+    category: 'intermediate',
+    name: 'mapToInt() / mapToLong() / mapToDouble()',
+    sig: 'IntStream mapToInt(ToIntFunction<? super T> mapper)',
+    desc: 'Map to primitive stream, enabling sum, average, min, max without boxing.',
+    input: '["apple","hi","streams"]',
+    output: 'IntStream [5,2,7]',
+    example: `List<String> words = List.of("apple","hi","streams","java");
+
+// Sum of lengths
+int totalLen = words.stream()
+    .mapToInt(String::length)
+    .sum(); // 19
+
+// Average
+OptionalDouble avgLen = words.stream()
+    .mapToInt(String::length)
+    .average(); // 4.75
+
+// Statistics
+IntSummaryStatistics stats = words.stream()
+    .mapToInt(String::length)
+    .summaryStatistics();
+System.out.println(stats.getMin());   // 2
+System.out.println(stats.getMax());   // 7
+System.out.println(stats.getAverage()); // 4.75
+System.out.println(stats.getSum());   // 19`
+  },
+  {
+    category: 'intermediate',
+    name: 'distinct()',
+    sig: 'Stream<T> distinct()',
+    desc: 'Return stream with unique elements (uses equals/hashCode).',
+    input: '[1,2,2,3,3,3,4]',
+    output: '[1,2,3,4]',
+    example: `List<Integer> nums = List.of(1,2,2,3,3,3,4,1,2);
+
+List<Integer> unique = nums.stream()
+    .distinct()
+    .collect(Collectors.toList()); // [1,2,3,4]
+
+// Distinct with custom objects (needs proper equals/hashCode)
+record Point(int x, int y) {}
+List<Point> points = List.of(
+    new Point(1,2), new Point(1,2), new Point(3,4));
+List<Point> distinctPoints = points.stream()
+    .distinct()
+    .collect(Collectors.toList()); // [(1,2),(3,4)]
+
+// Distinct by property (using Set trick)
+Set<String> seen = new HashSet<>();
+List<String> distinctByFirstChar = List.of("apple","ant","banana","avocado")
+    .stream()
+    .filter(s -> seen.add(String.valueOf(s.charAt(0))))
+    .collect(Collectors.toList()); // [apple, banana]`
+  },
+  {
+    category: 'intermediate',
+    name: 'sorted()',
+    sig: 'Stream<T> sorted()\nStream<T> sorted(Comparator<? super T> comparator)',
+    desc: 'Sort by natural order or Comparator.',
+    input: '[3,1,4,1,5,9,2,6]',
+    output: '[1,1,2,3,4,5,6,9]',
+    example: `List<Integer> nums = List.of(3,1,4,1,5,9,2,6);
+
+// Natural order
+List<Integer> sorted = nums.stream()
+    .sorted()
+    .collect(Collectors.toList());
+
+// Reverse order
+List<Integer> desc = nums.stream()
+    .sorted(Comparator.reverseOrder())
+    .collect(Collectors.toList());
+
+// Sort objects by field
+record Person(String name, int age) {}
+List<Person> people = List.of(
+    new Person("Bob",30), new Person("Alice",25), new Person("Carol",35));
+
+// Multi-field sort
+List<Person> sorted2 = people.stream()
+    .sorted(Comparator.comparing(Person::age)
+                      .thenComparing(Person::name))
+    .collect(Collectors.toList());`
+  },
+  {
+    category: 'intermediate',
+    name: 'limit()',
+    sig: 'Stream<T> limit(long maxSize)',
+    desc: 'Truncate stream to at most maxSize elements.',
+    input: '[1,2,3,4,5,6,7,8,9,10]',
+    output: '[1,2,3]  (limit(3))',
+    example: `// Get first N results
+List<Integer> first3 = Stream.iterate(1, n -> n+1)
+    .limit(3)
+    .collect(Collectors.toList()); // [1,2,3]
+
+// Pagination: page 2, size 5
+List<String> page = allItems.stream()
+    .skip(5)   // skip page 1
+    .limit(5)  // take page 2
+    .collect(Collectors.toList());
+
+// Top 3 scores
+List<Integer> top3 = scores.stream()
+    .sorted(Comparator.reverseOrder())
+    .limit(3)
+    .collect(Collectors.toList());`
+  },
+  {
+    category: 'intermediate',
+    name: 'skip()',
+    sig: 'Stream<T> skip(long n)',
+    desc: 'Discard the first n elements.',
+    input: '[1,2,3,4,5]',
+    output: '[3,4,5]  (skip(2))',
+    example: `List<Integer> nums = List.of(1,2,3,4,5,6,7,8,9,10);
+
+// Skip header row, process rest
+List<String> dataRows = csvLines.stream()
+    .skip(1)    // skip header
+    .collect(Collectors.toList());
+
+// Pagination: skip to page
+int page = 2, pageSize = 3;
+List<Integer> paginated = nums.stream()
+    .skip((long)(page - 1) * pageSize)
+    .limit(pageSize)
+    .collect(Collectors.toList()); // [4,5,6]`
+  },
+  {
+    category: 'intermediate',
+    name: 'peek()',
+    sig: 'Stream<T> peek(Consumer<? super T> action)',
+    desc: 'Perform side-effect on each element (mainly for debugging). Does NOT transform.',
+    input: '[1,2,3]',
+    output: '[1,2,3]  (unchanged)',
+    example: `// Debugging intermediate steps
+List<Integer> result = List.of(1,2,3,4,5,6).stream()
+    .filter(n -> n % 2 == 0)
+    .peek(n -> System.out.println("after filter: " + n))
+    .map(n -> n * n)
+    .peek(n -> System.out.println("after map: " + n))
+    .collect(Collectors.toList());
+// after filter: 2
+// after map: 4
+// after filter: 4
+// after map: 16
+// ...
+
+// Warning: don't use peek() to modify state —
+// behaviour is undefined in parallel streams!`
+  },
+  {
+    category: 'intermediate',
+    name: 'mapMulti() (Java 16+)',
+    sig: 'Stream<R> mapMulti(BiConsumer<T, Consumer<R>> mapper)',
+    desc: 'Replace each element with 0..N elements. Imperative flatMap alternative, often faster.',
+    input: '["a","bc","def"]',
+    output: '["a","bc","bc","def","def","def"]',
+    example: `// Expand each element n times (its length)
+List<String> result = List.of("a","bc","def").stream()
+    .<String>mapMulti((s, consumer) -> {
+        for (int i = 0; i < s.length(); i++) consumer.accept(s);
+    })
+    .collect(Collectors.toList());
+// [a, bc, bc, def, def, def]
+
+// Flatten only some elements
+Stream.of(1, List.of(2,3), 4, List.of(5,6))
+    .<Integer>mapMulti((obj, consumer) -> {
+        if (obj instanceof List<?> list)
+            list.forEach(e -> consumer.accept((Integer) e));
+        else consumer.accept((Integer) obj);
+    })
+    .forEach(System.out::print); // 1 2 3 4 5 6`
+  },
+  {
+    category: 'intermediate',
+    name: 'takeWhile() (Java 9+)',
+    sig: 'Stream<T> takeWhile(Predicate<? super T> predicate)',
+    desc: 'Take elements while predicate holds; stops at first failure (works best on ordered streams).',
+    input: '[1,2,3,4,5,4,3]  (<4)',
+    output: '[1,2,3]',
+    example: `// Take sorted values below threshold
+List<Integer> result = Stream.of(1,2,3,4,5,4,3)
+    .takeWhile(n -> n < 4)
+    .collect(Collectors.toList()); // [1,2,3]
+
+// Read log entries until ERROR
+List<String> logs = List.of("INFO a","INFO b","INFO c","ERROR d","INFO e");
+List<String> beforeError = logs.stream()
+    .takeWhile(l -> !l.startsWith("ERROR"))
+    .collect(Collectors.toList()); // [INFO a, INFO b, INFO c]`
+  },
+  {
+    category: 'intermediate',
+    name: 'dropWhile() (Java 9+)',
+    sig: 'Stream<T> dropWhile(Predicate<? super T> predicate)',
+    desc: 'Drop elements while predicate holds; keeps rest starting at first failure.',
+    input: '[1,2,3,4,5,4,3]  (<4)',
+    output: '[4,5,4,3]',
+    example: `// Drop sorted values below threshold
+List<Integer> result = Stream.of(1,2,3,4,5,4,3)
+    .dropWhile(n -> n < 4)
+    .collect(Collectors.toList()); // [4,5,4,3]
+
+// Skip log entries before first ERROR
+List<String> logs = List.of("INFO a","INFO b","ERROR c","INFO d","ERROR e");
+List<String> fromError = logs.stream()
+    .dropWhile(l -> !l.startsWith("ERROR"))
+    .collect(Collectors.toList()); // [ERROR c, INFO d, ERROR e]`
+  },
+  {
+    category: 'intermediate',
+    name: 'parallel() / sequential()',
+    sig: 'Stream<T> parallel()\nStream<T> sequential()',
+    desc: 'Switch between parallel and sequential execution modes.',
+    input: 'Any Stream',
+    output: 'Same Stream (mode changed)',
+    example: `// Enable parallelism for large workloads
+long count = LongStream.rangeClosed(1, 10_000_000)
+    .parallel()
+    .filter(n -> isPrime(n))
+    .count();
+
+// Force sequential for ordered operations
+list.parallelStream()
+    .filter(...)
+    .sequential()  // back to sequential for ordered terminal
+    .findFirst();
+
+// Check if parallel
+Stream<Integer> s = list.parallelStream();
+System.out.println(s.isParallel()); // true
+s = s.sequential();
+System.out.println(s.isParallel()); // false`
+  },
+
+  // ─── TERMINAL ─────────────────────────────────────
+  {
+    category: 'terminal',
+    name: 'collect()',
+    sig: 'R collect(Collector<? super T, A, R> collector)',
+    desc: 'Mutable reduction — most powerful terminal op. Works with Collectors factory methods.',
+    input: 'Stream<String>',
+    output: 'List / Set / Map / String...',
+    example: `List<String> words = Stream.of("apple","banana","cherry","date","elderberry");
+
+// To List
+List<String> list = words.collect(Collectors.toList());
+List<String> unmodifiable = words.collect(Collectors.toUnmodifiableList());
+
+// To Set
+Set<String> set = words.collect(Collectors.toSet());
+
+// Joining
+String joined = words.collect(Collectors.joining(", ","[","]"));
+// [apple, banana, cherry, date, elderberry]
+
+// GroupingBy
+Map<Integer, List<String>> byLen = words.collect(
+    Collectors.groupingBy(String::length));
+
+// ToMap
+Map<String, Integer> wordLen = words.collect(
+    Collectors.toMap(w -> w, String::length));`
+  },
+  {
+    category: 'terminal',
+    name: 'forEach() / forEachOrdered()',
+    sig: 'void forEach(Consumer<? super T> action)',
+    desc: 'Iterate over each element. forEachOrdered() respects encounter order in parallel.',
+    input: '[1,2,3]',
+    output: 'void (side effects)',
+    example: `// Simple forEach
+List.of("a","b","c").stream().forEach(System.out::println);
+
+// With index (no direct support — use AtomicInteger)
+AtomicInteger idx = new AtomicInteger(0);
+List.of("a","b","c").stream()
+    .forEach(s -> System.out.println(idx.getAndIncrement() + ": " + s));
+
+// forEachOrdered preserves order in parallel
+List.of(1,2,3,4,5).parallelStream()
+    .forEachOrdered(System.out::print); // 1 2 3 4 5 (ordered)
+// vs forEach — may print in any order`
+  },
+  {
+    category: 'terminal',
+    name: 'reduce()',
+    sig: 'Optional<T> reduce(BinaryOperator<T> accumulator)\nT reduce(T identity, BinaryOperator<T> accumulator)',
+    desc: 'Combine elements into a single value.',
+    input: '[1,2,3,4,5]',
+    output: '15  (sum reduction)',
+    example: `List<Integer> nums = List.of(1,2,3,4,5);
+
+// Sum
+int sum = nums.stream().reduce(0, Integer::sum); // 15
+int sum2 = nums.stream().reduce(0, (a,b) -> a+b); // same
+
+// Product (no identity — returns Optional)
+Optional<Integer> product = nums.stream()
+    .reduce((a,b) -> a * b); // Optional[120]
+
+// Max
+Optional<Integer> max = nums.stream().reduce(Integer::max); // Optional[5]
+
+// Concat strings
+String s = Stream.of("Hello"," ","World")
+    .reduce("", String::concat); // "Hello World"
+// Better to use Collectors.joining() for strings
+
+// Parallel-safe reduce with combiner
+int sumParallel = nums.parallelStream()
+    .reduce(0, Integer::sum, Integer::sum); // 15`
+  },
+  {
+    category: 'terminal',
+    name: 'count()',
+    sig: 'long count()',
+    desc: 'Return the number of elements in the stream.',
+    input: '[1,2,3,4,5]  filter>3',
+    output: '2L',
+    example: `long total = List.of("apple","banana","cherry","date").stream()
+    .filter(w -> w.length() > 4)
+    .count(); // 2
+
+// Count distinct
+long distinctCount = Stream.of(1,2,2,3,3,3,4)
+    .distinct()
+    .count(); // 4
+
+// Word frequency count
+String text = "the quick brown fox the fox";
+Map<String, Long> freq = Arrays.stream(text.split(" "))
+    .collect(Collectors.groupingBy(w -> w, Collectors.counting()));
+// {the=2, quick=1, brown=1, fox=2}`
+  },
+  {
+    category: 'terminal',
+    name: 'findFirst() / findAny()',
+    sig: 'Optional<T> findFirst()\nOptional<T> findAny()',
+    desc: 'Return first/any element. findAny() may be faster in parallel.',
+    input: '[10,5,3,8,1,7]  filter>4',
+    output: 'Optional[10]',
+    example: `Optional<Integer> first = Stream.of(10,5,3,8,1,7)
+    .filter(n -> n > 4)
+    .findFirst(); // Optional[10]
+
+// Safe extraction
+String result = List.of("a","bb","ccc","dddd").stream()
+    .filter(s -> s.length() == 3)
+    .findFirst()
+    .orElse("not found"); // "ccc"
+
+// With ifPresent
+List.of("apple","banana","cherry").stream()
+    .filter(s -> s.startsWith("b"))
+    .findFirst()
+    .ifPresent(System.out::println); // "banana"
+
+// findAny preferred in parallel
+Optional<String> any = bigList.parallelStream()
+    .filter(expensive::test)
+    .findAny(); // returns as soon as any thread finds one`
+  },
+  {
+    category: 'terminal',
+    name: 'anyMatch() / allMatch() / noneMatch()',
+    sig: 'boolean anyMatch(Predicate<? super T> predicate)\nboolean allMatch(Predicate<? super T> predicate)\nboolean noneMatch(Predicate<? super T> predicate)',
+    desc: 'Short-circuit predicates. anyMatch returns true if ≥1 match. allMatch if all match. noneMatch if none match.',
+    input: '[2,4,6,8,10]',
+    output: 'anyMatch(n>5): true',
+    example: `List<Integer> nums = List.of(2,4,6,8,10);
+
+boolean hasNegative = nums.stream().anyMatch(n -> n < 0);  // false
+boolean allPositive = nums.stream().allMatch(n -> n > 0);  // true
+boolean noneNegative = nums.stream().noneMatch(n -> n < 0); // true
+
+// Check if all emails valid
+List<String> emails = List.of("a@b.com","c@d.com","invalid");
+boolean allValid = emails.stream()
+    .allMatch(e -> e.contains("@")); // false
+
+// Short-circuit: stops early
+boolean found = LongStream.range(0, 1_000_000_000)
+    .anyMatch(n -> n == 42); // stops at 42!`
+  },
+  {
+    category: 'terminal',
+    name: 'min() / max()',
+    sig: 'Optional<T> min(Comparator<? super T> comparator)\nOptional<T> max(Comparator<? super T> comparator)',
+    desc: 'Return minimum or maximum element according to comparator.',
+    input: '[3,1,4,1,5,9,2,6]',
+    output: 'min: Optional[1]  max: Optional[9]',
+    example: `List<Integer> nums = List.of(3,1,4,1,5,9,2,6);
+
+Optional<Integer> min = nums.stream().min(Integer::compareTo); // 1
+Optional<Integer> max = nums.stream().max(Integer::compareTo); // 9
+
+// Min/max by field
+record Person(String name, int age) {}
+List<Person> people = List.of(
+    new Person("Alice",30), new Person("Bob",25), new Person("Carol",35));
+
+Optional<Person> youngest = people.stream()
+    .min(Comparator.comparing(Person::age)); // Bob
+Optional<Person> oldest = people.stream()
+    .max(Comparator.comparing(Person::age)); // Carol
+System.out.println(youngest.map(Person::name).orElse("none")); // Bob`
+  },
+  {
+    category: 'terminal',
+    name: 'toList() (Java 16+)',
+    sig: 'List<T> toList()',
+    desc: 'Collect to an unmodifiable list. Shorter than Collectors.toUnmodifiableList().',
+    input: 'Stream<String>',
+    output: 'Unmodifiable List<String>',
+    example: `// Java 16+ shorthand
+List<String> result = Stream.of("apple","banana","cherry")
+    .filter(s -> s.length() > 4)
+    .sorted()
+    .toList(); // [apple, banana, cherry]
+
+// Note: the list is UNMODIFIABLE
+// result.add("date"); // throws UnsupportedOperationException
+
+// For mutable list, use:
+List<String> mutable = Stream.of("a","b","c")
+    .collect(Collectors.toList()); // ArrayList (Java 8+)
+// or:
+List<String> mutable2 = new ArrayList<>(Stream.of("a","b","c").toList());`
+  },
+  {
+    category: 'terminal',
+    name: 'toArray()',
+    sig: 'Object[] toArray()\nA[] toArray(IntFunction<A[]> generator)',
+    desc: 'Collect elements into an array.',
+    input: 'Stream<String>',
+    output: 'String[]',
+    example: `String[] arr = Stream.of("a","b","c").toArray(String[]::new);
+
+// Typed array from stream
+int[] nums = IntStream.range(1, 6).toArray(); // [1,2,3,4,5]
+
+// Object array (less useful — use typed version)
+Object[] objs = Stream.of(1,"two",3.0).toArray();
+
+// Collect to array after filtering
+String[] longWords = List.of("a","bb","ccc","dddd").stream()
+    .filter(s -> s.length() > 2)
+    .toArray(String[]::new); // ["ccc","dddd"]`
+  },
+  {
+    category: 'terminal',
+    name: 'iterator() / spliterator()',
+    sig: 'Iterator<T> iterator()\nSpliterator<T> spliterator()',
+    desc: 'Return an iterator/spliterator over stream elements. Bridges to iterator-based APIs.',
+    input: 'Stream<T>',
+    output: 'Iterator<T>',
+    example: `// Bridge to legacy iterator-based API
+Stream<String> stream = Stream.of("a","b","c","d");
+Iterator<String> it = stream.iterator();
+while (it.hasNext()) {
+    System.out.println(it.next());
+}
+
+// Spliterator for custom parallel processing
+Spliterator<Integer> spliterator =
+    List.of(1,2,3,4,5,6,7,8).stream().spliterator();
+// Split for parallel processing
+Spliterator<Integer> prefix = spliterator.trySplit();`
+  },
+
+  // ─── COLLECTORS ───────────────────────────────────
+  {
+    category: 'special',
+    name: 'Collectors.groupingBy()',
+    sig: 'Collector groupingBy(Function classifier)\nCollector groupingBy(Function classifier, Collector downstream)',
+    desc: 'Group elements into a Map<K, List<T>> (or with downstream collector).',
+    input: 'Stream of words',
+    output: 'Map<Integer, List<String>>',
+    example: `List<String> words = List.of("apple","ant","banana","cherry","avocado","blueberry");
+
+// Group by first letter
+Map<Character, List<String>> byFirst = words.stream()
+    .collect(Collectors.groupingBy(w -> w.charAt(0)));
+// {a=[apple,ant,avocado], b=[banana,blueberry], c=[cherry]}
+
+// Group by length, counting
+Map<Integer, Long> countByLen = words.stream()
+    .collect(Collectors.groupingBy(String::length, Collectors.counting()));
+
+// Group and transform values
+Map<Character, String> byFirstJoined = words.stream()
+    .collect(Collectors.groupingBy(
+        w -> w.charAt(0),
+        Collectors.joining(", "))); // {a=apple, ant, avocado, ...}
+
+// Nested grouping
+Map<Character, Map<Integer, List<String>>> nested = words.stream()
+    .collect(Collectors.groupingBy(
+        w -> w.charAt(0),
+        Collectors.groupingBy(String::length)));`
+  },
+  {
+    category: 'special',
+    name: 'Collectors.partitioningBy()',
+    sig: 'Collector partitioningBy(Predicate predicate)',
+    desc: 'Partition into Map<Boolean, List<T>> — true vs false.',
+    input: 'Stream<Integer>',
+    output: 'Map<Boolean, List<Integer>>',
+    example: `List<Integer> nums = List.of(1,2,3,4,5,6,7,8,9,10);
+
+// Partition even/odd
+Map<Boolean, List<Integer>> partition = nums.stream()
+    .collect(Collectors.partitioningBy(n -> n % 2 == 0));
+System.out.println(partition.get(true));  // [2,4,6,8,10]
+System.out.println(partition.get(false)); // [1,3,5,7,9]
+
+// With downstream
+Map<Boolean, Long> counted = nums.stream()
+    .collect(Collectors.partitioningBy(n -> n > 5, Collectors.counting()));
+// {false=5, true=5}
+
+// Pass/fail students
+Map<Boolean, List<String>> passFail = students.stream()
+    .collect(Collectors.partitioningBy(s -> s.score() >= 60,
+        Collectors.mapping(Student::name, Collectors.toList())));`
+  },
+  {
+    category: 'special',
+    name: 'Collectors.joining()',
+    sig: 'Collector joining()\nCollector joining(String delimiter)\nCollector joining(String delimiter, String prefix, String suffix)',
+    desc: 'Concatenate stream of strings.',
+    input: '["Alice","Bob","Carol"]',
+    output: '"Alice, Bob, Carol"',
+    example: `List<String> names = List.of("Alice","Bob","Carol","Dave");
+
+// Simple join
+String all = names.stream().collect(Collectors.joining());
+// "AliceBobCarolDave"
+
+// With delimiter
+String csv = names.stream().collect(Collectors.joining(", "));
+// "Alice, Bob, Carol, Dave"
+
+// With prefix/suffix
+String json = names.stream()
+    .map(n -> "\\"" + n + "\\"")
+    .collect(Collectors.joining(", ","[","]"));
+// ["Alice", "Bob", "Carol", "Dave"]
+
+// SQL IN clause
+String inClause = ids.stream()
+    .map(String::valueOf)
+    .collect(Collectors.joining(",","(",")"));
+// (1,2,3,4)`
+  },
+  {
+    category: 'special',
+    name: 'Collectors.toMap()',
+    sig: 'Collector toMap(Function keyMapper, Function valueMapper)\nCollector toMap(Function keyMapper, Function valueMapper, BinaryOperator mergeFunction)',
+    desc: 'Collect into a Map. Provide merge function for duplicate keys.',
+    input: 'Stream<String>',
+    output: 'Map<String, Integer>',
+    example: `// Simple toMap
+Map<String, Integer> wordLen = Stream.of("apple","banana","cherry")
+    .collect(Collectors.toMap(w -> w, String::length));
+// {apple=5, banana=6, cherry=6}
+
+// With merge function (handle duplicate keys)
+Map<String, Integer> freq = Stream.of("a","b","a","c","b","a")
+    .collect(Collectors.toMap(
+        w -> w,
+        w -> 1,
+        Integer::sum)); // {a=3, b=2, c=1}
+
+// Preserve insertion order
+Map<String, Integer> linked = Stream.of("z","a","m")
+    .collect(Collectors.toMap(
+        w -> w, String::length,
+        (v1, v2) -> v1,
+        LinkedHashMap::new));
+
+// Function.identity() for key = value
+Map<String, String> selfMap = Stream.of("a","b","c")
+    .collect(Collectors.toMap(Function.identity(), Function.identity()));`
+  },
+  {
+    category: 'special',
+    name: 'Collectors.counting() / summingInt() / averagingInt()',
+    sig: 'Collector counting()\nCollector summingInt(ToIntFunction<T> mapper)\nCollector averagingInt(ToIntFunction<T> mapper)',
+    desc: 'Numeric aggregate collectors, often used as downstream collectors in groupingBy.',
+    input: 'Stream<String>',
+    output: 'Long count / Integer sum / Double avg',
+    example: `List<String> words = List.of("apple","banana","cherry","date","elderberry");
+
+long count  = words.stream().collect(Collectors.counting()); // 5
+int  sum    = words.stream().collect(Collectors.summingInt(String::length)); // 30
+double avg  = words.stream().collect(Collectors.averagingInt(String::length)); // 6.0
+
+// As downstream of groupingBy
+Map<Character, Long> countPerLetter = words.stream()
+    .collect(Collectors.groupingBy(
+        w -> w.charAt(0),
+        Collectors.counting()));
+// {a=1, b=1, c=1, d=1, e=1}
+
+Map<Character, Integer> sumLenPerLetter = words.stream()
+    .collect(Collectors.groupingBy(
+        w -> w.charAt(0),
+        Collectors.summingInt(String::length)));`
+  },
+  {
+    category: 'special',
+    name: 'Collectors.mapping() / flatMapping()',
+    sig: 'Collector mapping(Function<T,U> mapper, Collector<U,A,R> downstream)\nCollector flatMapping(Function<T,Stream<U>> mapper, Collector<U,A,R> downstream)',
+    desc: 'Transform elements before collecting (typically used as downstream collector).',
+    input: 'Stream of Persons',
+    output: 'Map<Dept, List<String>> names',
+    example: `record Person(String name, String dept, int salary) {}
+List<Person> employees = List.of(
+    new Person("Alice","Eng",90000),
+    new Person("Bob","HR",70000),
+    new Person("Carol","Eng",85000),
+    new Person("Dave","HR",75000));
+
+// Names grouped by department
+Map<String, List<String>> namesByDept = employees.stream()
+    .collect(Collectors.groupingBy(
+        Person::dept,
+        Collectors.mapping(Person::name, Collectors.toList())));
+// {Eng=[Alice,Carol], HR=[Bob,Dave]}
+
+// flatMapping (Java 9+)
+Map<String, List<String>> tagsByCategory = items.stream()
+    .collect(Collectors.groupingBy(
+        Item::category,
+        Collectors.flatMapping(
+            item -> item.tags().stream(),
+            Collectors.toList())));`
+  },
+  {
+    category: 'special',
+    name: 'Collectors.reducing()',
+    sig: 'Collector reducing(T identity, BinaryOperator<T> op)\nCollector reducing(BinaryOperator<T> op)',
+    desc: 'Reduction as a collector — useful as downstream in groupingBy.',
+    input: 'Stream<Integer>',
+    output: 'Optional<Integer> or T',
+    example: `// Max salary per department
+Map<String, Optional<Integer>> maxSalaryByDept = employees.stream()
+    .collect(Collectors.groupingBy(
+        Person::dept,
+        Collectors.mapping(
+            Person::salary,
+            Collectors.reducing(Integer::max))));
+
+// Sum per department
+Map<String, Integer> totalSalaryByDept = employees.stream()
+    .collect(Collectors.groupingBy(
+        Person::dept,
+        Collectors.reducing(0, Person::salary, Integer::sum)));
+
+// Compare to: summingInt is cleaner for numbers
+Map<String, Integer> same = employees.stream()
+    .collect(Collectors.groupingBy(
+        Person::dept,
+        Collectors.summingInt(Person::salary)));`
+  },
+  {
+    category: 'special',
+    name: 'Collectors.teeing() (Java 12+)',
+    sig: 'Collector teeing(Collector<T,?,R1> c1, Collector<T,?,R2> c2, BiFunction<R1,R2,R> merger)',
+    desc: 'Fork stream into two collectors and merge results into one.',
+    input: '[1,2,3,4,5,6,7,8,9,10]',
+    output: 'avg of evens and odds',
+    example: `// Min and max in one pass
+record MinMax(int min, int max) {}
+MinMax mm = IntStream.rangeClosed(1, 10).boxed()
+    .collect(Collectors.teeing(
+        Collectors.minBy(Integer::compareTo),
+        Collectors.maxBy(Integer::compareTo),
+        (min, max) -> new MinMax(min.orElseThrow(), max.orElseThrow())
+    )); // MinMax[min=1, max=10]
+
+// Sum and count for average (one-pass)
+double avg = Stream.of(1,2,3,4,5).collect(
+    Collectors.teeing(
+        Collectors.summingLong(Integer::longValue),
+        Collectors.counting(),
+        (sum, count) -> (double) sum / count));  // 3.0`
+  },
+];
+
+// ══════════════════════════════════════════════════
+// COMMON PATTERNS DATA
+// ══════════════════════════════════════════════════
+
+const PATTERNS = [
+  {
+    name: 'filter + map + collect',
+    tag: 'Fundamental',
+    code: `// Classic pipeline: filter → transform → collect
+List<String> words = List.of("apple","ant","banana","cherry","avocado","blueberry","cherry");
+
+// Get unique words starting with 'a', uppercased, sorted
+List<String> result = words.stream()
+    .filter(w -> w.startsWith("a"))
+    .distinct()
+    .sorted()
+    .map(String::toUpperCase)
+    .collect(Collectors.toList());
+// [ANT, APPLE, AVOCADO]
+
+// Transform objects
+record Product(String name, double price, String category) {}
+List<String> expensiveNames = products.stream()
+    .filter(p -> p.price() > 100)
+    .sorted(Comparator.comparing(Product::price).reversed())
+    .map(Product::name)
+    .collect(Collectors.toList());`
+  },
+  {
+    name: 'groupingBy + downstream',
+    tag: 'Grouping',
+    code: `record Employee(String name, String dept, int salary) {}
+List<Employee> emps = List.of(
+    new Employee("Alice","Eng",90000),
+    new Employee("Bob","HR",70000),
+    new Employee("Carol","Eng",85000),
+    new Employee("Dave","Marketing",80000),
+    new Employee("Eve","HR",75000));
+
+// Count per department
+Map<String, Long> countByDept = emps.stream()
+    .collect(Collectors.groupingBy(Employee::dept, Collectors.counting()));
+// {Eng=2, HR=2, Marketing=1}
+
+// Average salary per department
+Map<String, Double> avgSalary = emps.stream()
+    .collect(Collectors.groupingBy(
+        Employee::dept,
+        Collectors.averagingInt(Employee::salary)));
+
+// Names per department (sorted)
+Map<String, List<String>> namesByDept = emps.stream()
+    .collect(Collectors.groupingBy(
+        Employee::dept,
+        Collectors.mapping(Employee::name,
+            Collectors.collectingAndThen(
+                Collectors.toList(),
+                l -> { l.sort(null); return l; }))));`
+  },
+  {
+    name: 'flatMap — flatten / word count',
+    tag: 'FlatMap',
+    code: `// Word frequency count from paragraph
+String text = "the quick brown fox jumps over the lazy dog the fox";
+
+Map<String, Long> wordFreq = Arrays.stream(text.split("\\s+"))
+    .collect(Collectors.groupingBy(w -> w, Collectors.counting()));
+// {the=3, fox=2, quick=1, ...}
+
+// Flatten nested structure
+List<List<String>> matrix = List.of(
+    List.of("a","b","c"),
+    List.of("d","e"),
+    List.of("f","g","h","i"));
+
+List<String> flat = matrix.stream()
+    .flatMap(Collection::stream)
+    .collect(Collectors.toList());
+// [a, b, c, d, e, f, g, h, i]
+
+// Extract all tags from many posts
+record Post(String title, List<String> tags) {}
+Set<String> allTags = posts.stream()
+    .flatMap(p -> p.tags().stream())
+    .collect(Collectors.toSet());`
+  },
+  {
+    name: 'reduce — fold a stream',
+    tag: 'Reduction',
+    code: `// Sum / product
+int sum = IntStream.rangeClosed(1, 10).reduce(0, Integer::sum); // 55
+
+// Factorial
+long factorial = LongStream.rangeClosed(1, 10)
+    .reduce(1L, (a, b) -> a * b); // 3628800
+
+// Combine objects
+record Point(int x, int y) {
+    Point add(Point other) { return new Point(x+other.x, y+other.y); }
+}
+List<Point> points = List.of(new Point(1,2), new Point(3,4), new Point(5,6));
+Optional<Point> center = points.stream()
+    .reduce(Point::add);
+// Optional[Point[x=9, y=12]]
+
+// Immutable string concat (use joining() for real code)
+String s = Stream.of("Hello"," ","World","!")
+    .reduce("", String::concat); // "Hello World!"
+
+// Max by field
+Optional<Employee> topEarner = emps.stream()
+    .reduce((a, b) -> a.salary() > b.salary() ? a : b);`
+  },
+  {
+    name: 'Collectors.toMap — build lookup',
+    tag: 'Map Building',
+    code: `// Build ID → Object lookup
+record User(int id, String name, String email) {}
+List<User> users = List.of(
+    new User(1,"Alice","alice@example.com"),
+    new User(2,"Bob","bob@example.com"),
+    new User(3,"Carol","carol@example.com"));
+
+// Simple lookup map
+Map<Integer, User> byId = users.stream()
+    .collect(Collectors.toMap(User::id, u -> u));
+
+// Index by field value
+Map<String, User> byEmail = users.stream()
+    .collect(Collectors.toMap(User::email, u -> u));
+
+// Merge duplicates
+Map<String, String> emailByName = users.stream()
+    .collect(Collectors.toMap(
+        User::name,
+        User::email,
+        (existing, replacement) -> existing)); // keep first
+
+// Preserve insertion order with LinkedHashMap
+Map<Integer, String> ordered = users.stream()
+    .collect(Collectors.toMap(
+        User::id, User::name,
+        (a, b) -> a, LinkedHashMap::new));`
+  },
+  {
+    name: 'Collectors.teeing — two-pass in one',
+    tag: 'Java 12+',
+    code: `// Statistics in a single stream pass
+record Stats(long count, double sum, double min, double max) {
+    double average() { return count > 0 ? sum / count : 0; }
+}
+List<Double> values = List.of(1.5, 2.3, 0.8, 4.1, 3.7, 2.9);
+
+// Collect count+sum and min+max simultaneously
+var stats = values.stream().collect(Collectors.teeing(
+    Collectors.teeing(
+        Collectors.counting(),
+        Collectors.summingDouble(d -> d),
+        (count, sum) -> new double[]{count, sum}),
+    Collectors.teeing(
+        Collectors.minBy(Double::compareTo),
+        Collectors.maxBy(Double::compareTo),
+        (min, max) -> new double[]{min.orElse(0), max.orElse(0)}),
+    (cs, mm) -> new Stats((long)cs[0], cs[1], mm[0], mm[1])));
+
+System.out.printf("count=%d avg=%.2f min=%.1f max=%.1f%n",
+    stats.count(), stats.average(), stats.min(), stats.max());`
+  },
+  {
+    name: 'Stream.iterate + takeWhile — pagination',
+    tag: 'Java 9+',
+    code: `// Simulate paginated API requests
+import java.util.function.Function;
+
+// Fetch pages until empty
+Function<Integer, List<String>> fetchPage = page -> {
+    if (page >= 3) return List.of(); // no more data
+    return List.of("item-" + (page*3+1), "item-"+(page*3+2), "item-"+(page*3+3));
+};
+
+List<String> allItems = Stream.iterate(0, i -> i + 1)
+    .map(fetchPage)
+    .takeWhile(page -> !page.isEmpty()) // Java 9+
+    .flatMap(Collection::stream)
+    .collect(Collectors.toList());
+// [item-1, item-2, item-3, item-4, item-5, item-6, ...]
+
+// Fibonacci with takeWhile
+Stream.iterate(new long[]{0, 1}, f -> new long[]{f[1], f[0]+f[1]})
+    .mapToLong(f -> f[0])
+    .takeWhile(n -> n < 100)
+    .forEach(n -> System.out.print(n + " "));
+// 0 1 1 2 3 5 8 13 21 34 55 89`
+  },
+  {
+    name: 'Parallel Stream — safe patterns',
+    tag: 'Parallel',
+    code: `// SAFE: stateless, independent operations
+long count = LongStream.rangeClosed(1, 10_000_000)
+    .parallel()
+    .filter(n -> n % 2 == 0)
+    .count(); // safe — no shared state
+
+// SAFE: collect to thread-safe collector
+Map<String, Long> freq = words.parallelStream()
+    .collect(Collectors.groupingByConcurrent(
+        w -> w, Collectors.counting())); // concurrent collector
+
+// SAFE: reduce with identity + associative op
+int sum = nums.parallelStream()
+    .reduce(0, Integer::sum); // associative + commutative
+
+// UNSAFE — avoid mutable shared state!
+List<Integer> bad = new ArrayList<>(); // NOT thread-safe
+nums.parallelStream().forEach(bad::add); // RACE CONDITION!
+
+// CORRECT — collect instead
+List<Integer> good = nums.parallelStream()
+    .collect(Collectors.toList()); // thread-safe collector
+
+// UNSAFE — side effects
+AtomicInteger counter = new AtomicInteger();
+nums.parallelStream()
+    .filter(n -> n > 5)
+    .forEach(n -> counter.incrementAndGet()); // AtomicInteger is OK`
+  },
+  {
+    name: 'Optional integration',
+    tag: 'Optional',
+    code: `// Stream of Optionals — unwrap present values
+List<Optional<String>> optionals = List.of(
+    Optional.of("hello"), Optional.empty(),
+    Optional.of("world"), Optional.empty(),
+    Optional.of("java"));
+
+// Java 8
+List<String> present = optionals.stream()
+    .filter(Optional::isPresent)
+    .map(Optional::get)
+    .collect(Collectors.toList()); // [hello, world, java]
+
+// Java 9+: flatMap with Optional.stream()
+List<String> present9 = optionals.stream()
+    .flatMap(Optional::stream)
+    .collect(Collectors.toList()); // cleaner!
+
+// Chain Optional with stream
+Optional<String> longest = List.of("hi","hello","hey","howdy").stream()
+    .filter(s -> s.startsWith("h"))
+    .max(Comparator.comparing(String::length)); // Optional[howdy]
+
+String result = longest
+    .map(String::toUpperCase)
+    .orElse("NONE"); // "HOWDY"`
+  },
+  {
+    name: 'Collectors.collectingAndThen()',
+    tag: 'Post-processing',
+    code: `// Post-process collector result
+List<String> words = List.of("banana","apple","cherry","date","elderberry");
+
+// Collect to unmodifiable list
+List<String> immutable = words.stream()
+    .sorted()
+    .collect(Collectors.collectingAndThen(
+        Collectors.toList(),
+        Collections::unmodifiableList));
+
+// Collect to array
+String[] arr = words.stream()
+    .collect(Collectors.collectingAndThen(
+        Collectors.toList(),
+        l -> l.toArray(String[]::new)));
+
+// Count unique words per sentence
+Map<String, Long> uniquePerSentence = sentences.stream()
+    .collect(Collectors.toMap(
+        s -> s,
+        s -> Arrays.stream(s.split(" "))
+                   .collect(Collectors.collectingAndThen(
+                       Collectors.toSet(), set -> (long)set.size()))));`
+  },
+];
+
+// ══════════════════════════════════════════════════
+// RENDER OPERATIONS
+// ══════════════════════════════════════════════════
+
+const CATEGORIES = {
+  creation:     { label: 'Creation Operations', desc: 'Produce a Stream from a source. These start the pipeline.' },
+  intermediate: { label: 'Intermediate Operations', desc: 'Transform the stream. Lazy — execute only when a terminal op is called.' },
+  terminal:     { label: 'Terminal Operations', desc: 'Consume the stream and produce a result. Eager — triggers the whole pipeline.' },
+  special:      { label: 'Collectors', desc: 'Used with collect() to build Maps, Lists, strings, and statistics.' },
+};
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderOperations() {
+  const container = document.getElementById('operations-content');
+  const catOrder = ['creation','intermediate','terminal','special'];
+
+  catOrder.forEach(cat => {
+    const catOps = OPS.filter(o => o.category === cat);
+    const catInfo = CATEGORIES[cat];
+
+    const section = document.createElement('div');
+    section.className = 'category-section';
+
+    section.innerHTML = `
+      <div class="category-header ${cat}">
+        <h2>${catInfo.label}</h2>
+        <span class="cat-desc">${catInfo.desc}</span>
+      </div>
+      <div class="ops-grid" id="grid-${cat}"></div>
+    `;
+
+    container.appendChild(section);
+    const grid = section.querySelector(`#grid-${cat}`);
+
+    catOps.forEach((op, idx) => {
+      const card = document.createElement('div');
+      card.className = 'op-card';
+      const cardId = `op-${cat}-${idx}`;
+
+      card.innerHTML = `
+        <div class="op-card-header" onclick="toggleCard('${cardId}')">
+          <div class="cat-badge" style="background:var(--${cat}-color)"></div>
+          <div class="op-card-title">
+            <div class="op-name">${op.name}</div>
+            <div class="op-sig">${escHtml(op.sig)}</div>
+            <div class="op-desc">${op.desc}</div>
+          </div>
+          <button class="op-card-expand">&#9660;</button>
+        </div>
+        <div class="op-card-body" id="${cardId}">
+          <div class="op-io">
+            <span class="io-label">In:</span>
+            <span class="io-val">${escHtml(op.input)}</span>
+            <span class="arrow">&#8594;</span>
+            <span class="io-label">Out:</span>
+            <span class="io-val">${escHtml(op.output)}</span>
+          </div>
+          <pre><code class="language-java">${escHtml(op.example)}</code></pre>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+
+    grid.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+  });
+}
+
+function toggleCard(id) {
+  const body = document.getElementById(id);
+  const card = body.parentElement;
+  card.classList.toggle('expanded');
+}
+
+// ══════════════════════════════════════════════════
+// PIPELINE BUILDER
+// ══════════════════════════════════════════════════
+
+const PIPELINE_OPS = {
+  creation: [
+    { name: 'List.stream()', code: 'list.stream()' },
+    { name: 'Stream.of()', code: 'Stream.of(1,2,3,4,5,6,7,8,9,10)' },
+    { name: 'IntStream.range()', code: 'IntStream.range(1,11).boxed()' },
+    { name: 'Stream.iterate()', code: 'Stream.iterate(1, n->n+1)' },
+  ],
+  intermediate: [
+    { name: 'filter()', code: 'filter(n -> n % 2 == 0)' },
+    { name: 'map()', code: 'map(n -> n * n)' },
+    { name: 'flatMap()', code: 'flatMap(Collection::stream)' },
+    { name: 'distinct()', code: 'distinct()' },
+    { name: 'sorted()', code: 'sorted()' },
+    { name: 'sorted(rev)', code: 'sorted(Comparator.reverseOrder())' },
+    { name: 'limit(5)', code: 'limit(5)' },
+    { name: 'skip(2)', code: 'skip(2)' },
+    { name: 'peek(print)', code: 'peek(System.out::println)' },
+    { name: 'map(upper)', code: 'map(String::toUpperCase)' },
+    { name: 'filter(>3)', code: 'filter(n -> n > 3)' },
+    { name: 'mapToInt()', code: 'mapToInt(Integer::intValue)' },
+  ],
+  terminal: [
+    { name: 'collect(toList)', code: 'collect(Collectors.toList())' },
+    { name: 'toList()', code: 'toList()' },
+    { name: 'forEach()', code: 'forEach(System.out::println)' },
+    { name: 'count()', code: 'count()' },
+    { name: 'findFirst()', code: 'findFirst()' },
+    { name: 'reduce(sum)', code: 'reduce(0, Integer::sum)' },
+    { name: 'min()', code: 'min(Integer::compareTo)' },
+    { name: 'max()', code: 'max(Integer::compareTo)' },
+    { name: 'anyMatch()', code: 'anyMatch(n -> n > 5)' },
+    { name: 'allMatch()', code: 'allMatch(n -> n > 0)' },
+    { name: 'joining(", ")', code: 'collect(Collectors.joining(", "))' },
+    { name: 'sum()', code: 'sum()' },
+  ],
+};
+
+let pipeline = [];
+let pipelineHistory = [];
+
+const SAMPLE_DATA = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+function renderPipelinePalette() {
+  const panel = document.getElementById('pipeline-op-palette');
+  Object.entries(PIPELINE_OPS).forEach(([cat, ops]) => {
+    const div = document.createElement('div');
+    div.className = 'pipeline-cat-group';
+    div.innerHTML = `<div class="cat-label">${cat}</div>`;
+    ops.forEach(op => {
+      const btn = document.createElement('button');
+      btn.className = `pipeline-op-btn ${cat}`;
+      btn.textContent = op.name;
+      btn.title = op.code;
+      btn.addEventListener('click', () => addPipelineOp(op, cat));
+      div.appendChild(btn);
+    });
+    panel.appendChild(div);
+  });
+}
+
+function addPipelineOp(op, cat) {
+  pipelineHistory.push([...pipeline]);
+  pipeline.push({ ...op, cat });
+  renderPipeline();
+}
+
+function removePipelineOp(idx) {
+  pipelineHistory.push([...pipeline]);
+  pipeline.splice(idx, 1);
+  renderPipeline();
+}
+
+function clearPipeline() {
+  pipelineHistory.push([...pipeline]);
+  pipeline = [];
+  renderPipeline();
+}
+
+function undoPipeline() {
+  if (pipelineHistory.length > 0) {
+    pipeline = pipelineHistory.pop();
+    renderPipeline();
+  }
+}
+
+function renderPipeline() {
+  const track = document.getElementById('pipeline-track');
+  const codeEl = document.getElementById('pipeline-code');
+
+  if (pipeline.length === 0) {
+    track.innerHTML = `<span class="pipeline-placeholder">Add operations from the left panel...</span>`;
+    codeEl.textContent = '// Add operations to build your stream pipeline';
+    hljs.highlightElement(codeEl);
+    return;
+  }
+
+  // Build track UI
+  track.innerHTML = '';
+  pipeline.forEach((op, idx) => {
+    if (idx > 0) {
+      const arrow = document.createElement('span');
+      arrow.className = 'pipeline-arrow';
+      arrow.textContent = '→';
+      track.appendChild(arrow);
+    }
+    const step = document.createElement('div');
+    step.className = `pipeline-step ${op.cat}`;
+    step.innerHTML = `<span>${op.name}</span><button class="remove-btn" title="Remove" onclick="removePipelineOp(${idx})">✕</button>`;
+    track.appendChild(step);
+  });
+
+  // Build code
+  const lines = buildPipelineCode();
+  codeEl.textContent = lines;
+  hljs.highlightElement(codeEl);
+}
+
+function buildPipelineCode() {
+  const source = pipeline[0];
+  if (!source) return '// Empty pipeline';
+
+  const isCreation = cat => cat === 'creation';
+  const isTerminal = cat => cat === 'terminal';
+
+  const steps = pipeline.map((op, idx) => {
+    const indent = idx === 0 ? '' : '    .';
+    if (idx === 0) return `${op.code}`;
+    return `${indent}${op.code}`;
+  });
+
+  // Check validity
+  const hasCreation = pipeline[0].cat === 'creation';
+  const lastCat = pipeline[pipeline.length - 1].cat;
+  const hasTerminal = lastCat === 'terminal';
+
+  let header = '// Sample data\nList<Integer> list = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);\n\n';
+
+  if (!hasCreation) {
+    return `// ⚠ Start with a creation operation\n// (e.g., List.stream(), Stream.of(), IntStream.range())\n\n${steps.join('\n    .')}`;
+  }
+
+  let code = header;
+
+  // Determine result type for variable
+  const resultVar = hasTerminal ? resultVarName(pipeline[pipeline.length - 1]) : 'stream';
+  const resultType = hasTerminal ? resultType_(pipeline[pipeline.length - 1]) : 'Stream<?>  // not terminated yet';
+
+  code += `${resultType} result = ${steps.join('\n    .')};\n`;
+
+  if (!hasTerminal) {
+    code += '\n// ⚠ Add a terminal operation to execute the pipeline';
+  }
+
+  return code;
+}
+
+function resultType_(op) {
+  const t = op.name;
+  if (t.includes('collect(toList)') || t.includes('toList()')) return 'List<Integer>';
+  if (t.includes('joining')) return 'String';
+  if (t.includes('count()')) return 'long';
+  if (t.includes('findFirst')) return 'Optional<Integer>';
+  if (t.includes('reduce')) return 'int';
+  if (t.includes('anyMatch') || t.includes('allMatch')) return 'boolean';
+  if (t.includes('min') || t.includes('max')) return 'Optional<Integer>';
+  if (t.includes('forEach')) return 'void //';
+  if (t.includes('sum()')) return 'int';
+  return 'var';
+}
+
+function resultVarName(op) {
+  return 'result';
+}
+
+// ══════════════════════════════════════════════════
+// RENDER PATTERNS
+// ══════════════════════════════════════════════════
+
+function renderPatterns() {
+  const grid = document.getElementById('patterns-grid');
+  PATTERNS.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'pattern-card';
+    card.innerHTML = `
+      <div class="pattern-card-header">
+        <span class="pattern-name">${p.name}</span>
+        <span class="pattern-tag">${p.tag}</span>
+      </div>
+      <pre><code class="language-java">${escHtml(p.code)}</code></pre>
+    `;
+    grid.appendChild(card);
+  });
+  grid.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+}
+
+// ══════════════════════════════════════════════════
+// SECTION NAV
+// ══════════════════════════════════════════════════
+
+function showSection(id, btn) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderOperations();
+  renderPipelinePalette();
+  renderPipeline();
+  renderPatterns();
+});
+</script>
+</body>
+</html>

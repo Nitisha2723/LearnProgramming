@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Structures Comparison</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #1a1a2e;
+  --panel: #16213e;
+  --panel2: #0f3460;
+  --panel3: #1a2744;
+  --accent: #e94560;
+  --accent2: #533483;
+  --accent3: #00b4d8;
+  --text: #eaeaea;
+  --muted: #8892a4;
+  --green: #4ade80;
+  --yellow: #facc15;
+  --red: #f87171;
+  --purple: #a78bfa;
+  --cyan: #67e8f9;
+  --orange: #fb923c;
+}
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+header {
+  background: linear-gradient(135deg, var(--panel2) 0%, var(--accent2) 100%);
+  padding: 2rem;
+  text-align: center;
+  border-bottom: 2px solid var(--accent);
+  position: relative;
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0,180,216,0.12) 0%, transparent 70%);
+}
+header h1 { font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 800; letter-spacing: -0.02em; position: relative; }
+header h1 span { color: var(--accent3); }
+header p { color: var(--muted); margin-top: 0.5rem; font-size: 1.05rem; position: relative; }
+.container { max-width: 1500px; margin: 0 auto; padding: 2rem 1.5rem; }
+section { margin-bottom: 3rem; }
+h2 {
+  font-size: 1.5rem; font-weight: 700;
+  margin-bottom: 1.4rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--accent);
+  display: flex; align-items: center; gap: 0.6rem;
+}
+
+/* ── GRID ── */
+.ds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.2rem;
+}
+.ds-card {
+  background: var(--panel);
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.07);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.22s, box-shadow 0.22s, border-color 0.22s;
+  position: relative;
+}
+.ds-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+}
+.ds-card-header {
+  display: flex; align-items: center; gap: 0.9rem;
+  padding: 1.2rem 1.2rem 0.9rem;
+}
+.ds-icon {
+  width: 52px; height: 52px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+.ds-name { font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
+.ds-type { font-size: 0.78rem; color: var(--muted); margin-top: 0.15rem; }
+.ds-body { padding: 0 1.2rem 0.8rem; }
+.ds-tagline { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.8rem; line-height: 1.45; }
+
+/* Visual diagram inside card */
+.ds-visual {
+  height: 52px;
+  margin-bottom: 0.9rem;
+  display: flex; align-items: center; gap: 3px;
+  overflow: hidden;
+}
+.vis-array { display: flex; gap: 2px; align-items: center; }
+.vis-box {
+  width: 26px; height: 30px;
+  border: 1.5px solid;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.vis-arrow { font-size: 0.7rem; color: var(--muted); }
+.vis-node {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.vis-link { width: 10px; height: 2px; flex-shrink: 0; }
+
+/* Complexity mini-table */
+.ops-list { display: flex; flex-direction: column; gap: 0.3rem; }
+.op-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.82rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.03);
+}
+.op-name { color: var(--muted); }
+.op-val {
+  font-family: 'Courier New', monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+.oc-green  { background: rgba(74,222,128,0.15); color: var(--green); }
+.oc-yellow { background: rgba(250,204,21,0.15);  color: var(--yellow); }
+.oc-orange { background: rgba(251,146,60,0.15);  color: var(--orange); }
+.oc-red    { background: rgba(248,113,113,0.15); color: var(--red); }
+
+.ds-footer {
+  padding: 0.7rem 1.2rem 1rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.use-case-label { font-weight: 600; color: var(--cyan); margin-bottom: 0.2rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* ── HOVER DETAIL CARD ── */
+.detail-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+  backdrop-filter: blur(3px);
+}
+.detail-overlay.visible { opacity: 1; pointer-events: all; }
+.detail-card {
+  background: var(--panel);
+  border-radius: 18px;
+  max-width: 820px;
+  width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+  transform: scale(0.93) translateY(24px);
+  transition: transform 0.25s;
+  position: relative;
+}
+.detail-overlay.visible .detail-card { transform: scale(1) translateY(0); }
+.detail-close {
+  position: sticky; top: 0; right: 0;
+  float: right;
+  margin: 1rem 1rem 0 0;
+  background: rgba(255,255,255,0.08);
+  border: none; color: var(--text);
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+  z-index: 2;
+}
+.detail-close:hover { background: var(--accent); }
+.detail-header {
+  padding: 1.8rem 1.8rem 0;
+  display: flex; gap: 1rem; align-items: flex-start;
+  clear: both;
+}
+.detail-icon {
+  width: 64px; height: 64px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+.detail-title { font-size: 1.6rem; font-weight: 800; }
+.detail-subtitle { color: var(--muted); font-size: 0.9rem; margin-top: 0.3rem; line-height: 1.4; }
+.detail-body { padding: 1.4rem 1.8rem 1.8rem; }
+.detail-section { margin-bottom: 1.4rem; }
+.detail-section-title {
+  font-size: 0.78rem; font-weight: 700;
+  color: var(--accent3);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 0.7rem;
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.6rem;
+}
+.detail-op {
+  background: var(--panel2);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.83rem;
+}
+.detail-op-name { color: var(--muted); }
+.detail-pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.pro-con-box { background: var(--panel2); border-radius: 10px; padding: 0.9rem; }
+.pro-con-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.6rem; }
+.pro-con-title.pros { color: var(--green); }
+.pro-con-title.cons { color: var(--red); }
+.pro-con-box ul { list-style: none; }
+.pro-con-box li { font-size: 0.84rem; color: var(--muted); margin-bottom: 0.3rem; padding-left: 1.1rem; position: relative; line-height: 1.4; }
+.pro-con-box li::before { position: absolute; left: 0; }
+.pro-con-box.pros-box li::before { content: '✓'; color: var(--green); }
+.pro-con-box.cons-box li::before { content: '✗'; color: var(--red); }
+.detail-use-cases { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.use-tag {
+  background: rgba(0,180,216,0.12);
+  border: 1px solid rgba(0,180,216,0.25);
+  color: var(--cyan);
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+}
+.langs-row { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+.lang-block {
+  background: var(--panel2);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.83rem;
+  flex: 1; min-width: 200px;
+}
+.lang-block-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
+.lang-block-title.java-color { color: #f87171; }
+.lang-block-title.py-color { color: #4ade80; }
+.lang-block code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.82rem;
+  color: var(--cyan);
+  display: block;
+  line-height: 1.5;
+}
+
+/* ── QUIZ ── */
+.quiz-wrapper {
+  background: var(--panel);
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid rgba(255,255,255,0.07);
+  max-width: 700px;
+  margin: 0 auto;
+}
+.quiz-progress {
+  display: flex; gap: 6px; margin-bottom: 1.5rem;
+}
+.quiz-dot {
+  height: 4px; border-radius: 2px; flex: 1;
+  background: var(--panel2);
+  transition: background 0.3s;
+}
+.quiz-dot.active { background: var(--accent3); }
+.quiz-dot.done   { background: var(--accent); }
+.quiz-q { font-size: 1.15rem; font-weight: 600; margin-bottom: 1.2rem; line-height: 1.45; }
+.quiz-options { display: flex; flex-direction: column; gap: 0.7rem; }
+.quiz-opt {
+  background: var(--panel2);
+  border: 1.5px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 0.85rem 1.1rem;
+  cursor: pointer;
+  font-size: 0.92rem;
+  transition: all 0.2s;
+  text-align: left;
+  color: var(--text);
+}
+.quiz-opt:hover {
+  border-color: var(--accent3);
+  background: rgba(0,180,216,0.08);
+  transform: translateX(4px);
+}
+.quiz-result {
+  display: none;
+  animation: fadeIn 0.4s ease;
+}
+@keyframes fadeIn { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform:none; } }
+.quiz-result.visible { display: block; }
+.result-card {
+  background: var(--panel2);
+  border-radius: 14px;
+  padding: 1.5rem;
+  text-align: center;
+  border: 2px solid var(--accent3);
+}
+.result-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+.result-name { font-size: 1.8rem; font-weight: 800; color: var(--accent3); }
+.result-desc { color: var(--muted); margin: 0.5rem 0 1rem; line-height: 1.5; }
+.result-alts { font-size: 0.85rem; color: var(--muted); }
+.result-alts strong { color: var(--yellow); }
+.quiz-restart {
+  display: block; width: 100%;
+  margin-top: 1.2rem;
+  background: var(--accent);
+  color: #fff; border: none;
+  padding: 0.8rem;
+  border-radius: 10px;
+  font-size: 0.95rem; font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.quiz-restart:hover { opacity: 0.85; }
+
+/* ── COMPARISON TABLE ── */
+.cmp-scroll { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.07); }
+table.cmp { width: 100%; border-collapse: collapse; font-size: 0.83rem; min-width: 800px; }
+.cmp thead tr { background: var(--panel2); }
+.cmp th { padding: 0.75rem 0.8rem; text-align: left; color: var(--muted); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+.cmp tbody tr { background: var(--panel); border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+.cmp tbody tr:hover { background: rgba(255,255,255,0.04); }
+.cmp td { padding: 0.6rem 0.8rem; vertical-align: middle; }
+.cmp td:first-child { font-weight: 600; white-space: nowrap; }
+.pill {
+  display: inline-block;
+  padding: 0.18rem 0.55rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pill-green  { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.25); }
+.pill-yellow { background: rgba(250,204,21,0.15);  color: var(--yellow); border: 1px solid rgba(250,204,21,0.25); }
+.pill-orange { background: rgba(251,146,60,0.15);  color: var(--orange); border: 1px solid rgba(251,146,60,0.25); }
+.pill-red    { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+.pill-cyan   { background: rgba(103,232,249,0.12); color: var(--cyan); border: 1px solid rgba(103,232,249,0.25); }
+.check { color: var(--green); font-size: 1.1rem; }
+.cross { color: var(--red); font-size: 1.1rem; }
+
+@media (max-width: 768px) {
+  .detail-pros-cons { grid-template-columns: 1fr; }
+  .detail-card { border-radius: 12px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Data <span>Structures</span> Comparison</h1>
+  <p>Visual reference, Big O summary, and structure recommender</p>
+</header>
+
+<div class="container">
+
+  <!-- ── GRID ── -->
+  <section>
+    <h2><span>🗂️</span> Structure Reference — click any card for full details</h2>
+    <div class="ds-grid" id="dsGrid"></div>
+  </section>
+
+  <!-- ── COMPARISON TABLE ── -->
+  <section>
+    <h2><span>📊</span> Side-by-Side Comparison</h2>
+    <div class="cmp-scroll">
+      <table class="cmp" id="cmpTable">
+        <thead>
+          <tr>
+            <th>Structure</th>
+            <th>Access</th>
+            <th>Search</th>
+            <th>Insert (best)</th>
+            <th>Delete (best)</th>
+            <th>Ordered?</th>
+            <th>Duplicates?</th>
+            <th>Thread-safe?</th>
+            <th>Space</th>
+            <th>Best for</th>
+          </tr>
+        </thead>
+        <tbody id="cmpBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── QUIZ ── -->
+  <section>
+    <h2><span>🎯</span> Find the Right Structure</h2>
+    <div class="quiz-wrapper">
+      <div class="quiz-progress" id="quizProgress"></div>
+      <div id="quizContent"></div>
+      <div class="quiz-result" id="quizResult">
+        <div class="result-card" id="resultCard"></div>
+        <button class="quiz-restart" onclick="restartQuiz()">Try Again</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ── DETAIL OVERLAY ── -->
+<div class="detail-overlay" id="overlay" onclick="closeOverlay(event)">
+  <div class="detail-card" id="detailCard">
+    <button class="detail-close" onclick="closeDetail()">✕</button>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// DATA DEFINITIONS
+// ══════════════════════════════════════════════════════
+const DS_DATA = [
+  {
+    id: 'array',
+    name: 'Array',
+    type: 'Linear / Indexed',
+    icon: '▦',
+    iconBg: 'rgba(100,200,255,0.15)',
+    iconColor: '#67e8f9',
+    color: '#67e8f9',
+    tagline: 'Contiguous memory. O(1) random access by index. Fixed size in most languages.',
+    ops: [
+      { name: 'Access by index', val: 'O(1)',      cls: 'green' },
+      { name: 'Search (unsorted)', val: 'O(n)',    cls: 'yellow' },
+      { name: 'Search (sorted)',   val: 'O(log n)', cls: 'green' },
+      { name: 'Insert/Delete end',  val: 'O(1)',   cls: 'green' },
+      { name: 'Insert/Delete mid',  val: 'O(n)',   cls: 'yellow' },
+    ],
+    useCase: 'Index-based access, mathematical matrices, fixed-size data',
+    pros: ['O(1) index access', 'Cache-friendly (spatial locality)', 'Simple, no overhead', 'Memory efficient'],
+    cons: ['Fixed size (static arrays)', 'O(n) insertion/deletion in middle', 'Wasted space if over-allocated', 'Shifting elements on insert'],
+    javaImpl: 'int[] arr = new int[10];\nArrayList<Integer> list = new ArrayList<>();\nArrays.sort(arr); // O(n log n)',
+    pyImpl:   'arr = [1, 2, 3, 4]\narr.append(5)   # O(1)\narr.insert(0,0) # O(n)\narr.sort()      # O(n log n)',
+    useCases: ['Image pixel buffers', 'Matrix computations', 'Ring buffers', 'Sorting algorithms', 'Lookup tables'],
+    visual: 'array',
+    cmp: { access: ['O(1)','green'], search: ['O(n)','yellow'], insert: ['O(1)*','green'], del: ['O(n)','yellow'], ordered: true, dups: true, threadsafe: false, space: ['O(n)','yellow'], best: 'Index access, sorting' }
+  },
+  {
+    id: 'linkedlist',
+    name: 'Linked List',
+    type: 'Linear / Pointer',
+    icon: '⛓',
+    iconBg: 'rgba(167,139,250,0.15)',
+    iconColor: '#a78bfa',
+    color: '#a78bfa',
+    tagline: 'Nodes connected by pointers. O(1) insert/delete at ends. O(n) for random access.',
+    ops: [
+      { name: 'Access by index', val: 'O(n)',     cls: 'yellow' },
+      { name: 'Search',         val: 'O(n)',      cls: 'yellow' },
+      { name: 'Insert/Delete head/tail', val: 'O(1)', cls: 'green' },
+      { name: 'Insert/Delete mid', val: 'O(n)',   cls: 'yellow' },
+    ],
+    useCase: 'Frequent insert/delete at ends, implementing other structures',
+    pros: ['O(1) insert/delete at head or tail', 'Dynamic size', 'Efficient for queue/stack impl', 'No shifting needed'],
+    cons: ['O(n) random access', 'Extra memory per node (pointer overhead)', 'Not cache-friendly', 'No direct index access'],
+    javaImpl: 'LinkedList<Integer> ll = new LinkedList<>();\nll.addFirst(1); ll.addLast(2);\nDeque<Integer> deque = new LinkedList<>();',
+    pyImpl:   'from collections import deque\ndq = deque([1, 2, 3])\ndq.appendleft(0)  # O(1)\ndq.popleft()       # O(1)',
+    useCases: ['Queue implementation', 'Stack implementation', 'LRU Cache (with HashMap)', 'Undo functionality', 'Music playlist'],
+    visual: 'linkedlist',
+    cmp: { access: ['O(n)','yellow'], search: ['O(n)','yellow'], insert: ['O(1)','green'], del: ['O(1)','green'], ordered: true, dups: true, threadsafe: false, space: ['O(n)','yellow'], best: 'Queue/Stack, LRU cache' }
+  },
+  {
+    id: 'stack',
+    name: 'Stack',
+    type: 'Linear / LIFO',
+    icon: '📚',
+    iconBg: 'rgba(251,146,60,0.15)',
+    iconColor: '#fb923c',
+    color: '#fb923c',
+    tagline: 'Last-In, First-Out. Only access the top element. O(1) push and pop.',
+    ops: [
+      { name: 'Push (insert top)', val: 'O(1)', cls: 'green' },
+      { name: 'Pop (remove top)',  val: 'O(1)', cls: 'green' },
+      { name: 'Peek top',         val: 'O(1)', cls: 'green' },
+      { name: 'Search',           val: 'O(n)', cls: 'yellow' },
+    ],
+    useCase: 'Function call stack, undo operations, parsing expressions',
+    pros: ['O(1) push and pop', 'Simple mental model', 'Great for backtracking', 'Enforces LIFO discipline'],
+    cons: ['Only top element accessible', 'O(n) search', 'Not suitable for random access', 'Can stack overflow (recursion)'],
+    javaImpl: 'Deque<Integer> stack = new ArrayDeque<>();\nstack.push(1); stack.push(2);\nint top = stack.peek();\nint popped = stack.pop();',
+    pyImpl:   '# Use a list as a stack\nstack = []\nstack.append(1)  # push O(1)\nstack.append(2)\ntop = stack[-1]   # peek O(1)\npopped = stack.pop()  # O(1)',
+    useCases: ['Function call stack', 'Undo/redo', 'Browser back/forward', 'DFS traversal', 'Balanced parentheses check', 'Expression evaluation'],
+    visual: 'stack',
+    cmp: { access: ['O(n)','yellow'], search: ['O(n)','yellow'], insert: ['O(1)','green'], del: ['O(1)','green'], ordered: true, dups: true, threadsafe: false, space: ['O(n)','yellow'], best: 'LIFO, undo, DFS' }
+  },
+  {
+    id: 'queue',
+    name: 'Queue',
+    type: 'Linear / FIFO',
+    icon: '🚶',
+    iconBg: 'rgba(74,222,128,0.15)',
+    iconColor: '#4ade80',
+    color: '#4ade80',
+    tagline: 'First-In, First-Out. Enqueue at back, dequeue from front. O(1) both operations.',
+    ops: [
+      { name: 'Enqueue (insert back)', val: 'O(1)', cls: 'green' },
+      { name: 'Dequeue (remove front)', val: 'O(1)', cls: 'green' },
+      { name: 'Peek front',            val: 'O(1)', cls: 'green' },
+      { name: 'Search',                val: 'O(n)', cls: 'yellow' },
+    ],
+    useCase: 'BFS traversal, task scheduling, buffering streams',
+    pros: ['O(1) enqueue and dequeue', 'Fair ordering (FIFO)', 'Simple to implement', 'Useful for level-order processing'],
+    cons: ['Only front element accessible (dequeue)', 'O(n) search', 'Not for random access', 'Fixed order discipline'],
+    javaImpl: 'Queue<Integer> q = new LinkedList<>();\nq.offer(1); q.offer(2);\nint front = q.peek();\nint removed = q.poll();',
+    pyImpl:   'from collections import deque\nqueue = deque()\nqueue.append(1)    # enqueue O(1)\nqueue.append(2)\nfront = queue[0]   # peek O(1)\nqueue.popleft()    # dequeue O(1)',
+    useCases: ['BFS graph traversal', 'Task scheduler', 'Print spooler', 'CPU scheduling', 'Sliding window algorithms', 'Rate limiting'],
+    visual: 'queue',
+    cmp: { access: ['O(n)','yellow'], search: ['O(n)','yellow'], insert: ['O(1)','green'], del: ['O(1)','green'], ordered: true, dups: true, threadsafe: false, space: ['O(n)','yellow'], best: 'FIFO, BFS, scheduling' }
+  },
+  {
+    id: 'hashmap',
+    name: 'HashMap / dict',
+    type: 'Non-linear / Hash',
+    icon: '🗺️',
+    iconBg: 'rgba(233,69,96,0.15)',
+    iconColor: '#e94560',
+    color: '#e94560',
+    tagline: 'Key-value pairs. Average O(1) for get, put, remove. No guaranteed order.',
+    ops: [
+      { name: 'Get / Put / Remove', val: 'O(1) avg', cls: 'green' },
+      { name: 'Contains key',       val: 'O(1) avg', cls: 'green' },
+      { name: 'Iterate all',        val: 'O(n)',     cls: 'yellow' },
+      { name: 'Worst case (collision)', val: 'O(n)', cls: 'red' },
+    ],
+    useCase: 'Frequency counting, caching, indexing by key',
+    pros: ['Average O(1) for all operations', 'Flexible key types', 'Great for caching', 'Frequency/grouping tasks'],
+    cons: ['No ordering', 'O(n) worst case with collisions', 'Extra memory overhead', 'Key must be hashable'],
+    javaImpl: 'Map<String,Integer> map = new HashMap<>();\nmap.put("a", 1);\nmap.getOrDefault("a", 0);\nmap.merge("a", 1, Integer::sum);',
+    pyImpl:   'd = {}\nd["a"] = 1\nval = d.get("a", 0)\nfor k, v in d.items(): pass\nfrom collections import Counter\nc = Counter("abcaab")',
+    useCases: ['Frequency counting', 'Memoization/caching', 'Two-sum / complement lookup', 'Grouping/aggregation', 'Graph adjacency list', 'Index building'],
+    visual: 'hashmap',
+    cmp: { access: ['O(1)','green'], search: ['O(1)','green'], insert: ['O(1)','green'], del: ['O(1)','green'], ordered: false, dups: false, threadsafe: false, space: ['O(n)','yellow'], best: 'Key-value lookup, caching' }
+  },
+  {
+    id: 'hashset',
+    name: 'HashSet / set',
+    type: 'Non-linear / Hash',
+    icon: '🔷',
+    iconBg: 'rgba(0,180,216,0.15)',
+    iconColor: '#00b4d8',
+    color: '#00b4d8',
+    tagline: 'Unique values only. Average O(1) add, remove, contains. No duplicates, no order.',
+    ops: [
+      { name: 'Add / Remove',      val: 'O(1) avg', cls: 'green' },
+      { name: 'Contains',          val: 'O(1) avg', cls: 'green' },
+      { name: 'Iterate',           val: 'O(n)',     cls: 'yellow' },
+      { name: 'Set operations (union/intersect)', val: 'O(n)', cls: 'yellow' },
+    ],
+    useCase: 'Deduplication, membership tests, visited tracking',
+    pros: ['O(1) membership test', 'Automatic deduplication', 'Union/intersection support', 'Efficient visited set'],
+    cons: ['No ordering', 'No duplicates allowed', 'No key-value access', 'O(n) worst case'],
+    javaImpl: 'Set<Integer> set = new HashSet<>();\nset.add(1); set.add(2);\nboolean has = set.contains(1);\nset.remove(2);',
+    pyImpl:   's = {1, 2, 3}\ns.add(4)\n4 in s  # O(1)\ns.discard(4)\nunion = s | {5,6}\ninter = s & {2,3,7}',
+    useCases: ['Visited nodes in graph', 'Deduplication', 'Checking set membership', 'Finding duplicates', 'Set math (union/intersect)', 'Anagram detection'],
+    visual: 'hashset',
+    cmp: { access: ['O(1)','green'], search: ['O(1)','green'], insert: ['O(1)','green'], del: ['O(1)','green'], ordered: false, dups: false, threadsafe: false, space: ['O(n)','yellow'], best: 'Membership test, deduplication' }
+  },
+  {
+    id: 'tree',
+    name: 'Binary Tree / BST',
+    type: 'Non-linear / Hierarchical',
+    icon: '🌳',
+    iconBg: 'rgba(74,222,128,0.15)',
+    iconColor: '#4ade80',
+    color: '#4ade80',
+    tagline: 'Hierarchical. BST: O(log n) search/insert/delete (balanced). O(n) worst unbalanced.',
+    ops: [
+      { name: 'BST Search',  val: 'O(log n)', cls: 'green' },
+      { name: 'BST Insert',  val: 'O(log n)', cls: 'green' },
+      { name: 'BST Delete',  val: 'O(log n)', cls: 'green' },
+      { name: 'Traversal',   val: 'O(n)',     cls: 'yellow' },
+      { name: 'Unbalanced worst', val: 'O(n)', cls: 'red' },
+    ],
+    useCase: 'Sorted data, range queries, hierarchical structures',
+    pros: ['O(log n) ops when balanced', 'In-order traversal gives sorted data', 'Range queries supported', 'Natural hierarchy'],
+    cons: ['O(n) worst case (skewed)', 'Complex to implement (self-balancing)', 'Slow insert vs hash', 'Pointer overhead'],
+    javaImpl: 'TreeMap<Integer,String> tm = new TreeMap<>();\ntm.put(1,"a"); tm.put(3,"c");\ntm.floorKey(2); // 1\ntm.subMap(1, 3); // range',
+    pyImpl:   'from sortedcontainers import SortedList, SortedDict\nsl = SortedList([3,1,2])\nsl.add(4)\nsl.bisect_left(2)  # index',
+    useCases: ['Sorted map / set (TreeMap)', 'Range queries', 'Priority scheduling', 'Database indexes (B-Tree)', 'File system directories', 'Expression parsing'],
+    visual: 'tree',
+    cmp: { access: ['O(log n)','green'], search: ['O(log n)','green'], insert: ['O(log n)','green'], del: ['O(log n)','green'], ordered: true, dups: false, threadsafe: false, space: ['O(n)','yellow'], best: 'Sorted ops, range queries' }
+  },
+  {
+    id: 'graph',
+    name: 'Graph',
+    type: 'Non-linear / Network',
+    icon: '🕸️',
+    iconBg: 'rgba(250,204,21,0.15)',
+    iconColor: '#facc15',
+    color: '#facc15',
+    tagline: 'Vertices + Edges. Models relationships. BFS/DFS O(V+E). Weighted for shortest path.',
+    ops: [
+      { name: 'Add vertex',     val: 'O(1)',   cls: 'green' },
+      { name: 'Add edge',       val: 'O(1)',   cls: 'green' },
+      { name: 'BFS / DFS',      val: 'O(V+E)', cls: 'yellow' },
+      { name: 'Shortest path (Dijkstra)', val: 'O((V+E)log V)', cls: 'orange' },
+      { name: 'All-pairs shortest (Floyd)', val: 'O(V³)', cls: 'red' },
+    ],
+    useCase: 'Networks, social graphs, maps, dependency resolution',
+    pros: ['Models real-world networks', 'BFS/DFS cover all traversals', 'Flexible (directed/weighted)', 'Solves pathfinding'],
+    cons: ['High memory (adjacency matrix O(V²))', 'Complex algorithms', 'No simple ordering', 'Cycles need tracking'],
+    javaImpl: 'Map<Integer, List<Integer>> g = new HashMap<>();\ng.computeIfAbsent(1, k->new ArrayList<>()).add(2);\n// BFS: use Queue<Integer>\n// DFS: use Deque<Integer> as stack',
+    pyImpl:   'from collections import defaultdict, deque\ngraph = defaultdict(list)\ngraph[1].append(2)\n# BFS\nq = deque([start]); visited = {start}',
+    useCases: ['Social network', 'Maps / GPS routing', 'Web crawler', 'Dependency resolution', 'Network topology', 'Recommendation engine'],
+    visual: 'graph',
+    cmp: { access: ['O(V)','yellow'], search: ['O(V+E)','yellow'], insert: ['O(1)','green'], del: ['O(E)','orange'], ordered: false, dups: true, threadsafe: false, space: ['O(V+E)','yellow'], best: 'Networks, pathfinding' }
+  },
+];
+
+// ══════════════════════════════════════════════════════
+// VISUAL SVGs inline
+// ══════════════════════════════════════════════════════
+function makeVisual(type, color) {
+  if (type === 'array') {
+    const vals = ['1','3','7','2','9'];
+    return vals.map(v => `<div class="vis-box" style="border-color:${color};color:${color}">${v}</div>`).join('') +
+           `<div class="vis-arrow">…</div>`;
+  }
+  if (type === 'linkedlist') {
+    const nodes = ['A','B','C'];
+    return nodes.map((n,i) => `<div class="vis-box" style="border-color:${color};color:${color}">${n}</div>${i<nodes.length-1?`<div class="vis-arrow">→</div>`:''}`).join('') + `<div class="vis-arrow">→ null</div>`;
+  }
+  if (type === 'stack') {
+    const vals = ['4','3','2','1'];
+    return `<div style="display:flex;flex-direction:column;gap:2px">${vals.map((v,i)=>`<div class="vis-box" style="border-color:${color};color:${color};width:40px;height:20px;${i===0?'background:rgba(251,146,60,0.15)':''}">${v}${i===0?' ↑':''}</div>`).join('')}</div><div style="font-size:0.7rem;color:var(--muted);margin-left:6px">top</div>`;
+  }
+  if (type === 'queue') {
+    const vals = ['→','1','2','3','→'];
+    return `<div style="display:flex;flex-direction:column;font-size:0.7rem;color:var(--muted);gap:1px"><span style="text-align:right;padding-right:4px">dequeue</span></div>` +
+    `<div class="vis-box" style="border-color:${color};color:${color};background:rgba(74,222,128,0.1)">1</div><div class="vis-arrow">←</div>` +
+    `<div class="vis-box" style="border-color:${color};color:${color}">2</div><div class="vis-arrow">←</div>` +
+    `<div class="vis-box" style="border-color:${color};color:${color}">3</div>` +
+    `<div style="font-size:0.7rem;color:var(--muted);margin-left:4px">enqueue→</div>`;
+  }
+  if (type === 'hashmap') {
+    return `<div style="display:flex;gap:3px;align-items:center;font-size:0.72rem">` +
+      `<span style="color:${color}">"a"</span><span style="color:var(--muted)">→</span><span style="color:var(--text)">1</span>` +
+      `<span style="color:var(--muted);margin:0 4px">|</span>` +
+      `<span style="color:${color}">"b"</span><span style="color:var(--muted)">→</span><span style="color:var(--text)">2</span>` +
+      `<span style="color:var(--muted);margin:0 4px">|</span>` +
+      `<span style="color:${color}">"c"</span><span style="color:var(--muted)">→</span><span style="color:var(--text)">7</span>` +
+      `</div>`;
+  }
+  if (type === 'hashset') {
+    const vals = [1,2,3,5,8];
+    return `<div style="display:flex;gap:4px;align-items:center">` +
+      vals.map(v=>`<div class="vis-node" style="border-color:${color};color:${color}">${v}</div>`).join('') +
+      `</div>`;
+  }
+  if (type === 'tree') {
+    return `<svg width="150" height="50" style="overflow:visible">
+      <line x1="75" y1="10" x2="45" y2="35" stroke="${color}" stroke-width="1.5" opacity="0.6"/>
+      <line x1="75" y1="10" x2="105" y2="35" stroke="${color}" stroke-width="1.5" opacity="0.6"/>
+      <line x1="45" y1="35" x2="30" y2="50" stroke="${color}" stroke-width="1.5" opacity="0.4"/>
+      <line x1="45" y1="35" x2="60" y2="50" stroke="${color}" stroke-width="1.5" opacity="0.4"/>
+      <circle cx="75" cy="10" r="9" fill="${color}" opacity="0.8"/>
+      <circle cx="45" cy="35" r="9" fill="${color}" opacity="0.6"/>
+      <circle cx="105" cy="35" r="9" fill="${color}" opacity="0.6"/>
+      <circle cx="30" cy="50" r="7" fill="${color}" opacity="0.4"/>
+      <circle cx="60" cy="50" r="7" fill="${color}" opacity="0.4"/>
+      <text x="75" y="14" text-anchor="middle" font-size="9" fill="white" font-weight="bold">5</text>
+      <text x="45" y="39" text-anchor="middle" font-size="9" fill="white" font-weight="bold">3</text>
+      <text x="105" y="39" text-anchor="middle" font-size="9" fill="white" font-weight="bold">8</text>
+      <text x="30" y="54" text-anchor="middle" font-size="8" fill="white">1</text>
+      <text x="60" y="54" text-anchor="middle" font-size="8" fill="white">4</text>
+    </svg>`;
+  }
+  if (type === 'graph') {
+    return `<svg width="160" height="52" style="overflow:visible">
+      <line x1="30" y1="25" x2="80" y2="10" stroke="${color}" stroke-width="1.5" opacity="0.5"/>
+      <line x1="80" y1="10" x2="130" y2="25" stroke="${color}" stroke-width="1.5" opacity="0.5"/>
+      <line x1="30" y1="25" x2="80" y2="45" stroke="${color}" stroke-width="1.5" opacity="0.5"/>
+      <line x1="80" y1="45" x2="130" y2="25" stroke="${color}" stroke-width="1.5" opacity="0.5"/>
+      <line x1="80" y1="10" x2="80" y2="45" stroke="${color}" stroke-width="1.5" opacity="0.3"/>
+      <circle cx="30" cy="25" r="10" fill="${color}" opacity="0.7"/>
+      <circle cx="80" cy="10" r="10" fill="${color}" opacity="0.7"/>
+      <circle cx="130" cy="25" r="10" fill="${color}" opacity="0.7"/>
+      <circle cx="80" cy="45" r="10" fill="${color}" opacity="0.7"/>
+      <text x="30" y="29" text-anchor="middle" font-size="9" fill="white" font-weight="bold">A</text>
+      <text x="80" y="14" text-anchor="middle" font-size="9" fill="white" font-weight="bold">B</text>
+      <text x="130" y="29" text-anchor="middle" font-size="9" fill="white" font-weight="bold">C</text>
+      <text x="80" y="49" text-anchor="middle" font-size="9" fill="white" font-weight="bold">D</text>
+    </svg>`;
+  }
+  return '';
+}
+
+// ══════════════════════════════════════════════════════
+// BUILD CARDS
+// ══════════════════════════════════════════════════════
+(function buildGrid() {
+  const ocMap = { green:'oc-green', yellow:'oc-yellow', orange:'oc-orange', red:'oc-red' };
+  const grid = document.getElementById('dsGrid');
+
+  DS_DATA.forEach(ds => {
+    const card = document.createElement('div');
+    card.className = 'ds-card';
+    card.style.borderTopColor = ds.color;
+    card.style.borderTop = `3px solid ${ds.color}`;
+    card.style.cursor = 'pointer';
+
+    card.innerHTML = `
+      <div class="ds-card-header">
+        <div class="ds-icon" style="background:${ds.iconBg};color:${ds.iconColor}">${ds.icon}</div>
+        <div>
+          <div class="ds-name">${ds.name}</div>
+          <div class="ds-type">${ds.type}</div>
+        </div>
+      </div>
+      <div class="ds-body">
+        <div class="ds-tagline">${ds.tagline}</div>
+        <div class="ds-visual">${makeVisual(ds.visual, ds.color)}</div>
+        <div class="ops-list">
+          ${ds.ops.slice(0,4).map(o => `
+            <div class="op-row">
+              <span class="op-name">${o.name}</span>
+              <span class="op-val ${ocMap[o.cls]}">${o.val}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="ds-footer">
+        <div class="use-case-label">Best for</div>
+        ${ds.useCase}
+      </div>`;
+
+    card.addEventListener('click', () => openDetail(ds.id));
+    grid.appendChild(card);
+  });
+})();
+
+// ══════════════════════════════════════════════════════
+// DETAIL OVERLAY
+// ══════════════════════════════════════════════════════
+function openDetail(id) {
+  const ds = DS_DATA.find(d => d.id === id);
+  if (!ds) return;
+  const ocMap = { green:'oc-green', yellow:'oc-yellow', orange:'oc-orange', red:'oc-red' };
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-header">
+      <div class="detail-icon" style="background:${ds.iconBg};color:${ds.iconColor}">${ds.icon}</div>
+      <div>
+        <div class="detail-title" style="color:${ds.color}">${ds.name}</div>
+        <div class="detail-subtitle">${ds.type} — ${ds.tagline}</div>
+      </div>
+    </div>
+    <div class="detail-body">
+
+      <div class="detail-section">
+        <div class="detail-section-title">⚡ Complexity</div>
+        <div class="detail-grid">
+          ${ds.ops.map(o => `
+            <div class="detail-op">
+              <span class="detail-op-name">${o.name}</span>
+              <span class="op-val ${ocMap[o.cls]}">${o.val}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">✅ Pros vs Cons</div>
+        <div class="detail-pros-cons">
+          <div class="pro-con-box pros-box">
+            <div class="pro-con-title pros">Advantages</div>
+            <ul>${ds.pros.map(p=>`<li>${p}</li>`).join('')}</ul>
+          </div>
+          <div class="pro-con-box cons-box">
+            <div class="pro-con-title cons">Disadvantages</div>
+            <ul>${ds.cons.map(c=>`<li>${c}</li>`).join('')}</ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">🎯 Use Cases</div>
+        <div class="detail-use-cases">
+          ${ds.useCases.map(u=>`<span class="use-tag">${u}</span>`).join('')}
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">💻 Language Implementations</div>
+        <div class="langs-row">
+          <div class="lang-block">
+            <div class="lang-block-title java-color">Java</div>
+            <code>${ds.javaImpl.replace(/\n/g,'<br>').replace(/ /g,'&nbsp;')}</code>
+          </div>
+          <div class="lang-block">
+            <div class="lang-block-title py-color">Python</div>
+            <code>${ds.pyImpl.replace(/\n/g,'<br>').replace(/ /g,'&nbsp;')}</code>
+          </div>
+        </div>
+      </div>
+
+    </div>`;
+
+  document.getElementById('overlay').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  document.getElementById('overlay').classList.remove('visible');
+  document.body.style.overflow = '';
+}
+function closeOverlay(e) {
+  if (e.target === document.getElementById('overlay')) closeDetail();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+// ══════════════════════════════════════════════════════
+// COMPARISON TABLE
+// ══════════════════════════════════════════════════════
+(function buildTable() {
+  const ocMap = { green:'pill-green', yellow:'pill-yellow', orange:'pill-orange', red:'pill-red' };
+  const tbody = document.getElementById('cmpBody');
+  DS_DATA.forEach(ds => {
+    const c = ds.cmp;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span style="color:${ds.color}">${ds.icon}</span> ${ds.name}</td>
+      <td><span class="pill ${ocMap[c.access[1]]}">${c.access[0]}</span></td>
+      <td><span class="pill ${ocMap[c.search[1]]}">${c.search[0]}</span></td>
+      <td><span class="pill ${ocMap[c.insert[1]]}">${c.insert[0]}</span></td>
+      <td><span class="pill ${ocMap[c.del[1]]}">${c.del[0]}</span></td>
+      <td>${c.ordered ? '<span class="check">✓</span>' : '<span class="cross">✗</span>'}</td>
+      <td>${c.dups ? '<span class="check">✓</span>' : '<span class="cross">✗</span>'}</td>
+      <td>${c.threadsafe ? '<span class="check">✓</span>' : '<span class="cross">✗</span>'}</td>
+      <td><span class="pill ${ocMap[c.space[1]]}">${c.space[0]}</span></td>
+      <td style="color:var(--muted);font-size:0.8rem">${c.best}</td>`;
+    tbody.appendChild(tr);
+  });
+})();
+
+// ══════════════════════════════════════════════════════
+// QUIZ
+// ══════════════════════════════════════════════════════
+const QUIZ_QUESTIONS = [
+  {
+    q: 'What is your primary access pattern?',
+    options: [
+      { text: 'Access elements by index / position', scores: { array: 3, stack: 0, queue: 0, hashmap: 0, hashset: 0, tree: 1, linkedlist: 0, graph: 0 } },
+      { text: 'Look up by key (name, ID, string)', scores: { hashmap: 3, hashset: 1, array: 0, stack: 0, queue: 0, tree: 1, linkedlist: 0, graph: 0 } },
+      { text: 'Process items in arrival order (FIFO)', scores: { queue: 3, linkedlist: 1, array: 0, stack: 0, hashmap: 0, hashset: 0, tree: 0, graph: 0 } },
+      { text: 'Last-in / undo-style (LIFO)', scores: { stack: 3, linkedlist: 1, array: 0, queue: 0, hashmap: 0, hashset: 0, tree: 0, graph: 0 } },
+      { text: 'Navigate relationships / connections between things', scores: { graph: 3, tree: 2, array: 0, stack: 0, queue: 0, hashmap: 0, hashset: 0, linkedlist: 0 } },
+    ]
+  },
+  {
+    q: 'What matters most about your data?',
+    options: [
+      { text: 'Must be sorted / ordered at all times', scores: { tree: 3, array: 1, linkedlist: 0, stack: 0, queue: 0, hashmap: 0, hashset: 0, graph: 0 } },
+      { text: 'No duplicates allowed', scores: { hashset: 3, tree: 1, array: 0, stack: 0, queue: 0, hashmap: 0, linkedlist: 0, graph: 0 } },
+      { text: 'Fast membership check (is X in the collection?)', scores: { hashset: 3, hashmap: 2, array: 0, stack: 0, queue: 0, tree: 1, linkedlist: 0, graph: 0 } },
+      { text: 'Hierarchical parent/child relationships', scores: { tree: 3, graph: 1, array: 0, stack: 0, queue: 0, hashmap: 0, hashset: 0, linkedlist: 0 } },
+      { text: 'Key → value mappings', scores: { hashmap: 3, tree: 1, array: 0, stack: 0, queue: 0, hashset: 0, linkedlist: 0, graph: 0 } },
+    ]
+  },
+  {
+    q: 'What operations do you perform most?',
+    options: [
+      { text: 'Frequent insert/delete at both ends', scores: { linkedlist: 3, queue: 2, stack: 2, array: 0, hashmap: 0, hashset: 0, tree: 0, graph: 0 } },
+      { text: 'Sorting and binary search', scores: { array: 3, tree: 2, linkedlist: 0, stack: 0, queue: 0, hashmap: 0, hashset: 0, graph: 0 } },
+      { text: 'Count / group / aggregate by key', scores: { hashmap: 3, hashset: 1, array: 0, stack: 0, queue: 0, tree: 0, linkedlist: 0, graph: 0 } },
+      { text: 'Graph traversal (BFS / DFS / shortest path)', scores: { graph: 3, tree: 1, queue: 1, stack: 1, array: 0, hashmap: 0, hashset: 0, linkedlist: 0 } },
+      { text: 'Push / pop (function calls, recursion)', scores: { stack: 3, array: 1, linkedlist: 1, queue: 0, hashmap: 0, hashset: 0, tree: 0, graph: 0 } },
+    ]
+  }
+];
+
+const RESULTS = {
+  array:      { icon:'▦', name:'Array / ArrayList', desc:'Best for random access by index, iteration, and sorting. Use ArrayList in Java or list in Python for dynamic sizing.' },
+  linkedlist: { icon:'⛓', name:'Linked List / deque', desc:'Ideal when you frequently insert or delete at both ends. Use Java LinkedList or Python collections.deque.' },
+  stack:      { icon:'📚', name:'Stack', desc:'Perfect for LIFO access: undo, DFS, bracket matching. Use ArrayDeque in Java or a plain list in Python.' },
+  queue:      { icon:'🚶', name:'Queue', desc:'Great for FIFO processing: BFS, task scheduling, buffering. Use LinkedList/ArrayDeque in Java or deque in Python.' },
+  hashmap:    { icon:'🗺️', name:'HashMap / dict', desc:'Fastest for key-value lookup, caching, and frequency counting. O(1) average. Use HashMap in Java or dict in Python.' },
+  hashset:    { icon:'🔷', name:'HashSet / set', desc:'Best for deduplication and O(1) membership tests. Use HashSet in Java or set in Python.' },
+  tree:       { icon:'🌳', name:'BST / TreeMap', desc:'Choose when data must stay sorted or you need range queries. Use TreeMap/TreeSet in Java or sortedcontainers in Python.' },
+  graph:      { icon:'🕸️', name:'Graph', desc:'Model complex relationships, networks, and pathfinding. Use adjacency list (HashMap<Node, List<Node>>) in both Java and Python.' },
+};
+
+const ALTS = {
+  array: 'LinkedList (frequent insert/delete), HashMap (key lookup)',
+  linkedlist: 'ArrayDeque (if only stack/queue needed), ArrayList (if index access matters)',
+  stack: 'Deque (if you also need queue), recursion (if stack depth is limited)',
+  queue: 'PriorityQueue (if ordered by priority), deque (if both-end access needed)',
+  hashmap: 'TreeMap (if sorted iteration needed), LinkedHashMap (if insertion order needed)',
+  hashset: 'TreeSet (if sorted), BitSet (if integer membership, memory constrained)',
+  tree: 'HashMap (if order not needed), SortedList from sortedcontainers',
+  graph: 'Tree (if acyclic hierarchy), HashMap (if simpler adjacency needed)',
+};
+
+let quizStep = 0;
+let quizScores = { array:0, linkedlist:0, stack:0, queue:0, hashmap:0, hashset:0, tree:0, graph:0 };
+
+function renderQuiz() {
+  const progress = document.getElementById('quizProgress');
+  progress.innerHTML = QUIZ_QUESTIONS.map((_,i) =>
+    `<div class="quiz-dot ${i < quizStep ? 'done' : i === quizStep ? 'active' : ''}"></div>`
+  ).join('');
+
+  if (quizStep >= QUIZ_QUESTIONS.length) {
+    document.getElementById('quizContent').innerHTML = '';
+    showResult();
+    return;
+  }
+
+  const q = QUIZ_QUESTIONS[quizStep];
+  document.getElementById('quizContent').innerHTML = `
+    <div class="quiz-q">${quizStep + 1}. ${q.q}</div>
+    <div class="quiz-options">
+      ${q.options.map((opt, i) =>
+        `<button class="quiz-opt" onclick="answerQuiz(${i})">${opt.text}</button>`
+      ).join('')}
+    </div>`;
+  document.getElementById('quizResult').classList.remove('visible');
+}
+
+function answerQuiz(optIdx) {
+  const opt = QUIZ_QUESTIONS[quizStep].options[optIdx];
+  Object.entries(opt.scores).forEach(([k, v]) => { quizScores[k] += v; });
+  quizStep++;
+  renderQuiz();
+}
+
+function showResult() {
+  const best = Object.entries(quizScores).sort((a,b) => b[1]-a[1])[0][0];
+  const r = RESULTS[best];
+  document.getElementById('resultCard').innerHTML = `
+    <div class="result-icon">${r.icon}</div>
+    <div class="result-name">${r.name}</div>
+    <div class="result-desc">${r.desc}</div>
+    <div class="result-alts"><strong>Alternatives to consider:</strong> ${ALTS[best]}</div>`;
+  document.getElementById('quizResult').classList.add('visible');
+}
+
+function restartQuiz() {
+  quizStep = 0;
+  quizScores = { array:0, linkedlist:0, stack:0, queue:0, hashmap:0, hashset:0, tree:0, graph:0 };
+  document.getElementById('quizResult').classList.remove('visible');
+  renderQuiz();
+}
+
+renderQuiz();
+</script>
+</body>
+</html>

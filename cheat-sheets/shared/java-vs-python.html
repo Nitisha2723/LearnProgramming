@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Java vs Python — Side-by-Side Cheat Sheet</title>
+  <style>
+    :root {
+      --bg:        #1a1a2e;
+      --panel:     #16213e;
+      --accent:    #e94560;
+      --java:      #f89820;
+      --python:    #4584b6;
+      --text:      #e0e0e0;
+      --text-dim:  #aaa;
+      --border:    #2a2a4a;
+      --kw:        #e94560;
+      --str:       #4ecca3;
+      --cmt:       #666;
+      --code-bg:   #0d1117;
+      --header-h:  56px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── STICKY HEADER ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--panel);
+      border-bottom: 2px solid var(--accent);
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 20px;
+      flex-wrap: wrap;
+      overflow-x: auto;
+    }
+
+    header h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      white-space: nowrap;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    header h1 span.java  { color: var(--java); }
+    header h1 span.sep   { color: var(--accent); }
+    header h1 span.py    { color: var(--python); }
+
+    nav {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+      flex: 1;
+    }
+
+    nav a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 11.5px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    nav a:hover {
+      color: var(--text);
+      border-color: var(--accent);
+      background: rgba(233,69,96,0.1);
+    }
+
+    /* ── BACK LINK ── */
+    .back-link {
+      display: inline-block;
+      margin: 20px 20px 0;
+      color: var(--text-dim);
+      font-size: 12px;
+      text-decoration: none;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+    .back-link:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    /* ── MAIN CONTENT ── */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 16px 20px 60px;
+    }
+
+    /* ── SECTION ── */
+    .section {
+      margin-bottom: 36px;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── TABLE ── */
+    .cmp-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .cmp-table th {
+      background: var(--code-bg);
+      padding: 7px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      border: 1px solid var(--border);
+    }
+
+    .cmp-table th.col-concept { color: var(--text-dim); width: 18%; }
+    .cmp-table th.col-java    { color: var(--java);     width: 41%; }
+    .cmp-table th.col-python  { color: var(--python);   width: 41%; }
+
+    .cmp-table td {
+      vertical-align: top;
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      background: var(--panel);
+    }
+
+    .cmp-table tr:hover td {
+      background: #1a2545;
+    }
+
+    .cmp-table td.concept {
+      color: var(--text-dim);
+      font-size: 12px;
+      font-style: italic;
+      padding-top: 9px;
+    }
+
+    /* ── CODE BLOCKS ── */
+    pre {
+      margin: 0;
+      font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", Menlo, monospace;
+      font-size: 12.5px;
+      line-height: 1.55;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    code {
+      font-family: inherit;
+    }
+
+    /* Syntax token classes */
+    .kw  { color: var(--kw); font-weight: 600; }
+    .str { color: var(--str); }
+    .cmt { color: var(--cmt); font-style: italic; }
+    .num { color: #f8a95a; }
+    .fn  { color: #d4a4fb; }
+    .cls { color: #79d4f1; }
+    .ann { color: #f8a95a; }
+    .op  { color: #e94560; }
+    .ret { color: #4ecca3; }
+
+    /* ── SUMMARY TABLE ── */
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .summary-table th {
+      padding: 8px 12px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+    }
+
+    .summary-table th:nth-child(1) { color: var(--text-dim); width: 20%; }
+    .summary-table th:nth-child(2) { color: var(--java); }
+    .summary-table th:nth-child(3) { color: var(--python); }
+
+    .summary-table td {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      font-size: 13px;
+    }
+
+    .summary-table tr:hover td { background: #1a2545; }
+
+    .summary-table td:first-child {
+      color: var(--text-dim);
+      font-style: italic;
+      font-size: 12px;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 3px;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    .badge-java   { background: rgba(248,152,32,0.2);  color: var(--java);   border: 1px solid rgba(248,152,32,0.4); }
+    .badge-python { background: rgba(69,132,182,0.2);  color: var(--python); border: 1px solid rgba(69,132,182,0.4); }
+    .badge-note   { background: rgba(233,69,96,0.15);  color: var(--accent); border: 1px solid rgba(233,69,96,0.35); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      .cmp-table th.col-concept,
+      .cmp-table td.concept { display: none; }
+      .cmp-table th.col-java, .cmp-table th.col-python { width: 50%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
+<header>
+  <h1>
+    <span class="java">Java</span>
+    <span class="sep"> ⟺ </span>
+    <span class="py">Python</span>
+    &nbsp;Cheat Sheet
+  </h1>
+  <nav>
+    <a href="#s1">Variables</a>
+    <a href="#s2">Control Flow</a>
+    <a href="#s3">Functions</a>
+    <a href="#s4">OOP</a>
+    <a href="#s5">Collections</a>
+    <a href="#s6">Errors</a>
+    <a href="#s7">File I/O</a>
+    <a href="#s8">Functional</a>
+    <a href="#s9">Concurrency</a>
+    <a href="#s10">Testing</a>
+    <a href="#s11">Summary</a>
+  </nav>
+</header>
+
+<a class="back-link" href="../index.html">← Back to Index</a>
+
+<main>
+
+<!-- ═══════════════════════════════ SECTION 1 ═══════════════════════════════ -->
+<section class="section" id="s1">
+  <div class="section-title">1 · Variables &amp; Types</div>
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th class="col-concept">Concept</th>
+        <th class="col-java">Java</th>
+        <th class="col-python">Python</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="concept">Declare int</td>
+        <td><pre><code><span class="kw">int</span> x <span class="op">=</span> <span class="num">5</span>;</code></pre></td>
+        <td><pre><code>x <span class="op">=</span> <span class="num">5</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Declare string</td>
+        <td><pre><code><span class="cls">String</span> s <span class="op">=</span> <span class="str">"hi"</span>;</code></pre></td>
+        <td><pre><code>s <span class="op">=</span> <span class="str">"hi"</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Declare list</td>
+        <td><pre><code><span class="cls">List</span>&lt;<span class="cls">String</span>&gt; l <span class="op">=</span> <span class="kw">new</span> <span class="cls">ArrayList</span>&lt;&gt;();</code></pre></td>
+        <td><pre><code>l <span class="op">=</span> []</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Declare map</td>
+        <td><pre><code><span class="cls">Map</span>&lt;<span class="cls">String</span>,<span class="cls">Integer</span>&gt; m <span class="op">=</span> <span class="kw">new</span> <span class="cls">HashMap</span>&lt;&gt;();</code></pre></td>
+        <td><pre><code>m <span class="op">=</span> {}</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Null check</td>
+        <td><pre><code><span class="kw">if</span> (x <span class="op">==</span> <span class="kw">null</span>) { }</code></pre></td>
+        <td><pre><code><span class="kw">if</span> x <span class="kw">is</span> <span class="kw">None</span>:</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Type check</td>
+        <td><pre><code>x <span class="kw">instanceof</span> <span class="cls">String</span></code></pre></td>
+        <td><pre><code><span class="fn">isinstance</span>(x, <span class="cls">str</span>)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Type cast</td>
+        <td><pre><code>(<span class="kw">int</span>) <span class="num">3.7</span>  <span class="cmt">// → 3 (truncates)</span></code></pre></td>
+        <td><pre><code><span class="fn">int</span>(<span class="num">3.7</span>)  <span class="cmt"># → 3 (truncates)</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Constants</td>
+        <td><pre><code><span class="kw">final int</span> MAX <span class="op">=</span> <span class="num">100</span>;</code></pre></td>
+        <td><pre><code>MAX <span class="op">=</span> <span class="num">100</span>  <span class="cmt"># UPPER_CASE = convention</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Type hints</td>
+        <td><pre><code><span class="kw">int</span> count <span class="op">=</span> <span class="num">0</span>;  <span class="cmt">// always required</span></code></pre></td>
+        <td><pre><code>count: <span class="cls">int</span> <span class="op">=</span> <span class="num">0</span>  <span class="cmt"># optional hint</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Multi-assign</td>
+        <td><pre><code><span class="kw">int</span> a <span class="op">=</span> <span class="num">1</span>, b <span class="op">=</span> <span class="num">2</span>;</code></pre></td>
+        <td><pre><code>a, b <span class="op">=</span> <span class="num">1</span>, <span class="num">2</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Swap values</td>
+        <td><pre><code><span class="kw">int</span> tmp <span class="op">=</span> a; a <span class="op">=</span> b; b <span class="op">=</span> tmp;</code></pre></td>
+        <td><pre><code>a, b <span class="op">=</span> b, a</code></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════ SECTION 2 ═══════════════════════════════ -->
+<section class="section" id="s2">
+  <div class="section-title">2 · Control Flow</div>
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th class="col-concept">Concept</th>
+        <th class="col-java">Java</th>
+        <th class="col-python">Python</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="concept">if / else if / else</td>
+        <td><pre><code><span class="kw">if</span> (x <span class="op">&gt;</span> <span class="num">0</span>) {
+    <span class="cmt">// ...</span>
+} <span class="kw">else if</span> (x <span class="op">==</span> <span class="num">0</span>) {
+    <span class="cmt">// ...</span>
+} <span class="kw">else</span> {
+    <span class="cmt">// ...</span>
+}</code></pre></td>
+        <td><pre><code><span class="kw">if</span> x <span class="op">&gt;</span> <span class="num">0</span>:
+    <span class="kw">pass</span>
+<span class="kw">elif</span> x <span class="op">==</span> <span class="num">0</span>:
+    <span class="kw">pass</span>
+<span class="kw">else</span>:
+    <span class="kw">pass</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Ternary</td>
+        <td><pre><code><span class="cls">String</span> r <span class="op">=</span> x <span class="op">&gt;</span> <span class="num">0</span> <span class="op">?</span> <span class="str">"pos"</span> <span class="op">:</span> <span class="str">"neg"</span>;</code></pre></td>
+        <td><pre><code>r <span class="op">=</span> <span class="str">"pos"</span> <span class="kw">if</span> x <span class="op">&gt;</span> <span class="num">0</span> <span class="kw">else</span> <span class="str">"neg"</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Switch / match</td>
+        <td><pre><code><span class="kw">switch</span> (x) {
+    <span class="kw">case</span> <span class="num">1</span>: <span class="fn">doOne</span>(); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">2</span>: <span class="fn">doTwo</span>(); <span class="kw">break</span>;
+    <span class="kw">default</span>: <span class="fn">doOther</span>();
+}</code></pre></td>
+        <td><pre><code><span class="kw">match</span> x:
+    <span class="kw">case</span> <span class="num">1</span>: <span class="fn">do_one</span>()
+    <span class="kw">case</span> <span class="num">2</span>: <span class="fn">do_two</span>()
+    <span class="kw">case</span> _: <span class="fn">do_other</span>()
+<span class="cmt"># Python 3.10+ structural matching</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">C-style for</td>
+        <td><pre><code><span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">0</span>; i <span class="op">&lt;</span> <span class="num">10</span>; i<span class="op">++</span>) {
+    <span class="cls">System</span>.out.<span class="fn">println</span>(i);
+}</code></pre></td>
+        <td><pre><code><span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>):
+    <span class="fn">print</span>(i)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">for-each</td>
+        <td><pre><code><span class="kw">for</span> (<span class="cls">String</span> s : items) {
+    <span class="cls">System</span>.out.<span class="fn">println</span>(s);
+}</code></pre></td>
+        <td><pre><code><span class="kw">for</span> s <span class="kw">in</span> items:
+    <span class="fn">print</span>(s)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Enumerate</td>
+        <td><pre><code><span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">0</span>; i <span class="op">&lt;</span> list.<span class="fn">size</span>(); i<span class="op">++</span>) {
+    <span class="cls">System</span>.out.<span class="fn">println</span>(i <span class="op">+</span> <span class="str">": "</span> <span class="op">+</span> list.<span class="fn">get</span>(i));
+}</code></pre></td>
+        <td><pre><code><span class="kw">for</span> i, val <span class="kw">in</span> <span class="fn">enumerate</span>(items):
+    <span class="fn">print</span>(i, val)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">while</td>
+        <td><pre><code><span class="kw">while</span> (x <span class="op">&gt;</span> <span class="num">0</span>) { x<span class="op">--</span>; }</code></pre></td>
+        <td><pre><code><span class="kw">while</span> x <span class="op">&gt;</span> <span class="num">0</span>:
+    x <span class="op">-=</span> <span class="num">1</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">break / continue</td>
+        <td><pre><code><span class="kw">break</span>;  <span class="cmt">// exit loop</span>
+<span class="kw">continue</span>;  <span class="cmt">// skip iteration</span></code></pre></td>
+        <td><pre><code><span class="kw">break</span>    <span class="cmt"># exit loop</span>
+<span class="kw">continue</span>  <span class="cmt"># skip iteration</span></code></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════ SECTION 3 ═══════════════════════════════ -->
+<section class="section" id="s3">
+  <div class="section-title">3 · Functions / Methods</div>
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th class="col-concept">Concept</th>
+        <th class="col-java">Java</th>
+        <th class="col-python">Python</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="concept">Basic method</td>
+        <td><pre><code><span class="kw">public int</span> <span class="fn">add</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) {
+    <span class="kw">return</span> a <span class="op">+</span> b;
+}</code></pre></td>
+        <td><pre><code><span class="kw">def</span> <span class="fn">add</span>(a, b):
+    <span class="kw">return</span> a <span class="op">+</span> b</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Default args</td>
+        <td><pre><code><span class="cmt">// Use overloading:</span>
+<span class="kw">public void</span> <span class="fn">greet</span>() { <span class="fn">greet</span>(<span class="str">"World"</span>); }
+<span class="kw">public void</span> <span class="fn">greet</span>(<span class="cls">String</span> name) { }</code></pre></td>
+        <td><pre><code><span class="kw">def</span> <span class="fn">greet</span>(name<span class="op">=</span><span class="str">"World"</span>):
+    <span class="fn">print</span>(<span class="str">f"Hello, {name}"</span>)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Varargs</td>
+        <td><pre><code><span class="kw">public void</span> <span class="fn">log</span>(<span class="cls">String</span>... args) {
+    <span class="kw">for</span> (<span class="cls">String</span> s : args) <span class="fn">print</span>(s);
+}</code></pre></td>
+        <td><pre><code><span class="kw">def</span> <span class="fn">log</span>(<span class="op">*</span>args):
+    <span class="kw">for</span> s <span class="kw">in</span> args: <span class="fn">print</span>(s)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Keyword args</td>
+        <td><pre><code><span class="cmt">// Not natively supported</span>
+<span class="cmt">// Use builder pattern or Maps</span></code></pre></td>
+        <td><pre><code><span class="fn">connect</span>(host<span class="op">=</span><span class="str">"localhost"</span>, port<span class="op">=</span><span class="num">8080</span>)
+
+<span class="kw">def</span> <span class="fn">connect</span>(<span class="op">**</span>kwargs): <span class="kw">pass</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Lambda</td>
+        <td><pre><code><span class="cls">Function</span>&lt;<span class="cls">Integer</span>,<span class="cls">Integer</span>&gt; dbl <span class="op">=</span> x <span class="op">-&gt;</span> x <span class="op">*</span> <span class="num">2</span>;</code></pre></td>
+        <td><pre><code>dbl <span class="op">=</span> <span class="kw">lambda</span> x: x <span class="op">*</span> <span class="num">2</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Return multiple</td>
+        <td><pre><code><span class="kw">return new int</span>[]{a, b};  <span class="cmt">// array</span>
+<span class="cmt">// or record/object</span></code></pre></td>
+        <td><pre><code><span class="kw">return</span> a, b  <span class="cmt"># returns tuple</span>
+x, y <span class="op">=</span> <span class="fn">swap</span>(a, b)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Type annotations</td>
+        <td><pre><code><span class="kw">public</span> <span class="cls">String</span> <span class="fn">format</span>(<span class="kw">int</span> n, <span class="cls">String</span> s)</code></pre></td>
+        <td><pre><code><span class="kw">def</span> <span class="fn">format</span>(n: <span class="cls">int</span>, s: <span class="cls">str</span>) <span class="op">-&gt;</span> <span class="cls">str</span>:</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Docstring</td>
+        <td><pre><code><span class="cmt">/** JavaDoc comment */</span>
+<span class="kw">public void</span> <span class="fn">doThing</span>() { }</code></pre></td>
+        <td><pre><code><span class="kw">def</span> <span class="fn">do_thing</span>():
+    <span class="str">"""Do the thing. Returns None."""</span>
+    <span class="kw">pass</span></code></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════ SECTION 4 ═══════════════════════════════ -->
+<section class="section" id="s4">
+  <div class="section-title">4 · Object-Oriented Programming</div>
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th class="col-concept">Concept</th>
+        <th class="col-java">Java</th>
+        <th class="col-python">Python</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="concept">Class definition</td>
+        <td><pre><code><span class="kw">public class</span> <span class="cls">Dog</span> {
+    <span class="kw">private</span> <span class="cls">String</span> name;
+}</code></pre></td>
+        <td><pre><code><span class="kw">class</span> <span class="cls">Dog</span>:
+    <span class="kw">pass</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Constructor</td>
+        <td><pre><code><span class="kw">public</span> <span class="cls">Dog</span>(<span class="cls">String</span> name) {
+    <span class="kw">this</span>.name <span class="op">=</span> name;
+}</code></pre></td>
+        <td><pre><code><span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, name):
+    <span class="kw">self</span>.name <span class="op">=</span> name</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Inheritance</td>
+        <td><pre><code><span class="kw">public class</span> <span class="cls">Dog</span> <span class="kw">extends</span> <span class="cls">Animal</span> { }</code></pre></td>
+        <td><pre><code><span class="kw">class</span> <span class="cls">Dog</span>(<span class="cls">Animal</span>):
+    <span class="kw">pass</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Multiple inheritance</td>
+        <td><pre><code><span class="cmt">// Not supported (use interfaces)</span></code></pre></td>
+        <td><pre><code><span class="kw">class</span> <span class="cls">C</span>(<span class="cls">A</span>, <span class="cls">B</span>):  <span class="cmt"># MRO applies</span>
+    <span class="kw">pass</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Call parent</td>
+        <td><pre><code><span class="kw">super</span>().<span class="fn">speak</span>();
+<span class="kw">super</span>(<span class="str">"Buddy"</span>);  <span class="cmt">// super constructor</span></code></pre></td>
+        <td><pre><code><span class="kw">super</span>().<span class="fn">speak</span>()
+<span class="kw">super</span>().<span class="fn">__init__</span>(<span class="str">"Buddy"</span>)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Interface</td>
+        <td><pre><code><span class="kw">public interface</span> <span class="cls">Flyable</span> {
+    <span class="kw">void</span> <span class="fn">fly</span>();
+}
+<span class="kw">class</span> <span class="cls">Bird</span> <span class="kw">implements</span> <span class="cls">Flyable</span> { }</code></pre></td>
+        <td><pre><code><span class="kw">from</span> typing <span class="kw">import</span> <span class="cls">Protocol</span>
+<span class="kw">class</span> <span class="cls">Flyable</span>(<span class="cls">Protocol</span>):
+    <span class="kw">def</span> <span class="fn">fly</span>(<span class="kw">self</span>) <span class="op">-&gt;</span> <span class="kw">None</span>: ...</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Abstract class</td>
+        <td><pre><code><span class="kw">public abstract class</span> <span class="cls">Shape</span> {
+    <span class="kw">public abstract double</span> <span class="fn">area</span>();
+}</code></pre></td>
+        <td><pre><code><span class="kw">from</span> abc <span class="kw">import</span> ABC, abstractmethod
+<span class="kw">class</span> <span class="cls">Shape</span>(ABC):
+    <span class="ann">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">area</span>(<span class="kw">self</span>): ...</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Static method</td>
+        <td><pre><code><span class="kw">public static void</span> <span class="fn">helper</span>() { }</code></pre></td>
+        <td><pre><code><span class="ann">@staticmethod</span>
+<span class="kw">def</span> <span class="fn">helper</span>(): <span class="kw">pass</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Class method</td>
+        <td><pre><code><span class="cmt">// Factory pattern (static)</span>
+<span class="kw">public static</span> <span class="cls">Dog</span> <span class="fn">create</span>(<span class="cls">String</span> n) {
+    <span class="kw">return new</span> <span class="cls">Dog</span>(n);
+}</code></pre></td>
+        <td><pre><code><span class="ann">@classmethod</span>
+<span class="kw">def</span> <span class="fn">create</span>(cls, name):
+    <span class="kw">return</span> cls(name)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">__str__ / toString</td>
+        <td><pre><code><span class="ann">@Override</span>
+<span class="kw">public</span> <span class="cls">String</span> <span class="fn">toString</span>() {
+    <span class="kw">return</span> <span class="str">"Dog("</span> <span class="op">+</span> name <span class="op">+</span> <span class="str">")"</span>;
+}</code></pre></td>
+        <td><pre><code><span class="kw">def</span> <span class="fn">__str__</span>(<span class="kw">self</span>):
+    <span class="kw">return</span> <span class="str">f"Dog({self.name})"</span>
+<span class="kw">def</span> <span class="fn">__repr__</span>(<span class="kw">self</span>): ...</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">equals / __eq__</td>
+        <td><pre><code><span class="ann">@Override</span>
+<span class="kw">public boolean</span> <span class="fn">equals</span>(<span class="cls">Object</span> o) {
+    <span class="kw">if</span> (<span class="kw">this</span> <span class="op">==</span> o) <span class="kw">return true</span>;
+    <span class="kw">if</span> (<span class="op">!</span>(o <span class="kw">instanceof</span> <span class="cls">Dog</span>)) <span class="kw">return false</span>;
+    <span class="kw">return</span> name.<span class="fn">equals</span>(((Dog)o).name);
+}</code></pre></td>
+        <td><pre><code><span class="kw">def</span> <span class="fn">__eq__</span>(<span class="kw">self</span>, other):
+    <span class="kw">if not</span> <span class="fn">isinstance</span>(other, <span class="cls">Dog</span>):
+        <span class="kw">return</span> <span class="cls">NotImplemented</span>
+    <span class="kw">return</span> <span class="kw">self</span>.name <span class="op">==</span> other.name</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Dataclass / Record</td>
+        <td><pre><code><span class="cmt">// Java 16+ record</span>
+<span class="kw">public record</span> <span class="cls">Point</span>(<span class="kw">int</span> x, <span class="kw">int</span> y) { }</code></pre></td>
+        <td><pre><code><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+<span class="ann">@dataclass</span>
+<span class="kw">class</span> <span class="cls">Point</span>:
+    x: <span class="cls">int</span>; y: <span class="cls">int</span></code></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════ SECTION 5 ═══════════════════════════════ -->
+<section class="section" id="s5">
+  <div class="section-title">5 · Collections</div>
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th class="col-concept">Concept</th>
+        <th class="col-java">Java</th>
+        <th class="col-python">Python</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="concept">Create list</td>
+        <td><pre><code><span class="cls">List</span>&lt;<span class="cls">Integer</span>&gt; l <span class="op">=</span> <span class="kw">new</span> <span class="cls">ArrayList</span>&lt;&gt;();
+<span class="cls">List</span>&lt;<span class="cls">Integer</span>&gt; l2 <span class="op">=</span> <span class="cls">List</span>.<span class="fn">of</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>);</code></pre></td>
+        <td><pre><code>l <span class="op">=</span> []
+l2 <span class="op">=</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Add / remove</td>
+        <td><pre><code>list.<span class="fn">add</span>(x);
+list.<span class="fn">remove</span>(Integer.<span class="fn">valueOf</span>(x));</code></pre></td>
+        <td><pre><code>lst.<span class="fn">append</span>(x)
+lst.<span class="fn">remove</span>(x)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Get item</td>
+        <td><pre><code>list.<span class="fn">get</span>(<span class="num">0</span>)        <span class="cmt">// first</span>
+list.<span class="fn">get</span>(list.<span class="fn">size</span>() <span class="op">-</span> <span class="num">1</span>)  <span class="cmt">// last</span></code></pre></td>
+        <td><pre><code>lst[<span class="num">0</span>]     <span class="cmt"># first</span>
+lst[<span class="op">-</span><span class="num">1</span>]    <span class="cmt"># last</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Slice</td>
+        <td><pre><code>list.<span class="fn">subList</span>(<span class="num">1</span>, <span class="num">3</span>)  <span class="cmt">// [1..3)</span></code></pre></td>
+        <td><pre><code>lst[<span class="num">1</span>:<span class="num">3</span>]   <span class="cmt"># indices 1, 2</span>
+lst[::<span class="op">-</span><span class="num">1</span>]  <span class="cmt"># reversed</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Length</td>
+        <td><pre><code>list.<span class="fn">size</span>()</code></pre></td>
+        <td><pre><code><span class="fn">len</span>(lst)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Sort</td>
+        <td><pre><code><span class="cls">Collections</span>.<span class="fn">sort</span>(list);
+list.<span class="fn">sort</span>(<span class="cls">Comparator</span>.<span class="fn">reverseOrder</span>());</code></pre></td>
+        <td><pre><code>lst.<span class="fn">sort</span>()             <span class="cmt"># in-place</span>
+<span class="fn">sorted</span>(lst, reverse<span class="op">=</span><span class="kw">True</span>)  <span class="cmt"># new list</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Contains</td>
+        <td><pre><code>list.<span class="fn">contains</span>(x)</code></pre></td>
+        <td><pre><code>x <span class="kw">in</span> lst</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Filter (list)</td>
+        <td><pre><code>list.<span class="fn">stream</span>()
+    .<span class="fn">filter</span>(x <span class="op">-&gt;</span> x <span class="op">&gt;</span> <span class="num">0</span>)
+    .<span class="fn">collect</span>(<span class="cls">Collectors</span>.<span class="fn">toList</span>())</code></pre></td>
+        <td><pre><code>[x <span class="kw">for</span> x <span class="kw">in</span> lst <span class="kw">if</span> x <span class="op">&gt;</span> <span class="num">0</span>]</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Map / transform</td>
+        <td><pre><code>list.<span class="fn">stream</span>()
+    .<span class="fn">map</span>(x <span class="op">-&gt;</span> x <span class="op">*</span> <span class="num">2</span>)
+    .<span class="fn">collect</span>(<span class="cls">Collectors</span>.<span class="fn">toList</span>())</code></pre></td>
+        <td><pre><code>[x <span class="op">*</span> <span class="num">2</span> <span class="kw">for</span> x <span class="kw">in</span> lst]</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Dict create</td>
+        <td><pre><code><span class="cls">Map</span>&lt;<span class="cls">String</span>,<span class="cls">Integer</span>&gt; d <span class="op">=</span> <span class="kw">new</span> <span class="cls">HashMap</span>&lt;&gt;();
+d.<span class="fn">put</span>(<span class="str">"a"</span>, <span class="num">1</span>);</code></pre></td>
+        <td><pre><code>d <span class="op">=</span> {<span class="str">"a"</span>: <span class="num">1</span>, <span class="str">"b"</span>: <span class="num">2</span>}</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Dict get / safe get</td>
+        <td><pre><code>d.<span class="fn">get</span>(<span class="str">"key"</span>)            <span class="cmt">// null if missing</span>
+d.<span class="fn">getOrDefault</span>(<span class="str">"k"</span>, <span class="num">0</span>)  <span class="cmt">// default</span></code></pre></td>
+        <td><pre><code>d[<span class="str">"key"</span>]         <span class="cmt"># KeyError if missing</span>
+d.<span class="fn">get</span>(<span class="str">"k"</span>, <span class="num">0</span>)    <span class="cmt"># default 0</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Dict iterate</td>
+        <td><pre><code><span class="kw">for</span> (<span class="cls">Map</span>.<span class="cls">Entry</span>&lt;<span class="cls">String</span>,<span class="cls">Integer</span>&gt; e
+        : d.<span class="fn">entrySet</span>()) {
+    e.<span class="fn">getKey</span>(); e.<span class="fn">getValue</span>();
+}</code></pre></td>
+        <td><pre><code><span class="kw">for</span> k, v <span class="kw">in</span> d.<span class="fn">items</span>():
+    <span class="fn">print</span>(k, v)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Set</td>
+        <td><pre><code><span class="cls">Set</span>&lt;<span class="cls">String</span>&gt; s <span class="op">=</span> <span class="kw">new</span> <span class="cls">HashSet</span>&lt;&gt;();
+s.<span class="fn">add</span>(<span class="str">"x"</span>); s.<span class="fn">contains</span>(<span class="str">"x"</span>);</code></pre></td>
+        <td><pre><code>s <span class="op">=</span> {<span class="str">"a"</span>, <span class="str">"b"</span>}  <span class="cmt"># or set()</span>
+s.<span class="fn">add</span>(<span class="str">"x"</span>);  <span class="str">"x"</span> <span class="kw">in</span> s</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Tuple</td>
+        <td><pre><code><span class="cmt">// Use record or array</span>
+<span class="kw">var</span> pair <span class="op">=</span> <span class="cls">Map</span>.<span class="fn">entry</span>(<span class="str">"a"</span>, <span class="num">1</span>);</code></pre></td>
+        <td><pre><code>pair <span class="op">=</span> (<span class="str">"a"</span>, <span class="num">1</span>)  <span class="cmt"># immutable</span>
+x, y <span class="op">=</span> pair    <span class="cmt"># unpack</span></code></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════ SECTION 6 ═══════════════════════════════ -->
+<section class="section" id="s6">
+  <div class="section-title">6 · Error Handling</div>
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th class="col-concept">Concept</th>
+        <th class="col-java">Java</th>
+        <th class="col-python">Python</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="concept">Try / catch</td>
+        <td><pre><code><span class="kw">try</span> {
+    <span class="fn">riskyOp</span>();
+} <span class="kw">catch</span> (<span class="cls">IOException</span> e) {
+    <span class="cls">System</span>.err.<span class="fn">println</span>(e.<span class="fn">getMessage</span>());
+}</code></pre></td>
+        <td><pre><code><span class="kw">try</span>:
+    <span class="fn">risky_op</span>()
+<span class="kw">except</span> <span class="cls">IOError</span> <span class="kw">as</span> e:
+    <span class="fn">print</span>(e)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Multiple catches</td>
+        <td><pre><code>} <span class="kw">catch</span> (<span class="cls">IOException</span> <span class="op">|</span> <span class="cls">SQLException</span> e) {
+    <span class="cmt">// handle</span>
+}</code></pre></td>
+        <td><pre><code><span class="kw">except</span> (<span class="cls">IOError</span>, <span class="cls">ValueError</span>) <span class="kw">as</span> e:
+    <span class="fn">print</span>(e)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Finally</td>
+        <td><pre><code>} <span class="kw">finally</span> {
+    conn.<span class="fn">close</span>();
+}</code></pre></td>
+        <td><pre><code><span class="kw">finally</span>:
+    conn.<span class="fn">close</span>()</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">else (no exception)</td>
+        <td><pre><code><span class="cmt">// No equivalent</span></code></pre></td>
+        <td><pre><code><span class="kw">try</span>:
+    <span class="fn">op</span>()
+<span class="kw">except</span> <span class="cls">Error</span>: ...
+<span class="kw">else</span>:
+    <span class="cmt"># runs only if no exception</span>
+    <span class="fn">success</span>()</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Raise / throw</td>
+        <td><pre><code><span class="kw">throw new</span> <span class="cls">IllegalArgumentException</span>(<span class="str">"bad"</span>);</code></pre></td>
+        <td><pre><code><span class="kw">raise</span> <span class="cls">ValueError</span>(<span class="str">"bad"</span>)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Rethrow</td>
+        <td><pre><code>} <span class="kw">catch</span> (<span class="cls">Exception</span> e) {
+    <span class="kw">throw new</span> <span class="cls">RuntimeException</span>(e);
+}</code></pre></td>
+        <td><pre><code><span class="kw">except</span> <span class="cls">Exception</span> <span class="kw">as</span> e:
+    <span class="kw">raise</span> <span class="cls">RuntimeError</span>() <span class="kw">from</span> e</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Custom exception</td>
+        <td><pre><code><span class="kw">public class</span> <span class="cls">AppException</span>
+        <span class="kw">extends</span> <span class="cls">RuntimeException</span> {
+    <span class="kw">public</span> <span class="cls">AppException</span>(<span class="cls">String</span> msg) {
+        <span class="kw">super</span>(msg);
+    }
+}</code></pre></td>
+        <td><pre><code><span class="kw">class</span> <span class="cls">AppException</span>(<span class="cls">Exception</span>):
+    <span class="kw">pass</span>
+
+<span class="kw">raise</span> <span class="cls">AppException</span>(<span class="str">"oops"</span>)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Checked exceptions</td>
+        <td><pre><code><span class="kw">public void</span> <span class="fn">read</span>() <span class="kw">throws</span> <span class="cls">IOException</span> {
+    <span class="cmt">// caller must handle</span>
+}</code></pre></td>
+        <td><pre><code><span class="cmt"># No checked exceptions in Python</span>
+<span class="cmt"># All exceptions are unchecked</span></code></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════ SECTION 7 ═══════════════════════════════ -->
+<section class="section" id="s7">
+  <div class="section-title">7 · File I/O</div>
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th class="col-concept">Concept</th>
+        <th class="col-java">Java</th>
+        <th class="col-python">Python</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="concept">Read whole file</td>
+        <td><pre><code><span class="cls">String</span> text <span class="op">=</span> <span class="cls">Files</span>.<span class="fn">readString</span>(
+    <span class="cls">Path</span>.<span class="fn">of</span>(<span class="str">"file.txt"</span>));</code></pre></td>
+        <td><pre><code>text <span class="op">=</span> <span class="fn">open</span>(<span class="str">"file.txt"</span>).<span class="fn">read</span>()</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Write file</td>
+        <td><pre><code><span class="cls">Files</span>.<span class="fn">writeString</span>(
+    <span class="cls">Path</span>.<span class="fn">of</span>(<span class="str">"out.txt"</span>), text);</code></pre></td>
+        <td><pre><code><span class="fn">open</span>(<span class="str">"out.txt"</span>, <span class="str">"w"</span>).<span class="fn">write</span>(text)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Read lines</td>
+        <td><pre><code><span class="cls">List</span>&lt;<span class="cls">String</span>&gt; lines <span class="op">=</span>
+    <span class="cls">Files</span>.<span class="fn">readAllLines</span>(<span class="cls">Path</span>.<span class="fn">of</span>(<span class="str">"f"</span>));</code></pre></td>
+        <td><pre><code>lines <span class="op">=</span> <span class="fn">open</span>(<span class="str">"f"</span>).<span class="fn">readlines</span>()
+<span class="cmt"># or: list(open("f"))</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Safe close (context)</td>
+        <td><pre><code><span class="kw">try</span> (<span class="cls">BufferedReader</span> br <span class="op">=</span>
+        <span class="kw">new</span> <span class="cls">BufferedReader</span>(
+            <span class="kw">new</span> <span class="cls">FileReader</span>(<span class="str">"f"</span>))) {
+    <span class="cls">String</span> line <span class="op">=</span> br.<span class="fn">readLine</span>();
+}
+<span class="cmt">// try-with-resources: auto-closes</span></code></pre></td>
+        <td><pre><code><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"f"</span>) <span class="kw">as</span> fh:
+    line <span class="op">=</span> fh.<span class="fn">readline</span>()
+<span class="cmt"># auto-closes on exit</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Append to file</td>
+        <td><pre><code><span class="cls">Files</span>.<span class="fn">writeString</span>(path, text,
+    <span class="cls">StandardOpenOption</span>.APPEND);</code></pre></td>
+        <td><pre><code><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"f"</span>, <span class="str">"a"</span>) <span class="kw">as</span> fh:
+    fh.<span class="fn">write</span>(text)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Path operations</td>
+        <td><pre><code><span class="cls">Path</span> p <span class="op">=</span> <span class="cls">Path</span>.<span class="fn">of</span>(<span class="str">"dir"</span>, <span class="str">"sub"</span>, <span class="str">"f.txt"</span>);
+p.<span class="fn">getParent</span>(); p.<span class="fn">getFileName</span>();</code></pre></td>
+        <td><pre><code><span class="kw">from</span> pathlib <span class="kw">import</span> <span class="cls">Path</span>
+p <span class="op">=</span> <span class="cls">Path</span>(<span class="str">"dir"</span>) <span class="op">/</span> <span class="str">"sub"</span> <span class="op">/</span> <span class="str">"f.txt"</span>
+p.parent;  p.name</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Check exists</td>
+        <td><pre><code><span class="cls">Files</span>.<span class="fn">exists</span>(<span class="cls">Path</span>.<span class="fn">of</span>(<span class="str">"f"</span>))</code></pre></td>
+        <td><pre><code><span class="cls">Path</span>(<span class="str">"f"</span>).<span class="fn">exists</span>()  <span class="cmt"># or os.path.exists</span></code></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════ SECTION 8 ═══════════════════════════════ -->
+<section class="section" id="s8">
+  <div class="section-title">8 · Functional / Streams</div>
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th class="col-concept">Concept</th>
+        <th class="col-java">Java</th>
+        <th class="col-python">Python</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="concept">Filter</td>
+        <td><pre><code>stream.<span class="fn">filter</span>(x <span class="op">-&gt;</span> x <span class="op">&gt;</span> <span class="num">0</span>)</code></pre></td>
+        <td><pre><code><span class="fn">filter</span>(<span class="kw">lambda</span> x: x <span class="op">&gt;</span> <span class="num">0</span>, lst)
+<span class="cmt"># or: [x for x in lst if x > 0]</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Map</td>
+        <td><pre><code>stream.<span class="fn">map</span>(x <span class="op">-&gt;</span> x <span class="op">*</span> <span class="num">2</span>)</code></pre></td>
+        <td><pre><code><span class="fn">map</span>(<span class="kw">lambda</span> x: x <span class="op">*</span> <span class="num">2</span>, lst)
+<span class="cmt"># or: [x*2 for x in lst]</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Reduce</td>
+        <td><pre><code>stream.<span class="fn">reduce</span>(<span class="num">0</span>, <span class="cls">Integer</span><span class="op">::</span>sum)</code></pre></td>
+        <td><pre><code><span class="kw">import</span> functools, operator
+functools.<span class="fn">reduce</span>(operator.add, lst)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Collect to list</td>
+        <td><pre><code>stream.<span class="fn">collect</span>(<span class="cls">Collectors</span>.<span class="fn">toList</span>())
+<span class="cmt">// Java 16+: stream.toList()</span></code></pre></td>
+        <td><pre><code><span class="fn">list</span>(<span class="fn">map</span>(...))    <span class="cmt"># wrap in list()</span>
+<span class="cmt"># or just use list comp: [...]</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">List comprehension</td>
+        <td><pre><code><span class="cmt">// No native syntax — use stream</span></code></pre></td>
+        <td><pre><code>[x <span class="op">*</span> <span class="num">2</span> <span class="kw">for</span> x <span class="kw">in</span> lst <span class="kw">if</span> x <span class="op">&gt;</span> <span class="num">0</span>]</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Dict comprehension</td>
+        <td><pre><code><span class="cmt">// stream().collect(Collectors.toMap(...))</span></code></pre></td>
+        <td><pre><code>{k: v <span class="kw">for</span> k, v <span class="kw">in</span> items.<span class="fn">items</span>()}</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Generator / lazy</td>
+        <td><pre><code><span class="cmt">// Stream is lazy by default</span>
+<span class="cls">Stream</span>.<span class="fn">iterate</span>(<span class="num">0</span>, n <span class="op">-&gt;</span> n <span class="op">+</span> <span class="num">1</span>)</code></pre></td>
+        <td><pre><code>(x <span class="op">*</span> <span class="num">2</span> <span class="kw">for</span> x <span class="kw">in</span> lst)  <span class="cmt"># generator</span>
+
+<span class="kw">def</span> <span class="fn">counter</span>():
+    n <span class="op">=</span> <span class="num">0</span>
+    <span class="kw">while True</span>: <span class="kw">yield</span> n; n <span class="op">+=</span> <span class="num">1</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Method reference</td>
+        <td><pre><code><span class="cls">System</span>.out<span class="op">::</span>println  <span class="cmt">// instance ref</span>
+<span class="cls">Integer</span><span class="op">::</span>parseInt     <span class="cmt">// static ref</span></code></pre></td>
+        <td><pre><code>print              <span class="cmt"># functions are first-class</span>
+<span class="fn">map</span>(int, strings)  <span class="cmt"># int as callable</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Sorting with key</td>
+        <td><pre><code>list.<span class="fn">sort</span>(<span class="cls">Comparator</span>.<span class="fn">comparing</span>(<span class="cls">Dog</span><span class="op">::</span>getName));</code></pre></td>
+        <td><pre><code>dogs.<span class="fn">sort</span>(key<span class="op">=</span><span class="kw">lambda</span> d: d.name)
+<span class="kw">from</span> operator <span class="kw">import</span> attrgetter
+dogs.<span class="fn">sort</span>(key<span class="op">=</span><span class="fn">attrgetter</span>(<span class="str">"name"</span>))</code></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════ SECTION 9 ═══════════════════════════════ -->
+<section class="section" id="s9">
+  <div class="section-title">9 · Concurrency</div>
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th class="col-concept">Concept</th>
+        <th class="col-java">Java</th>
+        <th class="col-python">Python</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="concept">Start thread</td>
+        <td><pre><code><span class="kw">new</span> <span class="cls">Thread</span>(() <span class="op">-&gt;</span> {
+    <span class="fn">doWork</span>();
+}).<span class="fn">start</span>();</code></pre></td>
+        <td><pre><code><span class="kw">import</span> threading
+t <span class="op">=</span> threading.<span class="cls">Thread</span>(target<span class="op">=</span>do_work)
+t.<span class="fn">start</span>()</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Thread pool</td>
+        <td><pre><code><span class="cls">ExecutorService</span> pool <span class="op">=</span>
+    <span class="cls">Executors</span>.<span class="fn">newFixedThreadPool</span>(<span class="num">4</span>);
+pool.<span class="fn">submit</span>(() <span class="op">-&gt;</span> <span class="fn">task</span>());
+pool.<span class="fn">shutdown</span>();</code></pre></td>
+        <td><pre><code><span class="kw">from</span> concurrent.futures <span class="kw">import</span> ThreadPoolExecutor
+<span class="kw">with</span> <span class="cls">ThreadPoolExecutor</span>(max_workers<span class="op">=</span><span class="num">4</span>) <span class="kw">as</span> ex:
+    ex.<span class="fn">submit</span>(task)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Future / async result</td>
+        <td><pre><code><span class="cls">CompletableFuture</span>&lt;<span class="cls">String</span>&gt; f <span class="op">=</span>
+    <span class="cls">CompletableFuture</span>.<span class="fn">supplyAsync</span>(() <span class="op">-&gt;</span>
+        <span class="fn">fetchData</span>());
+f.<span class="fn">thenAccept</span>(<span class="cls">System</span>.out<span class="op">::</span>println);</code></pre></td>
+        <td><pre><code><span class="kw">import</span> asyncio
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    result <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch_data</span>()
+    <span class="fn">print</span>(result)
+
+asyncio.<span class="fn">run</span>(<span class="fn">main</span>())</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Async tasks (parallel)</td>
+        <td><pre><code><span class="cls">List</span>&lt;<span class="cls">CompletableFuture</span>&gt; futures <span class="op">=</span>
+    urls.<span class="fn">stream</span>()
+        .<span class="fn">map</span>(url <span class="op">-&gt;</span> <span class="cls">CompletableFuture</span>.<span class="fn">supplyAsync</span>(...))
+        .<span class="fn">toList</span>();
+<span class="cls">CompletableFuture</span>.<span class="fn">allOf</span>(...).<span class="fn">join</span>();</code></pre></td>
+        <td><pre><code>tasks <span class="op">=</span> [asyncio.<span class="fn">create_task</span>(<span class="fn">fetch</span>(u))
+         <span class="kw">for</span> u <span class="kw">in</span> urls]
+results <span class="op">=</span> <span class="kw">await</span> asyncio.<span class="fn">gather</span>(<span class="op">*</span>tasks)</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Lock / mutex</td>
+        <td><pre><code><span class="kw">synchronized</span>(<span class="kw">this</span>) {
+    counter<span class="op">++</span>;
+}
+<span class="cmt">// or: ReentrantLock</span></code></pre></td>
+        <td><pre><code>lock <span class="op">=</span> threading.<span class="cls">Lock</span>()
+<span class="kw">with</span> lock:
+    counter <span class="op">+=</span> <span class="num">1</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Atomic operations</td>
+        <td><pre><code><span class="cls">AtomicInteger</span> c <span class="op">=</span> <span class="kw">new</span> <span class="cls">AtomicInteger</span>(<span class="num">0</span>);
+c.<span class="fn">incrementAndGet</span>();</code></pre></td>
+        <td><pre><code><span class="cmt"># Use threading.Lock for atomicity</span>
+<span class="cmt"># or queue.Queue for thread-safe comms</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">GIL note</td>
+        <td><pre><code><span class="cmt">// No GIL — true CPU parallelism</span>
+<span class="cmt">// with threads</span></code></pre></td>
+        <td><pre><code><span class="cmt"># GIL limits CPU-bound threads</span>
+<span class="cmt"># Use multiprocessing for CPU work:</span>
+<span class="kw">from</span> multiprocessing <span class="kw">import</span> Pool</code></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════ SECTION 10 ═══════════════════════════════ -->
+<section class="section" id="s10">
+  <div class="section-title">10 · Testing</div>
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th class="col-concept">Concept</th>
+        <th class="col-java">Java</th>
+        <th class="col-python">Python</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="concept">Framework</td>
+        <td><pre><code><span class="cmt">// JUnit 5 (Jupiter)</span>
+<span class="kw">import</span> org.junit.jupiter.api.<span class="op">*</span>;</code></pre></td>
+        <td><pre><code><span class="cmt"># pytest (recommended)</span>
+<span class="cmt"># pip install pytest</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Test method</td>
+        <td><pre><code><span class="ann">@Test</span>
+<span class="kw">void</span> <span class="fn">testAdd</span>() {
+    <span class="fn">assertEquals</span>(<span class="num">5</span>, <span class="fn">add</span>(<span class="num">2</span>, <span class="num">3</span>));
+}</code></pre></td>
+        <td><pre><code><span class="kw">def</span> <span class="fn">test_add</span>():
+    <span class="kw">assert</span> <span class="fn">add</span>(<span class="num">2</span>, <span class="num">3</span>) <span class="op">==</span> <span class="num">5</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Assertions</td>
+        <td><pre><code><span class="fn">assertEquals</span>(expected, actual);
+<span class="fn">assertTrue</span>(condition);
+<span class="fn">assertNotNull</span>(obj);
+<span class="fn">assertThrows</span>(<span class="cls">Ex</span>.<span class="kw">class</span>, () <span class="op">-&gt;</span> <span class="fn">op</span>());</code></pre></td>
+        <td><pre><code><span class="kw">assert</span> actual <span class="op">==</span> expected
+<span class="kw">assert</span> condition
+<span class="kw">assert</span> obj <span class="kw">is not None</span>
+<span class="kw">with</span> pytest.<span class="fn">raises</span>(<span class="cls">ValueError</span>): <span class="fn">op</span>()</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Setup / teardown</td>
+        <td><pre><code><span class="ann">@BeforeEach</span>
+<span class="kw">void</span> <span class="fn">setUp</span>() { db.<span class="fn">connect</span>(); }
+
+<span class="ann">@AfterEach</span>
+<span class="kw">void</span> <span class="fn">tearDown</span>() { db.<span class="fn">close</span>(); }</code></pre></td>
+        <td><pre><code><span class="kw">def</span> <span class="fn">setup_method</span>(<span class="kw">self</span>):
+    db.<span class="fn">connect</span>()
+
+<span class="kw">def</span> <span class="fn">teardown_method</span>(<span class="kw">self</span>):
+    db.<span class="fn">close</span>()</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Mocking</td>
+        <td><pre><code><span class="cmt">// Mockito</span>
+<span class="cls">Service</span> mock <span class="op">=</span> <span class="cls">Mockito</span>.<span class="fn">mock</span>(<span class="cls">Service</span>.<span class="kw">class</span>);
+<span class="cls">Mockito</span>.<span class="fn">when</span>(mock.<span class="fn">get</span>()).<span class="fn">thenReturn</span>(<span class="str">"x"</span>);</code></pre></td>
+        <td><pre><code><span class="kw">from</span> unittest.mock <span class="kw">import</span> MagicMock, patch
+
+mock <span class="op">=</span> <span class="cls">MagicMock</span>()
+mock.<span class="fn">get</span>.<span class="fn">return_value</span> <span class="op">=</span> <span class="str">"x"</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Patch / spy</td>
+        <td><pre><code><span class="ann">@Spy</span> <span class="cls">MyService</span> svc;
+<span class="cls">Mockito</span>.<span class="fn">doReturn</span>(<span class="str">"x"</span>).<span class="fn">when</span>(svc).<span class="fn">get</span>();</code></pre></td>
+        <td><pre><code><span class="kw">with</span> patch(<span class="str">"module.func"</span>) <span class="kw">as</span> m:
+    m.<span class="fn">return_value</span> <span class="op">=</span> <span class="str">"x"</span>
+    <span class="fn">test_code</span>()</code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Parametrized tests</td>
+        <td><pre><code><span class="ann">@ParameterizedTest</span>
+<span class="ann">@ValueSource</span>(ints <span class="op">=</span> {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>})
+<span class="kw">void</span> <span class="fn">testPositive</span>(<span class="kw">int</span> n) {
+    <span class="fn">assertTrue</span>(n <span class="op">&gt;</span> <span class="num">0</span>);
+}</code></pre></td>
+        <td><pre><code><span class="ann">@pytest.mark.parametrize</span>(<span class="str">"n"</span>, [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>])
+<span class="kw">def</span> <span class="fn">test_positive</span>(n):
+    <span class="kw">assert</span> n <span class="op">&gt;</span> <span class="num">0</span></code></pre></td>
+      </tr>
+      <tr>
+        <td class="concept">Run tests</td>
+        <td><pre><code><span class="cmt">// mvn test  (Maven)</span>
+<span class="cmt">// gradle test  (Gradle)</span></code></pre></td>
+        <td><pre><code><span class="cmt"># pytest              (all tests)</span>
+<span class="cmt"># pytest tests/foo.py  (single file)</span>
+<span class="cmt"># pytest -k "test_add" (by name)</span></code></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════ SECTION 11 ═══════════════════════════════ -->
+<section class="section" id="s11">
+  <div class="section-title">11 · Key Differences Summary</div>
+  <table class="summary-table">
+    <thead>
+      <tr>
+        <th>Topic</th>
+        <th>Java <span class="badge badge-java">JVM</span></th>
+        <th>Python <span class="badge badge-python">CPython</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Typing</td>
+        <td>Static, explicit — all types declared at compile time</td>
+        <td>Dynamic — type determined at runtime; optional type hints via <code>typing</code></td>
+      </tr>
+      <tr>
+        <td>Execution</td>
+        <td>Compiled to bytecode → run on JVM (JIT-compiled)</td>
+        <td>Interpreted by CPython; PyPy offers JIT compilation</td>
+      </tr>
+      <tr>
+        <td>Null safety</td>
+        <td><code>NullPointerException</code> common; Java 17+ sealed types help; use <code>Optional&lt;T&gt;</code></td>
+        <td><code>None</code> is just an object; no NPE but <code>AttributeError</code> on <code>None.attr</code></td>
+      </tr>
+      <tr>
+        <td>Syntax delimiters</td>
+        <td>Curly braces <code>{ }</code> delimit blocks; semicolons <code>;</code> end statements</td>
+        <td>Indentation defines blocks; no semicolons needed</td>
+      </tr>
+      <tr>
+        <td>Memory management</td>
+        <td>Garbage collected (G1GC / ZGC); no reference counting</td>
+        <td>Reference counting + cyclic GC; <code>del</code> to hint at release</td>
+      </tr>
+      <tr>
+        <td>Performance</td>
+        <td>Generally faster due to JIT; warm-up cost on first run</td>
+        <td>Slower for pure-Python; NumPy/C extensions reach near-native speed</td>
+      </tr>
+      <tr>
+        <td>Concurrency</td>
+        <td>True multi-threading; OS-level threads with no GIL</td>
+        <td>GIL prevents true CPU parallelism with threads; use <code>multiprocessing</code> for CPU-bound work</td>
+      </tr>
+      <tr>
+        <td>Async model</td>
+        <td><code>CompletableFuture</code>, Project Loom (virtual threads, Java 21+)</td>
+        <td><code>asyncio</code> with <code>async/await</code>; single-threaded cooperative multitasking</td>
+      </tr>
+      <tr>
+        <td>Package manager</td>
+        <td>Maven (<code>pom.xml</code>) or Gradle (<code>build.gradle</code>)</td>
+        <td>pip + <code>requirements.txt</code>; poetry, uv for modern dependency management</td>
+      </tr>
+      <tr>
+        <td>Program entry point</td>
+        <td><code>public static void main(String[] args)</code></td>
+        <td><code>if __name__ == "__main__":</code></td>
+      </tr>
+      <tr>
+        <td>String interpolation</td>
+        <td><code>String.format("%s=%d", k, v)</code> or text blocks <code>"""..."""</code></td>
+        <td>f-strings: <code>f"{k}={v}"</code> (Python 3.6+)</td>
+      </tr>
+      <tr>
+        <td>Interfaces vs Protocols</td>
+        <td>Nominal typing — must explicitly <code>implement</code> an interface</td>
+        <td>Structural typing (duck typing) — just have the methods; <code>Protocol</code> for static checking</td>
+      </tr>
+      <tr>
+        <td>Generics</td>
+        <td><code>List&lt;T&gt;</code> — compile-time type safety (type erasure at runtime)</td>
+        <td><code>list[T]</code> / <code>List[T]</code> — type hints only, not enforced at runtime</td>
+      </tr>
+      <tr>
+        <td>Visibility</td>
+        <td><code>public</code>, <code>protected</code>, <code>private</code>, package-private — enforced by compiler</td>
+        <td>Convention only: <code>_private</code>, <code>__mangled</code>; no hard enforcement</td>
+      </tr>
+      <tr>
+        <td>Ecosystem strengths</td>
+        <td>Enterprise backends, Android, Spring Boot, microservices</td>
+        <td>Data science (NumPy/Pandas), ML (PyTorch/TensorFlow), scripting, web (Django/FastAPI)</td>
+      </tr>
+      <tr>
+        <td>REPL / interactive</td>
+        <td>JShell (Java 9+), limited use in practice</td>
+        <td>Python REPL, IPython, Jupyter Notebooks — first-class interactive experience</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<!-- ═══════════════════════════════ FOOTER ═══════════════════════════════ -->
+<footer style="text-align:center; padding: 24px; color: #555; font-size: 11px; border-top: 1px solid #2a2a4a; margin-top: 20px;">
+  Java <span style="color:#f89820">▪</span> vs <span style="color:#4584b6">▪</span> Python — Side-by-Side Cheat Sheet
+  &nbsp;|&nbsp; Covers Java 17–21 &amp; Python 3.10+
+</footer>
+
+</body>
+</html>

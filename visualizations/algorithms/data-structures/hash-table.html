@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hash Table Visualization</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #1a1a2e;
+    color: #eee;
+    font-family: system-ui, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  a.back-link {
+    color: #e94560;
+    text-decoration: none;
+    font-size: 14px;
+    display: inline-block;
+    margin-bottom: 16px;
+  }
+  a.back-link:hover { text-decoration: underline; }
+
+  h1 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 6px;
+    color: #eee;
+  }
+  .subtitle {
+    text-align: center;
+    color: #aaa;
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  .hash-formula {
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: 10px 16px;
+    text-align: center;
+    font-family: monospace;
+    font-size: 15px;
+    margin-bottom: 20px;
+    color: #7ecfff;
+  }
+
+  .main-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* Left column: controls */
+  .controls-panel {
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 12px;
+    padding: 20px;
+    width: 300px;
+    flex-shrink: 0;
+  }
+
+  .controls-panel h2 {
+    font-size: 1rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .input-group label {
+    font-size: 13px;
+    color: #aaa;
+  }
+
+  .input-group input {
+    background: #0f3460;
+    border: 1px solid #e94560;
+    border-radius: 6px;
+    color: #eee;
+    padding: 8px 10px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-group input:focus { border-color: #7ecfff; }
+
+  .btn-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  button {
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 9px 14px;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  button:hover { opacity: 0.85; }
+  button:active { transform: scale(0.97); }
+
+  .btn-insert { background: #e94560; color: #fff; }
+  .btn-lookup { background: #0f3460; color: #7ecfff; border: 1px solid #7ecfff; }
+  .btn-delete { background: #333; color: #ff8080; border: 1px solid #ff8080; }
+  .btn-clear  { background: #222; color: #888; border: 1px solid #555; font-size: 12px; margin-top: 4px; }
+
+  /* Hash step visualization */
+  .hash-step-box {
+    background: #0f1a2e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: 12px;
+    min-height: 60px;
+    font-family: monospace;
+    font-size: 13px;
+    color: #7ecfff;
+    white-space: pre-line;
+    margin-bottom: 14px;
+  }
+
+  /* Stats */
+  .stats-box {
+    background: #0f1a2e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 13px;
+  }
+  .stats-box .stat-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    border-bottom: 1px solid #1a2a4a;
+  }
+  .stats-box .stat-line:last-child { border-bottom: none; }
+  .stat-label { color: #aaa; }
+  .stat-value { color: #e94560; font-weight: 700; }
+
+  /* Middle: animation strip */
+  .anim-panel {
+    width: 90px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 24px;
+    position: relative;
+  }
+
+  #flying-kv {
+    display: none;
+    background: #e94560;
+    color: #fff;
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: 12px;
+    font-weight: 700;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    z-index: 10;
+    transition: top 0.5s cubic-bezier(.4,1.3,.6,1);
+  }
+
+  /* Right column: table */
+  .table-panel {
+    flex: 1;
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .table-panel h2 {
+    font-size: 1rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+
+  .bucket-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .bucket-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bucket-index {
+    width: 28px;
+    text-align: right;
+    font-family: monospace;
+    font-size: 13px;
+    color: #7ecfff;
+    flex-shrink: 0;
+  }
+
+  .bucket-slot {
+    flex: 1;
+    min-height: 42px;
+    border-radius: 8px;
+    border: 2px solid #0f3460;
+    padding: 5px 10px;
+    background: #0f1a2e;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+    position: relative;
+  }
+
+  .bucket-slot.empty {
+    border-color: #0f3460;
+    background: #0f1a2e;
+  }
+
+  .bucket-slot.one-item {
+    border-color: #2a7fff;
+    background: #0d2248;
+  }
+
+  .bucket-slot.collision {
+    border-color: #e94560;
+    background: #2a1020;
+  }
+
+  .bucket-slot.highlight {
+    box-shadow: 0 0 0 3px #ffdd57, 0 0 16px #ffdd5755;
+    border-color: #ffdd57;
+  }
+
+  .bucket-slot.found {
+    box-shadow: 0 0 0 3px #4caf50, 0 0 16px #4caf5055;
+    border-color: #4caf50;
+  }
+
+  .bucket-slot.not-found {
+    box-shadow: 0 0 0 3px #ff5252, 0 0 16px #ff525255;
+    border-color: #ff5252;
+  }
+
+  .kv-chip {
+    background: #1e3a5f;
+    border: 1px solid #2a7fff;
+    border-radius: 5px;
+    padding: 3px 8px;
+    font-size: 12px;
+    font-family: monospace;
+    color: #eee;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    animation: chipIn 0.35s cubic-bezier(.4,1.3,.6,1);
+    position: relative;
+  }
+
+  .kv-chip.collision-chip {
+    border-color: #e94560;
+    background: #3a1020;
+  }
+
+  .kv-chip .delete-chip {
+    margin-left: 4px;
+    cursor: pointer;
+    color: #e94560;
+    font-weight: 900;
+    font-size: 13px;
+    line-height: 1;
+  }
+  .kv-chip .delete-chip:hover { color: #ff8080; }
+
+  .chain-arrow {
+    color: #e94560;
+    font-size: 16px;
+    font-weight: 900;
+  }
+
+  @keyframes chipIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+
+  .collision-badge {
+    font-size: 10px;
+    background: #e94560;
+    color: #fff;
+    border-radius: 4px;
+    padding: 1px 5px;
+    margin-left: 4px;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    font-size: 12px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 3px;
+  }
+
+  /* Message bar */
+  #msg-bar {
+    max-width: 1100px;
+    margin: 14px auto 0;
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    min-height: 40px;
+    color: #eee;
+    transition: color 0.2s;
+  }
+  #msg-bar.success { color: #4caf50; }
+  #msg-bar.error   { color: #ff5252; }
+  #msg-bar.info    { color: #ffdd57; }
+
+  @media (max-width: 700px) {
+    .main-layout { flex-direction: column; }
+    .controls-panel { width: 100%; }
+    .anim-panel { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<a class="back-link" href="../../README.md">← Back to Index</a>
+
+<h1>Hash Table</h1>
+<p class="subtitle">Interactive visualization with chaining collision resolution</p>
+
+<div class="hash-formula">h(key) = charCodeSum(key) % tableSize &nbsp;|&nbsp; tableSize = 10</div>
+
+<div class="main-layout">
+
+  <!-- Controls -->
+  <div class="controls-panel">
+    <h2>Operations</h2>
+
+    <div class="input-group">
+      <label for="inp-key">Key</label>
+      <input id="inp-key" type="text" placeholder="e.g. name" maxlength="20">
+    </div>
+    <div class="input-group">
+      <label for="inp-val">Value</label>
+      <input id="inp-val" type="text" placeholder="e.g. Alice" maxlength="30">
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-insert" onclick="doInsert()">Insert</button>
+      <button class="btn-lookup" onclick="doLookup()">Lookup</button>
+      <button class="btn-delete" onclick="doDelete()">Delete</button>
+      <button class="btn-clear"  onclick="doClear()">Clear Table</button>
+    </div>
+
+    <div class="hash-step-box" id="hash-step">Type a key and click Insert to see the hash function at work.</div>
+
+    <div class="stats-box">
+      <div class="stat-line">
+        <span class="stat-label">Items stored</span>
+        <span class="stat-value" id="stat-items">0</span>
+      </div>
+      <div class="stat-line">
+        <span class="stat-label">Buckets used</span>
+        <span class="stat-value" id="stat-buckets">0 / 10</span>
+      </div>
+      <div class="stat-line">
+        <span class="stat-label">Load factor</span>
+        <span class="stat-value" id="stat-load">0/10 = 0.00</span>
+      </div>
+      <div class="stat-line">
+        <span class="stat-label">Collisions</span>
+        <span class="stat-value" id="stat-collisions">0</span>
+      </div>
+    </div>
+
+    <div class="legend" style="margin-top:14px;">
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#0f1a2e;border:2px solid #0f3460;"></div>
+        <span style="color:#aaa">Empty</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#0d2248;border:2px solid #2a7fff;"></div>
+        <span style="color:#7ecfff">1 item</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#2a1020;border:2px solid #e94560;"></div>
+        <span style="color:#e94560">Collision!</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Animation strip -->
+  <div class="anim-panel" id="anim-panel">
+    <div id="flying-kv"></div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-panel">
+    <h2>Hash Table (10 Buckets)</h2>
+    <div class="bucket-list" id="bucket-list"></div>
+  </div>
+
+</div>
+
+<div id="msg-bar">Ready. Enter a key/value pair and click Insert.</div>
+
+<script>
+// ─── State ──────────────────────────────────────────────────────────────────
+const TABLE_SIZE = 10;
+// table[i] = array of {key, value} objects (chaining)
+let table = Array.from({length: TABLE_SIZE}, () => []);
+let totalItems = 0;
+let totalCollisions = 0;
+
+// ─── Hash function ───────────────────────────────────────────────────────────
+function hashKey(key) {
+  let sum = 0;
+  for (let i = 0; i < key.length; i++) sum += key.charCodeAt(i);
+  return sum % TABLE_SIZE;
+}
+
+function hashSteps(key) {
+  if (!key) return 'Enter a key to see the hash computation.';
+  const codes = key.split('').map(c => `'${c}'=${c.charCodeAt(0)}`);
+  const sum = key.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  const idx = sum % TABLE_SIZE;
+  return `hash("${key}")\n= charCodeSum("${key}")\n= ${codes.join(' + ')}\n= ${sum}\n= ${sum} % ${TABLE_SIZE}\n= ${idx}`;
+}
+
+// ─── DOM helpers ─────────────────────────────────────────────────────────────
+function msg(text, type = '') {
+  const el = document.getElementById('msg-bar');
+  el.textContent = text;
+  el.className = type;
+}
+
+function getBucketEl(i) {
+  return document.querySelector(`[data-bucket="${i}"]`);
+}
+
+function renderTable() {
+  const list = document.getElementById('bucket-list');
+  list.innerHTML = '';
+  for (let i = 0; i < TABLE_SIZE; i++) {
+    const row = document.createElement('div');
+    row.className = 'bucket-row';
+
+    const idx = document.createElement('div');
+    idx.className = 'bucket-index';
+    idx.textContent = i;
+
+    const slot = document.createElement('div');
+    slot.dataset.bucket = i;
+    const len = table[i].length;
+    if (len === 0) slot.className = 'bucket-slot empty';
+    else if (len === 1) slot.className = 'bucket-slot one-item';
+    else slot.className = 'bucket-slot collision';
+
+    table[i].forEach((kv, j) => {
+      if (j > 0) {
+        const arrow = document.createElement('span');
+        arrow.className = 'chain-arrow';
+        arrow.textContent = '→';
+        slot.appendChild(arrow);
+      }
+      const chip = document.createElement('div');
+      chip.className = j === 0 ? 'kv-chip' : 'kv-chip collision-chip';
+      chip.innerHTML = `<span>"${kv.key}": "${kv.value}"</span><span class="delete-chip" onclick="removeChip(${i},${j})" title="Remove">✕</span>`;
+      slot.appendChild(chip);
+    });
+
+    if (len >= 2) {
+      const badge = document.createElement('span');
+      badge.className = 'collision-badge';
+      badge.textContent = 'CHAIN';
+      slot.appendChild(badge);
+    }
+
+    row.appendChild(idx);
+    row.appendChild(slot);
+    list.appendChild(row);
+  }
+  updateStats();
+}
+
+function updateStats() {
+  const items = table.reduce((a, b) => a + b.length, 0);
+  const bucketsUsed = table.filter(b => b.length > 0).length;
+  const lf = (items / TABLE_SIZE).toFixed(2);
+  document.getElementById('stat-items').textContent = items;
+  document.getElementById('stat-buckets').textContent = `${bucketsUsed} / ${TABLE_SIZE}`;
+  document.getElementById('stat-load').textContent = `${items}/${TABLE_SIZE} = ${lf}`;
+  document.getElementById('stat-collisions').textContent = totalCollisions;
+}
+
+// ─── Highlight helpers ────────────────────────────────────────────────────────
+function highlightBucket(idx, cls, duration = 1200) {
+  const el = getBucketEl(idx);
+  if (!el) return;
+  const original = el.className;
+  el.classList.add(cls);
+  setTimeout(() => {
+    el.className = original;
+    renderTable(); // re-render to reset classes
+  }, duration);
+}
+
+async function animateInsert(idx) {
+  // flash the target bucket
+  return new Promise(resolve => {
+    const el = getBucketEl(idx);
+    if (!el) { resolve(); return; }
+    el.classList.add('highlight');
+    setTimeout(() => { resolve(); }, 600);
+  });
+}
+
+// ─── Operations ──────────────────────────────────────────────────────────────
+async function doInsert() {
+  const key = document.getElementById('inp-key').value.trim();
+  const val = document.getElementById('inp-val').value.trim();
+  if (!key) { msg('Please enter a key.', 'error'); return; }
+  if (!val) { msg('Please enter a value.', 'error'); return; }
+
+  const idx = hashKey(key);
+  document.getElementById('hash-step').textContent = hashSteps(key);
+
+  // Check for update vs insert
+  const existing = table[idx].findIndex(kv => kv.key === key);
+
+  // Animate: flash the bucket
+  renderTable();
+  const el = getBucketEl(idx);
+  if (el) {
+    el.classList.add('highlight');
+    await new Promise(r => setTimeout(r, 700));
+  }
+
+  if (existing !== -1) {
+    // Update
+    table[idx][existing].value = val;
+    msg(`Updated key "${key}" → "${val}" at bucket ${idx}.`, 'success');
+  } else {
+    // Insert
+    const wasCollision = table[idx].length > 0;
+    table[idx].push({key, val: val, value: val});
+    totalItems++;
+    if (wasCollision) {
+      totalCollisions++;
+      msg(`Collision! Bucket ${idx} already occupied. Key "${key}" chained (linked list node added).`, 'info');
+    } else {
+      msg(`Inserted "${key}" → "${val}" at bucket ${idx}.`, 'success');
+    }
+  }
+
+  renderTable();
+  // Re-highlight after re-render
+  const el2 = getBucketEl(idx);
+  if (el2) {
+    el2.classList.add('highlight');
+    setTimeout(() => renderTable(), 900);
+  }
+}
+
+async function doLookup() {
+  const key = document.getElementById('inp-key').value.trim();
+  if (!key) { msg('Please enter a key to look up.', 'error'); return; }
+
+  const idx = hashKey(key);
+  document.getElementById('hash-step').textContent = hashSteps(key);
+  renderTable();
+
+  msg(`Looking up "${key}"… computing hash → bucket ${idx}`, 'info');
+
+  // Highlight bucket
+  const el = getBucketEl(idx);
+  if (el) {
+    el.classList.add('highlight');
+    await new Promise(r => setTimeout(r, 700));
+    el.classList.remove('highlight');
+  }
+
+  const chain = table[idx];
+  if (chain.length === 0) {
+    msg(`Key "${key}" not found. Bucket ${idx} is empty.`, 'error');
+    const el2 = getBucketEl(idx);
+    if (el2) { el2.classList.add('not-found'); setTimeout(() => renderTable(), 1000); }
+    return;
+  }
+
+  // Traverse chain
+  for (let i = 0; i < chain.length; i++) {
+    await new Promise(r => setTimeout(r, 350));
+    if (chain[i].key === key) {
+      msg(`Found! "${key}" → "${chain[i].value}" at bucket ${idx}, chain position ${i}.`, 'success');
+      const el2 = getBucketEl(idx);
+      if (el2) { el2.classList.add('found'); setTimeout(() => renderTable(), 1200); }
+      return;
+    }
+  }
+
+  msg(`Key "${key}" not found. Bucket ${idx} has ${chain.length} item(s) but none match.`, 'error');
+  const el2 = getBucketEl(idx);
+  if (el2) { el2.classList.add('not-found'); setTimeout(() => renderTable(), 1000); }
+}
+
+async function doDelete() {
+  const key = document.getElementById('inp-key').value.trim();
+  if (!key) { msg('Please enter a key to delete.', 'error'); return; }
+
+  const idx = hashKey(key);
+  document.getElementById('hash-step').textContent = hashSteps(key);
+
+  const chain = table[idx];
+  const pos = chain.findIndex(kv => kv.key === key);
+
+  if (pos === -1) {
+    msg(`Key "${key}" not found. Cannot delete.`, 'error');
+    renderTable();
+    const el = getBucketEl(idx);
+    if (el) { el.classList.add('not-found'); setTimeout(() => renderTable(), 900); }
+    return;
+  }
+
+  chain.splice(pos, 1);
+  totalItems--;
+  msg(`Deleted key "${key}" from bucket ${idx}.`, 'success');
+  renderTable();
+  const el = getBucketEl(idx);
+  if (el) { el.classList.add('highlight'); setTimeout(() => renderTable(), 900); }
+}
+
+function removeChip(bucketIdx, chainPos) {
+  const kv = table[bucketIdx][chainPos];
+  table[bucketIdx].splice(chainPos, 1);
+  totalItems--;
+  msg(`Removed "${kv.key}" from bucket ${bucketIdx}.`, 'info');
+  renderTable();
+}
+
+function doClear() {
+  table = Array.from({length: TABLE_SIZE}, () => []);
+  totalItems = 0;
+  totalCollisions = 0;
+  document.getElementById('hash-step').textContent = 'Table cleared.';
+  msg('Hash table cleared.', 'info');
+  renderTable();
+}
+
+// Live hash preview as user types
+document.getElementById('inp-key').addEventListener('input', function() {
+  const k = this.value.trim();
+  document.getElementById('hash-step').textContent = k ? hashSteps(k) : 'Type a key to preview the hash.';
+});
+
+// Enter key support
+document.getElementById('inp-val').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doInsert();
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+renderTable();
+</script>
+</body>
+</html>

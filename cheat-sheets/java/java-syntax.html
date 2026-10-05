@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Syntax Reference</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; color: #e0e0e0; font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.6; }
+  header { background: #16213e; padding: 20px 30px; border-bottom: 2px solid #0f3460; display: flex; align-items: center; gap: 20px; }
+  header h1 { font-size: 1.8rem; color: #e94560; }
+  header span { color: #a0a0b0; font-size: 0.9rem; }
+  nav { background: #16213e; padding: 10px 30px; display: flex; gap: 10px; flex-wrap: wrap; border-bottom: 1px solid #0f3460; }
+  nav a { color: #a0c4ff; text-decoration: none; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; transition: all 0.2s; }
+  nav a:hover, nav a.active { background: #0f3460; color: #e94560; }
+  .container { max-width: 1400px; margin: 0 auto; padding: 20px 30px; }
+  .section { margin-bottom: 40px; }
+  .section-title { font-size: 1.4rem; color: #e94560; border-left: 4px solid #e94560; padding-left: 12px; margin-bottom: 20px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+  .card { background: #16213e; border: 1px solid #0f3460; border-radius: 10px; overflow: hidden; }
+  .card-header { background: #0f3460; padding: 10px 16px; font-weight: 600; color: #a0c4ff; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+  .card-header .tag { background: #e94560; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; }
+  .card-body { padding: 16px; }
+  pre { margin: 0; border-radius: 6px; font-size: 0.82rem; }
+  .desc { color: #a0b0c0; font-size: 0.85rem; margin-bottom: 10px; }
+  .tip { background: #0f3460; border-left: 3px solid #4caf50; padding: 8px 12px; border-radius: 0 6px 6px 0; margin-top: 10px; font-size: 0.82rem; color: #90ee90; }
+  .warn { background: #2a1a0e; border-left: 3px solid #ff9800; padding: 8px 12px; border-radius: 0 6px 6px 0; margin-top: 10px; font-size: 0.82rem; color: #ffd08a; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: bold; margin-left: 6px; }
+  .badge-new { background: #1b5e20; color: #a5d6a7; }
+  .badge-8 { background: #1a237e; color: #90caf9; }
+  .badge-11 { background: #4a148c; color: #ce93d8; }
+  .badge-17 { background: #b71c1c; color: #ef9a9a; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th { background: #0f3460; padding: 8px 12px; text-align: left; color: #a0c4ff; }
+  td { padding: 8px 12px; border-bottom: 1px solid #0f3460; }
+  tr:hover { background: #1e2a4a; }
+  .search-box { width: 100%; max-width: 400px; padding: 10px 16px; background: #16213e; border: 1px solid #0f3460; border-radius: 25px; color: #e0e0e0; font-size: 0.9rem; outline: none; }
+  .search-box:focus { border-color: #e94560; }
+  .back-link { color: #a0c4ff; text-decoration: none; font-size: 0.85rem; }
+  .back-link:hover { color: #e94560; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Java Syntax Reference</h1>
+    <span>Complete Java language syntax cheat sheet</span>
+  </div>
+  <input type="text" class="search-box" placeholder="Search syntax..." id="searchBox" oninput="filterCards()">
+</header>
+<nav>
+  <a href="#basics" class="active">Basics</a>
+  <a href="#oop">OOP</a>
+  <a href="#control">Control Flow</a>
+  <a href="#generics">Generics</a>
+  <a href="#exceptions">Exceptions</a>
+  <a href="#functional">Functional <span class="badge badge-8">8+</span></a>
+  <a href="#records">Records <span class="badge badge-17">17+</span></a>
+  <a href="../../README.md" class="back-link">← Back to Index</a>
+</nav>
+<div class="container">
+
+<section class="section" id="basics">
+  <h2 class="section-title">Variables &amp; Types</h2>
+  <div class="grid">
+    <div class="card" data-tags="variable primitive type">
+      <div class="card-header"><span>Primitive Types</span></div>
+      <div class="card-body">
+        <p class="desc">Java's 8 primitive types with sizes</p>
+        <pre><code class="language-java">byte   b = 127;          // 8-bit  -128 to 127
+short  s = 32767;        // 16-bit
+int    i = 2_147_483_647;// 32-bit (use _ for readability)
+long   l = 9_999_999L;   // 64-bit (suffix L)
+float  f = 3.14f;        // 32-bit float (suffix f)
+double d = 3.14;         // 64-bit float (default)
+char   c = 'A';          // 16-bit Unicode
+boolean ok = true;       // true or false</code></pre>
+        <div class="tip">Use int by default; long for large numbers; double for decimals</div>
+      </div>
+    </div>
+    <div class="card" data-tags="var inference java10">
+      <div class="card-header"><span>Local Variable Type Inference</span><span class="tag">Java 10+</span></div>
+      <div class="card-body">
+        <p class="desc">Use var to let the compiler infer the type</p>
+        <pre><code class="language-java">var name = "Alice";           // String
+var list = new ArrayList&lt;String&gt;();
+var map = new HashMap&lt;String, Integer&gt;();
+var entry = map.entrySet().iterator();
+
+// Works in for loops
+for (var item : list) {
+    System.out.println(item);
+}
+
+// Does NOT work for fields, parameters, or return types</code></pre>
+        <div class="tip">var improves readability when the type is obvious from the right side</div>
+      </div>
+    </div>
+    <div class="card" data-tags="string text block java15">
+      <div class="card-header"><span>Strings &amp; Text Blocks</span><span class="tag">Java 15+</span></div>
+      <div class="card-body">
+        <pre><code class="language-java">String s1 = "Hello, World!";
+String s2 = s1.substring(0, 5);     // "Hello"
+String s3 = s1.toLowerCase();
+boolean eq = s1.equals(s2);         // always use .equals()
+String joined = String.join(", ", "a", "b", "c");
+String formatted = "Name: %s, Age: %d".formatted("Alice", 30);
+
+// Text blocks (Java 15+)
+String json = """
+        {
+            "name": "Alice",
+            "age": 30
+        }
+        """;</code></pre>
+        <div class="warn">Never use == to compare strings; use .equals()</div>
+      </div>
+    </div>
+    <div class="card" data-tags="array">
+      <div class="card-header"><span>Arrays</span></div>
+      <div class="card-body">
+        <pre><code class="language-java">int[] arr = {1, 2, 3, 4, 5};
+String[] names = new String[10];
+
+// Multidimensional
+int[][] matrix = new int[3][3];
+int[][] grid = {{1,2},{3,4},{5,6}};
+
+// Useful operations
+Arrays.sort(arr);
+Arrays.fill(arr, 0);
+int idx = Arrays.binarySearch(arr, 3);
+int[] copy = Arrays.copyOf(arr, arr.length);
+int[] range = Arrays.copyOfRange(arr, 1, 4);
+System.out.println(Arrays.toString(arr));</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="control">
+  <h2 class="section-title">Control Flow</h2>
+  <div class="grid">
+    <div class="card" data-tags="if else ternary switch">
+      <div class="card-header"><span>Conditionals</span></div>
+      <div class="card-body">
+        <pre><code class="language-java">// Standard if-else
+if (x > 0) {
+    System.out.println("positive");
+} else if (x == 0) {
+    System.out.println("zero");
+} else {
+    System.out.println("negative");
+}
+
+// Ternary operator
+String result = x > 0 ? "positive" : "non-positive";
+
+// Switch expression (Java 14+)
+String day = switch (dayNum) {
+    case 1 -> "Monday";
+    case 2 -> "Tuesday";
+    case 3, 4, 5 -> "Midweek";
+    default -> "Weekend";
+};
+
+// Switch with yield
+int score = switch (grade) {
+    case "A" -> 100;
+    case "B" -> { int v = 80; yield v; }
+    default -> 0;
+};</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="for while loop iterator">
+      <div class="card-header"><span>Loops</span></div>
+      <div class="card-body">
+        <pre><code class="language-java">// Traditional for
+for (int i = 0; i &lt; 10; i++) { ... }
+
+// Enhanced for (for-each)
+for (String s : list) { ... }
+for (int x : array) { ... }
+
+// While
+while (condition) { ... }
+
+// Do-while (executes at least once)
+do {
+    // code
+} while (condition);
+
+// Loop control
+for (int i = 0; i &lt; 100; i++) {
+    if (i == 5) continue;  // skip this iteration
+    if (i == 10) break;    // exit loop
+}
+
+// Labeled break (for nested loops)
+outer:
+for (int i = 0; i &lt; 3; i++) {
+    for (int j = 0; j &lt; 3; j++) {
+        if (i == 1 && j == 1) break outer;
+    }
+}</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="pattern matching instanceof java16">
+      <div class="card-header"><span>Pattern Matching</span><span class="tag">Java 16+</span></div>
+      <div class="card-body">
+        <pre><code class="language-java">// Old way
+if (obj instanceof String) {
+    String s = (String) obj;
+    System.out.println(s.length());
+}
+
+// Pattern matching (Java 16+)
+if (obj instanceof String s) {
+    System.out.println(s.length());
+}
+
+// In switch (Java 21+)
+String result = switch (obj) {
+    case Integer i -> "int: " + i;
+    case String s -> "str: " + s;
+    case null -> "null";
+    default -> "other";
+};</code></pre>
+        <div class="tip">Pattern matching eliminates redundant casts</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="oop">
+  <h2 class="section-title">Object-Oriented Programming</h2>
+  <div class="grid">
+    <div class="card" data-tags="class object constructor">
+      <div class="card-header"><span>Classes &amp; Objects</span></div>
+      <div class="card-body">
+        <pre><code class="language-java">public class Person {
+    // Fields
+    private final String name;  // immutable
+    private int age;
+
+    // Constructor
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    // Getters
+    public String getName() { return name; }
+    public int getAge() { return age; }
+
+    // Setter
+    public void setAge(int age) {
+        if (age &lt; 0) throw new IllegalArgumentException();
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{name='" + name + "', age=" + age + "}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Person p)) return false;
+        return age == p.age && Objects.equals(name, p.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, age);
+    }
+}</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="interface abstract implements">
+      <div class="card-header"><span>Interfaces &amp; Abstract Classes</span></div>
+      <div class="card-body">
+        <pre><code class="language-java">// Interface
+public interface Drawable {
+    void draw();  // abstract by default
+    default String getType() { return "shape"; }  // default method
+    static Drawable of(String type) { ... }       // static method
+}
+
+// Abstract class
+public abstract class Shape {
+    protected String color;
+    public abstract double area();  // must override
+    public void describe() {
+        System.out.println("Area: " + area());
+    }
+}
+
+// Implementing both
+public class Circle extends Shape implements Drawable {
+    private double radius;
+
+    public Circle(double radius) { this.radius = radius; }
+
+    @Override public double area() { return Math.PI * radius * radius; }
+    @Override public void draw() { System.out.println("Drawing circle"); }
+}</code></pre>
+        <div class="tip">Prefer interfaces over abstract classes; use abstract classes for shared state</div>
+      </div>
+    </div>
+    <div class="card" data-tags="record java16 immutable">
+      <div class="card-header"><span>Records</span><span class="tag">Java 16+</span></div>
+      <div class="card-body">
+        <pre><code class="language-java">// Records: immutable data carriers
+public record Point(int x, int y) {
+    // Compact canonical constructor
+    public Point {
+        if (x &lt; 0 || y &lt; 0) throw new IllegalArgumentException();
+    }
+
+    // Custom methods
+    public double distance() {
+        return Math.sqrt(x * x + y * y);
+    }
+}
+
+// Usage
+var p = new Point(3, 4);
+p.x();       // accessor (not getX)
+p.y();       // accessor
+p.equals(new Point(3, 4));  // true - by value
+p.toString(); // "Point[x=3, y=4]"</code></pre>
+        <div class="tip">Records auto-generate: constructor, accessors, equals, hashCode, toString</div>
+      </div>
+    </div>
+    <div class="card" data-tags="sealed interface java17">
+      <div class="card-header"><span>Sealed Classes/Interfaces</span><span class="tag">Java 17+</span></div>
+      <div class="card-body">
+        <pre><code class="language-java">// Sealed: restrict which classes can extend/implement
+public sealed interface Shape
+    permits Circle, Rectangle, Triangle {}
+
+public record Circle(double radius) implements Shape {}
+public record Rectangle(double w, double h) implements Shape {}
+public final class Triangle implements Shape { ... }
+
+// Works well with pattern matching
+double area = switch (shape) {
+    case Circle c -> Math.PI * c.radius() * c.radius();
+    case Rectangle r -> r.w() * r.h();
+    case Triangle t -> t.base() * t.height() / 2;
+}; // no default needed - compiler knows all cases</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="enum">
+      <div class="card-header"><span>Enums</span></div>
+      <div class="card-body">
+        <pre><code class="language-java">public enum Planet {
+    MERCURY(3.303e+23, 2.4397e6),
+    VENUS  (4.869e+24, 6.0518e6),
+    EARTH  (5.976e+24, 6.37814e6);
+
+    private final double mass;
+    private final double radius;
+
+    Planet(double mass, double radius) {
+        this.mass = mass;
+        this.radius = radius;
+    }
+
+    static final double G = 6.67300E-11;
+    double surfaceGravity() { return G * mass / (radius * radius); }
+    double surfaceWeight(double otherMass) {
+        return otherMass * surfaceGravity();
+    }
+}
+
+// Usage
+Planet.EARTH.surfaceWeight(75.0);
+Planet.valueOf("EARTH");   // by name
+Planet.values();           // all values
+Planet.EARTH.name();       // "EARTH"
+Planet.EARTH.ordinal();    // 2</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="generics type parameter">
+      <div class="card-header"><span>Generics</span></div>
+      <div class="card-body">
+        <pre><code class="language-java">// Generic class
+public class Box&lt;T&gt; {
+    private T value;
+    public Box(T value) { this.value = value; }
+    public T get() { return value; }
+}
+
+// Generic method
+public &lt;T extends Comparable&lt;T&gt;&gt; T max(T a, T b) {
+    return a.compareTo(b) &gt; 0 ? a : b;
+}
+
+// Bounded wildcards
+void printList(List&lt;? extends Number&gt; list) { ... } // upper bound
+void addNumbers(List&lt;? super Integer&gt; list) { ... } // lower bound
+void print(List&lt;?&gt; list) { ... }                    // unbounded
+
+// Generic interface
+public interface Transformer&lt;T, R&gt; {
+    R transform(T input);
+}
+
+// Diamond operator (type inference)
+List&lt;String&gt; list = new ArrayList&lt;&gt;();</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="exceptions">
+  <h2 class="section-title">Exception Handling</h2>
+  <div class="grid">
+    <div class="card" data-tags="try catch finally exception">
+      <div class="card-header"><span>Try-Catch-Finally</span></div>
+      <div class="card-body">
+        <pre><code class="language-java">// Basic try-catch
+try {
+    int result = 10 / 0;
+} catch (ArithmeticException e) {
+    System.err.println("Error: " + e.getMessage());
+} finally {
+    System.out.println("Always runs");
+}
+
+// Multi-catch (Java 7+)
+try {
+    // ...
+} catch (IOException | SQLException e) {
+    e.printStackTrace();
+}
+
+// Try-with-resources (Java 7+) - auto-closes
+try (var in = new FileInputStream("file.txt");
+     var out = new FileOutputStream("out.txt")) {
+    // use in and out - closed automatically
+} catch (IOException e) {
+    e.printStackTrace();
+}
+
+// Custom exception
+public class BusinessException extends RuntimeException {
+    private final int code;
+    public BusinessException(String message, int code) {
+        super(message);
+        this.code = code;
+    }
+    public int getCode() { return code; }
+}</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="exception hierarchy checked unchecked">
+      <div class="card-header"><span>Exception Hierarchy</span></div>
+      <div class="card-body">
+        <p class="desc">Key exceptions to know</p>
+        <table>
+          <tr><th>Type</th><th>Examples</th><th>Handle?</th></tr>
+          <tr><td>Error</td><td>OutOfMemoryError, StackOverflowError</td><td>No</td></tr>
+          <tr><td>Checked Exception</td><td>IOException, SQLException, ClassNotFoundException</td><td>Must</td></tr>
+          <tr><td>RuntimeException</td><td>NullPointerException, IllegalArgumentException, IndexOutOfBoundsException</td><td>Optional</td></tr>
+        </table>
+        <div class="tip">Prefer unchecked exceptions; use checked for recoverable conditions</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="functional">
+  <h2 class="section-title">Functional Programming <span class="badge badge-8">Java 8+</span></h2>
+  <div class="grid">
+    <div class="card" data-tags="lambda functional interface">
+      <div class="card-header"><span>Lambda Expressions</span></div>
+      <div class="card-body">
+        <pre><code class="language-java">// Lambda syntax
+Runnable r = () -> System.out.println("run");
+Comparator&lt;String&gt; cmp = (a, b) -> a.compareTo(b);
+Predicate&lt;Integer&gt; isPos = n -> n > 0;
+Function&lt;String, Integer&gt; len = String::length; // method ref
+
+// Common functional interfaces
+Predicate&lt;T&gt;     : T -> boolean
+Function&lt;T,R&gt;    : T -> R
+BiFunction&lt;T,U,R&gt;: (T,U) -> R
+Consumer&lt;T&gt;      : T -> void
+Supplier&lt;T&gt;      : () -> T
+UnaryOperator&lt;T&gt; : T -> T
+BinaryOperator&lt;T&gt;: (T,T) -> T
+
+// Method references
+String::length        // instance method
+System.out::println   // instance method of specific obj
+Integer::parseInt     // static method
+ArrayList::new        // constructor ref</code></pre>
+      </div>
+    </div>
+    <div class="card" data-tags="optional null">
+      <div class="card-header"><span>Optional</span></div>
+      <div class="card-body">
+        <pre><code class="language-java">// Creating Optional
+Optional&lt;String&gt; opt = Optional.of("hello");
+Optional&lt;String&gt; empty = Optional.empty();
+Optional&lt;String&gt; nullable = Optional.ofNullable(null);
+
+// Consuming
+opt.isPresent();                // true
+opt.isEmpty();                  // false (Java 11+)
+opt.get();                      // "hello" (throws if empty)
+opt.orElse("default");          // "hello"
+opt.orElseGet(() -> compute());
+opt.orElseThrow(IllegalStateException::new);
+
+// Transforming
+opt.map(String::toUpperCase);   // Optional["HELLO"]
+opt.filter(s -> s.length() > 3);
+opt.flatMap(s -> findUser(s));
+
+// Chaining
+Optional.ofNullable(user)
+        .map(User::getAddress)
+        .map(Address::getCity)
+        .orElse("Unknown");</code></pre>
+        <div class="warn">Never use Optional.get() without checking isPresent()</div>
+      </div>
+    </div>
+    <div class="card" data-tags="stream api">
+      <div class="card-header"><span>Streams (Quick Reference)</span></div>
+      <div class="card-body">
+        <pre><code class="language-java">List&lt;String&gt; names = List.of("Alice", "Bob", "Charlie", "Dave");
+
+// Create → Intermediate → Terminal
+names.stream()
+     .filter(s -> s.length() > 3)       // intermediate
+     .map(String::toUpperCase)           // intermediate
+     .sorted()                           // intermediate
+     .limit(3)                           // intermediate
+     .collect(Collectors.toList());      // terminal
+
+// Common terminals
+.count()
+.findFirst()
+.findAny()
+.anyMatch(pred)
+.allMatch(pred)
+.noneMatch(pred)
+.min(comparator)
+.max(comparator)
+.reduce(0, Integer::sum)
+.forEach(System.out::println)
+.toArray()</code></pre>
+        <div class="tip">See java-streams.html for the complete Streams reference</div>
+      </div>
+    </div>
+    <div class="card" data-tags="completablefuture async concurrent java8">
+      <div class="card-header"><span>CompletableFuture</span></div>
+      <div class="card-body">
+        <pre><code class="language-java">// Async computation
+CompletableFuture&lt;String&gt; future =
+    CompletableFuture.supplyAsync(() -> fetchData());
+
+// Chain operations
+future
+    .thenApply(data -> process(data))     // transform
+    .thenAccept(result -> save(result))   // consume
+    .thenRun(() -> notify())             // run after
+    .exceptionally(e -> handleError(e)); // error handler
+
+// Combine futures
+CompletableFuture&lt;String&gt; f1 = fetchUser();
+CompletableFuture&lt;String&gt; f2 = fetchOrders();
+
+CompletableFuture.allOf(f1, f2)
+    .thenRun(() -> combine(f1.join(), f2.join()));
+
+CompletableFuture.anyOf(f1, f2)
+    .thenAccept(result -> use(result));</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+<script>
+  hljs.highlightAll();
+
+  function filterCards() {
+    const q = document.getElementById('searchBox').value.toLowerCase();
+    document.querySelectorAll('.card').forEach(card => {
+      const text = card.textContent.toLowerCase();
+      const tags = (card.dataset.tags || '').toLowerCase();
+      card.style.display = (text.includes(q) || tags.includes(q)) ? '' : 'none';
+    });
+  }
+
+  document.querySelectorAll('nav a[href^="#"]').forEach(link => {
+    link.addEventListener('click', function(e) {
+      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

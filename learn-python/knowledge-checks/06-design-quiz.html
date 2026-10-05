@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python Software Design – Knowledge Check</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #1a1a2e;
+      --panel:   #16213e;
+      --accent:  #e94560;
+      --accent2: #0f3460;
+      --text:    #e0e0e0;
+      --muted:   #8892a4;
+      --green:   #2ecc71;
+      --red:     #e74c3c;
+      --border:  #2a3a5c;
+      --radius:  10px;
+      --font:    'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    a.back-link {
+      align-self: flex-start;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+      transition: color 0.2s;
+    }
+    a.back-link:hover { color: var(--accent); }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      color: #fff;
+      text-align: center;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    /* ── PROGRESS ─────────────────────────────────── */
+    .progress-wrap {
+      width: 100%;
+      max-width: 720px;
+      margin-bottom: 1.25rem;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .progress-bar-bg {
+      background: var(--panel);
+      border-radius: 99px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      background: var(--accent);
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.35s ease;
+    }
+
+    /* ── CARD ─────────────────────────────────────── */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .question-number {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+
+    .question-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+    }
+
+    pre.code-block {
+      background: #0d1b2a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin-bottom: 1.25rem;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      white-space: pre;
+    }
+
+    /* ── OPTIONS ──────────────────────────────────── */
+    .options { display: flex; flex-direction: column; gap: 0.65rem; }
+
+    .option-btn {
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.95rem;
+      padding: 0.85rem 1.1rem;
+      text-align: left;
+      transition: border-color 0.15s, background 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .option-btn .opt-key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      background: rgba(233,69,96,0.06);
+    }
+    .option-btn.focused {
+      border-color: #5d8bff;
+      background: rgba(93,139,255,0.07);
+    }
+    .option-btn.correct {
+      border-color: var(--green);
+      background: rgba(46,204,113,0.12);
+    }
+    .option-btn.wrong {
+      border-color: var(--red);
+      background: rgba(231,76,60,0.12);
+    }
+    .option-btn.correct-answer {
+      border-color: var(--green);
+      background: rgba(46,204,113,0.12);
+    }
+    .option-btn:disabled { cursor: default; }
+
+    /* fill-blank */
+    .fill-blank-wrap { display: flex; flex-direction: column; gap: 0.6rem; }
+    .fill-blank-wrap input {
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 1rem;
+      padding: 0.8rem 1rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .fill-blank-wrap input:focus { border-color: #5d8bff; }
+    .fill-blank-wrap input.correct { border-color: var(--green); }
+    .fill-blank-wrap input.wrong   { border-color: var(--red); }
+
+    .submit-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.8rem 1.5rem;
+      transition: opacity 0.2s;
+      align-self: flex-start;
+    }
+    .submit-btn:hover { opacity: 0.88; }
+    .submit-btn:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── FEEDBACK ─────────────────────────────────── */
+    .feedback {
+      margin-top: 1.25rem;
+      padding: 1rem 1.1rem;
+      border-radius: var(--radius);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      display: none;
+    }
+    .feedback.correct-fb {
+      background: rgba(46,204,113,0.1);
+      border: 1px solid var(--green);
+      color: #a0f0b8;
+      display: block;
+    }
+    .feedback.wrong-fb {
+      background: rgba(231,76,60,0.1);
+      border: 1px solid var(--red);
+      color: #f5b4b4;
+      display: block;
+    }
+    .feedback strong { color: #fff; }
+
+    /* ── NAV BUTTONS ──────────────────────────────── */
+    .nav-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    .nav-btn {
+      background: var(--accent2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0.65rem 1.2rem;
+      transition: background 0.15s;
+    }
+    .nav-btn:hover { background: #1a3a6e; }
+    .nav-btn:disabled { opacity: 0.35; cursor: default; }
+
+    /* ── FINAL SCREEN ─────────────────────────────── */
+    #final-screen {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 720px;
+      text-align: center;
+      display: none;
+    }
+    #final-screen h2 { font-size: 1.6rem; margin-bottom: 0.5rem; }
+    .score-big {
+      font-size: 4rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+      margin: 1rem 0 0.25rem;
+    }
+    .grade-label {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+    }
+    .stat-item { color: var(--muted); font-size: 0.9rem; }
+    .stat-item span { display: block; font-size: 1.25rem; font-weight: 700; color: var(--text); }
+
+    .final-btns {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.8rem 1.5rem;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-secondary {
+      background: var(--accent2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.95rem;
+      padding: 0.8rem 1.5rem;
+      transition: background 0.15s;
+    }
+    .btn-secondary:hover { background: #1a3a6e; }
+
+    /* ── REVIEW MODE ──────────────────────────────── */
+    #review-screen {
+      width: 100%;
+      max-width: 720px;
+      display: none;
+    }
+    #review-screen h2 {
+      font-size: 1.4rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .review-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .review-card .q-num {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .review-card .q-text { font-size: 1rem; margin-bottom: 0.75rem; line-height: 1.5; }
+    .review-option {
+      padding: 0.65rem 0.9rem;
+      border-radius: 6px;
+      margin-bottom: 0.4rem;
+      font-size: 0.88rem;
+    }
+    .review-option.your-answer {
+      background: rgba(231,76,60,0.15);
+      border: 1px solid var(--red);
+      color: #f5b4b4;
+    }
+    .review-option.correct-answer {
+      background: rgba(46,204,113,0.12);
+      border: 1px solid var(--green);
+      color: #a0f0b8;
+    }
+    .review-explanation {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: rgba(255,255,255,0.04);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* ── QUIZ SCREEN ──────────────────────────────── */
+    #quiz-screen { width: 100%; max-width: 720px; }
+
+    /* Responsive */
+    @media (max-width: 500px) {
+      .card { padding: 1.25rem; }
+      .score-big { font-size: 3rem; }
+      h1 { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<a href="README.md" class="back-link">&#8592; Back to Index</a>
+<h1>Python Software Design</h1>
+<p class="subtitle">Knowledge Check &mdash; 15 Questions</p>
+
+<!-- QUIZ SCREEN -->
+<div id="quiz-screen">
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="progress-text">Question 1 of 15</span>
+      <span id="score-live">Score: 0</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="question-number" id="q-number">Question 1 of 15</div>
+    <div class="question-text" id="q-text"></div>
+    <pre class="code-block" id="q-code" style="display:none"></pre>
+    <div id="q-options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="nav-row">
+      <button class="nav-btn" id="btn-prev" onclick="navigate(-1)" disabled>&#8592; Previous</button>
+      <button class="nav-btn" id="btn-next" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+  </div>
+</div>
+
+<!-- FINAL SCREEN -->
+<div id="final-screen">
+  <h2>Quiz Complete!</h2>
+  <div class="score-big" id="final-pct">0%</div>
+  <div class="grade-label" id="grade-label"></div>
+  <div class="stats-row">
+    <div class="stat-item">Correct <span id="stat-correct">0</span></div>
+    <div class="stat-item">Wrong <span id="stat-wrong">0</span></div>
+    <div class="stat-item">Time <span id="stat-time">0s</span></div>
+  </div>
+  <div class="final-btns">
+    <button class="btn-primary" onclick="retryQuiz()">&#8635; Retry</button>
+    <button class="btn-secondary" id="btn-review" onclick="showReview()">Review Wrong Answers</button>
+  </div>
+</div>
+
+<!-- REVIEW SCREEN -->
+<div id="review-screen">
+  <h2>Wrong Answers &mdash; Review</h2>
+  <div id="review-list"></div>
+  <div style="text-align:center;margin-top:1.5rem;">
+    <button class="btn-primary" onclick="backToFinal()">&#8592; Back to Results</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   QUESTIONS DATA
+═══════════════════════════════════════════════════════ */
+const questions = [
+  /* 1 ── SOLID: SRP violation */
+  {
+    type: "multiple-choice",
+    text: "Which SOLID principle does this code violate?",
+    code:
+`class UserService:
+    def create_user(self, name, email):
+        user = {"name": name, "email": email}
+        # save to database
+        db.execute("INSERT INTO users VALUES (?, ?)", (name, email))
+        # send welcome email
+        smtp.sendmail("noreply@app.com", email,
+                      "Welcome " + name)
+        return user`,
+    options: [
+      "Open/Closed Principle",
+      "Single Responsibility Principle",
+      "Liskov Substitution Principle",
+      "Interface Segregation Principle"
+    ],
+    correct: 1,
+    explanation: "The Single Responsibility Principle states a class should have only one reason to change. UserService handles three distinct concerns: business logic, database persistence, AND email sending. Each concern can change independently — e.g., switching from SMTP to SendGrid — which means this class has multiple reasons to change."
+  },
+
+  /* 2 ── SOLID: OCP violation */
+  {
+    type: "multiple-choice",
+    text: "Which SOLID principle does this code violate?",
+    code:
+`def calculate_area(shape):
+    if shape["type"] == "circle":
+        return 3.14159 * shape["radius"] ** 2
+    elif shape["type"] == "square":
+        return shape["side"] ** 2
+    elif shape["type"] == "triangle":
+        return 0.5 * shape["base"] * shape["height"]
+    # Adding a new shape requires modifying this function`,
+    options: [
+      "Dependency Inversion Principle",
+      "Single Responsibility Principle",
+      "Open/Closed Principle",
+      "Liskov Substitution Principle"
+    ],
+    correct: 2,
+    explanation: "The Open/Closed Principle states that software entities should be open for extension but closed for modification. Every time a new shape type is added, calculate_area must be modified. A better design uses polymorphism — each shape has its own area() method, and calculate_area simply calls shape.area(), so new shapes can be added without touching existing code."
+  },
+
+  /* 3 ── SOLID: LSP violation */
+  {
+    type: "multiple-choice",
+    text: "Which SOLID principle does this code violate?",
+    code:
+`class Bird:
+    def fly(self):
+        return "I can fly!"
+
+class Penguin(Bird):
+    def fly(self):
+        raise NotImplementedError("Penguins can't fly!")
+
+def make_bird_fly(bird: Bird):
+    print(bird.fly())   # crashes for Penguin`,
+    options: [
+      "Interface Segregation Principle",
+      "Open/Closed Principle",
+      "Single Responsibility Principle",
+      "Liskov Substitution Principle"
+    ],
+    correct: 3,
+    explanation: "The Liskov Substitution Principle states that objects of a subclass must be substitutable for objects of the superclass without breaking the program. Penguin inherits from Bird but raises an exception when fly() is called, breaking any code that expects a Bird to fly. A fix is to separate FlyingBird and NonFlyingBird or use a separate Flyable interface/protocol."
+  },
+
+  /* 4 ── @decorator syntax */
+  {
+    type: "multiple-choice",
+    text: "What is the correct way to apply a decorator called `log_call` to a function `process`?",
+    options: [
+      "process = log_call(process)",
+      "@log_call\ndef process(): ...",
+      "Both A and B are equivalent",
+      "process.decorate(log_call)"
+    ],
+    correct: 2,
+    explanation: "In Python, @log_call placed above a function definition is purely syntactic sugar for process = log_call(process). Both forms are 100% equivalent — the @ syntax was introduced in PEP 318 as a cleaner way to express the wrapping pattern. Option D is not valid Python."
+  },
+
+  /* 5 ── functools.wraps */
+  {
+    type: "multiple-choice",
+    text: "What does `@functools.wraps(func)` do inside a decorator?",
+    options: [
+      "It prevents the decorator from being applied more than once",
+      "It copies __name__, __doc__, and other attributes from func to the wrapper",
+      "It automatically caches the result of func",
+      "It makes func thread-safe"
+    ],
+    correct: 1,
+    explanation: "Without @functools.wraps(func), the wrapper function replaces func in __name__, __doc__, __annotations__, etc. This breaks introspection tools, help(), and pytest. @functools.wraps copies these attributes from the original function to the wrapper so the decorator is transparent to inspection tools. It is considered best practice in any decorator definition."
+  },
+
+  /* 6 ── decorator output question */
+  {
+    type: "multiple-choice",
+    text: "What is the output of this code?",
+    code:
+`import functools
+
+def shout(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        return result.upper()
+    return wrapper
+
+@shout
+def greet(name):
+    return f"hello, {name}"
+
+print(greet("world"))
+print(greet.__name__)`,
+    options: [
+      "hello, world\ngreet",
+      "HELLO, WORLD\nwrapper",
+      "HELLO, WORLD\ngreet",
+      "hello, world\nwrapper"
+    ],
+    correct: 2,
+    explanation: "The shout decorator calls the original function and uppercases its return value, so 'hello, world' becomes 'HELLO, WORLD'. Because @functools.wraps(func) is used, the wrapper keeps the original function's __name__, which is 'greet' — not 'wrapper'. Without @functools.wraps, the second line would print 'wrapper'."
+  },
+
+  /* 7 ── Singleton via module */
+  {
+    type: "true-false",
+    text: "In Python, the idiomatic way to implement a Singleton is to create a module-level instance, because Python's import system caches modules and guarantees the same object is returned on every import.",
+    options: ["True", "False"],
+    correct: 0,
+    explanation: "True. Python caches imported modules in sys.modules after the first import. Any subsequent 'import mymodule' returns the cached module object, so a module-level instance (e.g., _instance = MyClass()) is effectively a Singleton without needing __new__ tricks or metaclasses. This is the Pythonic approach recommended over the Gang-of-Four class-based Singleton."
+  },
+
+  /* 8 ── Factory function */
+  {
+    type: "multiple-choice",
+    text: "In Python, a Factory Function is best described as:",
+    options: [
+      "A class method decorated with @classmethod that returns cls()",
+      "A callable that creates and returns objects, hiding the exact class or creation logic from the caller",
+      "A function that only ever creates one instance of a class",
+      "A metaclass that overrides __call__ to return cached instances"
+    ],
+    correct: 1,
+    explanation: "A Factory Function is any callable (function, classmethod, staticmethod) that encapsulates object creation. The caller says 'give me a shape' and the factory decides which class to instantiate. This decouples client code from concrete classes, making it easy to change the type of object returned without modifying callers. In Python this is commonly a plain function or a @classmethod like Shape.from_config(cfg)."
+  },
+
+  /* 9 ── Observer pattern */
+  {
+    type: "multiple-choice",
+    text: "Which snippet correctly implements the Observer pattern in idiomatic Python?",
+    options: [
+      "class EventBus: _callbacks = {}; def on(self, ev, cb): self._callbacks[ev] = cb",
+      "class EventSource: def __init__(self): self._listeners = []\n  def subscribe(self, fn): self._listeners.append(fn)\n  def notify(self, data): [fn(data) for fn in self._listeners]",
+      "def observe(target, attr): return getattr(target, attr)",
+      "import threading; threading.Event().wait()"
+    ],
+    correct: 1,
+    explanation: "The Observer pattern has subjects maintain a list of observer callables and notify all of them on state changes. Option B correctly uses a list (_listeners) to hold multiple callbacks, subscribe() to register them, and notify() to call them all with data. Option A uses a dict that maps an event name to a single callback (overwriting previous ones), which breaks multiple-observer support."
+  },
+
+  /* 10 ── Strategy pattern */
+  {
+    type: "multiple-choice",
+    text: "Python's Strategy pattern is most naturally expressed using:",
+    options: [
+      "Inheritance — create a base Strategy class and subclass it for each algorithm",
+      "First-class functions — pass a callable as a parameter to select the algorithm at runtime",
+      "Class decorators applied to the context class",
+      "Abstract Base Classes with a single abstract execute() method"
+    ],
+    correct: 1,
+    explanation: "Because Python functions are first-class objects, the Strategy pattern can be implemented by simply accepting a callable parameter (e.g., def sort_data(data, strategy=sorted)). There is no need for a Strategy base class or subclasses. This is more concise and Pythonic than the class-hierarchy approach used in statically-typed languages like Java. ABCs can be used, but plain callables are idiomatic Python."
+  },
+
+  /* 11 ── Decorator GoF pattern (wrapping objects) */
+  {
+    type: "true-false",
+    text: "The Decorator design pattern (Gang of Four) and Python's @decorator syntax solve the same problem — both wrap functions to add behaviour.",
+    options: ["True", "False"],
+    correct: 1,
+    explanation: "False. These are different concepts that share a name. Python's @decorator wraps callables (functions/classes) at definition time, primarily to add cross-cutting concerns like logging or caching. The GoF Decorator pattern wraps objects to extend their behaviour at runtime while conforming to the same interface, and is used to add responsibilities dynamically without subclassing. In Python the GoF Decorator is usually implemented as a wrapper class."
+  },
+
+  /* 12 ── Repository pattern */
+  {
+    type: "multiple-choice",
+    text: "The Repository pattern's primary purpose in Python applications is to:",
+    options: [
+      "Cache database query results using functools.lru_cache",
+      "Abstract the data storage layer so domain code works with in-memory collections rather than raw SQL/ORM calls",
+      "Manage database connection pooling and transactions",
+      "Provide a factory for creating ORM model instances"
+    ],
+    correct: 1,
+    explanation: "The Repository pattern inserts an abstraction layer between domain/business logic and data storage. Domain code calls repo.get(id) or repo.save(entity) and never sees SQL or ORM details. This makes it trivial to swap databases, add caching, or use an in-memory repo for unit tests — the domain layer doesn't know or care about the storage backend."
+  },
+
+  /* 13 ── lru_cache */
+  {
+    type: "fill-blank",
+    text: "Complete the decorator that caches the results of fibonacci() so repeated calls with the same argument are O(1) instead of O(2^n):\n\nimport functools\n\n@functools.___________\ndef fibonacci(n):\n    if n < 2:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)",
+    options: null,
+    correct: "lru_cache",
+    explanation: "functools.lru_cache (Least Recently Used cache) memoizes function calls keyed on their arguments. Without it, fibonacci(40) makes ~330 million recursive calls. With @lru_cache, each unique n is computed once and cached, reducing the total calls to O(n). You can also write @lru_cache(maxsize=None) or @functools.cache (Python 3.9+) for an unbounded cache."
+  },
+
+  /* 14 ── ABC vs Protocol */
+  {
+    type: "multiple-choice",
+    text: "When should you prefer `typing.Protocol` over `abc.ABC` in modern Python (3.8+)?",
+    options: [
+      "When you need to enforce that subclasses call super().__init__()",
+      "When you want structural (duck-type) checking — any class with the right methods qualifies, without explicit inheritance",
+      "When you need to share concrete method implementations across multiple classes",
+      "When defining data classes that must satisfy a schema"
+    ],
+    correct: 1,
+    explanation: "Protocol enables structural subtyping (duck typing) checked by type checkers like mypy. A class satisfies a Protocol simply by having the required methods/attributes — no explicit 'class Foo(MyProtocol)' needed. Use abc.ABC when you want nominal subtyping (explicit inheritance) and/or need to provide shared concrete implementations via the base class. Protocol is preferred for library interfaces where you cannot control caller code."
+  },
+
+  /* 15 ── Dependency injection */
+  {
+    type: "multiple-choice",
+    text: "Which refactoring best demonstrates Dependency Injection in Python?",
+    options: [
+      "Before: class Service: def __init__(self): self.db = Database()\nAfter:  class Service: def __init__(self, db): self.db = db",
+      "Before: def process(data): return transform(data)\nAfter:  def process(data): return data.transform()",
+      "Before: class Cache: _store = {}\nAfter:  class Cache: def __init__(self): self._store = {}",
+      "Before: import json; json.loads(s)\nAfter:  from json import loads; loads(s)"
+    ],
+    correct: 0,
+    explanation: "Dependency Injection means providing dependencies to a class from the outside rather than constructing them internally. In option A, the original Service creates its own Database, tightly coupling it to that specific class. The injected version receives any object with the database interface, making it easy to pass a mock or alternative implementation in tests without patching internals. This is the cornerstone of testable, maintainable Python code."
+  }
+];
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+let current    = 0;
+let answers    = new Array(questions.length).fill(null);  // null | { chosen, correct }
+let score      = 0;
+let focusedOpt = 0;
+let startTime  = Date.now();
+
+/* ═══════════════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════════════════ */
+function render() {
+  const q   = questions[current];
+  const ans = answers[current];
+  const n   = current + 1;
+  const tot = questions.length;
+
+  // progress
+  document.getElementById("progress-text").textContent = `Question ${n} of ${tot}`;
+  document.getElementById("q-number").textContent      = `Question ${n} of ${tot}`;
+  document.getElementById("progress-fill").style.width = `${(n / tot) * 100}%`;
+  document.getElementById("score-live").textContent    = `Score: ${score}`;
+
+  // question text
+  document.getElementById("q-text").textContent = q.text;
+
+  // code block
+  const codeEl = document.getElementById("q-code");
+  if (q.code) {
+    codeEl.textContent = q.code;
+    codeEl.style.display = "block";
+  } else {
+    codeEl.style.display = "none";
+  }
+
+  // options container
+  const optWrap = document.getElementById("q-options");
+  optWrap.innerHTML = "";
+
+  if (q.type === "fill-blank") {
+    renderFillBlank(optWrap, q, ans);
+  } else {
+    renderMultiChoice(optWrap, q, ans);
+  }
+
+  // feedback
+  const fb = document.getElementById("feedback");
+  fb.className = "feedback";
+  fb.innerHTML = "";
+  if (ans !== null) {
+    if (ans.isCorrect) {
+      fb.classList.add("correct-fb");
+      fb.innerHTML = `<strong>Correct!</strong> ${escHtml(q.explanation)}`;
+    } else {
+      fb.classList.add("wrong-fb");
+      const correctLabel = q.type === "fill-blank"
+        ? `<strong>${escHtml(q.correct)}</strong>`
+        : `<strong>${escHtml(q.options[q.correct])}</strong>`;
+      fb.innerHTML = `<strong>Incorrect.</strong> Correct answer: ${correctLabel}<br><br>${escHtml(q.explanation)}`;
+    }
+  }
+
+  // nav buttons
+  document.getElementById("btn-prev").disabled = (current === 0);
+  document.getElementById("btn-next").textContent =
+    current === questions.length - 1 ? "Finish" : "Next →";
+}
+
+/* ── multiple-choice / true-false ───────────────────── */
+function renderMultiChoice(container, q, ans) {
+  const answered = ans !== null;
+  const keys = ["A","B","C","D","E","F"].slice(0, q.options.length);
+
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement("button");
+    btn.className = "option-btn";
+    if (!answered && i === focusedOpt) btn.classList.add("focused");
+
+    if (answered) {
+      if (i === q.correct) btn.classList.add("correct-answer");
+      if (i === ans.chosen && !ans.isCorrect) btn.classList.add("wrong");
+      if (i === ans.chosen && ans.isCorrect)  btn.classList.add("correct");
+      btn.disabled = true;
+    }
+
+    btn.innerHTML = `<span class="opt-key">${keys[i]}</span> ${escHtml(opt)}`;
+    btn.dataset.idx = i;
+    if (!answered) btn.addEventListener("click", () => submitAnswer(i));
+    container.appendChild(btn);
+  });
+}
+
+/* ── fill-blank ─────────────────────────────────────── */
+function renderFillBlank(container, q, ans) {
+  const wrap  = document.createElement("div");
+  wrap.className = "fill-blank-wrap";
+
+  const inp = document.createElement("input");
+  inp.type = "text";
+  inp.placeholder = "Type your answer…";
+  inp.spellcheck = false;
+  inp.autocomplete = "off";
+
+  if (ans !== null) {
+    inp.value    = ans.givenText;
+    inp.disabled = true;
+    inp.classList.add(ans.isCorrect ? "correct" : "wrong");
+  }
+
+  const btn = document.createElement("button");
+  btn.className = "submit-btn";
+  btn.textContent = "Submit";
+  if (ans !== null) btn.disabled = true;
+
+  btn.addEventListener("click", () => {
+    const val = inp.value.trim();
+    if (!val) return;
+    submitFillBlank(val, inp);
+  });
+
+  inp.addEventListener("keydown", e => {
+    if (e.key === "Enter") btn.click();
+  });
+
+  wrap.appendChild(inp);
+  wrap.appendChild(btn);
+  container.appendChild(wrap);
+
+  if (ans === null) setTimeout(() => inp.focus(), 0);
+}
+
+/* ═══════════════════════════════════════════════════════
+   ANSWER SUBMISSION
+═══════════════════════════════════════════════════════ */
+function submitAnswer(chosenIdx) {
+  if (answers[current] !== null) return;
+  const q = questions[current];
+  const isCorrect = chosenIdx === q.correct;
+  answers[current] = { chosen: chosenIdx, isCorrect };
+  if (isCorrect) score++;
+  render();
+}
+
+function submitFillBlank(text, inputEl) {
+  if (answers[current] !== null) return;
+  const q = questions[current];
+  const isCorrect = text.toLowerCase().replace(/\s/g,"") ===
+                    q.correct.toLowerCase().replace(/\s/g,"");
+  answers[current] = { chosen: -1, givenText: text, isCorrect };
+  if (isCorrect) score++;
+  render();
+}
+
+/* ═══════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════ */
+function navigate(dir) {
+  const next = current + dir;
+  if (next < 0) return;
+  if (next >= questions.length) {
+    showFinal();
+    return;
+  }
+  current = next;
+  focusedOpt = 0;
+  render();
+}
+
+/* ═══════════════════════════════════════════════════════
+   FINAL SCREEN
+═══════════════════════════════════════════════════════ */
+function showFinal() {
+  document.getElementById("quiz-screen").style.display   = "none";
+  document.getElementById("final-screen").style.display  = "block";
+  document.getElementById("review-screen").style.display = "none";
+
+  const pct = Math.round((score / questions.length) * 100);
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  const wrong   = questions.length - score;
+
+  document.getElementById("final-pct").textContent    = pct + "%";
+  document.getElementById("stat-correct").textContent = score;
+  document.getElementById("stat-wrong").textContent   = wrong;
+  document.getElementById("stat-time").textContent    = formatTime(elapsed);
+
+  let grade = "";
+  if (pct >= 95)      grade = "Expert!";
+  else if (pct >= 80) grade = "Good Job!";
+  else if (pct >= 60) grade = "Getting There";
+  else                grade = "Needs Work";
+  document.getElementById("grade-label").textContent = grade;
+
+  // disable review button if no wrong answers
+  document.getElementById("btn-review").disabled = (wrong === 0);
+}
+
+/* ═══════════════════════════════════════════════════════
+   REVIEW SCREEN
+═══════════════════════════════════════════════════════ */
+function showReview() {
+  document.getElementById("quiz-screen").style.display   = "none";
+  document.getElementById("final-screen").style.display  = "none";
+  document.getElementById("review-screen").style.display = "block";
+
+  const listEl = document.getElementById("review-list");
+  listEl.innerHTML = "";
+
+  questions.forEach((q, i) => {
+    const ans = answers[i];
+    if (!ans || ans.isCorrect) return;  // skip correct / unanswered
+
+    const card = document.createElement("div");
+    card.className = "review-card";
+
+    card.innerHTML = `<div class="q-num">Question ${i+1}</div>
+      <div class="q-text">${escHtml(q.text)}</div>`;
+
+    if (q.code) {
+      const pre = document.createElement("pre");
+      pre.className = "code-block";
+      pre.style.marginBottom = "0.75rem";
+      pre.textContent = q.code;
+      card.appendChild(pre);
+    }
+
+    if (q.type === "fill-blank") {
+      const yourDiv = document.createElement("div");
+      yourDiv.className = "review-option your-answer";
+      yourDiv.textContent = `Your answer: "${ans.givenText}"`;
+      card.appendChild(yourDiv);
+
+      const corrDiv = document.createElement("div");
+      corrDiv.className = "review-option correct-answer";
+      corrDiv.textContent = `Correct answer: "${q.correct}"`;
+      card.appendChild(corrDiv);
+    } else {
+      q.options.forEach((opt, oi) => {
+        const div = document.createElement("div");
+        if (oi === ans.chosen) div.className = "review-option your-answer";
+        else if (oi === q.correct) div.className = "review-option correct-answer";
+        else { div.className = "review-option"; div.style.color = "var(--muted)"; }
+
+        const prefix = oi === ans.chosen ? "Your answer: " : oi === q.correct ? "Correct: " : "";
+        div.textContent = prefix + opt;
+        card.appendChild(div);
+      });
+    }
+
+    const expDiv = document.createElement("div");
+    expDiv.className = "review-explanation";
+    expDiv.textContent = q.explanation;
+    card.appendChild(expDiv);
+
+    listEl.appendChild(card);
+  });
+}
+
+function backToFinal() {
+  document.getElementById("review-screen").style.display = "none";
+  document.getElementById("final-screen").style.display  = "block";
+}
+
+/* ═══════════════════════════════════════════════════════
+   RETRY
+═══════════════════════════════════════════════════════ */
+function retryQuiz() {
+  current    = 0;
+  answers    = new Array(questions.length).fill(null);
+  score      = 0;
+  focusedOpt = 0;
+  startTime  = Date.now();
+
+  document.getElementById("final-screen").style.display  = "none";
+  document.getElementById("review-screen").style.display = "none";
+  document.getElementById("quiz-screen").style.display   = "block";
+  render();
+}
+
+/* ═══════════════════════════════════════════════════════
+   KEYBOARD
+═══════════════════════════════════════════════════════ */
+document.addEventListener("keydown", e => {
+  // Only handle keyboard nav if quiz screen is active
+  if (document.getElementById("quiz-screen").style.display === "none") return;
+
+  const q = questions[current];
+  if (q.type === "fill-blank") return;  // typing in input handled by input itself
+
+  const numOpts = q.options.length;
+
+  if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+    e.preventDefault();
+    focusedOpt = (focusedOpt - 1 + numOpts) % numOpts;
+    render();
+  } else if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+    e.preventDefault();
+    focusedOpt = (focusedOpt + 1) % numOpts;
+    render();
+  } else if ((e.key === "Enter" || e.key === " ") && answers[current] === null) {
+    e.preventDefault();
+    submitAnswer(focusedOpt);
+  } else if (e.key === "Enter" && answers[current] !== null) {
+    e.preventDefault();
+    navigate(1);
+  } else if (e.key === "1" || e.key === "a" || e.key === "A") {
+    if (answers[current] === null) submitAnswer(0);
+  } else if (e.key === "2" || e.key === "b" || e.key === "B") {
+    if (answers[current] === null) submitAnswer(1);
+  } else if (e.key === "3" || e.key === "c" || e.key === "C") {
+    if (answers[current] === null) submitAnswer(2);
+  } else if (e.key === "4" || e.key === "d" || e.key === "D") {
+    if (answers[current] === null && numOpts > 3) submitAnswer(3);
+  }
+});
+
+/* ═══════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════ */
+function escHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function formatTime(secs) {
+  if (secs < 60) return secs + "s";
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return `${m}m ${s}s`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+render();
+</script>
+</body>
+</html>

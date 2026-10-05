@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linear Search Visualization</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a1a2e;
+      color: #eee;
+      font-family: system-ui, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+
+    .back-link {
+      display: inline-block;
+      color: #e94560;
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    .back-link:hover { opacity: 1; }
+
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 6px;
+      color: #eee;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      font-size: 0.9rem;
+      margin-bottom: 28px;
+    }
+
+    .panel {
+      background: #16213e;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .controls input[type="number"] {
+      background: #0f3460;
+      border: 1px solid #e94560;
+      color: #eee;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 1rem;
+      width: 120px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .controls input[type="number"]:focus { border-color: #eee; }
+
+    button {
+      background: #e94560;
+      color: #eee;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    button:hover { background: #c73050; }
+    button:active { transform: scale(0.97); }
+    button:disabled { background: #555; cursor: not-allowed; transform: none; }
+
+    .btn-secondary {
+      background: #0f3460;
+    }
+    .btn-secondary:hover { background: #1a4a7a; }
+
+    .array-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      min-height: 80px;
+      align-items: center;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .array-box {
+      width: 52px;
+      height: 52px;
+      background: #0f3460;
+      border: 2px solid #334;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      position: relative;
+      transition: background 0.3s, border-color 0.3s, transform 0.3s;
+      flex-shrink: 0;
+    }
+
+    .array-box .index-label {
+      position: absolute;
+      bottom: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.65rem;
+      color: #888;
+    }
+
+    .array-box.current {
+      background: #7a6a00;
+      border-color: #f0c000;
+      transform: scale(1.12);
+    }
+
+    .array-box.match {
+      background: #1a5e2e;
+      border-color: #3ecf6e;
+      transform: scale(1.15);
+    }
+
+    .array-box.no-match {
+      background: #5e1a1a;
+      border-color: #e94560;
+    }
+
+    .array-box.done {
+      background: #333;
+      border-color: #555;
+      opacity: 0.6;
+    }
+
+    .x-mark {
+      position: absolute;
+      top: 2px;
+      right: 4px;
+      color: #e94560;
+      font-size: 0.7rem;
+      font-weight: 900;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .array-box.no-match .x-mark { opacity: 1; }
+
+    .scanner {
+      position: absolute;
+      top: -8px;
+      width: 52px;
+      height: 4px;
+      background: #f0c000;
+      border-radius: 2px;
+      transition: left 0.4s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 0 0 8px #f0c000;
+      pointer-events: none;
+    }
+
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .stat-card {
+      flex: 1;
+      min-width: 160px;
+      background: #0f3460;
+      border-radius: 8px;
+      padding: 14px 18px;
+    }
+
+    .stat-card .label {
+      font-size: 0.75rem;
+      color: #aaa;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-card .value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #f0c000;
+    }
+
+    .step-counter {
+      text-align: center;
+      font-size: 1rem;
+      color: #ccc;
+      margin-top: 12px;
+      min-height: 24px;
+    }
+
+    .result-banner {
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      min-height: 32px;
+      margin-top: 10px;
+      transition: color 0.3s;
+    }
+
+    .result-banner.found { color: #3ecf6e; }
+    .result-banner.not-found { color: #e94560; }
+
+    .comparison-panel {
+      background: #16213e;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 900px;
+      margin: 0 auto 20px;
+    }
+
+    .comparison-panel h2 {
+      font-size: 1.1rem;
+      color: #e94560;
+      margin-bottom: 16px;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 500px) {
+      .comparison-grid { grid-template-columns: 1fr; }
+    }
+
+    .cmp-card {
+      background: #0f3460;
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .cmp-card h3 {
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+      color: #f0c000;
+    }
+
+    .cmp-card p {
+      font-size: 0.85rem;
+      color: #ccc;
+      line-height: 1.5;
+    }
+
+    .note-unsorted {
+      background: #2a1a2e;
+      border-left: 3px solid #e94560;
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      color: #ddd;
+      margin-top: 16px;
+    }
+
+    .cmp-steps {
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .speed-bar-wrap {
+      margin-top: 8px;
+    }
+
+    .speed-bar-label {
+      font-size: 0.75rem;
+      color: #aaa;
+      margin-bottom: 3px;
+    }
+
+    .speed-bar {
+      height: 8px;
+      border-radius: 4px;
+      background: #e94560;
+      transition: width 0.5s;
+    }
+
+    .speed-bar.fast { background: #3ecf6e; }
+
+    .array-wrap {
+      position: relative;
+      padding-top: 12px;
+      padding-bottom: 24px;
+    }
+
+    .speed-label {
+      font-size: 0.8rem;
+      color: #aaa;
+      margin-right: 8px;
+    }
+
+    select {
+      background: #0f3460;
+      border: 1px solid #e94560;
+      color: #eee;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="../../README.md" class="back-link">← Back to Index</a>
+
+  <h1>Linear Search</h1>
+  <p class="subtitle">Step-by-step visualization of O(n) sequential searching</p>
+
+  <div class="panel">
+    <div class="controls">
+      <input type="number" id="targetInput" placeholder="Target value" min="1" max="99" value="42" />
+      <button id="startBtn" onclick="startSearch()">Search</button>
+      <button id="stepBtn" class="btn-secondary" onclick="stepSearch()" disabled>Step</button>
+      <button class="btn-secondary" onclick="resetAll()">Reset</button>
+      <span class="speed-label">Speed:</span>
+      <select id="speedSelect">
+        <option value="700">Slow</option>
+        <option value="350" selected>Normal</option>
+        <option value="120">Fast</option>
+      </select>
+      <button class="btn-secondary" onclick="randomizeArray()">New Array</button>
+    </div>
+
+    <div class="array-wrap" id="arrayWrap">
+      <div class="array-container" id="arrayContainer"></div>
+    </div>
+
+    <div class="step-counter" id="stepCounter">Enter a target value and click Search</div>
+    <div class="result-banner" id="resultBanner"></div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="label">Steps Taken</div>
+        <div class="value" id="statSteps">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Array Size</div>
+        <div class="value" id="statSize">15</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Comparisons</div>
+        <div class="value" id="statComparisons">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Status</div>
+        <div class="value" id="statStatus" style="color:#aaa;font-size:0.95rem">Idle</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="comparison-panel">
+    <h2>Linear vs Binary Search Comparison</h2>
+    <div class="comparison-grid">
+      <div class="cmp-card" id="cmpLinear">
+        <h3>Linear Search</h3>
+        <span class="cmp-steps" id="linearSteps">—</span>
+        <p>Checks each element one by one from the start. Works on <strong>any</strong> array.</p>
+        <div class="speed-bar-wrap">
+          <div class="speed-bar-label">Relative time</div>
+          <div class="speed-bar" id="linearBar" style="width:100%"></div>
+        </div>
+      </div>
+      <div class="cmp-card" id="cmpBinary">
+        <h3>Binary Search</h3>
+        <span class="cmp-steps" id="binarySteps">—</span>
+        <p>Halves the search space each step. Requires a <strong>sorted</strong> array.</p>
+        <div class="speed-bar-wrap">
+          <div class="speed-bar-label">Relative time</div>
+          <div class="speed-bar fast" id="binaryBar" style="width:40%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="note-unsorted" id="sortNote">
+      Note: This array is <strong>unsorted</strong>. Linear search works on ANY array — binary search requires the array to be sorted first.
+    </div>
+  </div>
+
+<script>
+  const ARRAY_SIZE = 15;
+  let arr = [];
+  let currentIdx = -1;
+  let target = 0;
+  let isRunning = false;
+  let autoInterval = null;
+  let found = false;
+  let finished = false;
+  let isSorted = false;
+
+  function randomizeArray() {
+    resetAll();
+    const pool = new Set();
+    while (pool.size < ARRAY_SIZE) pool.add(Math.floor(Math.random() * 79) + 10);
+    arr = [...pool];
+    isSorted = false;
+    document.getElementById('sortNote').innerHTML =
+      'Note: This array is <strong>unsorted</strong>. Linear search works on ANY array — binary search requires the array to be sorted first.';
+    renderArray();
+    document.getElementById('statSize').textContent = ARRAY_SIZE;
+  }
+
+  function sortedArray() {
+    resetAll();
+    arr = [];
+    let v = 5;
+    for (let i = 0; i < ARRAY_SIZE; i++) {
+      v += Math.floor(Math.random() * 8) + 1;
+      arr.push(v);
+    }
+    isSorted = true;
+    document.getElementById('sortNote').innerHTML =
+      'This array is <strong>sorted</strong>. Binary search can take advantage of sorted order for O(log n) search speed.';
+    renderArray();
+  }
+
+  function renderArray() {
+    const container = document.getElementById('arrayContainer');
+    container.innerHTML = '';
+
+    const scanner = document.createElement('div');
+    scanner.className = 'scanner';
+    scanner.id = 'scanner';
+    scanner.style.display = 'none';
+    container.appendChild(scanner);
+
+    arr.forEach((val, idx) => {
+      const box = document.createElement('div');
+      box.className = 'array-box';
+      box.id = `box-${idx}`;
+      box.innerHTML = `${val}<span class="x-mark">✗</span><span class="index-label">${idx}</span>`;
+      container.appendChild(box);
+    });
+  }
+
+  function resetAll() {
+    clearInterval(autoInterval);
+    autoInterval = null;
+    isRunning = false;
+    found = false;
+    finished = false;
+    currentIdx = -1;
+
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('stepBtn').disabled = true;
+    document.getElementById('stepCounter').textContent = 'Enter a target value and click Search';
+    document.getElementById('resultBanner').textContent = '';
+    document.getElementById('resultBanner').className = 'result-banner';
+    document.getElementById('statSteps').textContent = '0';
+    document.getElementById('statComparisons').textContent = '0';
+    document.getElementById('statStatus').textContent = 'Idle';
+    document.getElementById('statStatus').style.color = '#aaa';
+    document.getElementById('linearSteps').textContent = '—';
+    document.getElementById('binarySteps').textContent = '—';
+    document.getElementById('linearBar').style.width = '100%';
+    document.getElementById('binaryBar').style.width = '40%';
+    document.getElementById('scanner').style.display = 'none';
+
+    arr.forEach((_, idx) => {
+      const box = document.getElementById(`box-${idx}`);
+      if (box) box.className = 'array-box';
+    });
+  }
+
+  function calcBinarySteps(target, sortedArr) {
+    let lo = 0, hi = sortedArr.length - 1, steps = 0;
+    while (lo <= hi) {
+      steps++;
+      const mid = Math.floor((lo + hi) / 2);
+      if (sortedArr[mid] === target) return steps;
+      else if (sortedArr[mid] < target) lo = mid + 1;
+      else hi = mid - 1;
+    }
+    return steps;
+  }
+
+  function updateScanner(idx) {
+    const scanner = document.getElementById('scanner');
+    const boxes = document.querySelectorAll('.array-box');
+    if (idx < 0 || idx >= boxes.length) { scanner.style.display = 'none'; return; }
+    const box = boxes[idx];
+    const container = document.getElementById('arrayContainer');
+    const containerRect = container.getBoundingClientRect();
+    const boxRect = box.getBoundingClientRect();
+    const left = boxRect.left - containerRect.left;
+    scanner.style.display = 'block';
+    scanner.style.left = left + 'px';
+    scanner.style.width = box.offsetWidth + 'px';
+  }
+
+  function startSearch() {
+    const targetVal = parseInt(document.getElementById('targetInput').value, 10);
+    if (isNaN(targetVal)) {
+      alert('Please enter a valid number');
+      return;
+    }
+    target = targetVal;
+    resetAll();
+
+    // re-instate to running state after reset
+    isRunning = true;
+    found = false;
+    finished = false;
+    currentIdx = -1;
+
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('stepBtn').disabled = false;
+    document.getElementById('statStatus').textContent = 'Searching…';
+    document.getElementById('statStatus').style.color = '#f0c000';
+
+    const speed = parseInt(document.getElementById('speedSelect').value, 10);
+    autoInterval = setInterval(() => {
+      if (!stepSearch()) {
+        clearInterval(autoInterval);
+        autoInterval = null;
+      }
+    }, speed);
+  }
+
+  // Returns true if should continue, false if done
+  function stepSearch() {
+    if (finished) return false;
+    currentIdx++;
+
+    if (currentIdx >= arr.length) {
+      finishSearch(false, -1);
+      return false;
+    }
+
+    // Mark previous as done
+    if (currentIdx > 0) {
+      const prev = document.getElementById(`box-${currentIdx - 1}`);
+      if (prev && !prev.classList.contains('match')) {
+        prev.className = 'array-box done';
+      }
+    }
+
+    const box = document.getElementById(`box-${currentIdx}`);
+    box.className = 'array-box current';
+    updateScanner(currentIdx);
+
+    const steps = currentIdx + 1;
+    document.getElementById('statSteps').textContent = steps;
+    document.getElementById('statComparisons').textContent = steps;
+    document.getElementById('stepCounter').textContent =
+      `Checked ${steps} of ${arr.length} elements`;
+
+    if (arr[currentIdx] === target) {
+      box.className = 'array-box match';
+      setTimeout(() => finishSearch(true, currentIdx), 300);
+      return false;
+    } else {
+      box.className = 'array-box no-match';
+      setTimeout(() => {
+        if (!finished) box.className = 'array-box done';
+      }, 600);
+      return true;
+    }
+  }
+
+  function finishSearch(wasFound, idx) {
+    finished = true;
+    isRunning = false;
+    clearInterval(autoInterval);
+    autoInterval = null;
+
+    document.getElementById('stepBtn').disabled = true;
+    document.getElementById('scanner').style.display = 'none';
+
+    const linearSteps = idx >= 0 ? idx + 1 : arr.length;
+
+    if (wasFound) {
+      document.getElementById('statStatus').textContent = 'Found!';
+      document.getElementById('statStatus').style.color = '#3ecf6e';
+      document.getElementById('resultBanner').textContent =
+        `Found ${target} at index ${idx} after ${linearSteps} comparison${linearSteps !== 1 ? 's' : ''}`;
+      document.getElementById('resultBanner').className = 'result-banner found';
+    } else {
+      document.getElementById('statStatus').textContent = 'Not Found';
+      document.getElementById('statStatus').style.color = '#e94560';
+      document.getElementById('resultBanner').textContent =
+        `${target} is not in the array. All ${arr.length} elements were checked.`;
+      document.getElementById('resultBanner').className = 'result-banner not-found';
+    }
+
+    // Comparison panel
+    const sortedCopy = [...arr].sort((a, b) => a - b);
+    const binarySteps = calcBinarySteps(target, sortedCopy);
+    const logN = Math.ceil(Math.log2(arr.length + 1));
+
+    document.getElementById('linearSteps').textContent = `${linearSteps} step${linearSteps !== 1 ? 's' : ''}`;
+    document.getElementById('binarySteps').textContent =
+      wasFound ? `~${binarySteps} step${binarySteps !== 1 ? 's' : ''} (sorted)` : `~${logN} steps max (sorted)`;
+
+    const maxSteps = Math.max(linearSteps, binarySteps, 1);
+    document.getElementById('linearBar').style.width = `${(linearSteps / maxSteps) * 100}%`;
+    document.getElementById('binaryBar').style.width = `${(binarySteps / maxSteps) * 100}%`;
+
+    if (linearSteps === 1) {
+      document.getElementById('binarySteps').textContent += ' (same here!)';
+    }
+
+    const cmpEl = document.querySelector('.cmp-card:first-child p');
+    if (wasFound && linearSteps > 1) {
+      cmpEl.innerHTML = `Binary search would find this in ~<strong>${binarySteps}</strong> steps vs <strong>${linearSteps}</strong> for linear. That's ${(linearSteps / binarySteps).toFixed(1)}x faster (on a sorted array).`;
+    }
+
+    document.getElementById('startBtn').disabled = false;
+  }
+
+  // Init
+  randomizeArray();
+</script>
+</body>
+</html>

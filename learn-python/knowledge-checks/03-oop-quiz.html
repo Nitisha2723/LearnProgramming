@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python OOP – Knowledge Check</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #1a1a2e;
+      --panel:   #16213e;
+      --accent:  #e94560;
+      --correct: #2ecc71;
+      --wrong:   #e74c3c;
+      --text:    #e0e0e0;
+      --muted:   #8892a4;
+      --border:  #2a3550;
+      --option-hover: #1e2d4a;
+      --option-selected: #1c3460;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Layout ── */
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .back-link {
+      font-size: 0.9rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .back-link:hover { color: var(--accent); text-decoration: none; }
+
+    .header-title {
+      flex: 1;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .timer {
+      font-size: 0.9rem;
+      color: var(--muted);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .quiz-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 780px;
+    }
+
+    /* ── Progress ── */
+    .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .progress-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .progress-bar-wrap {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    /* ── Question ── */
+    .question-text {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .question-category {
+      display: inline-block;
+      font-size: 0.75rem;
+      background: rgba(233,69,96,0.15);
+      color: var(--accent);
+      border: 1px solid rgba(233,69,96,0.3);
+      border-radius: 20px;
+      padding: 0.15rem 0.65rem;
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── Code block ── */
+    pre.code-block {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.88rem;
+      overflow-x: auto;
+      margin-bottom: 1.25rem;
+      color: #c9d1d9;
+      line-height: 1.55;
+      tab-size: 4;
+    }
+
+    /* ── Options ── */
+    .options-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .option-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      font-size: 0.95rem;
+      transition: background 0.15s, border-color 0.15s;
+      width: 100%;
+      font-family: inherit;
+    }
+    .option-btn:hover:not(:disabled) {
+      background: var(--option-hover);
+      border-color: var(--accent);
+    }
+    .option-btn.selected {
+      background: var(--option-selected);
+      border-color: var(--accent);
+    }
+    .option-btn.correct {
+      background: rgba(46,204,113,0.12);
+      border-color: var(--correct);
+      color: var(--correct);
+    }
+    .option-btn.wrong {
+      background: rgba(231,76,60,0.12);
+      border-color: var(--wrong);
+      color: var(--wrong);
+    }
+    .option-btn.reveal-correct {
+      background: rgba(46,204,113,0.1);
+      border-color: var(--correct);
+      color: var(--correct);
+    }
+    .option-btn:disabled { cursor: default; }
+
+    .option-key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 4px;
+      background: var(--border);
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .option-btn.correct .option-key   { background: var(--correct); color: #fff; }
+    .option-btn.wrong .option-key     { background: var(--wrong);   color: #fff; }
+    .option-btn.reveal-correct .option-key { background: var(--correct); color: #fff; }
+
+    /* ── Fill-blank ── */
+    .fill-input {
+      width: 100%;
+      background: #0d1117;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      font-family: 'Fira Code', monospace;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .fill-input:focus { border-color: var(--accent); }
+    .fill-input.correct { border-color: var(--correct); background: rgba(46,204,113,0.08); color: var(--correct); }
+    .fill-input.wrong   { border-color: var(--wrong);   background: rgba(231,76,60,0.08);  color: var(--wrong);  }
+
+    /* ── Feedback ── */
+    .feedback-box {
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.9rem;
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+    .feedback-box.show { display: block; }
+    .feedback-box.correct {
+      background: rgba(46,204,113,0.1);
+      border: 1px solid var(--correct);
+      color: var(--correct);
+    }
+    .feedback-box.wrong {
+      background: rgba(231,76,60,0.1);
+      border: 1px solid var(--wrong);
+      color: #ff9999;
+    }
+    .feedback-box strong { display: block; margin-bottom: 0.35rem; }
+
+    @keyframes fadeIn { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform: none; } }
+
+    /* ── Submit + Nav buttons ── */
+    .btn-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+
+    .btn-primary   { background: var(--accent); color: #fff; }
+    .btn-secondary { background: var(--border); color: var(--text); }
+    .btn-outline   { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+    .btn-outline:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+
+    .spacer { flex: 1; }
+
+    /* ── Final screen ── */
+    #final-screen {
+      display: none;
+    }
+    #final-screen.show { display: block; }
+
+    .score-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 5px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+    .score-pct {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .score-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .grade-badge {
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .stats-row span strong { color: var(--text); }
+
+    .final-btns {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── Review mode ── */
+    #review-screen { display: none; }
+    #review-screen.show { display: block; }
+
+    .review-item {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .review-item .review-q-num {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .review-item .question-text {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .review-answer-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+    }
+    .review-label { color: var(--muted); font-size: 0.8rem; }
+    .review-your-answer  { color: var(--wrong); }
+    .review-correct-answer { color: var(--correct); }
+    .review-explanation {
+      font-size: 0.875rem;
+      color: #b0c0d8;
+      border-top: 1px solid var(--border);
+      padding-top: 0.6rem;
+      margin-top: 0.6rem;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .quiz-card { padding: 1.25rem; }
+      .question-text { font-size: 1rem; }
+      pre.code-block { font-size: 0.82rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <a class="back-link" href="README.md">← Back to Index</a>
+    <span class="header-title">Python OOP – Knowledge Check</span>
+    <span class="timer" id="timer">00:00</span>
+  </header>
+
+  <main>
+    <div class="quiz-card">
+
+      <!-- Quiz screen -->
+      <div id="quiz-screen">
+        <div class="progress-row">
+          <span class="progress-label" id="progress-label">Question 1 of 15</span>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="progress-bar" style="width:6.67%"></div>
+          </div>
+        </div>
+
+        <span class="question-category" id="q-category"></span>
+        <p class="question-text" id="q-text"></p>
+        <pre class="code-block" id="q-code" style="display:none"></pre>
+
+        <!-- Multiple choice / true-false options -->
+        <ul class="options-list" id="options-list"></ul>
+
+        <!-- Fill blank -->
+        <input
+          class="fill-input"
+          id="fill-input"
+          type="text"
+          placeholder="Type your answer…"
+          style="display:none"
+          autocomplete="off"
+          spellcheck="false"
+        />
+
+        <div class="feedback-box" id="feedback"></div>
+
+        <div class="btn-row">
+          <button class="btn btn-outline" id="btn-prev" onclick="navigate(-1)">← Prev</button>
+          <button class="btn btn-primary" id="btn-submit" onclick="submitAnswer()">Submit</button>
+          <span class="spacer"></span>
+          <button class="btn btn-secondary" id="btn-next" onclick="navigate(1)" disabled>Next →</button>
+        </div>
+      </div>
+
+      <!-- Final screen -->
+      <div id="final-screen">
+        <div class="score-circle">
+          <span class="score-pct" id="final-pct">0%</span>
+          <span class="score-label">Score</span>
+        </div>
+        <div class="grade-badge" id="final-grade"></div>
+        <div class="stats-row">
+          <span><strong id="final-correct">0</strong> / 15 correct</span>
+          <span>Time: <strong id="final-time">00:00</strong></span>
+        </div>
+        <div class="final-btns">
+          <button class="btn btn-primary" onclick="retryQuiz()">Retry</button>
+          <button class="btn btn-secondary" id="btn-review" onclick="showReview()">Review Wrong Answers</button>
+        </div>
+      </div>
+
+      <!-- Review screen -->
+      <div id="review-screen">
+        <h2 style="margin-bottom:1.25rem;font-size:1.15rem;">Missed Questions</h2>
+        <div id="review-content"></div>
+        <button class="btn btn-outline" onclick="backToFinal()">← Back to Results</button>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+//  QUESTIONS  (15 total)
+// ─────────────────────────────────────────────────────────────
+const questions = [
+  // 1 – class definition / __init__ / self
+  {
+    category: "class / __init__ / self",
+    type: "multiple-choice",
+    text: "What is the purpose of `self` as the first parameter in Python instance methods?",
+    options: [
+      "It is a reserved keyword that Python uses to refer to global state.",
+      "It refers to the instance of the class on which the method is called.",
+      "It refers to the class itself (like `cls` in a class method).",
+      "It is optional and can be replaced with any identifier, but convention is `self`."
+    ],
+    correct: 1,
+    explanation: "`self` is the conventional name for the first parameter of instance methods. It receives the specific object instance the method is called on, allowing the method to access and modify that instance's attributes. Technically you can rename it, but the first positional parameter always behaves this way — `self` is just a convention."
+  },
+
+  // 2 – instance vs class variables
+  {
+    category: "Instance vs Class Variables",
+    type: "code-output",
+    text: "What does the following code print?",
+    code:
+`class Counter:
+    count = 0          # class variable
+
+    def __init__(self):
+        Counter.count += 1
+
+c1 = Counter()
+c2 = Counter()
+print(Counter.count)`,
+    options: ["0", "1", "2", "Error"],
+    correct: 2,
+    explanation: "`count` is a class variable shared across all instances. Each call to `__init__` increments `Counter.count` by 1. After creating two instances the shared variable equals 2. If it were `self.count = 0` in `__init__`, each instance would have its own independent copy."
+  },
+
+  // 3 – @property getter/setter
+  {
+    category: "@property",
+    type: "multiple-choice",
+    text: "Which decorator turns a method into a property setter for an existing property named `temperature`?",
+    options: [
+      "@property.setter",
+      "@temperature.setter",
+      "@setter.temperature",
+      "@property(temperature).setter"
+    ],
+    correct: 1,
+    explanation: "After defining a property with `@property`, you attach a setter by decorating a same-named method with `@<name>.setter` — in this case `@temperature.setter`. This keeps the public API clean (`obj.temperature = 25`) while letting you run validation logic inside the setter."
+  },
+
+  // 4 – @staticmethod vs @classmethod
+  {
+    category: "@staticmethod vs @classmethod",
+    type: "true-false",
+    text: "A `@classmethod` receives the class as its first argument, while a `@staticmethod` receives neither the class nor the instance.",
+    options: ["True", "False"],
+    correct: 0,
+    explanation: "True. `@classmethod` methods take `cls` (the class) as their first implicit argument and can access/modify class state. `@staticmethod` methods are plain functions attached to the class for namespace purposes — they receive no implicit first argument and cannot access the class or instance without an explicit reference."
+  },
+
+  // 5 – inheritance / super()
+  {
+    category: "Inheritance / super()",
+    type: "code-output",
+    text: "What does the following code print?",
+    code:
+`class Animal:
+    def __init__(self, name):
+        self.name = name
+
+    def speak(self):
+        return f"{self.name} makes a sound."
+
+class Dog(Animal):
+    def speak(self):
+        base = super().speak()
+        return base + " Woof!"
+
+d = Dog("Rex")
+print(d.speak())`,
+    options: [
+      "Rex makes a sound.",
+      "Rex makes a sound. Woof!",
+      "Woof!",
+      "AttributeError"
+    ],
+    correct: 1,
+    explanation: "`Dog.speak()` overrides the parent method but calls `super().speak()` first. `super()` proxies to `Animal.speak(self)`, which returns `'Rex makes a sound.'`. The child method then appends `' Woof!'`. This is the standard pattern for extending rather than completely replacing parent behaviour."
+  },
+
+  // 6 – method overriding
+  {
+    category: "Method Overriding",
+    type: "multiple-choice",
+    text: "Which statement best describes method overriding in Python?",
+    options: [
+      "A child class defines a method with the same name as a parent method, replacing its behaviour.",
+      "A class defines two methods with the same name but different parameter counts.",
+      "A method is decorated with `@override` to signal replacement.",
+      "Python does not support method overriding; you must rename the method."
+    ],
+    correct: 0,
+    explanation: "Method overriding means a subclass provides its own implementation of a method already defined in a parent class. Python uses the subclass version when called on an instance of the subclass. Python has no `@override` decorator in the stdlib (though `typing.override` was added in 3.12 for type-checker hints). Python also doesn't support method overloading by signature."
+  },
+
+  // 7 – __str__ vs __repr__
+  {
+    category: "__str__ vs __repr__",
+    type: "multiple-choice",
+    text: "Which dunder method should return an *unambiguous*, developer-oriented string — ideally one that could recreate the object?",
+    options: ["__str__", "__repr__", "__format__", "__bytes__"],
+    correct: 1,
+    explanation: "`__repr__` is meant for developers: it should be unambiguous and, when possible, look like valid Python to recreate the object (e.g., `Point(x=1, y=2)`). `__str__` is for end-users and can be informal (e.g., `'(1, 2)'`). When only `__repr__` is defined, `str()` falls back to it."
+  },
+
+  // 8 – __eq__
+  {
+    category: "Dunder Methods (__eq__)",
+    type: "code-output",
+    text: "What does the following code print?",
+    code:
+`class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
+p1 = Point(1, 2)
+p2 = Point(1, 2)
+p3 = Point(3, 4)
+print(p1 == p2, p1 == p3)`,
+    options: ["True False", "False False", "True True", "False True"],
+    correct: 0,
+    explanation: "`__eq__` defines the behaviour of the `==` operator. Here two `Point` objects are equal if both `x` and `y` match. `p1 == p2` is `True` (both 1,2) and `p1 == p3` is `False` (1,2 vs 3,4), so the output is `True False`."
+  },
+
+  // 9 – __len__ / __add__ operator overloading
+  {
+    category: "Operator Overloading (__len__, __add__)",
+    type: "true-false",
+    text: "Defining `__add__` on a class allows instances of that class to use the `+` operator.",
+    options: ["True", "False"],
+    correct: 0,
+    explanation: "True. Implementing `__add__(self, other)` lets Python call it when `+` is used: `a + b` is translated to `a.__add__(b)`. Similarly, `__len__` enables `len(obj)`, `__str__` enables `str(obj)`, etc. This is Python's data model (operator overloading via dunder methods)."
+  },
+
+  // 10 – ABC abstract base class
+  {
+    category: "ABC / Abstract Base Classes",
+    type: "multiple-choice",
+    text: "What happens if you try to instantiate a class that inherits from `ABC` but does not implement all abstract methods?",
+    options: [
+      "Python silently ignores the missing methods.",
+      "A `TypeError` is raised at instantiation time.",
+      "A `NotImplementedError` is raised at instantiation time.",
+      "The abstract methods default to returning `None`."
+    ],
+    correct: 1,
+    explanation: "If a concrete subclass of an `ABC` fails to override every method decorated with `@abstractmethod`, Python raises a `TypeError` (not `NotImplementedError`) when you attempt to create an instance. The error message lists the unimplemented abstract methods."
+  },
+
+  // 11 – Protocol (structural subtyping)
+  {
+    category: "Protocol (Structural Subtyping)",
+    type: "multiple-choice",
+    text: "Which statement correctly describes `typing.Protocol` compared to `ABC`?",
+    options: [
+      "A `Protocol` enforces subclassing; classes must explicitly inherit from it to satisfy it.",
+      "A `Protocol` uses structural (duck-type) checking — a class satisfies it if it has the required attributes/methods, regardless of inheritance.",
+      "A `Protocol` is identical to `ABC` but requires no `@abstractmethod` decorator.",
+      "A `Protocol` only works with `isinstance()` checks, not static type checkers."
+    ],
+    correct: 1,
+    explanation: "`typing.Protocol` enables *structural* subtyping: a class satisfies a Protocol simply by having compatible attributes and methods — explicit inheritance is not required. This aligns with Python's duck-typing philosophy. In contrast, `ABC` requires explicit inheritance. Protocols are mainly used by static type checkers like `mypy`/`pyright` (though `runtime_checkable` allows `isinstance`)."
+  },
+
+  // 12 – @dataclass
+  {
+    category: "@dataclass",
+    type: "fill-blank",
+    text: "Complete the decorator that auto-generates `__init__`, `__repr__`, and `__eq__` for a class: `@______`",
+    correct: "dataclass",
+    explanation: "`@dataclass` (from the `dataclasses` module, introduced in Python 3.7) automatically generates `__init__`, `__repr__`, and `__eq__` based on the class's field annotations. You can control which methods are generated via parameters like `repr=False`, `eq=False`, `order=True`, etc."
+  },
+
+  // 13 – Multiple inheritance / MRO
+  {
+    category: "Multiple Inheritance / MRO",
+    type: "code-output",
+    text: "What does the following code print? (Python uses C3 linearisation for MRO)",
+    code:
+`class A:
+    def greet(self): return "A"
+
+class B(A):
+    def greet(self): return "B"
+
+class C(A):
+    def greet(self): return "C"
+
+class D(B, C):
+    pass
+
+d = D()
+print(d.greet())`,
+    options: ["A", "B", "C", "Error"],
+    correct: 1,
+    explanation: "Python's MRO (C3 linearisation) for `D` is: D → B → C → A. When `d.greet()` is called, Python searches this order and finds `greet` in `B` first, returning `'B'`. You can inspect this with `D.__mro__` or `D.mro()`. This is the classic 'diamond problem' resolution."
+  },
+
+  // 14 – @classmethod as alternative constructor
+  {
+    category: "@classmethod",
+    type: "multiple-choice",
+    text: "What is the idiomatic Python use of `@classmethod` as an *alternative constructor*?",
+    options: [
+      "Return `None` from the method so `__init__` is skipped.",
+      "Call `cls(...)` inside the method to create and return a new instance.",
+      "Use `super().__init__()` from within the class method.",
+      "Decorate `__init__` with `@classmethod` to allow class-level instantiation."
+    ],
+    correct: 1,
+    explanation: "A `@classmethod` receives the class as `cls`. By calling `cls(...)`, you create and return a new instance, acting as a factory / alternative constructor. `datetime.fromisoformat()` is a classic example. This is preferable to multiple `__init__` signatures because Python doesn't support method overloading."
+  },
+
+  // 15 – MRO / super() in multiple inheritance
+  {
+    category: "MRO / super()",
+    type: "true-false",
+    text: "In a multiple-inheritance hierarchy, `super()` always delegates to the *direct parent* class, ignoring MRO.",
+    options: ["True", "False"],
+    correct: 1,
+    explanation: "False. `super()` follows the MRO, not just the direct parent. In cooperative multiple inheritance, each call to `super()` passes control to the *next class in the MRO*, which may not be the direct parent. This is why all classes in a cooperative hierarchy should call `super().__init__()` — the chain is guaranteed to reach every class in the correct MRO order."
+  }
+];
+
+// ─────────────────────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────────────────────
+let current       = 0;
+let answers       = new Array(questions.length).fill(null);  // user's choice/text
+let submitted     = new Array(questions.length).fill(false);
+let startTime     = Date.now();
+let timerInterval = null;
+let finalElapsed  = 0;
+
+// ─────────────────────────────────────────────────────────────
+//  TIMER
+// ─────────────────────────────────────────────────────────────
+function formatTime(ms) {
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  return String(m).padStart(2,'0') + ':' + String(s % 60).padStart(2,'0');
+}
+
+function startTimer() {
+  startTime = Date.now();
+  timerInterval = setInterval(() => {
+    document.getElementById('timer').textContent = formatTime(Date.now() - startTime);
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  finalElapsed = Date.now() - startTime;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  RENDER
+// ─────────────────────────────────────────────────────────────
+function renderQuestion(idx) {
+  const q = questions[idx];
+  const total = questions.length;
+
+  // Progress
+  document.getElementById('progress-label').textContent = `Question ${idx+1} of ${total}`;
+  document.getElementById('progress-bar').style.width = `${((idx+1)/total)*100}%`;
+
+  // Category & text
+  document.getElementById('q-category').textContent = q.category;
+  document.getElementById('q-text').textContent = q.text;
+
+  // Code block
+  const codeEl = document.getElementById('q-code');
+  if (q.code) {
+    codeEl.textContent = q.code;
+    codeEl.style.display = 'block';
+  } else {
+    codeEl.style.display = 'none';
+  }
+
+  // Options vs fill-blank
+  const optionsList = document.getElementById('options-list');
+  const fillInput   = document.getElementById('fill-input');
+  const feedback    = document.getElementById('feedback');
+  const btnSubmit   = document.getElementById('btn-submit');
+  const btnNext     = document.getElementById('btn-next');
+  const btnPrev     = document.getElementById('btn-prev');
+
+  feedback.className = 'feedback-box';
+  feedback.innerHTML = '';
+
+  if (q.type === 'fill-blank') {
+    optionsList.style.display = 'none';
+    fillInput.style.display = 'block';
+    fillInput.value = answers[idx] !== null ? answers[idx] : '';
+    fillInput.className = 'fill-input';
+    fillInput.disabled = submitted[idx];
+
+    if (submitted[idx]) {
+      const isCorrect = normalise(answers[idx]) === normalise(q.correct);
+      fillInput.classList.add(isCorrect ? 'correct' : 'wrong');
+      showFeedback(idx, isCorrect);
+    }
+  } else {
+    optionsList.style.display = 'flex';
+    fillInput.style.display   = 'none';
+    fillInput.value = '';
+
+    optionsList.innerHTML = '';
+    q.options.forEach((opt, i) => {
+      const li = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.setAttribute('data-idx', i);
+      btn.innerHTML = `<span class="option-key">${String.fromCharCode(65+i)}</span> ${escHtml(opt)}`;
+      btn.onclick = () => selectOption(i);
+
+      if (submitted[idx]) {
+        btn.disabled = true;
+        const isCorrect = i === q.correct;
+        const isSelected = answers[idx] === i;
+        if (isSelected && isCorrect)  btn.classList.add('correct');
+        else if (isSelected)          btn.classList.add('wrong');
+        else if (isCorrect)           btn.classList.add('reveal-correct');
+      } else {
+        if (answers[idx] === i) btn.classList.add('selected');
+      }
+
+      li.appendChild(btn);
+      optionsList.appendChild(li);
+    });
+
+    if (submitted[idx]) {
+      const isCorrect = answers[idx] === q.correct;
+      showFeedback(idx, isCorrect);
+    }
+  }
+
+  // Buttons
+  btnPrev.disabled = idx === 0;
+  if (submitted[idx]) {
+    btnSubmit.textContent = idx === total-1 ? 'Finish' : 'Next →';
+    btnSubmit.onclick = idx === total-1 ? finishQuiz : () => navigate(1);
+    btnNext.disabled = idx >= total-1;
+  } else {
+    btnSubmit.textContent = 'Submit';
+    btnSubmit.onclick = submitAnswer;
+    btnNext.disabled = true;
+  }
+  btnNext.disabled = !submitted[idx] || idx >= total-1;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function normalise(s) {
+  return String(s).trim().toLowerCase().replace(/['"]/g,'');
+}
+
+// ─────────────────────────────────────────────────────────────
+//  INTERACTION
+// ─────────────────────────────────────────────────────────────
+function selectOption(i) {
+  if (submitted[current]) return;
+  answers[current] = i;
+  document.querySelectorAll('.option-btn').forEach((btn, bi) => {
+    btn.classList.toggle('selected', bi === i);
+  });
+}
+
+function submitAnswer() {
+  const q = questions[current];
+  if (q.type === 'fill-blank') {
+    const val = document.getElementById('fill-input').value;
+    if (!val.trim()) { shake(document.getElementById('fill-input')); return; }
+    answers[current] = val.trim();
+  } else {
+    if (answers[current] === null) {
+      shake(document.getElementById('options-list')); return;
+    }
+  }
+
+  submitted[current] = true;
+
+  // Re-render to show colours
+  renderQuestion(current);
+}
+
+function showFeedback(idx, isCorrect) {
+  const q = questions[idx];
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback-box show ' + (isCorrect ? 'correct' : 'wrong');
+
+  let correctDisplay = '';
+  if (q.type === 'fill-blank') {
+    correctDisplay = `<strong>Correct answer:</strong> <code>${escHtml(q.correct)}</code><br>`;
+  } else if (!isCorrect) {
+    correctDisplay = `<strong>Correct answer:</strong> ${escHtml(q.options[q.correct])}<br>`;
+  }
+
+  fb.innerHTML = `
+    <strong>${isCorrect ? '✓ Correct!' : '✗ Incorrect'}</strong>
+    ${isCorrect ? '' : correctDisplay}
+    <span>${escHtml(q.explanation)}</span>
+  `;
+}
+
+function navigate(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= questions.length) return;
+  current = next;
+  renderQuestion(current);
+}
+
+function shake(el) {
+  el.style.animation = 'none';
+  el.offsetHeight; // reflow
+  el.style.animation = 'shake 0.35s ease';
+  el.addEventListener('animationend', () => el.style.animation = '', {once:true});
+}
+
+// ─────────────────────────────────────────────────────────────
+//  FINISH
+// ─────────────────────────────────────────────────────────────
+function finishQuiz() {
+  stopTimer();
+  const correctCount = questions.reduce((sum, q, i) => {
+    if (!submitted[i]) return sum;
+    if (q.type === 'fill-blank') {
+      return sum + (normalise(answers[i]) === normalise(q.correct) ? 1 : 0);
+    }
+    return sum + (answers[i] === q.correct ? 1 : 0);
+  }, 0);
+
+  const pct = Math.round((correctCount / questions.length) * 100);
+  let grade;
+  if (pct >= 95) grade = 'Expert!';
+  else if (pct >= 80) grade = 'Good Job!';
+  else if (pct >= 60) grade = 'Getting There';
+  else grade = 'Needs Work';
+
+  document.getElementById('final-pct').textContent = pct + '%';
+  document.getElementById('final-grade').textContent = grade;
+  document.getElementById('final-correct').textContent = correctCount;
+  document.getElementById('final-time').textContent = formatTime(finalElapsed);
+
+  const hasWrong = questions.some((q, i) => {
+    if (!submitted[i]) return false;
+    if (q.type === 'fill-blank') return normalise(answers[i]) !== normalise(q.correct);
+    return answers[i] !== q.correct;
+  });
+  document.getElementById('btn-review').disabled = !hasWrong;
+
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('final-screen').classList.add('show');
+}
+
+function retryQuiz() {
+  answers   = new Array(questions.length).fill(null);
+  submitted = new Array(questions.length).fill(false);
+  current   = 0;
+  finalElapsed = 0;
+
+  document.getElementById('final-screen').classList.remove('show');
+  document.getElementById('review-screen').classList.remove('show');
+  document.getElementById('quiz-screen').style.display = 'block';
+
+  startTimer();
+  renderQuestion(0);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  REVIEW
+// ─────────────────────────────────────────────────────────────
+function showReview() {
+  document.getElementById('final-screen').classList.remove('show');
+
+  const container = document.getElementById('review-content');
+  container.innerHTML = '';
+
+  questions.forEach((q, i) => {
+    const isCorrect = q.type === 'fill-blank'
+      ? normalise(answers[i]) === normalise(q.correct)
+      : answers[i] === q.correct;
+    if (isCorrect) return;
+
+    const div = document.createElement('div');
+    div.className = 'review-item';
+
+    let yourAnswer, correctAnswer;
+    if (q.type === 'fill-blank') {
+      yourAnswer    = answers[i] !== null ? escHtml(answers[i]) : '<em>not answered</em>';
+      correctAnswer = escHtml(q.correct);
+    } else {
+      yourAnswer    = answers[i] !== null ? escHtml(q.options[answers[i]]) : '<em>not answered</em>';
+      correctAnswer = escHtml(q.options[q.correct]);
+    }
+
+    div.innerHTML = `
+      <div class="review-q-num">Question ${i+1} — ${escHtml(q.category)}</div>
+      <p class="question-text">${escHtml(q.text)}</p>
+      ${q.code ? `<pre class="code-block">${escHtml(q.code)}</pre>` : ''}
+      <div class="review-answer-row">
+        <span class="review-label">Your answer:</span>
+        <span class="review-your-answer">${yourAnswer}</span>
+        <span class="review-label">Correct answer:</span>
+        <span class="review-correct-answer">${correctAnswer}</span>
+      </div>
+      <div class="review-explanation">${escHtml(q.explanation)}</div>
+    `;
+    container.appendChild(div);
+  });
+
+  document.getElementById('review-screen').classList.add('show');
+}
+
+function backToFinal() {
+  document.getElementById('review-screen').classList.remove('show');
+  document.getElementById('final-screen').classList.add('show');
+}
+
+// ─────────────────────────────────────────────────────────────
+//  KEYBOARD
+// ─────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  const quizVisible = document.getElementById('quiz-screen').style.display !== 'none';
+  if (!quizVisible) return;
+
+  const q = questions[current];
+
+  if (q.type !== 'fill-blank') {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      const cur = answers[current] !== null ? answers[current] : -1;
+      if (!submitted[current]) selectOption(Math.min(cur+1, q.options.length-1));
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const cur = answers[current] !== null ? answers[current] : q.options.length;
+      if (!submitted[current]) selectOption(Math.max(cur-1, 0));
+    }
+    // A-D or 1-4 shortcuts
+    const charMap = {a:0,b:1,c:2,d:3,'1':0,'2':1,'3':2,'4':3};
+    if (charMap[e.key] !== undefined && !submitted[current]) {
+      const idx = charMap[e.key];
+      if (idx < q.options.length) selectOption(idx);
+    }
+  }
+
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+    e.preventDefault();
+    if (!submitted[current]) {
+      submitAnswer();
+    } else if (current < questions.length - 1) {
+      navigate(1);
+    } else {
+      finishQuiz();
+    }
+  }
+});
+
+// Add shake keyframes dynamically
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes shake {
+    0%,100%{ transform: translateX(0);  }
+    20%    { transform: translateX(-6px); }
+    40%    { transform: translateX(6px);  }
+    60%    { transform: translateX(-4px); }
+    80%    { transform: translateX(4px);  }
+  }
+`;
+document.head.appendChild(style);
+
+// ─────────────────────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────────────────────
+startTimer();
+renderQuestion(0);
+</script>
+</body>
+</html>

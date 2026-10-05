@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python Project Architecture – Quiz</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #1a1a2e;
+      --panel:     #16213e;
+      --accent:    #e94560;
+      --accent-dim:#b5374c;
+      --green:     #2ecc71;
+      --red:       #e74c3c;
+      --text:      #e0e0e0;
+      --muted:     #8892a4;
+      --border:    #2a3a5e;
+      --code-bg:   #0d1117;
+      --radius:    10px;
+      --trans:     0.2s ease;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 40px;
+    }
+
+    a.back-link {
+      align-self: flex-start;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin-bottom: 18px;
+      transition: color var(--trans);
+    }
+    a.back-link:hover { color: var(--accent); }
+
+    h1 {
+      font-size: clamp(1.3rem, 4vw, 1.9rem);
+      color: var(--accent);
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    /* ── Progress bar ── */
+    .progress-wrap {
+      width: 100%;
+      max-width: 720px;
+      margin-bottom: 22px;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .progress-bar-outer {
+      background: var(--border);
+      border-radius: 99px;
+      height: 7px;
+      overflow: hidden;
+    }
+    .progress-bar-inner {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 30px;
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .question-text {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    pre.code-snippet {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      overflow-x: auto;
+      font-size: 0.84rem;
+      line-height: 1.55;
+      color: #c9d1d9;
+      font-family: 'Consolas', 'Fira Code', monospace;
+      white-space: pre;
+    }
+
+    /* ── Options ── */
+    .options { display: flex; flex-direction: column; gap: 10px; }
+
+    .option-btn {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.95rem;
+      padding: 12px 16px;
+      text-align: left;
+      transition: border-color var(--trans), background var(--trans);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      background: #1e1e3e;
+    }
+    .option-btn:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .option-btn.selected { border-color: var(--accent); background: #1e1e3e; }
+    .option-btn.correct  { border-color: var(--green); background: rgba(46,204,113,.12); }
+    .option-btn.wrong    { border-color: var(--red);   background: rgba(231,76,60,.12); }
+
+    .opt-key {
+      min-width: 26px;
+      height: 26px;
+      border-radius: 5px;
+      background: var(--border);
+      display: grid;
+      place-items: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .option-btn.correct .opt-key { background: var(--green); color: #000; }
+    .option-btn.wrong   .opt-key { background: var(--red);   color: #fff; }
+
+    /* ── Fill-blank ── */
+    .fill-blank-wrap { display: flex; flex-direction: column; gap: 10px; }
+    .fill-blank-input {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      padding: 11px 14px;
+      width: 100%;
+      transition: border-color var(--trans);
+      font-family: 'Consolas', 'Fira Code', monospace;
+    }
+    .fill-blank-input:focus { outline: none; border-color: var(--accent); }
+    .fill-blank-input.correct { border-color: var(--green); background: rgba(46,204,113,.08); }
+    .fill-blank-input.wrong   { border-color: var(--red);   background: rgba(231,76,60,.08); }
+
+    .confirm-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 11px 22px;
+      align-self: flex-start;
+      transition: background var(--trans);
+    }
+    .confirm-btn:hover { background: var(--accent-dim); }
+    .confirm-btn:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── Feedback ── */
+    .feedback {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      display: none;
+    }
+    .feedback.show { display: block; }
+    .feedback.correct-fb { background: rgba(46,204,113,.13); border: 1px solid var(--green); }
+    .feedback.wrong-fb   { background: rgba(231,76,60,.13);  border: 1px solid var(--red); }
+    .feedback strong { display: block; margin-bottom: 5px; font-size: 0.95rem; }
+
+    /* ── Nav buttons ── */
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 22px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .nav-btn {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 9px 20px;
+      transition: border-color var(--trans), color var(--trans);
+    }
+    .nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .nav-btn:disabled { opacity: 0.35; cursor: default; }
+    .nav-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+    .nav-btn.primary:hover:not(:disabled) { background: var(--accent-dim); border-color: var(--accent-dim); color: #fff; }
+
+    /* ── Result screen ── */
+    .result-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 30px;
+      width: 100%;
+      max-width: 720px;
+      text-align: center;
+      display: none;
+    }
+    .result-card.show { display: block; }
+
+    .score-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 4px solid var(--accent);
+      display: grid;
+      place-items: center;
+      margin: 0 auto 20px;
+    }
+    .score-pct { font-size: 2.2rem; font-weight: 800; color: var(--accent); }
+    .score-sub { font-size: 0.78rem; color: var(--muted); }
+
+    .grade-label {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .result-stats {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 28px;
+    }
+    .result-stats span { color: var(--text); font-weight: 600; }
+
+    .result-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* ── Review mode ── */
+    .review-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      width: 100%;
+      max-width: 720px;
+      display: none;
+      margin-top: 12px;
+    }
+    .review-card.show { display: block; }
+
+    .review-item {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+    }
+    .review-item:last-child { border-bottom: none; }
+    .review-q-label { color: var(--muted); font-size: 0.8rem; margin-bottom: 6px; }
+    .review-q-text  { font-size: 0.97rem; margin-bottom: 12px; line-height: 1.55; }
+    .review-your-ans { color: var(--red);   font-size: 0.88rem; margin-bottom: 4px; }
+    .review-correct  { color: var(--green); font-size: 0.88rem; margin-bottom: 8px; }
+    .review-explain  { background: var(--bg); border-radius: 6px; padding: 10px 12px; font-size: 0.87rem; color: var(--muted); line-height: 1.5; }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 480px) {
+      .card, .result-card, .review-card { padding: 20px 16px; }
+      .nav-row { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<a class="back-link" href="README.md">&#8592; Back to Index</a>
+
+<h1>Python Project Architecture</h1>
+<p class="subtitle">Knowledge Check &mdash; 15 Questions</p>
+
+<!-- Progress -->
+<div class="progress-wrap" id="progressWrap">
+  <div class="progress-label">
+    <span id="progressText">Question 1 of 15</span>
+    <span id="progressPct">0%</span>
+  </div>
+  <div class="progress-bar-outer">
+    <div class="progress-bar-inner" id="progressBar" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- Quiz card -->
+<div class="card" id="quizCard">
+  <div class="question-text" id="questionText"></div>
+  <pre class="code-snippet hidden" id="codeSnippet"></pre>
+  <div id="optionsArea"></div>
+  <div class="feedback" id="feedback"></div>
+  <div class="nav-row">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">&#8592; Previous</button>
+    <button class="nav-btn primary hidden" id="nextBtn" onclick="navigate(1)">Next &#8594;</button>
+    <button class="nav-btn primary hidden" id="finishBtn" onclick="showResult()">Finish &#10003;</button>
+  </div>
+</div>
+
+<!-- Result screen -->
+<div class="result-card" id="resultCard">
+  <div class="score-circle">
+    <div>
+      <div class="score-pct" id="scorePct"></div>
+      <div class="score-sub">score</div>
+    </div>
+  </div>
+  <div class="grade-label" id="gradeLabel"></div>
+  <div class="result-stats" id="resultStats"></div>
+  <div class="result-actions">
+    <button class="nav-btn primary" onclick="retryQuiz()">&#8635; Retry</button>
+    <button class="nav-btn" onclick="toggleReview()">Review Wrong Answers</button>
+  </div>
+</div>
+
+<!-- Review panel -->
+<div class="review-card" id="reviewCard"></div>
+
+<script>
+/* ================================================================
+   QUESTIONS
+   ================================================================ */
+const questions = [
+  /* 1 */
+  {
+    type: "multiple-choice",
+    text: "What is the primary benefit of chaining generators (a generator pipeline) instead of building full lists at each stage?",
+    options: [
+      "It executes faster on multi-core CPUs by default.",
+      "Only one item flows through the entire pipeline at a time, keeping memory constant regardless of input size.",
+      "It automatically caches results so repeated runs are faster.",
+      "Python's garbage collector is bypassed, reducing overhead."
+    ],
+    correct: 1,
+    explanation: "Generators are lazy: each stage only produces a value when the next stage asks for one. With a pipeline of chained generators, a single item travels the whole pipeline before the next item is fetched, so peak memory is O(1) relative to the sequence length — ideal for large files or streams."
+  },
+
+  /* 2 – code output */
+  {
+    type: "multiple-choice",
+    code:
+`def squares(n):
+    for i in range(n):
+        yield i * i
+
+def evens(seq):
+    for x in seq:
+        if x % 2 == 0:
+            yield x
+
+pipeline = evens(squares(6))
+print(list(pipeline))`,
+    text: "What does the generator pipeline above print?",
+    options: [
+      "[0, 4, 16]",
+      "[0, 2, 4]",
+      "[0, 4, 16, 36]",
+      "[4, 16, 36]"
+    ],
+    correct: 0,
+    explanation: "squares(6) yields 0,1,4,9,16,25. evens() keeps only even values: 0, 4, 16. So list(pipeline) == [0, 4, 16]. Note: 25 is odd and 36 is not produced because range(6) stops at 5."
+  },
+
+  /* 3 */
+  {
+    type: "multiple-choice",
+    text: "In the Repository pattern for Python, what is the Repository's primary responsibility?",
+    options: [
+      "Rendering HTML templates for data objects.",
+      "Validating business logic before saving.",
+      "Abstracting data-access operations (CRUD) so domain objects stay decoupled from storage details.",
+      "Managing HTTP request/response cycles."
+    ],
+    correct: 2,
+    explanation: "A Repository encapsulates all storage logic (database queries, file I/O, etc.) behind an interface. Domain objects interact with the repository rather than directly with SQLAlchemy, file handles, or REST APIs, making them independently testable and easier to swap backends."
+  },
+
+  /* 4 – code snippet architecture */
+  {
+    type: "multiple-choice",
+    code:
+`# repositories/user_repo.py
+from typing import Optional
+from models import User
+
+class UserRepository:
+    def __init__(self, session):
+        self._session = session
+
+    def get_by_id(self, user_id: int) -> Optional[User]:
+        return self._session.query(User).filter_by(id=user_id).first()
+
+    def save(self, user: User) -> None:
+        self._session.add(user)
+        self._session.commit()`,
+    text: "Which design benefit does the UserRepository above demonstrate?",
+    options: [
+      "It forces all callers to use SQLAlchemy directly.",
+      "It exposes the database session globally for convenience.",
+      "It hides ORM details behind named methods, so callers never touch the session.",
+      "It prevents unit tests from running because the session is required."
+    ],
+    correct: 2,
+    explanation: "Callers call get_by_id() and save() without knowing whether the backend is SQLAlchemy, a dict, a mock, or an API. In tests you inject a fake session or subclass UserRepository, keeping domain logic isolated from persistence mechanics."
+  },
+
+  /* 5 */
+  {
+    type: "multiple-choice",
+    text: "Which statement best describes the difference between pathlib.Path and os.path?",
+    options: [
+      "os.path is cross-platform; pathlib.Path only works on Unix.",
+      "pathlib.Path is an object-oriented API introduced in Python 3.4; os.path is a legacy string-based API.",
+      "pathlib.Path can only represent absolute paths.",
+      "os.path automatically creates missing directories; pathlib.Path does not."
+    ],
+    correct: 1,
+    explanation: "pathlib.Path (PEP 428, Python 3.4+) wraps paths as objects with methods like .read_text(), .glob(), .mkdir(). os.path is a module of standalone functions that operate on plain strings. Both are cross-platform. The idiomatic modern approach is pathlib."
+  },
+
+  /* 6 – code output */
+  {
+    type: "multiple-choice",
+    code:
+`from pathlib import Path
+
+p = Path('/projects/app') / 'src' / 'main.py'
+print(p.suffix)
+print(p.stem)
+print(p.parent.name)`,
+    text: "What is printed by the code above?",
+    options: [
+      ".py\nmain\napp",
+      ".py\nmain.py\nsrc",
+      ".py\nmain\nsrc",
+      "py\nmain\nsrc"
+    ],
+    correct: 2,
+    explanation: "p.suffix returns the file extension including the dot: '.py'. p.stem is the filename without extension: 'main'. p.parent is /projects/app/src, and its .name is 'src'."
+  },
+
+  /* 7 */
+  {
+    type: "multiple-choice",
+    code:
+`from dataclasses import dataclass, field
+from typing import List
+
+@dataclass
+class Project:
+    name: str
+    tags: List[str] = field(default_factory=list)
+
+a = Project("alpha")
+b = Project("beta")
+a.tags.append("web")
+print(b.tags)`,
+    text: "What does the code above print, and why is default_factory=list used instead of tags: List[str] = []?",
+    options: [
+      "['web'] — both instances share the same default list.",
+      "[] — each instance gets its own fresh list because default_factory creates a new list per instance.",
+      "None — field() is required for mutable defaults but still raises an error.",
+      "['web'] — dataclasses copy default lists automatically."
+    ],
+    correct: 1,
+    explanation: "Using a mutable default (= []) in a dataclass raises ValueError at class definition time. default_factory=list tells the dataclass machinery to call list() for each new instance, so a.tags and b.tags are independent objects. Appending to a.tags leaves b.tags empty."
+  },
+
+  /* 8 */
+  {
+    type: "multiple-choice",
+    text: "What does Optional[int] mean in Python type hints?",
+    options: [
+      "The parameter is optional (has a default value) at runtime.",
+      "The value can be an int or None — equivalent to Union[int, None].",
+      "The int is wrapped in a container that may be empty.",
+      "Only integers greater than zero are accepted."
+    ],
+    correct: 1,
+    explanation: "Optional[int] is shorthand for Union[int, None], meaning the value is either an integer or None. It does NOT enforce that the argument has a default value — that is a separate concern in the function signature."
+  },
+
+  /* 9 */
+  {
+    type: "true-false",
+    text: "Defining __all__ = ['Foo', 'Bar'] in a package's __init__.py controls which names are exported when a consumer runs `from mypackage import *`.",
+    options: ["True", "False"],
+    correct: 0,
+    explanation: "__all__ is a list of public names exported by a module. When someone writes 'from mypackage import *', only the names in __all__ are imported. Names NOT in __all__ are still accessible via explicit import; __all__ only affects the wildcard import."
+  },
+
+  /* 10 */
+  {
+    type: "multiple-choice",
+    text: "In a Python project, when should you prefer a @property over a plain public attribute?",
+    options: [
+      "Always — @property is faster than plain attributes.",
+      "When you need lazy computation, validation, or a read-only interface without breaking callers later.",
+      "Only inside dataclasses, because plain attributes cause NameErrors.",
+      "When the attribute is a list or dict, to avoid copying."
+    ],
+    correct: 1,
+    explanation: "@property lets you expose a value like an attribute while hiding computation or validation inside a method. Starting with a plain attribute and later adding @property is a non-breaking change for callers. It is also the right choice for read-only values (define getter, omit setter)."
+  },
+
+  /* 11 */
+  {
+    type: "multiple-choice",
+    text: "In a pyproject.toml, which table declares project metadata such as name, version, and dependencies?",
+    options: [
+      "[tool.setuptools]",
+      "[build-system]",
+      "[project]",
+      "[metadata]"
+    ],
+    correct: 2,
+    explanation: "PEP 621 standardises the [project] table for core metadata: name, version, description, authors, dependencies, etc. [build-system] declares the build backend (e.g. setuptools, flit). [tool.*] tables hold tool-specific configuration like [tool.pytest.ini_options] or [tool.mypy]."
+  },
+
+  /* 12 */
+  {
+    type: "true-false",
+    text: "A Python virtual environment (venv) modifies your system Python installation to install packages into a project-local directory.",
+    options: ["True", "False"],
+    correct: 1,
+    explanation: "A virtual environment (created with python -m venv .venv) is an isolated copy of the Python interpreter with its own site-packages directory. It does NOT modify the system Python. Activating it adjusts PATH and PYTHONPATH so pip installs go to the local directory."
+  },
+
+  /* 13 */
+  {
+    type: "fill-blank",
+    text: "Complete the guard that prevents a module from running its main logic when imported:\n\nif ________ == \"__main__\":",
+    correct: "__name__",
+    explanation: "Python sets the special variable __name__ to '__main__' only when the file is the entry point. When the file is imported by another module, __name__ is the module's dotted name. The guard `if __name__ == '__main__':` lets a file be both importable and directly executable."
+  },
+
+  /* 14 */
+  {
+    type: "multiple-choice",
+    text: "Which logging call produces output at severity WARNING or higher by default when using Python's root logger?",
+    options: [
+      "logging.debug('msg')",
+      "logging.info('msg')",
+      "logging.warning('msg')",
+      "Both A and B"
+    ],
+    correct: 2,
+    explanation: "The root logger's default level is WARNING. Calls to logging.debug() and logging.info() are silently dropped unless you explicitly lower the level (e.g. logging.basicConfig(level=logging.DEBUG)). logging.warning(), .error(), and .critical() pass through by default."
+  },
+
+  /* 15 */
+  {
+    type: "multiple-choice",
+    text: "Which command creates a source distribution and a wheel for a package described by pyproject.toml?",
+    options: [
+      "pip install --build .",
+      "python -m build",
+      "python setup.py sdist bdist_wheel",
+      "pip wheel ."
+    ],
+    correct: 1,
+    explanation: "`python -m build` (from the 'build' package, PEP 517) reads pyproject.toml and produces both a .tar.gz source distribution and a .whl wheel in the dist/ directory. It is the modern, backend-agnostic replacement for the old `python setup.py sdist bdist_wheel` command."
+  }
+];
+
+/* ================================================================
+   STATE
+   ================================================================ */
+let current   = 0;
+let answers   = new Array(questions.length).fill(null);  // user's chosen index / string
+let revealed  = new Array(questions.length).fill(false); // has this q been answered?
+let startTime = Date.now();
+let reviewOpen = false;
+
+/* ================================================================
+   RENDER
+   ================================================================ */
+function render() {
+  const q   = questions[current];
+  const isAnswered = revealed[current];
+
+  // Progress
+  const done = revealed.filter(Boolean).length;
+  const pct  = Math.round(((current) / questions.length) * 100);
+  document.getElementById('progressText').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('progressPct').textContent  = `${pct}%`;
+  document.getElementById('progressBar').style.width  = `${pct}%`;
+
+  // Question
+  document.getElementById('questionText').textContent = q.text;
+
+  // Code snippet
+  const codeEl = document.getElementById('codeSnippet');
+  if (q.code) {
+    codeEl.textContent = q.code;
+    codeEl.classList.remove('hidden');
+  } else {
+    codeEl.classList.add('hidden');
+  }
+
+  // Options area
+  const area = document.getElementById('optionsArea');
+  area.innerHTML = '';
+
+  if (q.type === 'fill-blank') {
+    renderFillBlank(q, area, isAnswered);
+  } else {
+    renderOptions(q, area, isAnswered);
+  }
+
+  // Feedback
+  renderFeedback(q, isAnswered);
+
+  // Nav
+  document.getElementById('prevBtn').disabled = (current === 0);
+  const nextBtn   = document.getElementById('nextBtn');
+  const finishBtn = document.getElementById('finishBtn');
+
+  if (isAnswered) {
+    if (current < questions.length - 1) {
+      nextBtn.classList.remove('hidden');
+      finishBtn.classList.add('hidden');
+    } else {
+      nextBtn.classList.add('hidden');
+      finishBtn.classList.remove('hidden');
+    }
+  } else {
+    nextBtn.classList.add('hidden');
+    finishBtn.classList.add('hidden');
+  }
+}
+
+function renderOptions(q, area, isAnswered) {
+  const wrap = document.createElement('div');
+  wrap.className = 'options';
+
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.setAttribute('data-idx', i);
+    btn.setAttribute('tabindex', '0');
+
+    const key = document.createElement('span');
+    key.className = 'opt-key';
+    key.textContent = String.fromCharCode(65 + i); // A B C D
+
+    const txt = document.createElement('span');
+    txt.textContent = opt;
+
+    btn.appendChild(key);
+    btn.appendChild(txt);
+
+    if (isAnswered) {
+      btn.disabled = true;
+      if (i === q.correct) btn.classList.add('correct');
+      else if (i === answers[current] && answers[current] !== q.correct) btn.classList.add('wrong');
+    } else {
+      if (answers[current] === i) btn.classList.add('selected');
+      btn.addEventListener('click', () => selectOption(i));
+    }
+
+    wrap.appendChild(btn);
+  });
+
+  area.appendChild(wrap);
+}
+
+function renderFillBlank(q, area, isAnswered) {
+  const wrap = document.createElement('div');
+  wrap.className = 'fill-blank-wrap';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'fill-blank-input';
+  input.placeholder = 'Type your answer…';
+  input.id = 'fillInput';
+
+  if (answers[current] !== null) {
+    input.value = answers[current];
+  }
+
+  if (isAnswered) {
+    input.disabled = true;
+    const isCorrect = normalise(answers[current]) === normalise(q.correct);
+    input.classList.add(isCorrect ? 'correct' : 'wrong');
+  } else {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') confirmFill();
+    });
+  }
+
+  const btn = document.createElement('button');
+  btn.className = 'confirm-btn';
+  btn.textContent = 'Confirm';
+  btn.disabled = isAnswered;
+  btn.addEventListener('click', confirmFill);
+
+  wrap.appendChild(input);
+  wrap.appendChild(btn);
+  area.appendChild(wrap);
+}
+
+function renderFeedback(q, isAnswered) {
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+
+  if (!isAnswered) { return; }
+
+  let isCorrect;
+  if (q.type === 'fill-blank') {
+    isCorrect = normalise(answers[current]) === normalise(q.correct);
+  } else {
+    isCorrect = answers[current] === q.correct;
+  }
+
+  fb.classList.add('show', isCorrect ? 'correct-fb' : 'wrong-fb');
+
+  const header = document.createElement('strong');
+  header.textContent = isCorrect ? '✓ Correct!' : '✗ Incorrect';
+  fb.appendChild(header);
+
+  if (!isCorrect) {
+    const correctLine = document.createElement('p');
+    if (q.type === 'fill-blank') {
+      correctLine.textContent = `Correct answer: ${q.correct}`;
+    } else {
+      correctLine.textContent = `Correct answer: ${String.fromCharCode(65 + q.correct)}. ${q.options[q.correct]}`;
+    }
+    correctLine.style.marginBottom = '6px';
+    fb.appendChild(correctLine);
+  }
+
+  const exp = document.createElement('p');
+  exp.textContent = q.explanation;
+  fb.appendChild(exp);
+}
+
+/* ================================================================
+   INTERACTION
+   ================================================================ */
+function selectOption(idx) {
+  if (revealed[current]) return;
+  answers[current] = idx;
+  revealed[current] = true;
+  render();
+}
+
+function confirmFill() {
+  if (revealed[current]) return;
+  const val = document.getElementById('fillInput')?.value.trim();
+  if (!val) return;
+  answers[current] = val;
+  revealed[current] = true;
+  render();
+}
+
+function navigate(dir) {
+  current = Math.max(0, Math.min(questions.length - 1, current + dir));
+  render();
+}
+
+function normalise(str) {
+  return String(str || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+/* ================================================================
+   RESULT
+   ================================================================ */
+function calcScore() {
+  let correct = 0;
+  questions.forEach((q, i) => {
+    if (!revealed[i]) return;
+    if (q.type === 'fill-blank') {
+      if (normalise(answers[i]) === normalise(q.correct)) correct++;
+    } else {
+      if (answers[i] === q.correct) correct++;
+    }
+  });
+  return correct;
+}
+
+function showResult() {
+  const correct = calcScore();
+  const total   = questions.length;
+  const pct     = Math.round((correct / total) * 100);
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  const mins    = Math.floor(elapsed / 60);
+  const secs    = elapsed % 60;
+  const timeStr = `${mins}m ${secs.toString().padStart(2,'0')}s`;
+
+  let grade;
+  if (pct >= 95) grade = 'Expert!';
+  else if (pct >= 80) grade = 'Good Job!';
+  else if (pct >= 60) grade = 'Getting There';
+  else grade = 'Needs Work';
+
+  document.getElementById('scorePct').textContent = `${pct}%`;
+  document.getElementById('gradeLabel').textContent = grade;
+  document.getElementById('resultStats').innerHTML =
+    `<span>${correct}</span> / <span>${total}</span> correct &nbsp;&bull;&nbsp; Time: <span>${timeStr}</span>`;
+
+  document.getElementById('progressWrap').classList.add('hidden');
+  document.getElementById('quizCard').classList.add('hidden');
+  document.getElementById('resultCard').classList.add('hidden');
+  document.getElementById('resultCard').style.display = 'block';
+  document.getElementById('reviewCard').style.display = 'none';
+  reviewOpen = false;
+}
+
+function retryQuiz() {
+  current   = 0;
+  answers   = new Array(questions.length).fill(null);
+  revealed  = new Array(questions.length).fill(false);
+  startTime = Date.now();
+
+  document.getElementById('resultCard').style.display = 'none';
+  document.getElementById('reviewCard').style.display = 'none';
+  document.getElementById('progressWrap').classList.remove('hidden');
+  document.getElementById('quizCard').classList.remove('hidden');
+  render();
+}
+
+function toggleReview() {
+  const card = document.getElementById('reviewCard');
+  if (reviewOpen) {
+    card.style.display = 'none';
+    reviewOpen = false;
+    return;
+  }
+  buildReview();
+  card.style.display = 'block';
+  reviewOpen = true;
+  card.scrollIntoView({ behavior: 'smooth' });
+}
+
+function buildReview() {
+  const card = document.getElementById('reviewCard');
+  card.innerHTML = '<h2 style="color:var(--accent);margin-bottom:18px">Missed Questions</h2>';
+
+  let anyMissed = false;
+  questions.forEach((q, i) => {
+    if (!revealed[i]) return;
+    let isCorrect;
+    if (q.type === 'fill-blank') {
+      isCorrect = normalise(answers[i]) === normalise(q.correct);
+    } else {
+      isCorrect = answers[i] === q.correct;
+    }
+    if (isCorrect) return;
+
+    anyMissed = true;
+    const item = document.createElement('div');
+    item.className = 'review-item';
+
+    const label = document.createElement('div');
+    label.className = 'review-q-label';
+    label.textContent = `Question ${i + 1}`;
+
+    const qtext = document.createElement('div');
+    qtext.className = 'review-q-text';
+    qtext.textContent = q.text;
+
+    let yourAnsText = '';
+    if (q.type === 'fill-blank') {
+      yourAnsText = `Your answer: "${answers[i] ?? '(blank)'}"`;
+    } else {
+      const idx = answers[i];
+      yourAnsText = idx !== null
+        ? `Your answer: ${String.fromCharCode(65+idx)}. ${q.options[idx]}`
+        : 'Your answer: (not answered)';
+    }
+
+    let correctText = '';
+    if (q.type === 'fill-blank') {
+      correctText = `Correct answer: "${q.correct}"`;
+    } else {
+      correctText = `Correct answer: ${String.fromCharCode(65+q.correct)}. ${q.options[q.correct]}`;
+    }
+
+    const yours   = document.createElement('div');
+    yours.className = 'review-your-ans';
+    yours.textContent = yourAnsText;
+
+    const correct = document.createElement('div');
+    correct.className = 'review-correct';
+    correct.textContent = correctText;
+
+    const explain = document.createElement('div');
+    explain.className = 'review-explain';
+    explain.textContent = q.explanation;
+
+    item.appendChild(label);
+    item.appendChild(qtext);
+    if (q.code) {
+      const pre = document.createElement('pre');
+      pre.className = 'code-snippet';
+      pre.style.margin = '0 0 10px';
+      pre.textContent = q.code;
+      item.appendChild(pre);
+    }
+    item.appendChild(yours);
+    item.appendChild(correct);
+    item.appendChild(explain);
+    card.appendChild(item);
+  });
+
+  if (!anyMissed) {
+    const msg = document.createElement('p');
+    msg.style.color = 'var(--green)';
+    msg.textContent = 'Perfect score — no missed questions!';
+    card.appendChild(msg);
+  }
+}
+
+/* ================================================================
+   KEYBOARD NAVIGATION
+   ================================================================ */
+document.addEventListener('keydown', (e) => {
+  const q = questions[current];
+  const isAnswered = revealed[current];
+
+  if (q.type === 'fill-blank') {
+    // Let text input handle its own keys; only intercept navigation when answered
+    if (!isAnswered) return;
+    if (e.key === 'ArrowRight' || e.key === 'Enter') {
+      e.preventDefault();
+      if (current < questions.length - 1) navigate(1);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      navigate(-1);
+    }
+    return;
+  }
+
+  if (!isAnswered) {
+    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
+      e.preventDefault();
+      const opts     = Array.from(document.querySelectorAll('.option-btn:not(:disabled)'));
+      const focused  = document.activeElement;
+      const idx      = opts.indexOf(focused);
+      const total    = opts.length;
+      let next;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        next = (idx + 1) % total;
+      } else {
+        next = (idx - 1 + total) % total;
+      }
+      opts[next]?.focus();
+      // Highlight selection
+      opts.forEach(o => o.classList.remove('selected'));
+      opts[next]?.classList.add('selected');
+      answers[current] = next;
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      const focused = document.activeElement;
+      if (focused.classList.contains('option-btn')) {
+        const idx = parseInt(focused.getAttribute('data-idx'));
+        selectOption(idx);
+      }
+    }
+  } else {
+    if (e.key === 'ArrowRight' || e.key === 'Enter') {
+      e.preventDefault();
+      if (current < questions.length - 1) navigate(1);
+      else showResult();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      navigate(-1);
+    }
+  }
+});
+
+/* ================================================================
+   BOOT
+   ================================================================ */
+render();
+</script>
+</body>
+</html>

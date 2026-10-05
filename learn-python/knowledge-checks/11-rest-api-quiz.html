@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python REST API with FastAPI Quiz</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #1a1a2e;
+      --panel: #16213e;
+      --accent: #e94560;
+      --accent-hover: #c73652;
+      --correct: #2ecc71;
+      --wrong: #e74c3c;
+      --text: #e0e0e0;
+      --muted: #8892a4;
+      --border: #2a3a5c;
+      --code-bg: #0d1b2a;
+      --option-hover: #1e3560;
+      --option-selected: #1e3560;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      padding: 12px 20px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .top-bar a { font-size: 0.9rem; color: var(--muted); }
+    .top-bar a:hover { color: var(--text); text-decoration: none; }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .subtitle { color: var(--muted); font-size: 0.92rem; margin-bottom: 24px; }
+
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .progress-label { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+    .progress-bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+    .progress-score { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 28px 22px;
+      position: relative;
+      transition: border-color 0.3s;
+    }
+    .card.flash-correct { border-color: var(--correct); }
+    .card.flash-wrong   { border-color: var(--wrong); }
+
+    .question-type-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--accent);
+      background: rgba(233,69,96,0.12);
+      border: 1px solid rgba(233,69,96,0.3);
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin-bottom: 14px;
+    }
+
+    .question-text {
+      font-size: 1.05rem;
+      font-weight: 500;
+      margin-bottom: 18px;
+      line-height: 1.55;
+    }
+
+    pre.code-snippet {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.87rem;
+      line-height: 1.6;
+      color: #c9d1d9;
+      margin-bottom: 18px;
+      tab-size: 4;
+    }
+
+    .options { display: flex; flex-direction: column; gap: 10px; }
+
+    .option-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text);
+      font-size: 0.97rem;
+      transition: background 0.15s, border-color 0.15s;
+      width: 100%;
+    }
+    .option-btn:hover:not(:disabled) { background: var(--option-hover); border-color: var(--accent); }
+    .option-btn.selected { background: var(--option-selected); border-color: #5577cc; }
+    .option-btn.correct  { background: rgba(46,204,113,0.15); border-color: var(--correct); }
+    .option-btn.wrong    { background: rgba(231,76,60,0.15);  border-color: var(--wrong); }
+    .option-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .option-btn:disabled { cursor: default; }
+
+    .option-key {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 28px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .option-btn.selected .option-key { background: #2a3a70; border-color: #5577cc; color: var(--text); }
+    .option-btn.correct  .option-key { background: rgba(46,204,113,0.3); border-color: var(--correct); color: var(--correct); }
+    .option-btn.wrong    .option-key { background: rgba(231,76,60,0.3);  border-color: var(--wrong); color: var(--wrong); }
+
+    .feedback {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 0.93rem;
+      display: none;
+      line-height: 1.55;
+    }
+    .feedback.show { display: block; }
+    .feedback.correct-fb { background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.35); }
+    .feedback.wrong-fb   { background: rgba(231,76,60,0.10);  border: 1px solid rgba(231,76,60,0.3); }
+    .feedback strong { display: block; margin-bottom: 6px; font-size: 0.96rem; }
+    .feedback .correct-answer { color: var(--correct); font-weight: 600; }
+    .feedback .explanation { color: var(--muted); margin-top: 8px; }
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+      gap: 10px;
+    }
+    .nav-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 0.93rem;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) { background: var(--option-hover); border-color: var(--accent); }
+    .nav-btn:disabled { opacity: 0.35; cursor: default; }
+    .nav-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+    .nav-btn.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+    #results-screen { display: none; }
+    .results-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 36px 28px;
+      text-align: center;
+    }
+    .score-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 5px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .score-pct { font-size: 2.2rem; font-weight: 800; color: var(--accent); line-height: 1; }
+    .score-lbl { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+    .grade-text { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+    .results-meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 28px; }
+    .results-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .results-actions .nav-btn { padding: 12px 28px; font-size: 0.95rem; }
+
+    #review-screen { display: none; }
+    .review-item {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 22px;
+      margin-bottom: 16px;
+    }
+    .review-item.review-correct { border-left: 4px solid var(--correct); }
+    .review-item.review-wrong   { border-left: 4px solid var(--wrong); }
+    .review-q { font-size: 0.97rem; font-weight: 500; margin-bottom: 10px; }
+    .review-meta { font-size: 0.88rem; color: var(--muted); margin-top: 8px; }
+    .review-meta span { font-weight: 600; }
+    .review-meta .ca { color: var(--correct); }
+    .review-meta .wa { color: var(--wrong); }
+    .review-expl { font-size: 0.88rem; color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+
+    .kbd-hint { font-size: 0.8rem; color: var(--muted); text-align: center; margin-top: 12px; }
+    kbd {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.78rem;
+      font-family: monospace;
+    }
+
+    @media (max-width: 520px) {
+      .card { padding: 20px 16px 16px; }
+      h1 { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="README.md">&#8592; Back to Index</a>
+</div>
+
+<div class="container">
+  <h1>Python REST API with FastAPI</h1>
+  <p class="subtitle">FastAPI, Pydantic &amp; HTTP fundamentals &mdash; 15 questions</p>
+
+  <!-- Quiz screen -->
+  <div id="quiz-screen">
+    <div class="progress-wrap">
+      <span class="progress-label" id="progress-label">Question 1 / 15</span>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <span class="progress-score" id="progress-score">Score: 0</span>
+    </div>
+
+    <div class="card" id="question-card">
+      <div class="question-type-badge" id="q-badge">Concept</div>
+      <p class="question-text" id="q-text"></p>
+      <pre class="code-snippet" id="q-code" style="display:none"></pre>
+      <div class="options" id="q-options"></div>
+      <div class="feedback" id="q-feedback">
+        <strong id="fb-verdict"></strong>
+        <div id="fb-correct-answer" class="correct-answer"></div>
+        <div id="fb-explanation" class="explanation"></div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button class="nav-btn" id="btn-prev" disabled>&#8592; Prev</button>
+      <span></span>
+      <button class="nav-btn primary" id="btn-next" disabled>Next &#8594;</button>
+    </div>
+    <p class="kbd-hint"><kbd>A</kbd>&ndash;<kbd>D</kbd> select &nbsp;|&nbsp; <kbd>Enter</kbd> next &nbsp;|&nbsp; <kbd>&#8592;</kbd><kbd>&#8594;</kbd> navigate</p>
+  </div>
+
+  <!-- Results screen -->
+  <div id="results-screen">
+    <div class="results-card">
+      <div class="score-circle">
+        <div class="score-pct" id="res-pct">0%</div>
+        <div class="score-lbl">Score</div>
+      </div>
+      <div class="grade-text" id="res-grade"></div>
+      <div class="results-meta" id="res-meta"></div>
+      <div class="results-actions">
+        <button class="nav-btn" id="btn-review">Review Wrong Answers</button>
+        <button class="nav-btn primary" id="btn-restart">Restart Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review screen -->
+  <div id="review-screen">
+    <h2 style="margin-bottom:20px;color:var(--accent)">Review Wrong Answers</h2>
+    <div id="review-list"></div>
+    <button class="nav-btn primary" id="btn-back-results" style="margin-top:8px">&#8592; Back to Results</button>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    type: "Concept",
+    text: "Which statement best describes when to choose FastAPI over Flask or Django?",
+    options: [
+      "FastAPI is best when you need a full-featured MVC framework with a built-in admin panel",
+      "FastAPI is best for high-performance async APIs with automatic validation and documentation; Flask for simple apps without async needs; Django for full-stack projects with ORM, admin, and auth",
+      "FastAPI should be used only for microservices under 1000 lines of code",
+      "FastAPI replaces Django entirely and should always be preferred"
+    ],
+    correct: 1,
+    explanation: "FastAPI shines for async-first REST APIs with Pydantic validation and auto-generated OpenAPI docs. Flask is lighter and synchronous, good for simple web apps. Django is a batteries-included full-stack framework best for projects needing ORM, admin, auth, and templating out of the box."
+  },
+  {
+    type: "Concept",
+    text: "Which HTTP method decorator would you use for an endpoint that creates a new resource?",
+    options: [
+      "@app.get()",
+      "@app.post()",
+      "@app.put()",
+      "@app.patch()"
+    ],
+    correct: 1,
+    explanation: "POST is the conventional HTTP method for creating a new resource. GET retrieves data, PUT fully replaces a resource, PATCH partially updates it, and DELETE removes it. FastAPI provides decorators matching each method."
+  },
+  {
+    type: "Code Reading",
+    text: "What does this FastAPI route do, and what type does `user_id` have inside the function?",
+    code: `from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/users/{user_id}")
+def get_user(user_id: int):
+    return {"user_id": user_id}`,
+    options: [
+      "Accepts any string for user_id; returns it as a string",
+      "Defines a path parameter; FastAPI automatically coerces the URL segment to int and returns a 422 error if it is not a valid integer",
+      "Raises a TypeError at startup because path parameters must be strings",
+      "user_id is optional and defaults to 0 if not provided"
+    ],
+    correct: 1,
+    explanation: "Path parameters are declared inside curly braces in the path string and matched to function parameters by name. The type annotation int tells FastAPI to validate and coerce the URL segment. If the value cannot be converted, FastAPI automatically returns HTTP 422 Unprocessable Entity."
+  },
+  {
+    type: "Concept",
+    text: "How do you declare an optional query parameter named `name` that defaults to `None`?",
+    options: [
+      "@app.get('/users?name') with def get_users(name):",
+      "@app.get('/users') with def get_users(name: str = None):",
+      "@app.get('/users/{name}') with def get_users(name: str = None):",
+      "@app.query('/users') with def get_users(name: str):"
+    ],
+    correct: 1,
+    explanation: "Any function parameter not part of the path template is treated as a query parameter. Giving it a default value (None, or any other value) makes it optional. FastAPI parses it from the query string, e.g. GET /users?name=Alice."
+  },
+  {
+    type: "Code Reading",
+    text: "What does this endpoint expect as input?",
+    code: `from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class TodoCreate(BaseModel):
+    title: str
+    done: bool = False
+
+@app.post("/todos")
+def create_todo(todo: TodoCreate):
+    return {"title": todo.title, "done": todo.done}`,
+    options: [
+      "A query parameter named 'todo'",
+      "A JSON request body with a required 'title' string and an optional 'done' boolean",
+      "A form submission with fields 'title' and 'done'",
+      "A path parameter named 'todo'"
+    ],
+    correct: 1,
+    explanation: "When a function parameter is annotated with a Pydantic BaseModel subclass, FastAPI reads the request body as JSON and validates it against the model. 'title' is required (no default), 'done' defaults to False. Invalid input returns HTTP 422."
+  },
+  {
+    type: "Concept",
+    text: "What does Pydantic's `BaseModel` provide that a plain Python dataclass does not?",
+    options: [
+      "Inheritance and method definitions",
+      "Automatic data validation and type coercion with clear error messages on failure",
+      "Faster attribute access via __slots__",
+      "Integration with the database ORM"
+    ],
+    correct: 1,
+    explanation: "Pydantic validates types at runtime, coerces compatible types (e.g. '42' to int), and raises ValidationError with structured error details when data is invalid. Plain dataclasses store types as hints but do not validate at runtime."
+  },
+  {
+    type: "Concept",
+    text: "How do you raise an HTTP 404 response inside a FastAPI route handler?",
+    options: [
+      "return Response(404)",
+      "raise HTTPException(status_code=404, detail='Not found')",
+      "return None",
+      "raise ValueError('Not found')"
+    ],
+    correct: 1,
+    explanation: "FastAPI (via Starlette) provides HTTPException. Raising it with status_code=404 causes FastAPI to return a JSON error response like {\"detail\": \"Not found\"} with the correct HTTP status code. Plain Python exceptions would cause a 500 Internal Server Error."
+  },
+  {
+    type: "Concept",
+    text: "What is the purpose of the `response_model=` parameter in a FastAPI decorator?",
+    options: [
+      "It sets the Content-Type header of the response",
+      "It filters and validates the return value, ensuring only declared fields are serialized and sensitive data is not accidentally leaked",
+      "It defines the type of the request body",
+      "It sets the HTTP status code of the response"
+    ],
+    correct: 1,
+    explanation: "response_model= takes a Pydantic model. FastAPI serializes the return value through that model, dropping any extra fields not in the model. This is the primary way to avoid accidentally exposing fields like hashed_password that exist on an ORM object but should not appear in the API response."
+  },
+  {
+    type: "Concept",
+    text: "FastAPI automatically generates interactive API documentation. At which URL is the Swagger UI available by default?",
+    options: [
+      "/swagger",
+      "/docs",
+      "/api/v1/docs",
+      "/openapi"
+    ],
+    correct: 1,
+    explanation: "FastAPI serves Swagger UI at /docs and ReDoc at /redoc. Both are generated automatically from the OpenAPI schema that FastAPI builds based on your route definitions, type annotations, and Pydantic models. The raw OpenAPI JSON is at /openapi.json."
+  },
+  {
+    type: "Concept",
+    text: "What does the command `uvicorn main:app --reload` do?",
+    options: [
+      "Runs the app in production mode with multiple workers",
+      "Starts an ASGI server pointing to the `app` object inside `main.py`, and restarts automatically when source files change",
+      "Compiles main.py into a binary",
+      "Runs unit tests and reloads on failure"
+    ],
+    correct: 1,
+    explanation: "uvicorn is an ASGI server. `main:app` means 'find the object named app in the module main'. --reload enables auto-reload on file changes, which is useful during development but should never be used in production."
+  },
+  {
+    type: "Code Reading",
+    text: "What HTTP status code does this endpoint return when it successfully creates a todo?",
+    code: `from fastapi import FastAPI, status
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class TodoCreate(BaseModel):
+    title: str
+
+@app.post("/todos", status_code=status.HTTP_201_CREATED)
+def create_todo(todo: TodoCreate):
+    return {"title": todo.title}`,
+    options: [
+      "200 OK (the default)",
+      "201 Created",
+      "204 No Content",
+      "202 Accepted"
+    ],
+    correct: 1,
+    explanation: "status_code=status.HTTP_201_CREATED overrides the default 200 status. HTTP 201 is the correct code for a successful resource creation. Using status.HTTP_201_CREATED instead of the raw integer 201 is more readable and less error-prone."
+  },
+  {
+    type: "Concept",
+    text: "How do you write a test for a FastAPI endpoint using the built-in test utilities?",
+    options: [
+      "Use requests.get() after starting the server manually",
+      "Use TestClient from fastapi.testclient — it lets you make HTTP calls directly to your app without a running server",
+      "Use unittest.mock to mock every route",
+      "FastAPI has no built-in test support; use pytest-django instead"
+    ],
+    correct: 1,
+    explanation: "TestClient wraps Starlette's test client and lets you call routes directly: `client = TestClient(app); response = client.get('/users/1')`. It does not require a running server and integrates naturally with pytest."
+  },
+  {
+    type: "Concept",
+    text: "What is the semantic difference between HTTP PUT and PATCH?",
+    options: [
+      "PUT is for creation only; PATCH is for updates only",
+      "PUT fully replaces the resource (requires all fields); PATCH partially updates the resource (only provided fields change)",
+      "PUT and PATCH are identical — use either one",
+      "PUT is idempotent; PATCH is not safe to retry"
+    ],
+    correct: 1,
+    explanation: "PUT replaces the entire resource: if you omit a field, it is removed or set to its default. PATCH sends only the fields you want to change, leaving others untouched. Both PUT and PATCH are idempotent in practice (repeating the same call has the same effect)."
+  },
+  {
+    type: "Code Reading",
+    text: "What does the `Depends()` usage do in this route?",
+    code: `from fastapi import FastAPI, Depends
+
+app = FastAPI()
+
+def get_db():
+    db = {"connected": True}
+    try:
+        yield db
+    finally:
+        pass  # close db here
+
+@app.get("/items")
+def list_items(db = Depends(get_db)):
+    return {"db": db}`,
+    options: [
+      "get_db is called once at app startup and cached for all requests",
+      "FastAPI calls get_db for each request, injects the yielded value as db, and runs the finally block after the response is sent",
+      "Depends() makes db an optional query parameter",
+      "get_db must return a class instance, not a dictionary"
+    ],
+    correct: 1,
+    explanation: "Depends() is FastAPI's dependency injection system. For each request, FastAPI calls the dependency function, injects the return (or yielded) value, and — for generators — runs the cleanup code after the response is sent. This pattern is commonly used for database sessions, authentication, and shared configuration."
+  },
+  {
+    type: "Concept",
+    text: "What does `Field(min_length=1, max_length=200)` do in a Pydantic model?",
+    options: [
+      "Sets the database column constraints for an ORM model",
+      "Adds validation constraints directly on the field so Pydantic rejects values outside those bounds and returns a clear error",
+      "It is a hint only — Pydantic does not enforce it at runtime",
+      "Sets the HTML input constraints in the auto-generated docs form"
+    ],
+    correct: 1,
+    explanation: "Pydantic's Field() allows attaching metadata and validation rules to model fields. min_length=1 rejects empty strings; max_length=200 rejects strings longer than 200 characters. FastAPI surfaces these as HTTP 422 errors with field-level details when the constraint is violated."
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = new Array(QUESTIONS.length).fill(null);
+
+function getGrade(pct) {
+  if (pct >= 93) return { label: "Excellent! ★★★", color: "#2ecc71" };
+  if (pct >= 80) return { label: "Good job! ★★☆", color: "#27ae60" };
+  if (pct >= 60) return { label: "Keep practicing ★☆☆", color: "#f39c12" };
+  return { label: "Review the material", color: "#e74c3c" };
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[current];
+  const total = QUESTIONS.length;
+
+  document.getElementById('progress-label').textContent = `Question ${current + 1} / ${total}`;
+  document.getElementById('progress-fill').style.width = `${((current + 1) / total) * 100}%`;
+  document.getElementById('progress-score').textContent = `Score: ${score}`;
+
+  document.getElementById('q-badge').textContent = q.type;
+  document.getElementById('q-text').textContent = q.text;
+
+  const codeEl = document.getElementById('q-code');
+  if (q.code) {
+    codeEl.textContent = q.code;
+    codeEl.style.display = 'block';
+  } else {
+    codeEl.style.display = 'none';
+  }
+
+  const optionsEl = document.getElementById('q-options');
+  optionsEl.innerHTML = '';
+  const keys = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.setAttribute('data-index', i);
+    btn.innerHTML = `<span class="option-key">${keys[i]}</span><span>${opt}</span>`;
+    btn.addEventListener('click', () => selectOption(i));
+    optionsEl.appendChild(btn);
+  });
+
+  const fb = document.getElementById('q-feedback');
+  fb.className = 'feedback';
+  document.getElementById('fb-verdict').textContent = '';
+  document.getElementById('fb-correct-answer').textContent = '';
+  document.getElementById('fb-explanation').textContent = '';
+
+  const card = document.getElementById('question-card');
+  card.className = 'card';
+
+  const state = answered[current];
+  if (state !== null) {
+    applyAnswerState(state.chosen, state.wasCorrect, false);
+    document.getElementById('btn-next').disabled = false;
+  } else {
+    document.getElementById('btn-next').disabled = true;
+  }
+
+  document.getElementById('btn-prev').disabled = current === 0;
+  if (current === total - 1 && answered[current] !== null) {
+    document.getElementById('btn-next').textContent = 'See Results';
+    document.getElementById('btn-next').disabled = false;
+  } else {
+    document.getElementById('btn-next').textContent = 'Next →';
+  }
+}
+
+function applyAnswerState(chosen, wasCorrect, animate) {
+  const q = QUESTIONS[current];
+  const btns = document.querySelectorAll('.option-btn');
+
+  btns.forEach(b => b.disabled = true);
+  btns[q.correct].classList.add('correct');
+  if (!wasCorrect) btns[chosen].classList.add('wrong');
+
+  const fb = document.getElementById('q-feedback');
+  const verdict = document.getElementById('fb-verdict');
+  const ca = document.getElementById('fb-correct-answer');
+  const expl = document.getElementById('fb-explanation');
+
+  if (wasCorrect) {
+    fb.className = 'feedback correct-fb show';
+    verdict.textContent = '✓ Correct!';
+  } else {
+    fb.className = 'feedback wrong-fb show';
+    verdict.textContent = '✗ Incorrect';
+    ca.textContent = `Correct answer: ${['A','B','C','D'][q.correct]}. ${q.options[q.correct]}`;
+  }
+  expl.textContent = q.explanation;
+
+  if (animate) {
+    const card = document.getElementById('question-card');
+    card.classList.add(wasCorrect ? 'flash-correct' : 'flash-wrong');
+    setTimeout(() => card.className = 'card', 800);
+  }
+
+  document.getElementById('btn-next').disabled = false;
+  if (current === QUESTIONS.length - 1) {
+    document.getElementById('btn-next').textContent = 'See Results';
+  }
+}
+
+function selectOption(i) {
+  if (answered[current] !== null) return;
+  const q = QUESTIONS[current];
+  const wasCorrect = (i === q.correct);
+  if (wasCorrect) score++;
+  answered[current] = { chosen: i, wasCorrect };
+  applyAnswerState(i, wasCorrect, true);
+  document.getElementById('progress-score').textContent = `Score: ${score}`;
+}
+
+function showResults() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'block';
+
+  const pct = Math.round((score / QUESTIONS.length) * 100);
+  const grade = getGrade(pct);
+
+  document.getElementById('res-pct').textContent = `${pct}%`;
+  const gradeEl = document.getElementById('res-grade');
+  gradeEl.textContent = grade.label;
+  gradeEl.style.color = grade.color;
+  document.getElementById('res-meta').textContent =
+    `You answered ${score} out of ${QUESTIONS.length} questions correctly.`;
+
+  const wrongCount = answered.filter(a => a && !a.wasCorrect).length;
+  document.getElementById('btn-review').style.display = wrongCount > 0 ? 'inline-block' : 'none';
+}
+
+function showReview() {
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('review-screen').style.display = 'block';
+
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+
+  QUESTIONS.forEach((q, i) => {
+    const state = answered[i];
+    if (!state || state.wasCorrect) return;
+
+    const div = document.createElement('div');
+    div.className = 'review-item review-wrong';
+    const codeHTML = q.code
+      ? `<pre class="code-snippet">${escHtml(q.code)}</pre>`
+      : '';
+    div.innerHTML = `
+      <div class="review-q">Q${i+1}: ${escHtml(q.text)}</div>
+      ${codeHTML}
+      <div class="review-meta">
+        Your answer: <span class="wa">${['A','B','C','D'][state.chosen]}. ${escHtml(q.options[state.chosen])}</span>
+      </div>
+      <div class="review-meta">
+        Correct answer: <span class="ca">${['A','B','C','D'][q.correct]}. ${escHtml(q.options[q.correct])}</span>
+      </div>
+      <div class="review-expl">${escHtml(q.explanation)}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function restart() {
+  current = 0; score = 0;
+  answered = new Array(QUESTIONS.length).fill(null);
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('review-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  renderQuestion();
+}
+
+document.getElementById('btn-next').addEventListener('click', () => {
+  if (current === QUESTIONS.length - 1) {
+    showResults();
+  } else {
+    current++;
+    renderQuestion();
+  }
+});
+
+document.getElementById('btn-prev').addEventListener('click', () => {
+  if (current > 0) { current--; renderQuestion(); }
+});
+
+document.getElementById('btn-restart').addEventListener('click', restart);
+document.getElementById('btn-review').addEventListener('click', showReview);
+document.getElementById('btn-back-results').addEventListener('click', () => {
+  document.getElementById('review-screen').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'block';
+});
+
+document.addEventListener('keydown', e => {
+  if (document.getElementById('quiz-screen').style.display === 'none') return;
+  const keyMap = { 'a': 0, 'b': 1, 'c': 2, 'd': 3 };
+  const k = e.key.toLowerCase();
+  if (k in keyMap && answered[current] === null) {
+    selectOption(keyMap[k]);
+  } else if ((e.key === 'Enter' || e.key === 'ArrowRight') && !document.getElementById('btn-next').disabled) {
+    document.getElementById('btn-next').click();
+  } else if (e.key === 'ArrowLeft' && !document.getElementById('btn-prev').disabled) {
+    document.getElementById('btn-prev').click();
+  }
+});
+
+renderQuestion();
+</script>
+</body>
+</html>

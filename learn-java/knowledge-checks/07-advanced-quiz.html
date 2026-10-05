@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java Advanced Topics Quiz</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #1a1a2e;
+      --panel:   #16213e;
+      --accent:  #e94560;
+      --text:    #e0e0e0;
+      --muted:   #8892a4;
+      --border:  #2a3550;
+      --green:   #2ecc71;
+      --red:     #e74c3c;
+      --yellow:  #f39c12;
+      --code-bg: #0d1117;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    a.back-link {
+      align-self: flex-start;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+      transition: color 0.2s;
+    }
+    a.back-link:hover { color: var(--accent); }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0.25rem;
+      text-align: center;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    /* ── progress ── */
+    .progress-wrap {
+      width: 100%;
+      max-width: 680px;
+      margin-bottom: 1.25rem;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .progress-bar-track {
+      height: 6px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 99px;
+      transition: width 0.35s ease;
+    }
+
+    /* ── card ── */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem 2rem;
+      width: 100%;
+      max-width: 680px;
+      transition: border-color 0.3s;
+    }
+    .card.flash-correct { border-color: var(--green); }
+    .card.flash-wrong   { border-color: var(--red);   }
+
+    .question-text {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+    }
+
+    pre.code-snippet {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin-bottom: 1.25rem;
+      white-space: pre;
+      color: #c9d1d9;
+    }
+
+    /* ── options ── */
+    .options { display: flex; flex-direction: column; gap: 0.65rem; }
+
+    .option-btn {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      color: var(--text);
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      background: rgba(233,69,96,0.07);
+    }
+    .option-btn.selected {
+      border-color: var(--accent);
+      background: rgba(233,69,96,0.12);
+    }
+    .option-btn.correct {
+      border-color: var(--green);
+      background: rgba(46,204,113,0.12);
+      color: var(--green);
+    }
+    .option-btn.wrong {
+      border-color: var(--red);
+      background: rgba(231,76,60,0.12);
+      color: var(--red);
+    }
+    .option-btn:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ── fill-blank ── */
+    .fill-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+    .fill-input:focus { outline: none; border-color: var(--accent); }
+    .fill-input.correct { border-color: var(--green); color: var(--green); }
+    .fill-input.wrong   { border-color: var(--red);   color: var(--red);   }
+
+    /* ── feedback ── */
+    .feedback {
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      display: none;
+    }
+    .feedback.show { display: block; }
+    .feedback.correct-fb {
+      background: rgba(46,204,113,0.1);
+      border: 1px solid var(--green);
+      color: var(--green);
+    }
+    .feedback.wrong-fb {
+      background: rgba(231,76,60,0.1);
+      border: 1px solid var(--red);
+      color: #f08080;
+    }
+    .feedback strong { color: inherit; }
+
+    /* ── nav ── */
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+      gap: 0.75rem;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    .btn {
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .btn-primary   { background: var(--accent); color: #fff; }
+    .btn-secondary { background: var(--border); color: var(--text); }
+    .btn-ghost     { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
+
+    .btn-primary:hover:not(:disabled)   { opacity: 0.88; }
+    .btn-secondary:hover:not(:disabled) { opacity: 0.88; }
+    .btn-ghost:hover:not(:disabled)     { border-color: var(--accent); color: var(--text); }
+
+    /* ── results screen ── */
+    .results-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 680px;
+      text-align: center;
+      display: none;
+    }
+    .results-card.show { display: block; }
+
+    .score-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 5px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+    .score-pct { font-size: 2rem; font-weight: 800; color: var(--accent); }
+    .score-sub { font-size: 0.75rem; color: var(--muted); }
+
+    .grade-badge {
+      display: inline-block;
+      padding: 0.35rem 1.2rem;
+      border-radius: 99px;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      margin-bottom: 1.75rem;
+    }
+    .stat { text-align: center; }
+    .stat-val { font-size: 1.4rem; font-weight: 700; }
+    .stat-lbl { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+    .results-btns {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    /* ── review screen ── */
+    .review-wrap {
+      width: 100%;
+      max-width: 680px;
+      display: none;
+    }
+    .review-wrap.show { display: block; }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    .review-header h2 { font-size: 1.2rem; color: var(--accent); }
+
+    .review-item {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .review-q-num { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; }
+    .review-q-text { font-size: 0.95rem; margin-bottom: 0.75rem; }
+    .review-label { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.25rem; }
+    .review-answer { font-size: 0.9rem; }
+    .review-answer.your-wrong { color: var(--red); }
+    .review-answer.correct-ans { color: var(--green); font-weight: 600; }
+    .review-explanation {
+      margin-top: 0.65rem;
+      padding: 0.65rem 0.85rem;
+      background: rgba(233,69,96,0.05);
+      border-left: 3px solid var(--accent);
+      font-size: 0.82rem;
+      color: var(--muted);
+      border-radius: 0 6px 6px 0;
+      line-height: 1.55;
+    }
+
+    /* ── hidden ── */
+    .hidden { display: none !important; }
+
+    /* ── responsive ── */
+    @media (max-width: 480px) {
+      .card { padding: 1.25rem 1rem; }
+      h1 { font-size: 1.3rem; }
+      .stats-row { gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<a class="back-link" href="README.md">&#8592; Back to Index</a>
+<h1>Java Advanced Topics</h1>
+<p class="subtitle">Generics &bull; Concurrency &bull; Java 21 Features &bull; 15 Questions</p>
+
+<!-- Progress -->
+<div class="progress-wrap" id="progressWrap">
+  <div class="progress-label">
+    <span id="progressText">Question 1 of 15</span>
+    <span id="timerText">0:00</span>
+  </div>
+  <div class="progress-bar-track">
+    <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- Question card -->
+<div class="card" id="questionCard">
+  <p class="question-text" id="questionText"></p>
+  <pre class="code-snippet hidden" id="codeSnippet"></pre>
+  <div class="options" id="optionsContainer"></div>
+  <div class="feedback" id="feedback"></div>
+</div>
+
+<!-- Navigation -->
+<div class="nav-row" id="navRow">
+  <button class="btn btn-ghost" id="prevBtn" onclick="navigate(-1)">&#8592; Previous</button>
+  <button class="btn btn-primary" id="nextBtn" onclick="navigate(1)">Next &#8594;</button>
+</div>
+
+<!-- Results screen -->
+<div class="results-card" id="resultsCard">
+  <h2 style="margin-bottom:1.25rem;font-size:1.3rem;">Quiz Complete!</h2>
+  <div class="score-circle">
+    <span class="score-pct" id="scorePct">0%</span>
+    <span class="score-sub" id="scoreRaw">0 / 15</span>
+  </div>
+  <div class="grade-badge" id="gradeBadge"></div>
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-val" id="statCorrect" style="color:var(--green)">0</div>
+      <div class="stat-lbl">Correct</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="statWrong" style="color:var(--red)">0</div>
+      <div class="stat-lbl">Wrong</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="statTime" style="color:var(--accent)">0:00</div>
+      <div class="stat-lbl">Time</div>
+    </div>
+  </div>
+  <div class="results-btns">
+    <button class="btn btn-secondary" onclick="retryQuiz()">&#8635; Retry</button>
+    <button class="btn btn-primary" id="reviewBtn" onclick="showReview()">Review Wrong Answers</button>
+  </div>
+</div>
+
+<!-- Review screen -->
+<div class="review-wrap" id="reviewWrap">
+  <div class="review-header">
+    <h2>Wrong Answers Review</h2>
+    <button class="btn btn-ghost" onclick="backToResults()">&#8592; Back to Results</button>
+  </div>
+  <div id="reviewItems"></div>
+</div>
+
+<script>
+/* ================================================================
+   QUESTIONS DATA
+   ================================================================ */
+const questions = [
+  /* 1 ── multiple-choice: generics bounded wildcard */
+  {
+    type: "multiple-choice",
+    text: "Which wildcard bound should you use for a method that READS elements from a collection and returns the sum of their values?",
+    options: [
+      "List<? super Number>",
+      "List<? extends Number>",
+      "List<Number>",
+      "List<?>"
+    ],
+    correct: 1,
+    explanation: "PECS — Producer Extends, Consumer Super. When you only READ (produce) items from a collection, use '? extends T'. This allows List<Integer>, List<Double>, etc. to be passed in. '? super Number' is used when you INSERT into a collection."
+  },
+
+  /* 2 ── multiple-choice: Comparable vs Comparator */
+  {
+    type: "multiple-choice",
+    text: "What is the key difference between Comparable<T> and Comparator<T>?",
+    options: [
+      "Comparable is for primitives; Comparator is for objects",
+      "Comparable defines natural ordering inside the class via compareTo(); Comparator defines external ordering via compare()",
+      "Comparable can sort descending; Comparator only ascending",
+      "There is no difference — they are interchangeable"
+    ],
+    correct: 1,
+    explanation: "Comparable<T> is implemented by the class itself (e.g., String, Integer) to define its natural order via compareTo(). Comparator<T> is an external strategy object that defines a custom order via compare(), allowing multiple orderings without modifying the class."
+  },
+
+  /* 3 ── code-output: generics */
+  {
+    type: "multiple-choice",
+    code:
+`import java.util.*;
+
+public class Demo {
+    static <T extends Comparable<T>> T max(List<T> list) {
+        T result = list.get(0);
+        for (T item : list)
+            if (item.compareTo(result) > 0) result = item;
+        return result;
+    }
+    public static void main(String[] args) {
+        System.out.println(max(List.of(3, 1, 4, 1, 5, 9, 2, 6)));
+    }
+}`,
+    text: "What does this code print?",
+    options: ["3", "9", "6", "Compilation error"],
+    correct: 1,
+    explanation: "The generic method max() is bounded by Comparable<T>, so it works with Integer. It iterates through the list keeping the largest value. compareTo() returns > 0 when item > result, so 9 is correctly identified as the maximum."
+  },
+
+  /* 4 ── true-false: volatile */
+  {
+    type: "true-false",
+    text: "The 'volatile' keyword in Java guarantees both visibility AND atomicity for compound operations such as i++.",
+    options: ["True", "False"],
+    correct: 1,
+    explanation: "volatile guarantees VISIBILITY only — every thread sees the latest write. It does NOT guarantee atomicity for compound operations. i++ is read-modify-write (three steps), so it remains non-atomic. Use AtomicInteger or synchronization for atomic compound operations."
+  },
+
+  /* 5 ── multiple-choice: CompletableFuture */
+  {
+    type: "multiple-choice",
+    text: "Which CompletableFuture method is used to combine TWO independent futures and produce a new result from both of their values?",
+    options: [
+      "thenApply()",
+      "thenCompose()",
+      "thenCombine()",
+      "allOf()"
+    ],
+    correct: 2,
+    explanation: "thenCombine(other, biFunction) waits for two independent CompletableFutures to complete and combines their results with a BiFunction. thenApply() transforms one result; thenCompose() chains dependent futures (flatMap); allOf() waits for all but discards results."
+  },
+
+  /* 6 ── code-output: CompletableFuture */
+  {
+    type: "multiple-choice",
+    code:
+`import java.util.concurrent.*;
+
+public class CFDemo {
+    public static void main(String[] args) throws Exception {
+        CompletableFuture<String> cf = CompletableFuture
+            .supplyAsync(() -> "Hello")
+            .thenApply(s -> s + " World")
+            .exceptionally(ex -> "Error: " + ex.getMessage());
+        System.out.println(cf.get());
+    }
+}`,
+    text: "What does this code print (assuming no exception)?",
+    options: [
+      "Hello",
+      "Hello World",
+      "Error: null",
+      "Compilation error"
+    ],
+    correct: 1,
+    explanation: "supplyAsync() provides 'Hello' asynchronously. thenApply() transforms it by appending ' World'. Since no exception is thrown, exceptionally() is skipped. cf.get() blocks until completion and returns 'Hello World'."
+  },
+
+  /* 7 ── multiple-choice: deadlock */
+  {
+    type: "multiple-choice",
+    text: "Which of the following is NOT one of the four necessary conditions for a deadlock?",
+    options: [
+      "Mutual exclusion",
+      "Hold and wait",
+      "Preemption",
+      "Circular wait"
+    ],
+    correct: 2,
+    explanation: "The four Coffman conditions for deadlock are: (1) Mutual exclusion, (2) Hold and wait, (3) NO preemption (resources cannot be forcibly taken), (4) Circular wait. 'Preemption' means resources CAN be taken away — this PREVENTS deadlock, so it is the one condition that must be ABSENT."
+  },
+
+  /* 8 ── code-output: Java 21 records */
+  {
+    type: "multiple-choice",
+    code:
+`public class RecordDemo {
+    record Point(int x, int y) {
+        double distance() {
+            return Math.sqrt(x * x + y * y);
+        }
+    }
+    public static void main(String[] args) {
+        Point p = new Point(3, 4);
+        System.out.println(p.x() + " " + p.distance());
+    }
+}`,
+    text: "What does this code print?",
+    options: [
+      "3 5.0",
+      "3 7.0",
+      "Compilation error — records cannot have instance methods",
+      "3 25.0"
+    ],
+    correct: 0,
+    explanation: "Records automatically generate accessor methods named after the components (p.x() returns 3). Records CAN define additional instance methods. distance() computes sqrt(9+16) = sqrt(25) = 5.0. Output: '3 5.0'."
+  },
+
+  /* 9 ── multiple-choice: sealed classes */
+  {
+    type: "multiple-choice",
+    text: "In Java 21, a sealed class declared as 'public sealed class Shape permits Circle, Rectangle {}' means:",
+    options: [
+      "Shape can only be instantiated as Circle or Rectangle",
+      "Only Circle and Rectangle (and their own permitted subclasses) may extend Shape",
+      "Circle and Rectangle are automatically made final",
+      "Shape cannot be used in switch expressions"
+    ],
+    correct: 1,
+    explanation: "A sealed class restricts which classes may directly extend it — only those listed in the permits clause. Each permitted subclass must itself be final, sealed, or non-sealed. This enables exhaustive pattern matching in switch without a default clause."
+  },
+
+  /* 10 ── multiple-choice: pattern matching in switch */
+  {
+    type: "multiple-choice",
+    text: "Given a sealed hierarchy Shape permits Circle, Rectangle, what is correct about this Java 21 switch expression?\n\nString describe(Shape s) {\n    return switch (s) {\n        case Circle c    -> \"Circle r=\" + c.radius();\n        case Rectangle r -> \"Rect\";\n    };\n}",
+    options: [
+      "It fails to compile — switch needs a default branch",
+      "It compiles correctly because the switch is exhaustive over the sealed type",
+      "It compiles but throws NullPointerException at runtime if s is null",
+      "Both B and C are correct"
+    ],
+    correct: 3,
+    explanation: "Since Shape is sealed and all permitted subtypes are covered, the compiler recognizes the switch as exhaustive — no default needed (B is true). However, passing null throws a NullPointerException because pattern-matching switch does not handle null implicitly (C is also true). Therefore D is correct."
+  },
+
+  /* 11 ── fill-blank: text blocks */
+  {
+    type: "fill-blank",
+    text: "Complete the blank: In Java 15+, a ________ is a multi-line string literal delimited by triple-quotes (\"\"\") that automatically strips leading indentation.",
+    correct: "text block",
+    explanation: "Text blocks (introduced as preview in Java 13/14, standard in Java 15) start with '\"\"\"' followed by a newline and end with '\"\"\"'. The compiler determines incidental indentation by the position of the closing delimiter and strips it, giving clean multi-line strings without manual \\n escaping."
+  },
+
+  /* 12 ── multiple-choice: ThreadLocal */
+  {
+    type: "multiple-choice",
+    text: "What is the primary purpose of ThreadLocal<T> in Java?",
+    options: [
+      "To share a single object safely across all threads",
+      "To give each thread its own independent copy of a variable",
+      "To make a variable visible across threads without synchronization",
+      "To prevent a variable from being garbage collected"
+    ],
+    correct: 1,
+    explanation: "ThreadLocal<T> provides thread-local storage: each thread that accesses the variable via get()/set() operates on its own independent copy. This eliminates sharing and therefore avoids synchronization overhead. Common uses: per-thread database connections, user sessions, or SimpleDateFormat instances."
+  },
+
+  /* 13 ── multiple-choice: synchronized */
+  {
+    type: "multiple-choice",
+    text: "When a method is declared 'synchronized' on an instance, which lock does it acquire?",
+    options: [
+      "A dedicated lock object created for that method",
+      "The lock on the Class object (Class<?>)",
+      "The intrinsic lock (monitor) of 'this'",
+      "No lock — it only prevents visibility issues"
+    ],
+    correct: 2,
+    explanation: "An instance synchronized method acquires the intrinsic (monitor) lock of the object instance ('this'). A static synchronized method acquires the lock on the Class object. Two threads calling different synchronized instance methods on the SAME object will block each other."
+  },
+
+  /* 14 ── multiple-choice: var */
+  {
+    type: "multiple-choice",
+    text: "Which statement about 'var' (local variable type inference, Java 10+) is TRUE?",
+    options: [
+      "var can be used for method parameters and return types",
+      "var is dynamically typed — the type can change at runtime",
+      "var is statically typed — the compiler infers the type at compile time and it cannot change",
+      "var only works with primitive types"
+    ],
+    correct: 2,
+    explanation: "'var' is purely a compile-time feature. The compiler infers the static type from the right-hand side initializer, and that type is fixed for the variable's lifetime. It cannot be used for fields, method parameters, or return types — only for local variables with an initializer."
+  },
+
+  /* 15 ── multiple-choice: String.formatted */
+  {
+    type: "multiple-choice",
+    text: "What is the output of: System.out.println(\"Score: %.2f\".formatted(3.14159));",
+    options: [
+      "Score: 3.14159",
+      "Score: 3.14",
+      "Score: %.2f",
+      "Compilation error"
+    ],
+    correct: 1,
+    explanation: "String.formatted() (added in Java 15) is an instance method equivalent to String.format(fmt, args). '%.2f' formats a floating-point number with exactly 2 decimal places. 3.14159 rounded to 2 decimal places is 3.14. Output: 'Score: 3.14'."
+  }
+];
+
+/* ================================================================
+   STATE
+   ================================================================ */
+let current   = 0;
+let answers   = new Array(questions.length).fill(null); // null = unanswered
+let startTime = Date.now();
+let timerInterval;
+let quizDone  = false;
+
+/* ================================================================
+   TIMER
+   ================================================================ */
+function formatTime(ms) {
+  const s = Math.floor(ms / 1000);
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    document.getElementById('timerText').textContent = formatTime(Date.now() - startTime);
+  }, 1000);
+}
+
+/* ================================================================
+   RENDER
+   ================================================================ */
+function render() {
+  const q   = questions[current];
+  const ans = answers[current];
+
+  // Progress
+  document.getElementById('progressText').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('progressFill').style.width = `${((current + 1) / questions.length) * 100}%`;
+
+  // Question text
+  document.getElementById('questionText').textContent = q.text;
+
+  // Code snippet
+  const codeEl = document.getElementById('codeSnippet');
+  if (q.code) {
+    codeEl.textContent = q.code;
+    codeEl.classList.remove('hidden');
+  } else {
+    codeEl.classList.add('hidden');
+  }
+
+  // Options / fill-blank
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+
+  if (q.type === 'fill-blank') {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'fill-input';
+    input.placeholder = 'Type your answer here…';
+    input.id = 'fillInput';
+    if (ans !== null) {
+      input.value = ans.given;
+      input.disabled = true;
+      input.classList.add(ans.correct ? 'correct' : 'wrong');
+    }
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') confirmFill();
+    });
+    container.appendChild(input);
+
+    if (ans === null) {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-primary';
+      btn.style.marginTop = '0.75rem';
+      btn.textContent = 'Submit';
+      btn.onclick = confirmFill;
+      container.appendChild(btn);
+    }
+  } else {
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = opt;
+      btn.dataset.index = i;
+      btn.setAttribute('tabindex', '0');
+
+      if (ans !== null) {
+        btn.disabled = true;
+        if (i === q.correct) btn.classList.add('correct');
+        else if (ans.given === i) btn.classList.add('wrong');
+      }
+
+      btn.addEventListener('click', () => selectOption(i));
+      container.appendChild(btn);
+    });
+  }
+
+  // Feedback
+  showFeedback(ans, q);
+
+  // Card flash
+  const card = document.getElementById('questionCard');
+  card.classList.remove('flash-correct', 'flash-wrong');
+
+  // Nav buttons
+  document.getElementById('prevBtn').disabled = current === 0;
+  const nextBtn = document.getElementById('nextBtn');
+  if (current === questions.length - 1) {
+    nextBtn.textContent = 'Finish';
+    nextBtn.onclick = () => { if (allAnswered()) finishQuiz(); else navigate(1); };
+  } else {
+    nextBtn.textContent = 'Next →';
+    nextBtn.onclick = () => navigate(1);
+  }
+  nextBtn.disabled = false;
+}
+
+function showFeedback(ans, q) {
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+
+  if (ans === null) return;
+
+  if (ans.correct) {
+    fb.classList.add('show', 'correct-fb');
+    fb.innerHTML = '<strong>&#10003; Correct!</strong> ' + escapeHtml(q.explanation);
+  } else {
+    fb.classList.add('show', 'wrong-fb');
+    let correctLabel = q.type === 'fill-blank'
+      ? escapeHtml(q.correct)
+      : escapeHtml(q.options[q.correct]);
+    fb.innerHTML = '<strong>&#10007; Incorrect.</strong> Correct answer: <strong>' + correctLabel + '</strong><br><br>' + escapeHtml(q.explanation);
+  }
+}
+
+/* ================================================================
+   ANSWER HANDLING
+   ================================================================ */
+function selectOption(idx) {
+  if (answers[current] !== null) return;
+  const q   = questions[current];
+  const ok  = idx === q.correct;
+  answers[current] = { given: idx, correct: ok };
+
+  // Style buttons
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach(b => {
+    b.disabled = true;
+    const i = parseInt(b.dataset.index);
+    if (i === q.correct) b.classList.add('correct');
+    else if (i === idx)  b.classList.add('wrong');
+  });
+
+  // Flash card
+  const card = document.getElementById('questionCard');
+  card.classList.add(ok ? 'flash-correct' : 'flash-wrong');
+  setTimeout(() => card.classList.remove('flash-correct', 'flash-wrong'), 600);
+
+  showFeedback(answers[current], q);
+}
+
+function confirmFill() {
+  if (answers[current] !== null) return;
+  const input = document.getElementById('fillInput');
+  if (!input) return;
+  const given = input.value.trim().toLowerCase();
+  const correct = questions[current].correct.toLowerCase();
+  const ok = given === correct;
+  answers[current] = { given: input.value.trim(), correct: ok };
+  input.disabled = true;
+  input.classList.add(ok ? 'correct' : 'wrong');
+
+  const submitBtn = input.nextElementSibling;
+  if (submitBtn) submitBtn.remove();
+
+  const card = document.getElementById('questionCard');
+  card.classList.add(ok ? 'flash-correct' : 'flash-wrong');
+  setTimeout(() => card.classList.remove('flash-correct', 'flash-wrong'), 600);
+
+  showFeedback(answers[current], questions[current]);
+}
+
+/* ================================================================
+   NAVIGATION
+   ================================================================ */
+function navigate(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= questions.length) return;
+  current = next;
+  render();
+}
+
+function allAnswered() {
+  return answers.every(a => a !== null);
+}
+
+/* ================================================================
+   FINISH
+   ================================================================ */
+function finishQuiz() {
+  clearInterval(timerInterval);
+  quizDone = true;
+  const elapsed = Date.now() - startTime;
+
+  const correct = answers.filter(a => a && a.correct).length;
+  const pct     = Math.round((correct / questions.length) * 100);
+
+  // Grade
+  let grade, gradeColor;
+  if      (pct >= 95) { grade = 'Expert!';        gradeColor = '#e94560'; }
+  else if (pct >= 80) { grade = 'Good Job!';       gradeColor = '#2ecc71'; }
+  else if (pct >= 60) { grade = 'Getting There';   gradeColor = '#f39c12'; }
+  else                { grade = 'Needs Work';      gradeColor = '#e74c3c'; }
+
+  document.getElementById('scorePct').textContent = pct + '%';
+  document.getElementById('scoreRaw').textContent = correct + ' / ' + questions.length;
+
+  const badge = document.getElementById('gradeBadge');
+  badge.textContent = grade;
+  badge.style.background = gradeColor + '22';
+  badge.style.color       = gradeColor;
+  badge.style.border      = '1.5px solid ' + gradeColor;
+
+  document.getElementById('statCorrect').textContent = correct;
+  document.getElementById('statWrong').textContent   = questions.length - correct;
+  document.getElementById('statTime').textContent    = formatTime(elapsed);
+
+  const wrongCount = answers.filter(a => a && !a.correct).length;
+  document.getElementById('reviewBtn').disabled = wrongCount === 0;
+
+  // Hide quiz UI, show results
+  document.getElementById('progressWrap').classList.add('hidden');
+  document.getElementById('questionCard').classList.add('hidden');
+  document.getElementById('navRow').classList.add('hidden');
+  document.getElementById('resultsCard').classList.add('show');
+}
+
+/* ================================================================
+   RETRY
+   ================================================================ */
+function retryQuiz() {
+  current   = 0;
+  answers   = new Array(questions.length).fill(null);
+  startTime = Date.now();
+  quizDone  = false;
+
+  document.getElementById('resultsCard').classList.remove('show');
+  document.getElementById('reviewWrap').classList.remove('show');
+  document.getElementById('progressWrap').classList.remove('hidden');
+  document.getElementById('questionCard').classList.remove('hidden');
+  document.getElementById('navRow').classList.remove('hidden');
+
+  clearInterval(timerInterval);
+  startTimer();
+  render();
+}
+
+/* ================================================================
+   REVIEW
+   ================================================================ */
+function showReview() {
+  document.getElementById('resultsCard').classList.remove('show');
+  const wrap  = document.getElementById('reviewWrap');
+  const items = document.getElementById('reviewItems');
+  items.innerHTML = '';
+
+  questions.forEach((q, i) => {
+    const ans = answers[i];
+    if (!ans || ans.correct) return;
+
+    const div = document.createElement('div');
+    div.className = 'review-item';
+
+    const correctLabel = q.type === 'fill-blank'
+      ? q.correct
+      : q.options[q.correct];
+    const givenLabel = q.type === 'fill-blank'
+      ? (ans.given || '(no answer)')
+      : q.options[ans.given];
+
+    div.innerHTML = `
+      <div class="review-q-num">Question ${i + 1}</div>
+      <div class="review-q-text">${escapeHtml(q.text)}</div>
+      ${q.code ? `<pre class="code-snippet" style="margin-bottom:0.75rem;font-size:0.75rem;">${escapeHtml(q.code)}</pre>` : ''}
+      <div class="review-label">Your answer:</div>
+      <div class="review-answer your-wrong">${escapeHtml(givenLabel)}</div>
+      <div class="review-label" style="margin-top:0.5rem;">Correct answer:</div>
+      <div class="review-answer correct-ans">${escapeHtml(correctLabel)}</div>
+      <div class="review-explanation">${escapeHtml(q.explanation)}</div>
+    `;
+    items.appendChild(div);
+  });
+
+  if (items.children.length === 0) {
+    items.innerHTML = '<p style="color:var(--green);text-align:center;">All answers were correct!</p>';
+  }
+
+  wrap.classList.add('show');
+}
+
+function backToResults() {
+  document.getElementById('reviewWrap').classList.remove('show');
+  document.getElementById('resultsCard').classList.add('show');
+}
+
+/* ================================================================
+   KEYBOARD NAVIGATION
+   ================================================================ */
+document.addEventListener('keydown', e => {
+  if (quizDone) return;
+  const q = questions[current];
+
+  if (q.type !== 'fill-blank') {
+    const opts = document.querySelectorAll('.option-btn:not(:disabled)');
+    if (!opts.length) return;
+
+    // Find currently focused/selected
+    let focused = [...opts].findIndex(b => b === document.activeElement);
+
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      focused = (focused + 1) % opts.length;
+      opts[focused].focus();
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      focused = (focused - 1 + opts.length) % opts.length;
+      opts[focused].focus();
+    } else if ((e.key === 'Enter' || e.key === ' ') && focused >= 0) {
+      e.preventDefault();
+      opts[focused].click();
+    }
+  }
+
+  if (e.key === 'ArrowRight' && e.ctrlKey) navigate(1);
+  if (e.key === 'ArrowLeft'  && e.ctrlKey) navigate(-1);
+});
+
+/* ================================================================
+   UTILS
+   ================================================================ */
+function escapeHtml(str) {
+  if (typeof str !== 'string') return str;
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/* ================================================================
+   INIT
+   ================================================================ */
+startTimer();
+render();
+</script>
+</body>
+</html>

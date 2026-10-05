@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java Foundations Quiz</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #1a1a2e;
+      --panel:   #16213e;
+      --accent:  #e94560;
+      --accent2: #0f3460;
+      --text:    #e0e0e0;
+      --muted:   #8892b0;
+      --green:   #2ecc71;
+      --red:     #e94560;
+      --border:  #2a3a5e;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    a.back-link {
+      align-self: flex-start;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: color 0.2s;
+    }
+    a.back-link:hover { color: var(--accent); }
+
+    .quiz-wrapper {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    h1.quiz-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 1.2rem;
+      text-align: center;
+    }
+
+    /* Progress */
+    .progress-bar-wrap {
+      background: var(--border);
+      border-radius: 999px;
+      height: 6px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+    .progress-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: right;
+      margin-bottom: 1.2rem;
+    }
+
+    /* Card */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.8rem;
+      margin-bottom: 1.2rem;
+      transition: border-color 0.3s;
+    }
+    .card.flash-correct  { border-color: var(--green); box-shadow: 0 0 18px rgba(46,204,113,0.25); }
+    .card.flash-wrong    { border-color: var(--red);   box-shadow: 0 0 18px rgba(233,69,96,0.25);  }
+
+    .question-text {
+      font-size: 1.05rem;
+      line-height: 1.55;
+      margin-bottom: 1.2rem;
+      font-weight: 500;
+    }
+
+    /* Code block */
+    pre.code-snippet {
+      background: #0d1b2a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.9rem 1.1rem;
+      font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin-bottom: 1.2rem;
+      color: #cdd9e5;
+      white-space: pre;
+    }
+
+    /* Options */
+    .options-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+    .option-btn {
+      width: 100%;
+      text-align: left;
+      background: var(--accent2);
+      border: 2px solid transparent;
+      border-radius: 9px;
+      color: var(--text);
+      font-size: 0.95rem;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      outline: none;
+    }
+    .option-btn .opt-key {
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+      padding: 0.15rem 0.45rem;
+      min-width: 1.6rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .option-btn:hover:not(:disabled):not(.disabled-opt) {
+      background: #1a3a6e;
+      border-color: var(--accent);
+      transform: translateX(3px);
+    }
+    .option-btn.selected {
+      border-color: var(--accent);
+      background: rgba(233,69,96,0.15);
+    }
+    .option-btn.correct-ans {
+      border-color: var(--green);
+      background: rgba(46,204,113,0.18);
+    }
+    .option-btn.wrong-ans {
+      border-color: var(--red);
+      background: rgba(233,69,96,0.18);
+    }
+    .option-btn:disabled, .option-btn.disabled-opt {
+      cursor: default;
+    }
+
+    /* Fill-blank */
+    .fill-blank-wrap {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .fill-blank-input {
+      background: var(--accent2);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1rem;
+      padding: 0.65rem 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+      flex: 1;
+      min-width: 0;
+      font-family: 'Fira Code', Consolas, monospace;
+    }
+    .fill-blank-input:focus { border-color: var(--accent); }
+    .fill-blank-input.input-correct { border-color: var(--green); }
+    .fill-blank-input.input-wrong   { border-color: var(--red); }
+
+    .submit-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.65rem 1.3rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .submit-btn:hover:not(:disabled) { opacity: 0.88; transform: scale(1.02); }
+    .submit-btn:disabled { opacity: 0.4; cursor: default; }
+
+    /* Feedback */
+    .feedback-box {
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: 9px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      display: none;
+    }
+    .feedback-box.show { display: block; }
+    .feedback-box.fb-correct { background: rgba(46,204,113,0.12); border: 1px solid var(--green); }
+    .feedback-box.fb-wrong   { background: rgba(233,69,96,0.12);   border: 1px solid var(--red); }
+    .feedback-box .fb-title { font-weight: 700; margin-bottom: 0.3rem; }
+    .feedback-box .fb-correct-ans { margin-bottom: 0.3rem; color: var(--green); }
+    .feedback-box .fb-explanation { color: var(--muted); }
+
+    /* Navigation */
+    .nav-row {
+      display: flex;
+      gap: 0.8rem;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-btn {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+      padding: 0.6rem 1.2rem;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s;
+    }
+    .nav-btn:hover:not(:disabled) { background: var(--accent2); border-color: var(--accent); }
+    .nav-btn:disabled { opacity: 0.35; cursor: default; }
+    .nav-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+    .nav-btn.primary:hover:not(:disabled) { opacity: 0.88; }
+
+    /* Final screen */
+    #final-screen {
+      display: none;
+      text-align: center;
+    }
+    .score-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 5px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.2rem;
+    }
+    .score-pct  { font-size: 2.4rem; font-weight: 800; color: var(--accent); }
+    .score-frac { font-size: 0.8rem; color: var(--muted); }
+    .grade-badge {
+      display: inline-block;
+      background: var(--accent2);
+      border: 2px solid var(--accent);
+      border-radius: 999px;
+      padding: 0.35rem 1.1rem;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0.8rem;
+    }
+    .final-time {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+    .final-buttons {
+      display: flex;
+      gap: 0.8rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .final-buttons .nav-btn { min-width: 140px; }
+
+    /* Review mode */
+    #review-screen { display: none; }
+    .review-item {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.4rem;
+      margin-bottom: 1rem;
+    }
+    .review-item .q-num { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.4rem; }
+    .review-item .q-text { font-weight: 500; margin-bottom: 0.8rem; line-height: 1.5; }
+    .review-item .your-ans { color: var(--red); font-size: 0.88rem; margin-bottom: 0.25rem; }
+    .review-item .right-ans { color: var(--green); font-size: 0.88rem; margin-bottom: 0.5rem; }
+    .review-item .expl { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+    .review-back-btn {
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 1.2rem; }
+      .quiz-title { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<a href="README.md" class="back-link">&#8592; Back to Index</a>
+
+<div class="quiz-wrapper">
+  <h1 class="quiz-title">Java Foundations Quiz</h1>
+
+  <!-- Quiz screen -->
+  <div id="quiz-screen">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-label" id="progress-label">Question 1 of 15</div>
+
+    <div class="card" id="question-card">
+      <div class="question-text" id="question-text"></div>
+      <pre class="code-snippet" id="code-snippet" style="display:none"></pre>
+      <ul class="options-list" id="options-list"></ul>
+      <div class="fill-blank-wrap" id="fill-blank-wrap" style="display:none">
+        <input type="text" class="fill-blank-input" id="fill-blank-input" placeholder="Type your answer..." autocomplete="off" />
+        <button class="submit-btn" id="submit-blank-btn">Submit</button>
+      </div>
+      <div class="feedback-box" id="feedback-box">
+        <div class="fb-title" id="fb-title"></div>
+        <div class="fb-correct-ans" id="fb-correct-ans" style="display:none"></div>
+        <div class="fb-explanation" id="fb-explanation"></div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" id="prev-btn" disabled>&#8592; Previous</button>
+      <button class="nav-btn primary" id="next-btn" disabled>Next &#8594;</button>
+    </div>
+  </div>
+
+  <!-- Final screen -->
+  <div id="final-screen">
+    <div class="card" style="padding:2rem;">
+      <div class="score-circle" id="score-circle">
+        <div class="score-pct" id="score-pct"></div>
+        <div class="score-frac" id="score-frac"></div>
+      </div>
+      <div class="grade-badge" id="grade-badge"></div>
+      <div class="final-time" id="final-time"></div>
+      <div class="final-buttons">
+        <button class="nav-btn primary" id="retry-btn">Retry</button>
+        <button class="nav-btn" id="review-btn">Review Wrong Answers</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review screen -->
+  <div id="review-screen">
+    <button class="nav-btn review-back-btn" id="review-back-btn">&#8592; Back to Results</button>
+    <div id="review-list"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// QUESTIONS DATA
+// ============================================================
+const questions = [
+  // 1
+  {
+    type: "multiple-choice",
+    text: "Which component is required to BOTH compile and run a Java program from source code?",
+    options: ["JRE (Java Runtime Environment)", "JVM (Java Virtual Machine)", "JDK (Java Development Kit)", "javac compiler only"],
+    correct: 2,
+    explanation: "The JDK (Java Development Kit) bundles the compiler (javac), the JRE, and the JVM. To compile source code you need javac (part of JDK). The JRE alone can only run already-compiled .class files. The JVM is the engine inside the JRE that executes bytecode."
+  },
+  // 2
+  {
+    type: "multiple-choice",
+    text: "What is the default value of an uninitialized int field in a Java class?",
+    options: ["null", "undefined", "0", "-1"],
+    correct: 2,
+    explanation: "Instance fields (not local variables) of primitive numeric types are automatically initialised to 0 (for int/long/short/byte), 0.0 (for float/double), false (for boolean), and '\\u0000' (for char). Local variables must be explicitly initialised before use."
+  },
+  // 3
+  {
+    type: "multiple-choice",
+    text: "Which of the following is the correct range for the byte primitive type in Java?",
+    options: ["0 to 255", "-128 to 127", "-256 to 255", "-32768 to 32767"],
+    correct: 1,
+    explanation: "byte is an 8-bit signed integer. Its range is -2^7 to 2^7-1, i.e. -128 to 127. short is 16-bit (-32768..32767). int is 32-bit. The range 0..255 would be for an unsigned byte, which Java does not have as a primitive."
+  },
+  // 4 — code-output
+  {
+    type: "multiple-choice",
+    code: "int x = 5;\nint y = 2;\nSystem.out.println(x / y);",
+    text: "What does the following code print?",
+    options: ["2.5", "2", "3", "Compilation error"],
+    correct: 1,
+    explanation: "When both operands of / are integers, Java performs integer (truncating) division. 5 / 2 = 2.5, but the fractional part is discarded, giving 2. To get 2.5 you would need at least one operand to be a floating-point type, e.g. 5.0 / 2 or (double)x / y."
+  },
+  // 5 — code-output
+  {
+    type: "multiple-choice",
+    code: "int max = Integer.MAX_VALUE;\nSystem.out.println(max + 1);",
+    text: "What does the following code print?",
+    options: ["2147483648", "Integer.MAX_VALUE", "-2147483648", "Overflow exception"],
+    correct: 2,
+    explanation: "Integer.MAX_VALUE is 2^31-1 = 2147483647. Adding 1 wraps around in two's complement arithmetic, giving the most negative int value: -2147483648 (Integer.MIN_VALUE). Java does NOT throw an exception for integer overflow — it silently wraps around. This is a classic integer overflow bug."
+  },
+  // 6 — code-output
+  {
+    type: "multiple-choice",
+    code: 'String a = "Hello";\nString b = a;\nb = b + " World";\nSystem.out.println(a);',
+    text: "What does the following code print?",
+    options: ["Hello World", "Hello", "null", "Compilation error"],
+    correct: 1,
+    explanation: "Strings in Java are immutable. The expression b + \" World\" creates a brand-new String object and assigns it to b. The reference stored in a is never changed, so a still points to the original \"Hello\" object."
+  },
+  // 7 — true-false
+  {
+    type: "true-false",
+    text: "In Java, a char literal is stored as a 16-bit unsigned Unicode value, so you can cast it to an int to see its numeric code.",
+    options: ["True", "False"],
+    correct: 0,
+    explanation: "True. Java's char is a 16-bit unsigned type representing a UTF-16 code unit (range 0..65535). You can freely assign a char to an int without an explicit cast, and the int receives the corresponding Unicode code point. For example, (int)'A' gives 65."
+  },
+  // 8
+  {
+    type: "multiple-choice",
+    text: "Which statement about String and StringBuilder is correct?",
+    options: [
+      "String is mutable; StringBuilder is immutable",
+      "Both String and StringBuilder are immutable",
+      "String is immutable; StringBuilder is mutable and better for repeated concatenation in loops",
+      "StringBuilder is thread-safe; String is not"
+    ],
+    correct: 2,
+    explanation: "String objects are immutable — every concatenation creates a new object. StringBuilder is mutable: its append() modifies the internal buffer in place, making it far more efficient when concatenating inside a loop. StringBuffer is the thread-safe variant of StringBuilder."
+  },
+  // 9
+  {
+    type: "multiple-choice",
+    text: "What is autoboxing in Java?",
+    options: [
+      "Automatic conversion between int[] and Integer[]",
+      "Automatic wrapping of a primitive value into its corresponding wrapper class object",
+      "Automatic casting of double to float",
+      "The process of compiling Java to bytecode automatically"
+    ],
+    correct: 1,
+    explanation: "Autoboxing is the compiler's automatic conversion of a primitive (e.g. int) to its wrapper class (e.g. Integer) when required — for example, when storing an int into an ArrayList<Integer>. The reverse process (wrapper to primitive) is called unboxing. Both were introduced in Java 5."
+  },
+  // 10 — true-false
+  {
+    type: "true-false",
+    text: "The expression (int) 9.99 evaluates to 10 in Java because the value is rounded to the nearest integer.",
+    options: ["True", "False"],
+    correct: 1,
+    explanation: "False. Narrowing a floating-point value to an integer using a cast truncates (drops) the fractional part — it does NOT round. So (int) 9.99 gives 9, not 10. To round, you would use Math.round(), which returns 10 for 9.99."
+  },
+  // 11
+  {
+    type: "multiple-choice",
+    text: "What is the result of the following widening conversion?",
+    code: "int i = 1_000_000;\nlong l = i;\nSystem.out.println(l);",
+    options: ["1000000", "Compilation error — explicit cast needed", "10", "0"],
+    correct: 0,
+    explanation: "Widening primitive conversions (e.g., int to long, float to double) are done automatically with no cast because no data can be lost. A long is 64 bits so it can hold any int value perfectly. The underscore in 1_000_000 is a legal numeric literal separator introduced in Java 7 — it improves readability and is ignored by the compiler."
+  },
+  // 12 — fill-blank
+  {
+    type: "fill-blank",
+    text: "Complete the method call to print \"Java\" to the console on its own line: System.out.________(\"Java\");",
+    correct: "println",
+    explanation: "System.out.println() prints the argument followed by a newline character. System.out.print() prints without a newline. System.out.printf() or System.out.format() are for formatted output. All three are methods on the PrintStream object System.out."
+  },
+  // 13
+  {
+    type: "multiple-choice",
+    text: "What does the Integer.parseInt(\"42\") call return?",
+    options: [
+      "The String \"42\"",
+      "The Integer object 42",
+      "The primitive int value 42",
+      "A double 42.0"
+    ],
+    correct: 2,
+    explanation: "Integer.parseInt(String) is a static method that parses the string and returns a primitive int. If you need an Integer object you can use Integer.valueOf(\"42\") or rely on autoboxing. If the string cannot be parsed (e.g. \"abc\"), a NumberFormatException is thrown."
+  },
+  // 14 — code-output
+  {
+    type: "multiple-choice",
+    code: 'int a = 10;\nint b = 3;\nSystem.out.println(a % b);',
+    text: "What does the following code print?",
+    options: ["3", "1", "0", "3.33"],
+    correct: 1,
+    explanation: "The % operator is the modulus (remainder) operator. 10 divided by 3 is 3 with a remainder of 1, so 10 % 3 = 1. It is useful for checking divisibility (n % 2 == 0 means even), cycling through array indices, and many other patterns."
+  },
+  // 15 — true-false
+  {
+    type: "true-false",
+    text: "In Java, float is a 64-bit floating-point type and double is a 32-bit floating-point type.",
+    options: ["True", "False"],
+    correct: 1,
+    explanation: "False. It is the other way around. float is 32-bit (single precision, IEEE 754) and double is 64-bit (double precision). Because double provides roughly twice the precision, it is the default for floating-point literals — writing 3.14 gives a double, while 3.14f gives a float."
+  }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let currentIndex   = 0;
+let answers        = new Array(questions.length).fill(null); // null = unanswered
+let answered       = new Array(questions.length).fill(false);
+let startTime      = Date.now();
+let reviewMode     = false;
+
+// ============================================================
+// DOM REFS
+// ============================================================
+const quizScreen      = document.getElementById('quiz-screen');
+const finalScreen     = document.getElementById('final-screen');
+const reviewScreen    = document.getElementById('review-screen');
+const progressFill    = document.getElementById('progress-fill');
+const progressLabel   = document.getElementById('progress-label');
+const questionCard    = document.getElementById('question-card');
+const questionText    = document.getElementById('question-text');
+const codeSnippet     = document.getElementById('code-snippet');
+const optionsList     = document.getElementById('options-list');
+const fillBlankWrap   = document.getElementById('fill-blank-wrap');
+const fillBlankInput  = document.getElementById('fill-blank-input');
+const submitBlankBtn  = document.getElementById('submit-blank-btn');
+const feedbackBox     = document.getElementById('feedback-box');
+const fbTitle         = document.getElementById('fb-title');
+const fbCorrectAns    = document.getElementById('fb-correct-ans');
+const fbExplanation   = document.getElementById('fb-explanation');
+const prevBtn         = document.getElementById('prev-btn');
+const nextBtn         = document.getElementById('next-btn');
+const retryBtn        = document.getElementById('retry-btn');
+const reviewBtn       = document.getElementById('review-btn');
+const reviewBackBtn   = document.getElementById('review-back-btn');
+const reviewList      = document.getElementById('review-list');
+
+// ============================================================
+// RENDER QUESTION
+// ============================================================
+function renderQuestion(index) {
+  const q = questions[index];
+
+  // Progress
+  const pct = ((index + 1) / questions.length) * 100;
+  progressFill.style.width = pct + '%';
+  progressLabel.textContent = `Question ${index + 1} of ${questions.length}`;
+
+  // Question text
+  questionText.textContent = q.text;
+
+  // Code snippet
+  if (q.code) {
+    codeSnippet.textContent = q.code;
+    codeSnippet.style.display = 'block';
+  } else {
+    codeSnippet.style.display = 'none';
+  }
+
+  // Reset card flash
+  questionCard.classList.remove('flash-correct', 'flash-wrong');
+
+  // Options vs fill-blank
+  optionsList.innerHTML = '';
+  fillBlankWrap.style.display = 'none';
+
+  if (q.type === 'fill-blank') {
+    fillBlankWrap.style.display = 'flex';
+    fillBlankInput.value = answers[index] !== null ? answers[index] : '';
+    fillBlankInput.className = 'fill-blank-input';
+    fillBlankInput.disabled = answered[index];
+    submitBlankBtn.disabled = answered[index];
+  } else {
+    const keys = ['A','B','C','D'];
+    q.options.forEach((opt, i) => {
+      const li  = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.setAttribute('data-index', i);
+
+      const keySpan = document.createElement('span');
+      keySpan.className = 'opt-key';
+      keySpan.textContent = keys[i] || i;
+
+      btn.appendChild(keySpan);
+      btn.appendChild(document.createTextNode(opt));
+
+      if (answered[index]) {
+        btn.disabled = true;
+        btn.classList.add('disabled-opt');
+        if (i === q.correct) btn.classList.add('correct-ans');
+        else if (answers[index] === i) btn.classList.add('wrong-ans');
+      } else {
+        btn.addEventListener('click', () => selectOption(i));
+      }
+
+      li.appendChild(btn);
+      optionsList.appendChild(li);
+    });
+  }
+
+  // Feedback
+  renderFeedback(index);
+
+  // Nav buttons
+  prevBtn.disabled = index === 0;
+  nextBtn.disabled = !answered[index] && index < questions.length - 1;
+  if (index === questions.length - 1 && answered[index]) {
+    nextBtn.textContent = 'Finish';
+    nextBtn.disabled = false;
+  } else {
+    nextBtn.textContent = 'Next →';
+  }
+
+  // Apply flash if already answered
+  if (answered[index]) {
+    const q2 = questions[index];
+    const isCorrect = checkCorrect(index, answers[index]);
+    questionCard.classList.add(isCorrect ? 'flash-correct' : 'flash-wrong');
+  }
+}
+
+function checkCorrect(index, userAnswer) {
+  const q = questions[index];
+  if (q.type === 'fill-blank') {
+    return typeof userAnswer === 'string' &&
+      userAnswer.trim().toLowerCase() === q.correct.trim().toLowerCase();
+  }
+  return userAnswer === q.correct;
+}
+
+function renderFeedback(index) {
+  if (!answered[index]) {
+    feedbackBox.className = 'feedback-box';
+    return;
+  }
+  const q = questions[index];
+  const correct = checkCorrect(index, answers[index]);
+
+  if (correct) {
+    feedbackBox.className = 'feedback-box show fb-correct';
+    fbTitle.textContent = '✓ Correct!';
+    fbCorrectAns.style.display = 'none';
+  } else {
+    feedbackBox.className = 'feedback-box show fb-wrong';
+    fbTitle.textContent = '✗ Wrong';
+    if (q.type === 'fill-blank') {
+      fbCorrectAns.textContent = 'Correct answer: ' + q.correct;
+    } else {
+      fbCorrectAns.textContent = 'Correct answer: ' + q.options[q.correct];
+    }
+    fbCorrectAns.style.display = 'block';
+  }
+  fbExplanation.textContent = q.explanation;
+}
+
+// ============================================================
+// HANDLE ANSWERS
+// ============================================================
+function selectOption(optIndex) {
+  if (answered[currentIndex]) return;
+  answered[currentIndex] = true;
+  answers[currentIndex]  = optIndex;
+
+  const q = questions[currentIndex];
+  const correct = optIndex === q.correct;
+
+  // Flash card
+  questionCard.classList.add(correct ? 'flash-correct' : 'flash-wrong');
+
+  // Style buttons
+  const btns = optionsList.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    btn.classList.add('disabled-opt');
+    if (i === q.correct) btn.classList.add('correct-ans');
+    else if (i === optIndex) btn.classList.add('wrong-ans');
+  });
+
+  renderFeedback(currentIndex);
+
+  // Enable next
+  if (currentIndex === questions.length - 1) {
+    nextBtn.textContent = 'Finish';
+  }
+  nextBtn.disabled = false;
+}
+
+submitBlankBtn.addEventListener('click', submitBlank);
+fillBlankInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') submitBlank();
+});
+
+function submitBlank() {
+  if (answered[currentIndex]) return;
+  const val = fillBlankInput.value.trim();
+  if (!val) return;
+
+  answered[currentIndex] = true;
+  answers[currentIndex]  = val;
+
+  const correct = checkCorrect(currentIndex, val);
+  fillBlankInput.disabled = true;
+  submitBlankBtn.disabled = true;
+  fillBlankInput.classList.add(correct ? 'input-correct' : 'input-wrong');
+  questionCard.classList.add(correct ? 'flash-correct' : 'flash-wrong');
+
+  renderFeedback(currentIndex);
+  if (currentIndex === questions.length - 1) nextBtn.textContent = 'Finish';
+  nextBtn.disabled = false;
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+prevBtn.addEventListener('click', () => {
+  if (currentIndex > 0) { currentIndex--; renderQuestion(currentIndex); }
+});
+
+nextBtn.addEventListener('click', () => {
+  if (currentIndex < questions.length - 1) {
+    currentIndex++;
+    renderQuestion(currentIndex);
+  } else {
+    showFinal();
+  }
+});
+
+// ============================================================
+// KEYBOARD NAVIGATION
+// ============================================================
+document.addEventListener('keydown', (e) => {
+  if (reviewMode) return;
+  if (finalScreen.style.display === 'flex') return;
+
+  const q = questions[currentIndex];
+  if (q.type === 'fill-blank') return; // let input handle its own keys
+
+  const keys = ['KeyA','KeyB','KeyC','KeyD'];
+  const keyIdx = keys.indexOf(e.code);
+  if (keyIdx !== -1 && keyIdx < q.options.length && !answered[currentIndex]) {
+    e.preventDefault();
+    selectOption(keyIdx);
+    return;
+  }
+  if ((e.key === 'Enter' || e.key === ' ') && answered[currentIndex]) {
+    e.preventDefault();
+    nextBtn.click();
+  }
+  if (e.key === 'ArrowRight' && answered[currentIndex]) {
+    e.preventDefault(); nextBtn.click();
+  }
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault(); prevBtn.click();
+  }
+});
+
+// ============================================================
+// FINAL SCREEN
+// ============================================================
+function showFinal() {
+  quizScreen.style.display = 'none';
+  finalScreen.style.display = 'block';
+  reviewScreen.style.display = 'none';
+
+  const total   = questions.length;
+  const correct = answers.filter((a, i) => checkCorrect(i, a)).length;
+  const pct     = Math.round((correct / total) * 100);
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const mins    = Math.floor(elapsed / 60);
+  const secs    = elapsed % 60;
+
+  document.getElementById('score-pct').textContent  = pct + '%';
+  document.getElementById('score-frac').textContent = correct + ' / ' + total;
+  document.getElementById('final-time').textContent =
+    `Time: ${mins}m ${secs.toString().padStart(2,'0')}s`;
+
+  let grade;
+  if (pct >= 95)      grade = 'Expert!';
+  else if (pct >= 80) grade = 'Good Job!';
+  else if (pct >= 60) grade = 'Getting There';
+  else                grade = 'Needs Work';
+
+  document.getElementById('grade-badge').textContent = grade;
+
+  // Colour the score circle
+  const circle = document.getElementById('score-circle');
+  if (pct >= 80)      circle.style.borderColor = 'var(--green)';
+  else if (pct >= 60) circle.style.borderColor = '#f39c12';
+  else                circle.style.borderColor = 'var(--red)';
+
+  const wrongCount = answers.filter((a, i) => !checkCorrect(i, a)).length;
+  reviewBtn.disabled = wrongCount === 0;
+  if (wrongCount === 0) reviewBtn.textContent = 'No Wrong Answers!';
+}
+
+// ============================================================
+// RETRY
+// ============================================================
+retryBtn.addEventListener('click', () => {
+  currentIndex = 0;
+  answers      = new Array(questions.length).fill(null);
+  answered     = new Array(questions.length).fill(false);
+  startTime    = Date.now();
+  reviewMode   = false;
+
+  finalScreen.style.display  = 'none';
+  reviewScreen.style.display = 'none';
+  quizScreen.style.display   = 'block';
+  renderQuestion(0);
+});
+
+// ============================================================
+// REVIEW WRONG ANSWERS
+// ============================================================
+reviewBtn.addEventListener('click', () => {
+  reviewMode = true;
+  finalScreen.style.display  = 'none';
+  quizScreen.style.display   = 'none';
+  reviewScreen.style.display = 'block';
+  buildReview();
+});
+
+reviewBackBtn.addEventListener('click', () => {
+  reviewMode = false;
+  reviewScreen.style.display = 'none';
+  finalScreen.style.display  = 'block';
+});
+
+function buildReview() {
+  reviewList.innerHTML = '';
+  const wrongIndices = questions
+    .map((_, i) => i)
+    .filter(i => !checkCorrect(i, answers[i]));
+
+  if (wrongIndices.length === 0) {
+    reviewList.innerHTML = '<p style="color:var(--green);text-align:center">No wrong answers — perfect score!</p>';
+    return;
+  }
+
+  wrongIndices.forEach(i => {
+    const q    = questions[i];
+    const item = document.createElement('div');
+    item.className = 'review-item';
+
+    const qNum = document.createElement('div');
+    qNum.className = 'q-num';
+    qNum.textContent = `Question ${i + 1}`;
+
+    const qText = document.createElement('div');
+    qText.className = 'q-text';
+    qText.textContent = q.text;
+
+    item.appendChild(qNum);
+
+    if (q.code) {
+      const pre = document.createElement('pre');
+      pre.className = 'code-snippet';
+      pre.textContent = q.code;
+      pre.style.marginBottom = '0.7rem';
+      item.appendChild(pre);
+    }
+
+    item.appendChild(qText);
+
+    const yourAns = document.createElement('div');
+    yourAns.className = 'your-ans';
+    if (q.type === 'fill-blank') {
+      yourAns.textContent = 'Your answer: ' + (answers[i] !== null ? answers[i] : '(no answer)');
+    } else {
+      yourAns.textContent = 'Your answer: ' + (answers[i] !== null ? q.options[answers[i]] : '(no answer)');
+    }
+
+    const rightAns = document.createElement('div');
+    rightAns.className = 'right-ans';
+    rightAns.textContent = 'Correct: ' + (q.type === 'fill-blank' ? q.correct : q.options[q.correct]);
+
+    const expl = document.createElement('div');
+    expl.className = 'expl';
+    expl.textContent = q.explanation;
+
+    item.appendChild(yourAns);
+    item.appendChild(rightAns);
+    item.appendChild(expl);
+    reviewList.appendChild(item);
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderQuestion(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Project Architecture Quiz</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #1a1a2e;
+    --panel:    #16213e;
+    --accent:   #e94560;
+    --accent2:  #0f3460;
+    --text:     #e0e0e0;
+    --muted:    #8892a4;
+    --correct:  #2ecc71;
+    --wrong:    #e74c3c;
+    --border:   #0f3460;
+    --opt-hover:#1e3a5f;
+    --code-bg:  #0d1b2a;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+  }
+
+  a.back-link {
+    align-self: flex-start;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+  }
+  a.back-link:hover { color: var(--text); background: var(--panel); }
+
+  h1 {
+    font-size: clamp(1.2rem, 4vw, 1.7rem);
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  #quiz-container {
+    width: 100%;
+    max-width: 760px;
+  }
+
+  /* ── Progress bar ── */
+  #progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+  #progress-label { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+  #progress-bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--accent2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  #progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.8rem;
+  }
+
+  #question-type-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: var(--accent2);
+    color: var(--muted);
+    border-radius: 4px;
+    padding: 0.15rem 0.5rem;
+    margin-bottom: 0.8rem;
+  }
+
+  #question-text {
+    font-size: clamp(1rem, 3vw, 1.15rem);
+    line-height: 1.6;
+    margin-bottom: 1.2rem;
+  }
+
+  pre.code-snippet {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+    font-size: 0.82rem;
+    overflow-x: auto;
+    line-height: 1.5;
+    margin-bottom: 1.2rem;
+    white-space: pre;
+  }
+
+  /* ── Options ── */
+  #options-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .option-btn {
+    width: 100%;
+    text-align: left;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    position: relative;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: var(--opt-hover);
+  }
+  .option-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .option-key {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent2);
+    border-radius: 4px;
+    padding: 0.1rem 0.45rem;
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+  }
+  .option-btn.selected { border-color: var(--accent); background: var(--opt-hover); }
+  .option-btn.correct  { border-color: var(--correct); background: rgba(46,204,113,0.12); }
+  .option-btn.wrong    { border-color: var(--wrong);   background: rgba(231,76,60,0.12); }
+  .option-btn:disabled { cursor: default; }
+
+  /* ── Fill-blank ── */
+  #fill-input {
+    width: 100%;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-size: 0.95rem;
+    margin-bottom: 1.2rem;
+    transition: border-color 0.15s;
+  }
+  #fill-input:focus { outline: none; border-color: var(--accent); }
+  #fill-input.correct { border-color: var(--correct); }
+  #fill-input.wrong   { border-color: var(--wrong); }
+
+  /* ── Feedback ── */
+  #feedback-box {
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1.2rem;
+    display: none;
+  }
+  #feedback-box.show { display: block; }
+  #feedback-box.correct-fb {
+    background: rgba(46,204,113,0.1);
+    border: 1px solid var(--correct);
+    color: #a0f0c0;
+  }
+  #feedback-box.wrong-fb {
+    background: rgba(231,76,60,0.1);
+    border: 1px solid var(--wrong);
+    color: #f5a0a0;
+  }
+  #feedback-box strong { color: var(--text); }
+
+  /* ── Buttons row ── */
+  .btn-row {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .btn {
+    padding: 0.6rem 1.3rem;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover:not(:disabled) { opacity: 0.85; }
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover:not(:disabled) { color: var(--text); border-color: var(--muted); }
+  .btn-confirm { background: var(--correct); color: #fff; }
+  .btn-confirm:hover:not(:disabled) { opacity: 0.85; }
+
+  .spacer { flex: 1; }
+
+  /* ── Final screen ── */
+  #final-screen {
+    display: none;
+    text-align: center;
+  }
+  #final-screen.show { display: block; }
+
+  .score-circle {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: conic-gradient(var(--accent) 0% var(--pct, 0%), var(--accent2) var(--pct, 0%) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.2rem;
+    position: relative;
+  }
+  .score-circle::after {
+    content: '';
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: var(--panel);
+    border-radius: 50%;
+  }
+  .score-circle-inner {
+    position: relative;
+    z-index: 1;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .grade-badge {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .final-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 1rem 0 1.5rem;
+    flex-wrap: wrap;
+  }
+  .stat-item { text-align: center; }
+  .stat-val { font-size: 1.4rem; font-weight: 700; color: var(--text); }
+  .stat-lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* ── Review screen ── */
+  #review-screen { display: none; }
+  #review-screen.show { display: block; }
+
+  .review-item {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  .review-q-label {
+    font-size: 0.75rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 0.4rem;
+  }
+  .review-q-text { font-size: 0.95rem; line-height: 1.5; margin-bottom: 0.6rem; }
+  .review-answer {
+    font-size: 0.88rem;
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    margin-bottom: 0.3rem;
+  }
+  .review-answer.your-wrong {
+    background: rgba(231,76,60,0.1);
+    border: 1px solid var(--wrong);
+    color: #f5a0a0;
+  }
+  .review-answer.correct-ans {
+    background: rgba(46,204,113,0.1);
+    border: 1px solid var(--correct);
+    color: #a0f0c0;
+  }
+  .review-exp {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+    line-height: 1.5;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  @keyframes flash-correct {
+    0%   { box-shadow: 0 0 0 0 rgba(46,204,113,0.7); }
+    50%  { box-shadow: 0 0 0 12px rgba(46,204,113,0); }
+    100% { box-shadow: none; }
+  }
+  @keyframes flash-wrong {
+    0%   { box-shadow: 0 0 0 0 rgba(231,76,60,0.7); }
+    50%  { box-shadow: 0 0 0 12px rgba(231,76,60,0); }
+    100% { box-shadow: none; }
+  }
+  .card.flash-c { animation: flash-correct 0.5s ease-out; }
+  .card.flash-w { animation: flash-wrong   0.5s ease-out; }
+
+  @media (max-width: 480px) {
+    .card { padding: 1.2rem; }
+    .btn-row { gap: 0.4rem; }
+    .btn { padding: 0.55rem 1rem; font-size: 0.85rem; }
+    .final-stats { gap: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<a class="back-link" href="README.md">&#8592; Back to Index</a>
+<h1>Java Project Architecture Quiz</h1>
+
+<div id="quiz-container">
+
+  <!-- Quiz screen -->
+  <div id="quiz-screen">
+    <div id="progress-wrap">
+      <span id="progress-label">Question 1 of 15</span>
+      <div id="progress-bar-track"><div id="progress-bar-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="card" id="question-card">
+      <span id="question-type-badge"></span>
+      <div id="question-text"></div>
+      <pre class="code-snippet" id="code-block" style="display:none"></pre>
+      <ul id="options-list"></ul>
+      <input type="text" id="fill-input" placeholder="Type your answer here..." style="display:none" autocomplete="off" spellcheck="false">
+      <div id="feedback-box"></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="btn-prev">&#8592; Prev</button>
+        <span class="spacer"></span>
+        <button class="btn btn-confirm" id="btn-confirm" style="display:none">Confirm</button>
+        <button class="btn btn-primary" id="btn-next">Next &#8594;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Final screen -->
+  <div id="final-screen" class="card">
+    <h2 style="color:var(--accent);margin-bottom:1rem;">Quiz Complete!</h2>
+    <div class="score-circle" id="score-circle">
+      <span class="score-circle-inner" id="score-pct-text">0%</span>
+    </div>
+    <div class="grade-badge" id="grade-text"></div>
+    <div class="final-stats">
+      <div class="stat-item">
+        <div class="stat-val" id="final-correct">0</div>
+        <div class="stat-lbl">Correct</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="final-wrong">0</div>
+        <div class="stat-lbl">Wrong</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="final-time">0:00</div>
+        <div class="stat-lbl">Elapsed</div>
+      </div>
+    </div>
+    <div class="btn-row" style="justify-content:center;gap:0.8rem;flex-wrap:wrap;">
+      <button class="btn btn-primary" id="btn-retry">Retry</button>
+      <button class="btn btn-secondary" id="btn-review">Review Wrong Answers</button>
+    </div>
+  </div>
+
+  <!-- Review screen -->
+  <div id="review-screen">
+    <h2 style="color:var(--accent);margin-bottom:1rem;">Review: Missed Questions</h2>
+    <div id="review-list"></div>
+    <div class="btn-row" style="margin-top:1rem;">
+      <button class="btn btn-primary" id="btn-retry-from-review">Retry Quiz</button>
+      <button class="btn btn-secondary" id="btn-back-to-results">&#8592; Back to Results</button>
+    </div>
+  </div>
+
+</div><!-- /quiz-container -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+//  QUESTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+const questions = [
+  // 1 ── Multiple choice
+  {
+    type: "multiple-choice",
+    question: "What core problem does the Repository pattern primarily solve in Java project architecture?",
+    options: [
+      "It makes all database tables visible to the controller layer.",
+      "It decouples the business logic from data-access details, so the service layer works with domain objects without caring about SQL or JPA specifics.",
+      "It automatically generates REST endpoints for every entity.",
+      "It replaces the need for a Service layer entirely."
+    ],
+    correct: 1,
+    explanation: "The Repository pattern acts as an abstraction over the data store. The service layer calls repository methods (findById, save, delete) and never writes SQL or JPA queries directly, making the business logic testable without a real database."
+  },
+
+  // 2 ── True / False
+  {
+    type: "true-false",
+    question: "In a standard layered architecture, the Service layer is allowed to directly access the HTTP request object (HttpServletRequest) to read query parameters.",
+    options: ["True", "False"],
+    correct: 1,
+    explanation: "False. The Service layer must not depend on the web/presentation tier. HTTP-specific objects like HttpServletRequest belong in Controllers. The Controller extracts the data it needs and passes plain Java objects or DTOs down to the Service."
+  },
+
+  // 3 ── Architecture code snippet (what layer?)
+  {
+    type: "multiple-choice",
+    question: "Which architectural layer does the following class belong to?",
+    code:
+`@RestController
+@RequestMapping("/api/orders")
+public class OrderController {
+
+    private final OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderDTO> getOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrder(id));
+    }
+}`,
+    options: [
+      "Domain / Model layer",
+      "Repository layer",
+      "Service layer",
+      "Presentation (Controller) layer"
+    ],
+    correct: 3,
+    explanation: "@RestController maps HTTP requests to Java method calls. It sits in the Presentation layer — its only job is to receive HTTP input, delegate to the Service, and format the HTTP response. It must not contain business logic."
+  },
+
+  // 4 ── Architecture code snippet (what layer?)
+  {
+    type: "multiple-choice",
+    question: "Which architectural layer does the following class belong to?",
+    code:
+`@Service
+@Transactional
+public class OrderService {
+
+    private final OrderRepository orderRepository;
+    private final InventoryService inventoryService;
+
+    public OrderService(OrderRepository orderRepository,
+                        InventoryService inventoryService) {
+        this.orderRepository = orderRepository;
+        this.inventoryService = inventoryService;
+    }
+
+    public OrderDTO placeOrder(CreateOrderRequest req) {
+        inventoryService.reserve(req.getProductId(), req.getQty());
+        Order order = new Order(req.getCustomerId(), req.getProductId(), req.getQty());
+        return OrderMapper.toDTO(orderRepository.save(order));
+    }
+}`,
+    options: [
+      "Presentation (Controller) layer",
+      "Service layer",
+      "Repository layer",
+      "Domain / Model layer"
+    ],
+    correct: 1,
+    explanation: "The @Service annotation and the transactional business logic (reserve inventory, create Order, persist) place this squarely in the Service layer. It orchestrates domain objects and repositories but does not deal with HTTP."
+  },
+
+  // 5 ── Architecture code snippet (what layer?)
+  {
+    type: "multiple-choice",
+    question: "Which architectural layer does the following class belong to?",
+    code:
+`@Repository
+public interface ProductRepository
+        extends JpaRepository<Product, Long> {
+
+    List<Product> findByCategoryAndPriceLessThan(
+            String category, BigDecimal maxPrice);
+
+    @Query("SELECT p FROM Product p WHERE p.stock = 0")
+    List<Product> findOutOfStock();
+}`,
+    options: [
+      "Service layer",
+      "Presentation layer",
+      "Repository (Data Access) layer",
+      "Domain / Model layer"
+    ],
+    correct: 2,
+    explanation: "JpaRepository extension with @Repository marks this as the Data Access / Repository layer. It abstracts JPA queries. The Service calls these methods without knowing whether the data comes from MySQL, PostgreSQL, or an in-memory H2 database."
+  },
+
+  // 6 ── DTO vs Entity
+  {
+    type: "multiple-choice",
+    question: "A developer includes the user's password hash and internal audit fields directly in the UserDTO returned by the REST API. What principle is violated?",
+    options: [
+      "Single Responsibility Principle — the DTO should only hold one field.",
+      "The DTO should be identical to the Entity to avoid mapping overhead.",
+      "DTOs exist to control the data exposed over the API; exposing sensitive Entity fields leaks internal structure and is a security risk.",
+      "DTOs must extend the Entity class to share field definitions."
+    ],
+    correct: 2,
+    explanation: "DTOs (Data Transfer Objects) decouple the API contract from the internal domain model. They let you expose only what the client needs, hide sensitive fields, and evolve the entity without breaking the API. Returning the Entity directly is an anti-pattern."
+  },
+
+  // 7 ── MVC separation of concerns
+  {
+    type: "true-false",
+    question: "In the MVC pattern, the Model is responsible for rendering HTML or JSON responses.",
+    options: ["True", "False"],
+    correct: 1,
+    explanation: "False. The View (or, in REST APIs, the serialisation framework) renders the response. The Model holds data and business state. The Controller mediates between View and Model. Mixing rendering code into the Model violates separation of concerns."
+  },
+
+  // 8 ── Interface vs Abstract class
+  {
+    type: "multiple-choice",
+    question: "You are designing a NotificationService that could be implemented as EmailNotificationService or SmsNotificationService. Both share NO common implementation code. Which should you use?",
+    options: [
+      "abstract class NotificationService — because abstract classes are always safer.",
+      "interface NotificationService — because there is no shared state or implementation to inherit, and an interface allows multiple implementations without an inheritance chain.",
+      "A concrete class with if/else for each channel.",
+      "enum NotificationService — because the number of channels is finite."
+    ],
+    correct: 1,
+    explanation: "When classes share a contract but no code, an interface is the right tool. It enables dependency injection of different implementations, easier mocking in tests, and avoids locking implementations into a single inheritance chain. Use abstract class when shared code (template methods, fields) exists."
+  },
+
+  // 9 ── Dependency Injection
+  {
+    type: "multiple-choice",
+    question: "Why is constructor injection generally preferred over field injection (using @Autowired on a private field) in Spring projects?",
+    options: [
+      "Constructor injection uses less memory at runtime.",
+      "Field injection is not supported in Spring Boot.",
+      "Constructor injection makes dependencies explicit, enables immutability (final fields), and allows the class to be instantiated and tested without a Spring context.",
+      "Constructor injection is faster because Spring skips reflection."
+    ],
+    correct: 2,
+    explanation: "With constructor injection you can write 'new MyService(mockRepo)' in a unit test — no Spring context needed. Dependencies are final, preventing accidental reassignment. Field injection requires Spring's DI framework (reflection) to work, making isolated unit testing harder."
+  },
+
+  // 10 ── Transaction boundaries
+  {
+    type: "multiple-choice",
+    question: "Where should @Transactional be placed to correctly define transaction boundaries in a typical Spring layered architecture?",
+    options: [
+      "On the Repository interface, so every query runs in its own transaction.",
+      "On the Controller method, so the full HTTP request is one transaction.",
+      "On the Service method, because the service orchestrates the business operation that must succeed or fail as a unit.",
+      "On the Entity class, so every field write is transactional."
+    ],
+    correct: 2,
+    explanation: "@Transactional belongs on the Service layer. A single business operation may call multiple repository methods — all must commit or roll back together. Placing it on the Controller violates layering; placing it only on the Repository creates a transaction per query, which breaks atomicity across operations."
+  },
+
+  // 11 ── Maven structure fill-blank
+  {
+    type: "fill-blank",
+    question: "In a standard Maven project layout, production Java source files are stored in the directory (relative to project root): src/____/java",
+    correct: "main",
+    explanation: "Maven's standard directory layout places production source code in src/main/java and test source code in src/test/java. The build lifecycle compiles each set separately, keeping test code out of the production artifact."
+  },
+
+  // 12 ── Integration vs Unit testing
+  {
+    type: "multiple-choice",
+    question: "A test loads the full Spring ApplicationContext, uses an in-memory H2 database, and verifies that calling OrderService.placeOrder() persists a row in the orders table. This is best described as:",
+    options: [
+      "A unit test, because it tests one method.",
+      "A smoke test, because it checks the application starts.",
+      "An integration test, because it verifies multiple real components (Spring context, service, JPA, database) working together.",
+      "A regression test, because it confirms previously working behaviour."
+    ],
+    correct: 2,
+    explanation: "Integration tests wire together real components: Spring beans, JPA mappings, and a real (or in-memory) database. They are slower than unit tests but catch wiring bugs and SQL issues. Unit tests isolate a single class by mocking all collaborators."
+  },
+
+  // 13 ── Package naming conventions
+  {
+    type: "multiple-choice",
+    question: "Which package naming convention is correct for a Java project at the company example.com with an app called inventory?",
+    options: [
+      "Inventory.ExampleCom.Controllers",
+      "com.example.inventory.controller",
+      "controller.inventory.com.example",
+      "example_com.inventory.Controller"
+    ],
+    correct: 1,
+    explanation: "Java package names use all-lowercase reversed domain followed by the project name and then the layer/feature: com.example.inventory.controller. This ensures global uniqueness and follows the naming convention defined in the Java Language Specification."
+  },
+
+  // 14 ── Code output / architecture
+  {
+    type: "multiple-choice",
+    question: "What is printed when this code runs?",
+    code:
+`interface Drawable {
+    default String describe() { return "shape"; }
+}
+
+abstract class Shape implements Drawable {
+    abstract double area();
+    @Override
+    public String describe() { return "Shape: " + area(); }
+}
+
+class Circle extends Shape {
+    double r;
+    Circle(double r) { this.r = r; }
+    @Override
+    public double area() { return Math.PI * r * r; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Drawable d = new Circle(0); // area = 0.0
+        System.out.println(d.describe());
+    }
+}`,
+    options: [
+      "shape",
+      "Shape: 0.0",
+      "Shape: 3.141592653589793",
+      "Compilation error — Circle must implement describe()"
+    ],
+    correct: 1,
+    explanation: "Circle inherits describe() from Shape (not Drawable's default) because Shape overrides it. Shape.describe() calls the abstract area() which Circle implements as Math.PI*0*0 = 0.0. So output is 'Shape: 0.0'. This illustrates why abstract classes beat interfaces when shared template-method logic exists."
+  },
+
+  // 15 ── CRUD / layered architecture
+  {
+    type: "true-false",
+    question: "In a well-designed layered architecture, the Repository layer should contain business validation logic such as 'an order cannot be placed if the customer's account is suspended'.",
+    options: ["True", "False"],
+    correct: 1,
+    explanation: "False. Business rules belong in the Service layer. The Repository's only job is to store and retrieve data. Embedding business logic in the repository couples data access to domain rules, making both harder to test, reuse, and change independently."
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════════════════
+let current    = 0;
+let answers    = new Array(questions.length).fill(null); // null | index | string
+let confirmed  = new Array(questions.length).fill(false);
+let startTime  = Date.now();
+let timerHandle = null;
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  DOM REFS
+// ═══════════════════════════════════════════════════════════════════════════
+const quizScreen    = document.getElementById('quiz-screen');
+const finalScreen   = document.getElementById('final-screen');
+const reviewScreen  = document.getElementById('review-screen');
+const progressLabel = document.getElementById('progress-label');
+const progressFill  = document.getElementById('progress-bar-fill');
+const questionCard  = document.getElementById('question-card');
+const typeBadge     = document.getElementById('question-type-badge');
+const questionText  = document.getElementById('question-text');
+const codeBlock     = document.getElementById('code-block');
+const optionsList   = document.getElementById('options-list');
+const fillInput     = document.getElementById('fill-input');
+const feedbackBox   = document.getElementById('feedback-box');
+const btnPrev       = document.getElementById('btn-prev');
+const btnConfirm    = document.getElementById('btn-confirm');
+const btnNext       = document.getElementById('btn-next');
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════════════════
+function init() {
+  current   = 0;
+  answers   = new Array(questions.length).fill(null);
+  confirmed = new Array(questions.length).fill(false);
+  startTime = Date.now();
+  quizScreen.style.display   = 'block';
+  finalScreen.classList.remove('show');
+  reviewScreen.classList.remove('show');
+  renderQuestion();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════════════════════════
+function renderQuestion() {
+  const q    = questions[current];
+  const done = confirmed[current];
+
+  // progress
+  progressLabel.textContent = `Question ${current + 1} of ${questions.length}`;
+  progressFill.style.width  = `${((current + 1) / questions.length) * 100}%`;
+
+  // badge
+  const badgeMap = {
+    'multiple-choice': 'Multiple Choice',
+    'true-false':      'True / False',
+    'fill-blank':      'Fill in the Blank'
+  };
+  typeBadge.textContent = badgeMap[q.type] || q.type;
+
+  // question
+  questionText.textContent = q.question;
+
+  // code block
+  if (q.code) {
+    codeBlock.textContent = q.code;
+    codeBlock.style.display = 'block';
+  } else {
+    codeBlock.style.display = 'none';
+  }
+
+  // options / fill
+  optionsList.innerHTML = '';
+  fillInput.style.display = 'none';
+  fillInput.className = '';
+
+  if (q.type === 'fill-blank') {
+    fillInput.style.display = 'block';
+    fillInput.value = done ? (answers[current] || '') : (answers[current] !== null ? answers[current] : '');
+    fillInput.disabled = done;
+    if (done) {
+      const correct = answers[current].trim().toLowerCase() === q.correct.trim().toLowerCase();
+      fillInput.className = correct ? 'correct' : 'wrong';
+    }
+  } else {
+    q.options.forEach((opt, idx) => {
+      const li  = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.disabled  = done;
+
+      const keySpan = document.createElement('span');
+      keySpan.className   = 'option-key';
+      keySpan.textContent = String.fromCharCode(65 + idx); // A, B, C, D
+
+      const label = document.createElement('span');
+      label.textContent = opt;
+
+      btn.appendChild(keySpan);
+      btn.appendChild(label);
+
+      // style based on state
+      if (done) {
+        if (idx === q.correct) {
+          btn.classList.add('correct');
+        } else if (idx === answers[current] && idx !== q.correct) {
+          btn.classList.add('wrong');
+        }
+      } else if (idx === answers[current]) {
+        btn.classList.add('selected');
+      }
+
+      btn.addEventListener('click', () => selectOption(idx));
+      li.appendChild(btn);
+      optionsList.appendChild(li);
+    });
+  }
+
+  // feedback
+  feedbackBox.className = 'feedback-box';
+  feedbackBox.innerHTML = '';
+  if (done) {
+    const isCorrect = checkAnswer();
+    showFeedback(isCorrect, q);
+  } else {
+    feedbackBox.classList.remove('show');
+  }
+
+  // buttons
+  btnPrev.disabled    = current === 0;
+  btnNext.textContent = current === questions.length - 1 ? 'Finish' : 'Next →';
+  btnConfirm.style.display = (!done) ? 'inline-flex' : 'none';
+  btnNext.style.display    = done ? 'inline-flex' : (current === questions.length - 1 ? 'none' : 'inline-flex');
+
+  // if on last question and not confirmed yet hide Next
+  if (current === questions.length - 1 && !done) {
+    btnNext.style.display = 'none';
+  }
+  // if confirmed on last question, Next becomes Finish
+  if (done && current === questions.length - 1) {
+    btnNext.textContent = 'See Results';
+  }
+
+  // focus first option for keyboard nav
+  if (!done) {
+    const first = optionsList.querySelector('.option-btn');
+    if (first) first.focus();
+  }
+}
+
+function selectOption(idx) {
+  if (confirmed[current]) return;
+  answers[current] = idx;
+  // re-render option styles
+  const btns = optionsList.querySelectorAll('.option-btn');
+  btns.forEach((b, i) => {
+    b.classList.toggle('selected', i === idx);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  CHECK & FEEDBACK
+// ═══════════════════════════════════════════════════════════════════════════
+function checkAnswer() {
+  const q = questions[current];
+  if (q.type === 'fill-blank') {
+    const userVal = (answers[current] || '').trim().toLowerCase();
+    return userVal === q.correct.trim().toLowerCase();
+  }
+  return answers[current] === q.correct;
+}
+
+function showFeedback(isCorrect, q) {
+  feedbackBox.classList.add('show');
+  feedbackBox.className = 'feedback-box show ' + (isCorrect ? 'correct-fb' : 'wrong-fb');
+
+  let html = '';
+  if (isCorrect) {
+    html += '<strong>Correct!</strong> ';
+  } else {
+    if (q.type === 'fill-blank') {
+      html += `<strong>Incorrect.</strong> The correct answer is: <strong>"${q.correct}"</strong><br><br>`;
+    } else {
+      html += `<strong>Incorrect.</strong> The correct answer is: <strong>"${q.options[q.correct]}"</strong><br><br>`;
+    }
+  }
+  html += q.explanation;
+  feedbackBox.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  CONFIRM ANSWER
+// ═══════════════════════════════════════════════════════════════════════════
+function confirmAnswer() {
+  const q = questions[current];
+
+  // collect fill-blank answer
+  if (q.type === 'fill-blank') {
+    const val = fillInput.value.trim();
+    if (!val) { fillInput.focus(); return; }
+    answers[current] = val;
+  } else {
+    if (answers[current] === null) return; // nothing selected
+  }
+
+  confirmed[current] = true;
+  const isCorrect = checkAnswer();
+
+  // flash card
+  questionCard.classList.remove('flash-c', 'flash-w');
+  void questionCard.offsetWidth; // reflow
+  questionCard.classList.add(isCorrect ? 'flash-c' : 'flash-w');
+
+  renderQuestion();
+
+  // auto-advance after short delay if correct, keep on screen if wrong
+  if (isCorrect && current < questions.length - 1) {
+    setTimeout(() => {
+      current++;
+      renderQuestion();
+    }, 1200);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  NAV
+// ═══════════════════════════════════════════════════════════════════════════
+btnConfirm.addEventListener('click', confirmAnswer);
+
+btnNext.addEventListener('click', () => {
+  if (current < questions.length - 1) {
+    current++;
+    renderQuestion();
+  } else {
+    showFinal();
+  }
+});
+
+btnPrev.addEventListener('click', () => {
+  if (current > 0) {
+    current--;
+    renderQuestion();
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  KEYBOARD
+// ═══════════════════════════════════════════════════════════════════════════
+document.addEventListener('keydown', (e) => {
+  if (finalScreen.classList.contains('show') || reviewScreen.classList.contains('show')) return;
+  if (document.activeElement === fillInput) return;
+
+  const q = questions[current];
+
+  if ((e.key === 'Enter' || e.key === ' ') && !confirmed[current]) {
+    e.preventDefault();
+    confirmAnswer();
+    return;
+  }
+  if (e.key === 'ArrowRight' && confirmed[current]) {
+    e.preventDefault();
+    if (current < questions.length - 1) { current++; renderQuestion(); }
+    else showFinal();
+    return;
+  }
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    if (current > 0) { current--; renderQuestion(); }
+    return;
+  }
+
+  if (confirmed[current]) return;
+  if (q.type === 'fill-blank') return;
+
+  const optCount = q.options.length;
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    const cur = answers[current] === null ? 0 : answers[current];
+    selectOption((cur - 1 + optCount) % optCount);
+  }
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    const cur = answers[current] === null ? -1 : answers[current];
+    selectOption((cur + 1) % optCount);
+  }
+
+  // A/B/C/D keys
+  const keyIdx = 'abcd'.indexOf(e.key.toLowerCase());
+  if (keyIdx >= 0 && keyIdx < optCount) {
+    selectOption(keyIdx);
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  FINAL SCREEN
+// ═══════════════════════════════════════════════════════════════════════════
+function showFinal() {
+  quizScreen.style.display = 'none';
+
+  let correctCount = 0;
+  questions.forEach((q, i) => {
+    if (!confirmed[i]) return;
+    if (q.type === 'fill-blank') {
+      if ((answers[i] || '').trim().toLowerCase() === q.correct.trim().toLowerCase()) correctCount++;
+    } else {
+      if (answers[i] === q.correct) correctCount++;
+    }
+  });
+
+  const total   = questions.length;
+  const pct     = Math.round((correctCount / total) * 100);
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  const mins    = Math.floor(elapsed / 60);
+  const secs    = elapsed % 60;
+
+  let grade;
+  if (pct >= 95) grade = 'Expert!';
+  else if (pct >= 80) grade = 'Good Job!';
+  else if (pct >= 60) grade = 'Getting There';
+  else grade = 'Needs Work';
+
+  document.getElementById('score-pct-text').textContent = pct + '%';
+  document.getElementById('score-circle').style.setProperty('--pct', pct + '%');
+  document.getElementById('grade-text').textContent = grade;
+  document.getElementById('final-correct').textContent = correctCount;
+  document.getElementById('final-wrong').textContent   = total - correctCount;
+  document.getElementById('final-time').textContent    = `${mins}:${String(secs).padStart(2,'0')}`;
+
+  finalScreen.classList.add('show');
+}
+
+document.getElementById('btn-retry').addEventListener('click', init);
+
+document.getElementById('btn-review').addEventListener('click', showReview);
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  REVIEW SCREEN
+// ═══════════════════════════════════════════════════════════════════════════
+function showReview() {
+  finalScreen.classList.remove('show');
+  reviewScreen.classList.add('show');
+
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+
+  let anyMissed = false;
+  questions.forEach((q, i) => {
+    // determine if wrong
+    let wrong = false;
+    if (!confirmed[i]) {
+      wrong = true; // unanswered counts as wrong
+    } else if (q.type === 'fill-blank') {
+      wrong = (answers[i] || '').trim().toLowerCase() !== q.correct.trim().toLowerCase();
+    } else {
+      wrong = answers[i] !== q.correct;
+    }
+    if (!wrong) return;
+    anyMissed = true;
+
+    const div = document.createElement('div');
+    div.className = 'review-item';
+
+    // code snippet if present
+    let codeHtml = '';
+    if (q.code) {
+      codeHtml = `<pre class="code-snippet" style="margin-bottom:0.6rem">${escHtml(q.code)}</pre>`;
+    }
+
+    let yourAnswer = '';
+    if (!confirmed[i] || answers[i] === null) {
+      yourAnswer = '<em>(no answer given)</em>';
+    } else if (q.type === 'fill-blank') {
+      yourAnswer = escHtml(answers[i]);
+    } else {
+      yourAnswer = escHtml(q.options[answers[i]]);
+    }
+
+    let correctAnswer = '';
+    if (q.type === 'fill-blank') {
+      correctAnswer = escHtml(q.correct);
+    } else {
+      correctAnswer = escHtml(q.options[q.correct]);
+    }
+
+    div.innerHTML = `
+      <div class="review-q-label">Question ${i + 1}</div>
+      <div class="review-q-text">${escHtml(q.question)}</div>
+      ${codeHtml}
+      <div class="review-answer your-wrong">&#10007; Your answer: ${yourAnswer}</div>
+      <div class="review-answer correct-ans">&#10003; Correct answer: ${correctAnswer}</div>
+      <div class="review-exp">${escHtml(q.explanation)}</div>
+    `;
+    list.appendChild(div);
+  });
+
+  if (!anyMissed) {
+    list.innerHTML = '<p style="color:var(--correct);text-align:center;padding:2rem;">Perfect score — no missed questions!</p>';
+  }
+}
+
+function escHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+document.getElementById('btn-retry-from-review').addEventListener('click', () => {
+  reviewScreen.classList.remove('show');
+  init();
+});
+
+document.getElementById('btn-back-to-results').addEventListener('click', () => {
+  reviewScreen.classList.remove('show');
+  finalScreen.classList.add('show');
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  FILL-BLANK: pressing Enter confirms
+// ═══════════════════════════════════════════════════════════════════════════
+fillInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') confirmAnswer();
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  START
+// ═══════════════════════════════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>

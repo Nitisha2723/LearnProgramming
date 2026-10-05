@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java Software Design Quiz</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #1a1a2e;
+      --panel:   #16213e;
+      --accent:  #e94560;
+      --accent2: #0f3460;
+      --text:    #e0e0e0;
+      --muted:   #8892a4;
+      --correct: #2ecc71;
+      --wrong:   #e74c3c;
+      --border:  #2a3a5c;
+      --hover:   #1e2d4a;
+      --radius:  10px;
+      --shadow:  0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    a.back-link {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.2s;
+      z-index: 100;
+    }
+    a.back-link:hover { color: var(--text); }
+
+    .container {
+      width: 100%;
+      max-width: 780px;
+      margin-top: 30px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+    }
+    header p {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 0.9rem;
+    }
+
+    /* Progress */
+    .progress-bar-wrap {
+      background: var(--border);
+      border-radius: 99px;
+      height: 8px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+    .progress-label {
+      text-align: right;
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-bottom: 20px;
+    }
+
+    /* Card */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      box-shadow: var(--shadow);
+    }
+
+    .question-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .question-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      background: var(--accent2);
+      color: var(--accent);
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+    .question-num {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .question-text {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    /* Code block */
+    .code-block {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 18px;
+      overflow-x: auto;
+    }
+    .code-block pre {
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      color: #c9d1d9;
+      white-space: pre;
+    }
+
+    /* Options */
+    .options-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .option-btn {
+      background: var(--hover);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      text-align: left;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      width: 100%;
+      font-size: 0.93rem;
+      line-height: 1.45;
+    }
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      background: #1e2d4a;
+      transform: translateX(2px);
+    }
+    .option-btn:disabled { cursor: default; }
+    .option-btn .opt-key {
+      min-width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--accent2);
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .option-btn.selected    { border-color: #6bb5ff; background: #1a2d45; }
+    .option-btn.correct     { border-color: var(--correct); background: rgba(46,204,113,0.12); }
+    .option-btn.wrong       { border-color: var(--wrong);   background: rgba(231,76,60,0.12); }
+    .option-btn.show-correct{ border-color: var(--correct); background: rgba(46,204,113,0.12); }
+
+    /* Fill blank */
+    .fill-blank-wrap {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .fill-blank-input {
+      flex: 1;
+      background: var(--hover);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .fill-blank-input:focus { border-color: var(--accent); }
+    .fill-blank-input.correct-input { border-color: var(--correct); }
+    .fill-blank-input.wrong-input   { border-color: var(--wrong); }
+    .fill-blank-input:disabled { opacity: 0.7; }
+
+    .btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 10px 20px;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn:hover:not(:disabled) { background: #c73652; transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.45; cursor: default; }
+    .btn.btn-secondary {
+      background: var(--accent2);
+      color: var(--text);
+    }
+    .btn.btn-secondary:hover:not(:disabled) { background: #143b6e; }
+
+    /* Feedback */
+    .feedback-box {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      display: none;
+    }
+    .feedback-box.correct { background: rgba(46,204,113,0.12); border: 1px solid var(--correct); color: #a8f0c6; }
+    .feedback-box.wrong   { background: rgba(231,76,60,0.12);  border: 1px solid var(--wrong);   color: #f5a5a5; }
+    .feedback-box strong  { display: block; margin-bottom: 4px; }
+
+    /* Nav buttons */
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 22px;
+      gap: 10px;
+    }
+
+    /* Flash animation */
+    @keyframes flashCorrect {
+      0%   { box-shadow: 0 0 0 0 rgba(46,204,113,0.6); }
+      50%  { box-shadow: 0 0 0 16px rgba(46,204,113,0); }
+      100% { box-shadow: 0 0 0 0 rgba(46,204,113,0); }
+    }
+    @keyframes flashWrong {
+      0%   { box-shadow: 0 0 0 0 rgba(231,76,60,0.6); }
+      50%  { box-shadow: 0 0 0 16px rgba(231,76,60,0); }
+      100% { box-shadow: 0 0 0 0 rgba(231,76,60,0); }
+    }
+    .card.flash-correct { animation: flashCorrect 0.55s ease-out; }
+    .card.flash-wrong   { animation: flashWrong   0.55s ease-out; }
+
+    /* Results screen */
+    .results-screen {
+      text-align: center;
+    }
+    .score-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: conic-gradient(var(--accent) 0%, var(--accent2) 0%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+    .score-circle::before {
+      content: '';
+      position: absolute;
+      inset: 12px;
+      border-radius: 50%;
+      background: var(--panel);
+    }
+    .score-pct {
+      position: relative;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      z-index: 1;
+    }
+    .grade-label {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      margin: 18px 0 26px;
+      flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-val  { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+    .stat-lbl  { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+    .results-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* Review mode */
+    .review-question {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 26px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .review-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+    .review-badge.wrong   { background: rgba(231,76,60,0.15); color: var(--wrong); }
+    .review-badge.correct { background: rgba(46,204,113,0.15); color: var(--correct); }
+
+    .hidden { display: none !important; }
+
+    /* Keyboard hint */
+    .kbd-hint {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin-top: 12px;
+    }
+    kbd {
+      background: var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.72rem;
+      font-family: monospace;
+    }
+
+    @media (max-width: 520px) {
+      .card { padding: 18px 16px; }
+      header h1 { font-size: 1.4rem; }
+      .stats-row { gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<a class="back-link" href="README.md">&#8592; Back to Index</a>
+
+<div class="container">
+  <header>
+    <h1>Java Software Design</h1>
+    <p>SOLID Principles &bull; Design Patterns &bull; Code Smells &bull; Best Practices</p>
+  </header>
+
+  <!-- Quiz screen -->
+  <div id="quiz-screen">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-label" id="progress-label">Question 1 of 15</div>
+
+    <div class="card" id="card">
+      <div class="question-meta">
+        <span class="question-tag" id="q-tag">Multiple Choice</span>
+        <span class="question-num" id="q-num">1 / 15</span>
+      </div>
+      <p class="question-text" id="q-text"></p>
+      <div id="q-code-wrap" class="code-block hidden"><pre id="q-code"></pre></div>
+      <ul class="options-list" id="options-list"></ul>
+      <div id="fill-blank-wrap" class="fill-blank-wrap hidden">
+        <input type="text" id="fill-blank-input" class="fill-blank-input" placeholder="Type your answer…" autocomplete="off" spellcheck="false" />
+        <button class="btn" id="fill-submit-btn">Submit</button>
+      </div>
+      <div class="feedback-box" id="feedback-box"></div>
+      <div class="nav-row">
+        <button class="btn btn-secondary" id="prev-btn" disabled>&#8592; Previous</button>
+        <button class="btn" id="next-btn" disabled>Next &#8594;</button>
+      </div>
+    </div>
+    <p class="kbd-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> select &nbsp;&nbsp; <kbd>Enter</kbd>/<kbd>Space</kbd> confirm &nbsp;&nbsp; <kbd>&larr;</kbd><kbd>&rarr;</kbd> prev/next</p>
+  </div>
+
+  <!-- Results screen -->
+  <div id="results-screen" class="hidden">
+    <div class="card results-screen">
+      <div class="score-circle" id="score-circle">
+        <span class="score-pct" id="score-pct">0%</span>
+      </div>
+      <div class="grade-label" id="grade-label"></div>
+      <div class="stats-row">
+        <div class="stat-item"><div class="stat-val" id="stat-correct">0</div><div class="stat-lbl">Correct</div></div>
+        <div class="stat-item"><div class="stat-val" id="stat-wrong">0</div><div class="stat-lbl">Wrong</div></div>
+        <div class="stat-item"><div class="stat-val" id="stat-time">0:00</div><div class="stat-lbl">Time</div></div>
+      </div>
+      <div class="results-btns">
+        <button class="btn btn-secondary" id="retry-btn">&#8635; Retry</button>
+        <button class="btn" id="review-btn">Review Wrong Answers</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review screen -->
+  <div id="review-screen" class="hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <h2 style="font-size:1.2rem;color:var(--accent)">Review: Missed Questions</h2>
+      <button class="btn btn-secondary" id="back-to-results-btn">&#8592; Back</button>
+    </div>
+    <div id="review-list"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  QUESTIONS
+// ============================================================
+const questions = [
+  // 1 — SRP violation (code snippet)
+  {
+    type: "multiple-choice",
+    tag: "SOLID",
+    text: "Which SOLID principle does the following class violate?",
+    code: `public class UserManager {
+    public void createUser(String name, String email) { /* save to DB */ }
+    public void sendWelcomeEmail(String email)        { /* send SMTP email */ }
+    public void generateUserReport(long userId)       { /* build PDF report */ }
+    public void logActivity(String action)            { /* write to log file */ }
+}`,
+    options: [
+      "Open/Closed Principle",
+      "Single Responsibility Principle",
+      "Liskov Substitution Principle",
+      "Interface Segregation Principle"
+    ],
+    correct: 1,
+    explanation: "Single Responsibility Principle (SRP) states a class should have only ONE reason to change. UserManager handles four unrelated concerns — persistence, email, reporting, and logging — giving it four separate reasons to change. Each concern should live in its own class."
+  },
+
+  // 2 — OCP violation (code snippet)
+  {
+    type: "multiple-choice",
+    tag: "SOLID",
+    text: "Which SOLID principle does this code violate?",
+    code: `public double calculateArea(Shape shape) {
+    if (shape.type.equals("circle")) {
+        return Math.PI * shape.radius * shape.radius;
+    } else if (shape.type.equals("square")) {
+        return shape.side * shape.side;
+    } else if (shape.type.equals("triangle")) {
+        return 0.5 * shape.base * shape.height;
+    }
+    throw new UnsupportedOperationException("Unknown shape");
+}`,
+    options: [
+      "Dependency Inversion Principle",
+      "Single Responsibility Principle",
+      "Open/Closed Principle",
+      "Liskov Substitution Principle"
+    ],
+    correct: 2,
+    explanation: "Open/Closed Principle (OCP): software entities should be OPEN for extension but CLOSED for modification. Every time a new shape is added, this method must be modified. The fix is polymorphism — define an abstract Shape.calculateArea() and let each subclass implement it, so new shapes are added without touching existing code."
+  },
+
+  // 3 — LSP violation (code snippet)
+  {
+    type: "multiple-choice",
+    tag: "SOLID",
+    text: "Which SOLID principle does this class hierarchy violate?",
+    code: `class Rectangle {
+    protected int width, height;
+    public void setWidth(int w)  { this.width = w; }
+    public void setHeight(int h) { this.height = h; }
+    public int area() { return width * height; }
+}
+
+class Square extends Rectangle {
+    @Override public void setWidth(int w)  { width = height = w; }
+    @Override public void setHeight(int h) { width = height = h; }
+}
+
+// Calling code that breaks:
+Rectangle r = new Square();
+r.setWidth(5);
+r.setHeight(3);
+System.out.println(r.area()); // expects 15, gets 9`,
+    options: [
+      "Interface Segregation Principle",
+      "Open/Closed Principle",
+      "Single Responsibility Principle",
+      "Liskov Substitution Principle"
+    ],
+    correct: 3,
+    explanation: "Liskov Substitution Principle (LSP): objects of a subclass must be substitutable for objects of their superclass without altering program correctness. Square breaks the Rectangle contract — setting width and height independently is a guaranteed property of Rectangle. A Square cannot honor that, so Square should NOT extend Rectangle."
+  },
+
+  // 4 — Thread-safe Singleton
+  {
+    type: "multiple-choice",
+    tag: "Singleton",
+    text: "Which implementation correctly creates a thread-safe Singleton in Java using the initialization-on-demand holder idiom?",
+    options: [
+      `public class Singleton {\n  private static Singleton instance;\n  public static Singleton getInstance() {\n    if (instance == null) instance = new Singleton();\n    return instance;\n  }\n}`,
+      `public class Singleton {\n  private static class Holder {\n    static final Singleton INSTANCE = new Singleton();\n  }\n  public static Singleton getInstance() { return Holder.INSTANCE; }\n}`,
+      `public class Singleton {\n  private static volatile Singleton instance;\n  public static Singleton getInstance() {\n    instance = new Singleton();\n    return instance;\n  }\n}`,
+      `public class Singleton {\n  public static final Singleton INSTANCE;\n  static { INSTANCE = new Singleton(); }\n}`
+    ],
+    correct: 1,
+    explanation: "The Initialization-On-Demand Holder (IODH) idiom (option B) is thread-safe by relying on the JVM class-loader guarantee: the static inner class Holder is loaded only when getInstance() is first called, and static field initialization is thread-safe. It avoids synchronization overhead on every call. Option A is not thread-safe; option C always creates a new instance; option D exposes the instance as a public field, breaking encapsulation."
+  },
+
+  // 5 — Factory vs Abstract Factory
+  {
+    type: "true-false",
+    tag: "Patterns",
+    text: "Abstract Factory creates a SINGLE object, while Factory Method creates FAMILIES of related objects.",
+    options: ["True", "False"],
+    correct: 1,
+    explanation: "FALSE — it is the other way around. Factory Method defines an interface for creating ONE object, letting subclasses decide which class to instantiate. Abstract Factory provides an interface for creating FAMILIES of related or dependent objects without specifying their concrete classes."
+  },
+
+  // 6 — Builder pattern
+  {
+    type: "multiple-choice",
+    tag: "Patterns",
+    text: "A developer needs to construct a complex HttpRequest object with many optional parameters (headers, body, timeout, auth). Which pattern is most appropriate?",
+    options: [
+      "Singleton — to share the same request object",
+      "Strategy — to swap request-sending algorithms",
+      "Builder — to construct the object step-by-step",
+      "Decorator — to add behavior to the request"
+    ],
+    correct: 2,
+    explanation: "The Builder pattern is ideal for constructing complex objects with many optional parameters, avoiding telescoping constructors. It lets you set only the fields you need, validates invariants before build(), and produces an immutable object. The classic Java example is StringBuilder; modern examples include Retrofit's Request.Builder()."
+  },
+
+  // 7 — Observer pattern
+  {
+    type: "multiple-choice",
+    tag: "Patterns",
+    text: "Which pattern defines a one-to-many dependency between objects so that when one object changes state, all its dependents are notified automatically?",
+    options: [
+      "Strategy",
+      "Observer",
+      "Decorator",
+      "Command"
+    ],
+    correct: 1,
+    explanation: "Observer (also known as Publish-Subscribe) maintains a list of dependents (observers/listeners) and notifies them of state changes. Java's java.util.Observable and EventListener are classic examples. Modern event buses, Rx Observables, and Java's Flow API are all based on this pattern."
+  },
+
+  // 8 — Strategy pattern
+  {
+    type: "multiple-choice",
+    tag: "Patterns",
+    text: "Examine the code below. Which design pattern is demonstrated?",
+    code: `interface SortStrategy { void sort(int[] data); }
+
+class BubbleSortStrategy  implements SortStrategy { /* ... */ }
+class QuickSortStrategy   implements SortStrategy { /* ... */ }
+class MergeSortStrategy   implements SortStrategy { /* ... */ }
+
+class DataProcessor {
+    private SortStrategy strategy;
+    public DataProcessor(SortStrategy strategy) { this.strategy = strategy; }
+    public void setStrategy(SortStrategy s) { this.strategy = s; }
+    public void process(int[] data) { strategy.sort(data); }
+}`,
+    options: [
+      "Template Method",
+      "Command",
+      "Strategy",
+      "Decorator"
+    ],
+    correct: 2,
+    explanation: "Strategy pattern defines a family of algorithms, encapsulates each one, and makes them interchangeable. The context (DataProcessor) holds a reference to a strategy interface and delegates the algorithm to whichever concrete strategy is injected. This allows the algorithm to vary independently from clients that use it."
+  },
+
+  // 9 — Decorator pattern
+  {
+    type: "multiple-choice",
+    tag: "Patterns",
+    text: "What does the Decorator pattern achieve that simple subclassing does NOT handle well?",
+    options: [
+      "It enforces a single instance of a class",
+      "It dynamically adds responsibilities to objects at runtime without creating an explosion of subclass combinations",
+      "It hides the complexity of object creation behind a factory interface",
+      "It defines a skeleton algorithm and lets subclasses fill in the steps"
+    ],
+    correct: 1,
+    explanation: "Decorator wraps an object to add behavior dynamically, avoiding the 'class explosion' problem. For example, java.io.InputStream is decorated by BufferedInputStream, DataInputStream, GZIPInputStream etc. — each combination does not need its own subclass. Decorators can be stacked at runtime in any order."
+  },
+
+  // 10 — Repository pattern
+  {
+    type: "fill-blank",
+    tag: "Patterns",
+    text: "The ________ pattern abstracts the data layer, providing a collection-like interface for accessing domain objects, hiding the details of the underlying database or persistence mechanism.",
+    correct: "Repository",
+    explanation: "The Repository pattern mediates between the domain and data-mapping layers using a collection-like interface for accessing domain objects. It centralizes data access logic, makes unit testing easy (mock the repository), and decouples the domain model from ORM or SQL details. Spring Data's JpaRepository is a well-known Java implementation."
+  },
+
+  // 11 — Code smell: God Class
+  {
+    type: "multiple-choice",
+    tag: "Code Smells",
+    text: "A class called ApplicationManager has 4,000 lines of code, 80 methods, direct dependencies on 25 other classes, and handles authentication, business rules, UI logic, and database access. Which code smell does this represent?",
+    options: [
+      "Feature Envy",
+      "Long Method",
+      "God Class",
+      "Data Clumps"
+    ],
+    correct: 2,
+    explanation: "God Class (also called Blob or Large Class) is a class that knows too much and does too much. It concentrates unrelated logic, has too many responsibilities, and high coupling. The fix is to apply SRP and extract cohesive groups of methods and fields into separate classes. God Classes are major maintenance liabilities."
+  },
+
+  // 12 — DRY principle
+  {
+    type: "true-false",
+    tag: "Principles",
+    text: "The DRY (Don't Repeat Yourself) principle states that every piece of knowledge must have a single, unambiguous, authoritative representation within a system.",
+    options: ["True", "False"],
+    correct: 0,
+    explanation: "TRUE — DRY is precisely defined this way in 'The Pragmatic Programmer' by Hunt and Thomas. Violation (WET — Write Everything Twice) leads to bugs where one copy is updated and the other is forgotten. DRY applies not just to code but also to documentation, database schemas, and configuration."
+  },
+
+  // 13 — YAGNI
+  {
+    type: "multiple-choice",
+    tag: "Principles",
+    text: "A developer adds a plugin system, an internationalization layer, and a distributed cache to a simple to-do list app 'just in case it scales'. Which principle is being violated?",
+    options: [
+      "DRY (Don't Repeat Yourself)",
+      "KISS (Keep It Simple, Stupid)",
+      "YAGNI (You Aren't Gonna Need It)",
+      "LSP (Liskov Substitution Principle)"
+    ],
+    correct: 2,
+    explanation: "YAGNI — You Aren't Gonna Need It — warns against adding functionality until it is actually needed. Over-engineering adds complexity, slows development, and often results in dead code. XP (Extreme Programming) emphasizes YAGNI to keep the codebase lean. Implement what is required now; extend when the need is real."
+  },
+
+  // 14 — ISP violation (code snippet)
+  {
+    type: "multiple-choice",
+    tag: "SOLID",
+    text: "Which SOLID principle does the following interface design violate?",
+    code: `interface Worker {
+    void work();
+    void eat();
+    void sleep();
+}
+
+class RobotWorker implements Worker {
+    public void work()  { /* works fine */ }
+    public void eat()   { throw new UnsupportedOperationException(); }
+    public void sleep() { throw new UnsupportedOperationException(); }
+}`,
+    options: [
+      "Single Responsibility Principle",
+      "Open/Closed Principle",
+      "Interface Segregation Principle",
+      "Dependency Inversion Principle"
+    ],
+    correct: 2,
+    explanation: "Interface Segregation Principle (ISP): clients should not be forced to depend on interfaces they do not use. RobotWorker must implement eat() and sleep() even though a robot doesn't eat or sleep. The fix is to split Worker into Workable, Eatable, and Sleepable interfaces — human workers implement all three, robots only Workable."
+  },
+
+  // 15 — Feature Envy
+  {
+    type: "multiple-choice",
+    tag: "Code Smells",
+    text: "Examine the method below. Which code smell does it exhibit?",
+    code: `class OrderProcessor {
+    public double calculateDiscount(Customer customer) {
+        double base = customer.getAccount().getBalance()
+                    * customer.getLoyaltyProgram().getMultiplier();
+        if (customer.getLoyaltyProgram().getTier().equals("GOLD")) {
+            base += customer.getAccount().getCreditLimit() * 0.05;
+        }
+        return base * customer.getDiscount().getRate();
+    }
+}`,
+    options: [
+      "Long Method",
+      "Feature Envy",
+      "God Class",
+      "Shotgun Surgery"
+    ],
+    correct: 1,
+    explanation: "Feature Envy: a method is more interested in the data of OTHER classes than its own. calculateDiscount() reaches deep into Customer, Account, LoyaltyProgram, and Discount — it 'envies' those classes. The fix is to MOVE this logic closer to the data it uses, i.e., into Customer or LoyaltyProgram. This also eliminates the Law of Demeter violation (chained calls)."
+  }
+];
+
+// ============================================================
+//  STATE
+// ============================================================
+let current   = 0;
+let answers   = new Array(questions.length).fill(null); // null = unanswered
+let startTime = Date.now();
+let revealed  = new Array(questions.length).fill(false);
+
+const KEYS = ["A","B","C","D"];
+
+// ============================================================
+//  ELEMENTS
+// ============================================================
+const quizScreen    = document.getElementById("quiz-screen");
+const resultsScreen = document.getElementById("results-screen");
+const reviewScreen  = document.getElementById("review-screen");
+const card          = document.getElementById("card");
+const progressFill  = document.getElementById("progress-fill");
+const progressLabel = document.getElementById("progress-label");
+const qTag          = document.getElementById("q-tag");
+const qNum          = document.getElementById("q-num");
+const qText         = document.getElementById("q-text");
+const qCodeWrap     = document.getElementById("q-code-wrap");
+const qCode         = document.getElementById("q-code");
+const optionsList   = document.getElementById("options-list");
+const fillBlankWrap = document.getElementById("fill-blank-wrap");
+const fillInput     = document.getElementById("fill-blank-input");
+const fillSubmit    = document.getElementById("fill-submit-btn");
+const feedbackBox   = document.getElementById("feedback-box");
+const prevBtn       = document.getElementById("prev-btn");
+const nextBtn       = document.getElementById("next-btn");
+
+// ============================================================
+//  RENDER QUESTION
+// ============================================================
+function renderQuestion(idx) {
+  const q = questions[idx];
+  current = idx;
+
+  // Progress
+  const pct = Math.round(((idx + 1) / questions.length) * 100);
+  progressFill.style.width = pct + "%";
+  progressLabel.textContent = `Question ${idx + 1} of ${questions.length}`;
+  qNum.textContent = `${idx + 1} / ${questions.length}`;
+
+  // Tag
+  const tagMap = {
+    "multiple-choice": "Multiple Choice",
+    "true-false":      "True / False",
+    "fill-blank":      "Fill in the Blank"
+  };
+  qTag.textContent = q.tag || tagMap[q.type] || q.type;
+
+  // Text & code
+  qText.textContent = q.text;
+  if (q.code) {
+    qCodeWrap.classList.remove("hidden");
+    qCode.textContent = q.code;
+  } else {
+    qCodeWrap.classList.add("hidden");
+    qCode.textContent = "";
+  }
+
+  // Hide fill blank by default
+  fillBlankWrap.classList.add("hidden");
+  optionsList.innerHTML = "";
+  feedbackBox.style.display = "none";
+  feedbackBox.className = "feedback-box";
+
+  if (q.type === "fill-blank") {
+    fillBlankWrap.classList.remove("hidden");
+    fillInput.value = answers[idx] !== null ? answers[idx] : "";
+    fillInput.disabled = revealed[idx];
+    fillSubmit.disabled = revealed[idx];
+    fillInput.className = "fill-blank-input";
+    if (revealed[idx]) {
+      const isCorrect = normalizeStr(answers[idx]) === normalizeStr(q.correct);
+      fillInput.classList.add(isCorrect ? "correct-input" : "wrong-input");
+      showFeedback(idx);
+    }
+  } else {
+    renderOptions(q, idx);
+  }
+
+  // Nav buttons
+  prevBtn.disabled = idx === 0;
+  nextBtn.disabled = !revealed[idx];
+  if (idx === questions.length - 1 && revealed[idx]) {
+    nextBtn.textContent = "Finish";
+  } else {
+    nextBtn.textContent = "Next →";
+  }
+
+  // Remove flash
+  card.classList.remove("flash-correct", "flash-wrong");
+}
+
+function renderOptions(q, idx) {
+  q.options.forEach((opt, i) => {
+    const li  = document.createElement("li");
+    const btn = document.createElement("button");
+    btn.className = "option-btn";
+    btn.dataset.index = i;
+    btn.innerHTML = `<span class="opt-key">${KEYS[i] || i+1}</span><span>${escapeHtml(opt)}</span>`;
+
+    if (revealed[idx]) {
+      btn.disabled = true;
+      if (i === q.correct) btn.classList.add("correct");
+      if (answers[idx] === i && i !== q.correct) btn.classList.add("wrong");
+    } else {
+      if (answers[idx] === i) btn.classList.add("selected");
+      btn.addEventListener("click", () => selectOption(btn, i, idx));
+    }
+    li.appendChild(btn);
+    optionsList.appendChild(li);
+  });
+}
+
+// ============================================================
+//  SELECT OPTION (MC / TF)
+// ============================================================
+function selectOption(btn, optIdx, qIdx) {
+  const q = questions[qIdx];
+  if (revealed[qIdx]) return;
+
+  // Deselect all
+  document.querySelectorAll(".option-btn").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  answers[qIdx] = optIdx;
+
+  // Auto-confirm
+  revealAnswer(qIdx);
+}
+
+// ============================================================
+//  REVEAL ANSWER
+// ============================================================
+function revealAnswer(qIdx) {
+  const q = questions[qIdx];
+  revealed[qIdx] = true;
+
+  if (q.type === "fill-blank") {
+    const isCorrect = normalizeStr(answers[qIdx]) === normalizeStr(q.correct);
+    fillInput.disabled = true;
+    fillSubmit.disabled = true;
+    fillInput.classList.add(isCorrect ? "correct-input" : "wrong-input");
+    triggerFlash(isCorrect);
+    showFeedback(qIdx);
+  } else {
+    // Highlight options
+    document.querySelectorAll(".option-btn").forEach((btn, i) => {
+      btn.disabled = true;
+      if (i === q.correct) btn.classList.add("correct");
+      if (answers[qIdx] === i && i !== q.correct) btn.classList.add("wrong");
+      if (answers[qIdx] !== q.correct && i === q.correct) btn.classList.add("show-correct");
+    });
+    const isCorrect = answers[qIdx] === q.correct;
+    triggerFlash(isCorrect);
+    showFeedback(qIdx);
+  }
+
+  nextBtn.disabled = false;
+  if (qIdx === questions.length - 1) nextBtn.textContent = "Finish";
+}
+
+function showFeedback(qIdx) {
+  const q = questions[qIdx];
+  let isCorrect;
+  if (q.type === "fill-blank") {
+    isCorrect = normalizeStr(answers[qIdx]) === normalizeStr(q.correct);
+  } else {
+    isCorrect = answers[qIdx] === q.correct;
+  }
+
+  feedbackBox.style.display = "block";
+  feedbackBox.className = "feedback-box " + (isCorrect ? "correct" : "wrong");
+
+  let html = "";
+  if (isCorrect) {
+    html = `<strong>Correct!</strong>${escapeHtml(q.explanation)}`;
+  } else {
+    let correctStr = q.type === "fill-blank"
+      ? q.correct
+      : q.options[q.correct];
+    html = `<strong>Incorrect. Correct answer: ${escapeHtml(correctStr)}</strong>${escapeHtml(q.explanation)}`;
+  }
+  feedbackBox.innerHTML = html;
+}
+
+function triggerFlash(isCorrect) {
+  card.classList.remove("flash-correct", "flash-wrong");
+  void card.offsetWidth; // reflow
+  card.classList.add(isCorrect ? "flash-correct" : "flash-wrong");
+}
+
+// ============================================================
+//  FILL BLANK SUBMIT
+// ============================================================
+fillSubmit.addEventListener("click", () => {
+  const val = fillInput.value.trim();
+  if (!val) return;
+  answers[current] = val;
+  revealAnswer(current);
+});
+
+fillInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    if (!revealed[current] && fillInput.value.trim()) {
+      answers[current] = fillInput.value.trim();
+      revealAnswer(current);
+    } else if (revealed[current]) {
+      goNext();
+    }
+  }
+});
+
+// ============================================================
+//  NAV
+// ============================================================
+prevBtn.addEventListener("click", () => {
+  if (current > 0) renderQuestion(current - 1);
+});
+
+nextBtn.addEventListener("click", goNext);
+
+function goNext() {
+  if (current < questions.length - 1) {
+    renderQuestion(current + 1);
+  } else if (revealed[current]) {
+    showResults();
+  }
+}
+
+// ============================================================
+//  KEYBOARD
+// ============================================================
+document.addEventListener("keydown", e => {
+  if (resultsScreen.classList.contains("hidden") === false) return;
+  if (reviewScreen.classList.contains("hidden") === false) return;
+
+  const q = questions[current];
+
+  if (q.type !== "fill-blank") {
+    const keyMap = { ArrowUp: -1, ArrowDown: 1 };
+    if (keyMap[e.key] !== undefined) {
+      e.preventDefault();
+      if (revealed[current]) return;
+      const btns = [...document.querySelectorAll(".option-btn")];
+      const sel  = btns.findIndex(b => b.classList.contains("selected"));
+      let next   = sel + keyMap[e.key];
+      if (next < 0) next = 0;
+      if (next >= btns.length) next = btns.length - 1;
+      btns.forEach(b => b.classList.remove("selected"));
+      btns[next].classList.add("selected");
+      answers[current] = next;
+    }
+
+    if ((e.key === "Enter" || e.key === " ") && !revealed[current]) {
+      e.preventDefault();
+      const btns = [...document.querySelectorAll(".option-btn")];
+      const sel  = btns.findIndex(b => b.classList.contains("selected"));
+      if (sel >= 0) {
+        answers[current] = sel;
+        revealAnswer(current);
+      }
+    }
+
+    // Letter shortcuts A-D
+    const idx = KEYS.indexOf(e.key.toUpperCase());
+    if (idx >= 0 && !revealed[current]) {
+      const btns = [...document.querySelectorAll(".option-btn")];
+      if (idx < btns.length) {
+        btns.forEach(b => b.classList.remove("selected"));
+        btns[idx].classList.add("selected");
+        answers[current] = idx;
+        revealAnswer(current);
+      }
+    }
+  }
+
+  if ((e.key === "Enter" || e.key === " ") && revealed[current]) {
+    if (document.activeElement !== fillInput && e.key === " ") {
+      e.preventDefault();
+      goNext();
+    }
+    if (e.key === "Enter" && document.activeElement !== fillInput) {
+      e.preventDefault();
+      goNext();
+    }
+  }
+
+  if (e.key === "ArrowLeft"  && !prevBtn.disabled) renderQuestion(current - 1);
+  if (e.key === "ArrowRight" && revealed[current]) goNext();
+});
+
+// ============================================================
+//  RESULTS
+// ============================================================
+function showResults() {
+  quizScreen.classList.add("hidden");
+  resultsScreen.classList.remove("hidden");
+
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const correct = answers.filter((a, i) => {
+    const q = questions[i];
+    if (q.type === "fill-blank") return normalizeStr(a) === normalizeStr(q.correct);
+    return a === q.correct;
+  }).length;
+  const total = questions.length;
+  const pct   = Math.round((correct / total) * 100);
+
+  document.getElementById("score-pct").textContent = pct + "%";
+  document.getElementById("stat-correct").textContent = correct;
+  document.getElementById("stat-wrong").textContent = total - correct;
+  document.getElementById("stat-time").textContent = formatTime(elapsed);
+
+  let grade, color;
+  if      (pct >= 95) { grade = "Expert!";       color = "#f0c040"; }
+  else if (pct >= 80) { grade = "Good Job!";      color = var_correct; }
+  else if (pct >= 60) { grade = "Getting There";  color = "#f39c12"; }
+  else                { grade = "Needs Work";      color = "var(--wrong)"; }
+
+  const gl = document.getElementById("grade-label");
+  gl.textContent = grade;
+  gl.style.color = color || "#2ecc71";
+
+  // Conic gradient on score circle
+  const circle = document.getElementById("score-circle");
+  circle.style.background = `conic-gradient(${color || "#2ecc71"} ${pct * 3.6}deg, var(--accent2) ${pct * 3.6}deg)`;
+
+  // Hide review button if no wrong answers
+  document.getElementById("review-btn").style.display = (correct < total) ? "" : "none";
+}
+
+const var_correct = "#2ecc71";
+
+function formatTime(secs) {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return `${m}:${String(s).padStart(2,"0")}`;
+}
+
+// ============================================================
+//  RETRY
+// ============================================================
+document.getElementById("retry-btn").addEventListener("click", () => {
+  answers  = new Array(questions.length).fill(null);
+  revealed = new Array(questions.length).fill(false);
+  startTime = Date.now();
+  current = 0;
+  resultsScreen.classList.add("hidden");
+  quizScreen.classList.remove("hidden");
+  renderQuestion(0);
+});
+
+// ============================================================
+//  REVIEW
+// ============================================================
+document.getElementById("review-btn").addEventListener("click", () => {
+  resultsScreen.classList.add("hidden");
+  reviewScreen.classList.remove("hidden");
+  buildReview();
+});
+
+document.getElementById("back-to-results-btn").addEventListener("click", () => {
+  reviewScreen.classList.add("hidden");
+  resultsScreen.classList.remove("hidden");
+});
+
+function buildReview() {
+  const list = document.getElementById("review-list");
+  list.innerHTML = "";
+
+  questions.forEach((q, i) => {
+    const userAns = answers[i];
+    let isCorrect;
+    if (q.type === "fill-blank") {
+      isCorrect = normalizeStr(userAns) === normalizeStr(q.correct);
+    } else {
+      isCorrect = userAns === q.correct;
+    }
+    if (isCorrect) return; // only show missed
+
+    const div = document.createElement("div");
+    div.className = "review-question";
+
+    let correctStr;
+    if (q.type === "fill-blank") {
+      correctStr = q.correct;
+    } else {
+      correctStr = `${KEYS[q.correct]}. ${q.options[q.correct]}`;
+    }
+    let yourStr;
+    if (q.type === "fill-blank") {
+      yourStr = userAns || "(no answer)";
+    } else if (userAns !== null) {
+      yourStr = `${KEYS[userAns]}. ${q.options[userAns]}`;
+    } else {
+      yourStr = "(no answer)";
+    }
+
+    div.innerHTML = `
+      <div class="review-header">
+        <span style="color:var(--muted);font-size:0.8rem">Q${i+1} &bull; ${escapeHtml(q.tag || q.type)}</span>
+        <span class="review-badge wrong">Incorrect</span>
+      </div>
+      <p style="margin-bottom:10px;line-height:1.5">${escapeHtml(q.text)}</p>
+      ${q.code ? `<div class="code-block"><pre>${escapeHtml(q.code)}</pre></div>` : ""}
+      <p style="margin-bottom:6px;font-size:0.85rem"><span style="color:var(--wrong)">Your answer:</span> ${escapeHtml(yourStr)}</p>
+      <p style="margin-bottom:10px;font-size:0.85rem"><span style="color:var(--correct)">Correct answer:</span> <strong style="color:var(--correct)">${escapeHtml(correctStr)}</strong></p>
+      <div class="feedback-box correct" style="display:block">${escapeHtml(q.explanation)}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+// ============================================================
+//  HELPERS
+// ============================================================
+function escapeHtml(str) {
+  if (!str && str !== 0) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function normalizeStr(s) {
+  if (!s) return "";
+  return String(s).trim().toLowerCase();
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+renderQuestion(0);
+</script>
+</body>
+</html>

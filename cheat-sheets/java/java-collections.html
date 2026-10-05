@@ -1,0 +1,1962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Collections Framework - Interactive Cheat Sheet</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --panel: #16213e;
+    --panel2: #0f3460;
+    --accent: #e94560;
+    --accent2: #533483;
+    --accent3: #0f9b8e;
+    --text: #e0e0e0;
+    --text-dim: #9090a0;
+    --border: #2a2a4e;
+    --success: #4caf50;
+    --warning: #ff9800;
+    --info: #2196f3;
+    --interface-color: #7c4dff;
+    --abstract-color: #ff6d00;
+    --class-color: #00bcd4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--panel2) 0%, var(--panel) 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+    background: linear-gradient(90deg, var(--accent), #ff8a65);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  header .subtitle {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-left: auto;
+  }
+
+  nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: 2rem;
+    flex-wrap: wrap;
+  }
+
+  nav button {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 0.35rem 0.9rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: all 0.2s;
+  }
+
+  nav button:hover, nav button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  section {
+    display: none;
+  }
+
+  section.active {
+    display: block;
+  }
+
+  /* ── HIERARCHY DIAGRAM ───────────────── */
+  .hierarchy-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .hierarchy-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  .hierarchy-panel h2 {
+    font-size: 1.1rem;
+    margin-bottom: 1.2rem;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+  }
+
+  .tree {
+    font-family: monospace;
+    font-size: 0.88rem;
+  }
+
+  .tree-node {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    margin: 2px 0;
+  }
+
+  .tree-node:hover {
+    background: rgba(233, 69, 96, 0.15);
+  }
+
+  .tree-node.selected {
+    background: rgba(233, 69, 96, 0.25);
+    border-left: 3px solid var(--accent);
+  }
+
+  .tree-node .badge {
+    font-size: 0.65rem;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-style: italic;
+  }
+
+  .badge-interface { background: rgba(124, 77, 255, 0.3); color: #b39ddb; border: 1px solid #7c4dff; }
+  .badge-abstract  { background: rgba(255, 109, 0, 0.3);  color: #ffcc80; border: 1px solid #ff6d00; }
+  .badge-class     { background: rgba(0, 188, 212, 0.3);  color: #80deea; border: 1px solid #00bcd4; }
+
+  .tree-indent-1 { margin-left: 1.2rem; }
+  .tree-indent-2 { margin-left: 2.4rem; }
+  .tree-indent-3 { margin-left: 3.6rem; }
+  .tree-indent-4 { margin-left: 4.8rem; }
+
+  .tree-line {
+    color: var(--text-dim);
+    margin-right: 2px;
+  }
+
+  .node-name {
+    font-weight: 600;
+  }
+
+  .node-name.interface { color: #b39ddb; }
+  .node-name.abstract  { color: #ffcc80; }
+  .node-name.class     { color: #80deea; }
+
+  /* ── DETAIL PANEL ────────────────────── */
+  .detail-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    min-height: 300px;
+  }
+
+  .detail-panel .placeholder {
+    text-align: center;
+    color: var(--text-dim);
+    margin-top: 4rem;
+    font-size: 1rem;
+  }
+
+  .detail-panel .placeholder span {
+    display: block;
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .detail-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.8rem;
+    flex-wrap: wrap;
+  }
+
+  .detail-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .detail-header h2.interface { color: #b39ddb; }
+  .detail-header h2.abstract  { color: #ffcc80; }
+  .detail-header h2.class     { color: #80deea; }
+
+  .detail-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .detail-tab {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: all 0.2s;
+  }
+
+  .detail-tab.active, .detail-tab:hover {
+    background: var(--panel2);
+    color: var(--text);
+    border-color: var(--accent2);
+  }
+
+  .detail-content { display: none; }
+  .detail-content.active { display: block; }
+
+  /* Big-O table */
+  .bigo-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+  }
+
+  .bigo-table th {
+    background: var(--panel2);
+    padding: 0.5rem 0.8rem;
+    text-align: left;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .bigo-table td {
+    padding: 0.45rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .bigo-table tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .o-1  { color: #4caf50; font-weight: 700; }
+  .o-log{ color: #8bc34a; font-weight: 700; }
+  .o-n  { color: #ff9800; font-weight: 700; }
+  .o-nl { color: #f44336; font-weight: 700; }
+  .o-na { color: var(--text-dim); }
+
+  /* methods list */
+  .method-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+  }
+
+  .method-item {
+    background: var(--panel2);
+    border-radius: 6px;
+    padding: 0.5rem 0.8rem;
+  }
+
+  .method-sig {
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: #80cbc4;
+  }
+
+  .method-desc {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .when-to-use {
+    background: rgba(15, 154, 142, 0.1);
+    border-left: 3px solid var(--accent3);
+    padding: 0.8rem 1rem;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.88rem;
+    line-height: 1.7;
+  }
+
+  /* ── COMPARISON TABLE ────────────────── */
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .comparison-table th {
+    background: var(--panel2);
+    padding: 0.6rem 1rem;
+    text-align: left;
+    border-bottom: 2px solid var(--accent);
+  }
+
+  .comparison-table td {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .comparison-table tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .comparison-table th:nth-child(2) { color: #80deea; }
+  .comparison-table th:nth-child(3) { color: #f48fb1; }
+  .comparison-table th:nth-child(4) { color: #a5d6a7; }
+
+  .check { color: #4caf50; }
+  .cross { color: #f44336; }
+  .warn  { color: #ff9800; }
+
+  /* ── DECISION FLOWCHART ──────────────── */
+  .flowchart-container {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+  }
+
+  .question-card {
+    background: var(--panel2);
+    border: 1px solid var(--accent2);
+    border-radius: 10px;
+    padding: 1.5rem;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .question-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1.2rem;
+    color: var(--accent);
+  }
+
+  .question-card .question-text {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.8rem;
+  }
+
+  .option-btn {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    transition: all 0.2s;
+    line-height: 1.4;
+  }
+
+  .option-btn:hover {
+    border-color: var(--accent);
+    background: rgba(233, 69, 96, 0.1);
+    color: var(--accent);
+  }
+
+  .recommendation-card {
+    background: linear-gradient(135deg, rgba(79, 52, 131, 0.3), rgba(15, 154, 142, 0.2));
+    border: 2px solid var(--accent3);
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .recommendation-card .rec-title {
+    font-size: 1.4rem;
+    color: var(--accent3);
+    margin-bottom: 0.5rem;
+  }
+
+  .recommendation-card .rec-name {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #80deea;
+    font-family: monospace;
+    margin-bottom: 1rem;
+  }
+
+  .recommendation-card .rec-reason {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .restart-btn {
+    background: var(--accent);
+    border: none;
+    color: white;
+    padding: 0.6rem 1.5rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: opacity 0.2s;
+  }
+
+  .restart-btn:hover { opacity: 0.85; }
+
+  .breadcrumb {
+    display: flex;
+    gap: 0.4rem;
+    justify-content: center;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb span {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    background: var(--panel);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+  }
+
+  .breadcrumb span.arrow {
+    background: transparent;
+    color: var(--accent);
+  }
+
+  /* ── MINI SNIPPETS GRID ──────────────── */
+  .snippets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .snippet-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .snippet-card-header {
+    background: var(--panel2);
+    padding: 0.6rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .snippet-card-header .name {
+    font-family: monospace;
+    font-weight: 700;
+    color: #80deea;
+  }
+
+  .snippet-card-header .pkg {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-left: auto;
+  }
+
+  .snippet-card pre {
+    margin: 0;
+    font-size: 0.8rem;
+  }
+
+  /* code highlight overrides */
+  pre code.hljs { background: transparent; padding: 1rem; }
+
+  /* ── SECTION TITLES ──────────────────── */
+  .section-title {
+    font-size: 1.4rem;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 1.4rem;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  .card-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  @media (max-width: 900px) {
+    .card-grid-2 { grid-template-columns: 1fr; }
+    .hierarchy-container { grid-template-columns: 1fr; }
+    nav { margin-left: 0; margin-top: 0.5rem; }
+    header { flex-wrap: wrap; }
+    .snippets-grid { grid-template-columns: 1fr; }
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-right: 4px;
+  }
+  .tag-sync     { background: rgba(33,150,243,0.2); color: #90caf9; border: 1px solid #2196f3; }
+  .tag-thread   { background: rgba(76,175,80,0.2);  color: #a5d6a7; border: 1px solid #4caf50; }
+  .tag-ordered  { background: rgba(255,152,0,0.2);  color: #ffcc80; border: 1px solid #ff9800; }
+  .tag-sorted   { background: rgba(156,39,176,0.2); color: #ce93d8; border: 1px solid #9c27b0; }
+  .tag-unique   { background: rgba(0,188,212,0.2);  color: #80deea; border: 1px solid #00bcd4; }
+  .tag-null     { background: rgba(233,69,96,0.2);  color: #ef9a9a; border: 1px solid #e94560; }
+  .tag-deque    { background: rgba(79,52,131,0.2);  color: #ce93d8; border: 1px solid #533483; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>&#9749; Java Collections Framework</h1>
+  <nav>
+    <button class="active" onclick="showSection('hierarchy',this)">Hierarchy</button>
+    <button onclick="showSection('comparison',this)">Comparison</button>
+    <button onclick="showSection('flowchart',this)">Choose Collection</button>
+    <button onclick="showSection('snippets',this)">Code Snippets</button>
+  </nav>
+  <span class="subtitle">Interactive Reference</span>
+</header>
+
+<main>
+
+<!-- ====== HIERARCHY SECTION ====== -->
+<section id="hierarchy" class="active">
+  <h2 class="section-title">Collections Framework Hierarchy</h2>
+  <p style="color:var(--text-dim);margin-bottom:1.5rem;font-size:0.88rem;">Click any class or interface to see its methods, complexity, and usage guide.</p>
+
+  <div class="hierarchy-container">
+    <!-- Collection hierarchy -->
+    <div class="hierarchy-panel">
+      <h2>Collection Hierarchy</h2>
+      <div class="tree" id="collection-tree"></div>
+    </div>
+
+    <!-- Map hierarchy -->
+    <div class="hierarchy-panel">
+      <h2>Map Hierarchy</h2>
+      <div class="tree" id="map-tree"></div>
+      <br>
+      <h2 style="margin-top:1rem;">Utility Classes</h2>
+      <div class="tree" id="util-tree"></div>
+    </div>
+  </div>
+
+  <!-- Detail panel -->
+  <div class="detail-panel" id="detail-panel">
+    <div class="placeholder">
+      <span>&#128193;</span>
+      Click any node in the hierarchy to explore its API, complexity, and usage guide
+    </div>
+  </div>
+</section>
+
+<!-- ====== COMPARISON SECTION ====== -->
+<section id="comparison">
+  <h2 class="section-title">Side-by-Side Comparison</h2>
+
+  <div style="margin-bottom:2rem;">
+    <h3 style="color:#80deea;margin-bottom:1rem;">List Implementations</h3>
+    <div style="overflow-x:auto;">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>ArrayList</th>
+            <th>LinkedList</th>
+            <th>ArrayDeque</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Underlying Structure</td><td>Dynamic array</td><td>Doubly linked list</td><td>Resizable circular array</td></tr>
+          <tr><td>get(i) / set(i)</td><td class="o-1">O(1)</td><td class="o-n">O(n)</td><td class="o-n">O(n)</td></tr>
+          <tr><td>add(end)</td><td class="o-1">O(1) amortized</td><td class="o-1">O(1)</td><td class="o-1">O(1) amortized</td></tr>
+          <tr><td>add(index)</td><td class="o-n">O(n)</td><td class="o-n">O(n)</td><td class="o-n">O(n)</td></tr>
+          <tr><td>remove(end)</td><td class="o-1">O(1)</td><td class="o-1">O(1)</td><td class="o-1">O(1)</td></tr>
+          <tr><td>remove(front)</td><td class="o-n">O(n)</td><td class="o-1">O(1)</td><td class="o-1">O(1)</td></tr>
+          <tr><td>remove(middle)</td><td class="o-n">O(n)</td><td class="o-n">O(n)</td><td class="o-n">O(n)</td></tr>
+          <tr><td>Implements List</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="cross">✗</span></td></tr>
+          <tr><td>Implements Deque</td><td><span class="cross">✗</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Thread-safe</td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td></tr>
+          <tr><td>Null elements</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="cross">✗</span></td></tr>
+          <tr><td>Memory overhead</td><td>Low (array + size)</td><td>High (node per element)</td><td>Low (circular array)</td></tr>
+          <tr><td>Cache friendly</td><td><span class="check">✓ Yes</span></td><td><span class="cross">✗ No</span></td><td><span class="check">✓ Yes</span></td></tr>
+          <tr><td>Best for</td><td>Random access, iteration</td><td>Frequent front insertions/removals</td><td>Stack/Queue/Deque operations</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="margin-bottom:2rem;">
+    <h3 style="color:#80deea;margin-bottom:1rem;">Set Implementations</h3>
+    <div style="overflow-x:auto;">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>HashSet</th>
+            <th>LinkedHashSet</th>
+            <th>TreeSet</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Underlying Structure</td><td>HashMap</td><td>LinkedHashMap</td><td>TreeMap (Red-Black tree)</td></tr>
+          <tr><td>add / remove / contains</td><td class="o-1">O(1) avg</td><td class="o-1">O(1) avg</td><td class="o-log">O(log n)</td></tr>
+          <tr><td>Iteration order</td><td>No guarantee</td><td>Insertion order</td><td>Sorted (natural/comparator)</td></tr>
+          <tr><td>Sorted</td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Null element</td><td><span class="check">✓ (one)</span></td><td><span class="check">✓ (one)</span></td><td><span class="cross">✗</span></td></tr>
+          <tr><td>NavigableSet API</td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td><td><span class="check">✓ floor/ceiling/headSet</span></td></tr>
+          <tr><td>Best for</td><td>Fast uniqueness check</td><td>Unique + preserve order</td><td>Sorted unique elements</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="margin-bottom:2rem;">
+    <h3 style="color:#80deea;margin-bottom:1rem;">Map Implementations</h3>
+    <div style="overflow-x:auto;">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>HashMap</th>
+            <th>LinkedHashMap</th>
+            <th>TreeMap</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Underlying Structure</td><td>Array + linked lists / trees</td><td>HashMap + doubly linked list</td><td>Red-Black tree</td></tr>
+          <tr><td>get / put / remove</td><td class="o-1">O(1) avg</td><td class="o-1">O(1) avg</td><td class="o-log">O(log n)</td></tr>
+          <tr><td>Iteration order</td><td>No guarantee</td><td>Insertion / access order</td><td>Sorted by key</td></tr>
+          <tr><td>Null keys</td><td><span class="check">✓ (one)</span></td><td><span class="check">✓ (one)</span></td><td><span class="cross">✗</span></td></tr>
+          <tr><td>Null values</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>NavigableMap API</td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>LRU cache support</td><td><span class="cross">✗</span></td><td><span class="check">✓ (accessOrder=true)</span></td><td><span class="cross">✗</span></td></tr>
+          <tr><td>Best for</td><td>General key-value lookup</td><td>LRU cache or ordered iteration</td><td>Range queries, sorted keys</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div>
+    <h3 style="color:#80deea;margin-bottom:1rem;">Thread-Safe Options</h3>
+    <div style="overflow-x:auto;">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Class</th>
+            <th>Equivalent of</th>
+            <th>Strategy</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="font-family:monospace;color:#80deea;">Vector</td><td>ArrayList</td><td>synchronized methods</td><td>Legacy, avoid in new code</td></tr>
+          <tr><td style="font-family:monospace;color:#80deea;">Hashtable</td><td>HashMap</td><td>synchronized methods</td><td>Legacy, avoid in new code</td></tr>
+          <tr><td style="font-family:monospace;color:#80deea;">CopyOnWriteArrayList</td><td>ArrayList</td><td>Copy array on write</td><td>Fast reads, slow writes; iteration never throws ConcurrentModificationException</td></tr>
+          <tr><td style="font-family:monospace;color:#80deea;">ConcurrentHashMap</td><td>HashMap</td><td>Segment locks (Java 8: CAS)</td><td>Preferred concurrent map; lock striping</td></tr>
+          <tr><td style="font-family:monospace;color:#80deea;">ConcurrentSkipListMap</td><td>TreeMap</td><td>Skip list (lock-free)</td><td>Sorted, concurrent, O(log n)</td></tr>
+          <tr><td style="font-family:monospace;color:#80deea;">ArrayBlockingQueue</td><td>ArrayDeque</td><td>ReentrantLock</td><td>Bounded blocking queue</td></tr>
+          <tr><td style="font-family:monospace;color:#80deea;">LinkedBlockingQueue</td><td>LinkedList queue</td><td>Separate head/tail locks</td><td>Optionally bounded</td></tr>
+          <tr><td style="font-family:monospace;color:#80deea;">Collections.synchronized*()</td><td>Any collection</td><td>Wrapper, synchronized this</td><td>Must synchronize externally for iteration</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ====== FLOWCHART SECTION ====== -->
+<section id="flowchart">
+  <h2 class="section-title">Choose Your Collection</h2>
+  <p style="color:var(--text-dim);margin-bottom:1.5rem;font-size:0.88rem;">Answer the questions to get a tailored recommendation.</p>
+
+  <div class="flowchart-container">
+    <div id="flowchart-app"></div>
+  </div>
+</section>
+
+<!-- ====== SNIPPETS SECTION ====== -->
+<section id="snippets">
+  <h2 class="section-title">Common Usage Snippets</h2>
+  <p style="color:var(--text-dim);margin-bottom:1.5rem;font-size:0.88rem;">Real-world patterns for every major collection type.</p>
+  <div class="snippets-grid" id="snippets-grid"></div>
+</section>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════
+
+const NODES = {
+  Iterable: {
+    type: 'interface',
+    pkg: 'java.lang',
+    desc: 'Root of the collection hierarchy. Provides the ability to iterate using for-each.',
+    methods: [
+      { sig: 'Iterator<T> iterator()', desc: 'Returns an iterator over elements' },
+      { sig: 'default void forEach(Consumer<? super T> action)', desc: 'Performs action for each element (Java 8+)' },
+      { sig: 'default Spliterator<T> spliterator()', desc: 'Creates a Spliterator over elements (Java 8+)' },
+    ],
+    bigo: [],
+    whenToUse: 'You rarely implement Iterable directly. Any class implementing it can be used in for-each loops. Useful when you want to expose a custom iteration sequence.',
+    example: `// Implementing Iterable
+class Range implements Iterable<Integer> {
+    private final int start, end;
+    Range(int start, int end) { this.start = start; this.end = end; }
+
+    @Override
+    public Iterator<Integer> iterator() {
+        return new Iterator<>() {
+            int cur = start;
+            public boolean hasNext() { return cur < end; }
+            public Integer next() { return cur++; }
+        };
+    }
+}
+// Usage
+for (int n : new Range(1, 5)) System.out.println(n); // 1 2 3 4`,
+  },
+
+  Collection: {
+    type: 'interface',
+    pkg: 'java.util',
+    desc: 'Core interface for most collection types. Extends Iterable. Provides size, add, remove, contains operations.',
+    methods: [
+      { sig: 'int size()', desc: 'Number of elements' },
+      { sig: 'boolean isEmpty()', desc: 'True if no elements' },
+      { sig: 'boolean contains(Object o)', desc: 'True if element present' },
+      { sig: 'boolean add(E e)', desc: 'Adds element; returns true if collection changed' },
+      { sig: 'boolean remove(Object o)', desc: 'Removes one occurrence' },
+      { sig: 'boolean containsAll(Collection<?> c)', desc: 'True if all elements present' },
+      { sig: 'boolean addAll(Collection<? extends E> c)', desc: 'Adds all elements' },
+      { sig: 'boolean removeAll(Collection<?> c)', desc: 'Removes all matching' },
+      { sig: 'boolean retainAll(Collection<?> c)', desc: 'Retains only matching' },
+      { sig: 'void clear()', desc: 'Removes all elements' },
+      { sig: 'Object[] toArray()', desc: 'Returns array of elements' },
+      { sig: 'default Stream<E> stream()', desc: 'Returns sequential Stream (Java 8+)' },
+      { sig: 'default Stream<E> parallelStream()', desc: 'Returns parallel Stream (Java 8+)' },
+      { sig: 'default boolean removeIf(Predicate<? super E> filter)', desc: 'Removes matching elements (Java 8+)' },
+    ],
+    bigo: [],
+    whenToUse: 'Use as parameter / return type when you want maximum flexibility (accept any collection). Declare as Collection<E> when you only need basic add/remove/contains.',
+    example: `// Program to Collection interface for flexibility
+void printAll(Collection<String> items) {
+    items.forEach(System.out::println);
+}
+
+// Works with any Collection
+printAll(new ArrayList<>(List.of("a","b","c")));
+printAll(new HashSet<>(Set.of("x","y","z")));
+printAll(new ArrayDeque<>(List.of("p","q")));`,
+  },
+
+  List: {
+    type: 'interface',
+    pkg: 'java.util',
+    desc: 'Ordered (indexed) collection. Allows duplicate elements. Positional access by index.',
+    methods: [
+      { sig: 'E get(int index)', desc: 'Element at position' },
+      { sig: 'E set(int index, E element)', desc: 'Replace element at position' },
+      { sig: 'void add(int index, E element)', desc: 'Insert at position' },
+      { sig: 'E remove(int index)', desc: 'Remove element at position' },
+      { sig: 'int indexOf(Object o)', desc: 'First index of element, -1 if absent' },
+      { sig: 'int lastIndexOf(Object o)', desc: 'Last index of element' },
+      { sig: 'List<E> subList(int from, int to)', desc: 'View of portion [from, to)' },
+      { sig: 'ListIterator<E> listIterator()', desc: 'Bidirectional iterator' },
+      { sig: 'static List<E> of(E... e)', desc: 'Immutable list (Java 9+)' },
+      { sig: 'static List<E> copyOf(Collection<? extends E> c)', desc: 'Immutable copy (Java 10+)' },
+      { sig: 'default void sort(Comparator<? super E> c)', desc: 'Sort in-place' },
+      { sig: 'default void replaceAll(UnaryOperator<E> op)', desc: 'Replace each element' },
+    ],
+    bigo: [],
+    whenToUse: 'When you need indexed access, ordering matters, or duplicates are allowed. Prefer ArrayList for random access; LinkedList for frequent front insertions.',
+    example: `List<String> names = new ArrayList<>(Arrays.asList("Charlie","Alice","Bob"));
+
+names.sort(Comparator.naturalOrder());  // [Alice, Bob, Charlie]
+names.add(1, "Dave");                   // insert at index 1
+String s = names.get(2);               // "Bob"
+names.removeIf(n -> n.startsWith("A")); // removes Alice
+List<String> sub = names.subList(0, 2); // [Dave, Bob] view
+names.replaceAll(String::toUpperCase);`,
+  },
+
+  ArrayList: {
+    type: 'class',
+    pkg: 'java.util',
+    tags: ['null'],
+    desc: 'Resizable-array implementation of List. Best general-purpose list. O(1) random access.',
+    methods: [
+      { sig: 'void ensureCapacity(int minCapacity)', desc: 'Pre-allocate to avoid resizing' },
+      { sig: 'void trimToSize()', desc: 'Trim backing array to current size' },
+      { sig: 'boolean contains(Object o)', desc: 'O(n) linear scan' },
+      // inherited List methods apply
+    ],
+    bigo: [
+      { op: 'get(i)', best: 'O(1)', avg: 'O(1)', worst: 'O(1)' },
+      { op: 'set(i, e)', best: 'O(1)', avg: 'O(1)', worst: 'O(1)' },
+      { op: 'add(end)', best: 'O(1)', avg: 'O(1)*', worst: 'O(n)' },
+      { op: 'add(index)', best: 'O(1)', avg: 'O(n)', worst: 'O(n)' },
+      { op: 'remove(end)', best: 'O(1)', avg: 'O(1)', worst: 'O(1)' },
+      { op: 'remove(front)', best: 'O(n)', avg: 'O(n)', worst: 'O(n)' },
+      { op: 'contains()', best: 'O(1)', avg: 'O(n)', worst: 'O(n)' },
+      { op: 'sort()', best: 'O(n log n)', avg: 'O(n log n)', worst: 'O(n log n)' },
+    ],
+    whenToUse: '✓ Default list choice — fast random access, cache-friendly\n✓ Frequent read/iteration\n✓ Appending to end\n✗ Frequent inserts/removes at front/middle\n✗ Memory tight with huge lists (wastes space on resizes)',
+    example: `List<Integer> list = new ArrayList<>(Arrays.asList(3, 1, 4, 1, 5, 9));
+
+// Random access
+System.out.println(list.get(3));          // 1
+
+// Sort, filter, collect
+list.sort(Comparator.reverseOrder());     // [9,5,4,3,1,1]
+list.removeIf(n -> n < 4);               // [9,5,4]
+
+// Sublist view (backed by original)
+List<Integer> view = list.subList(0, 2); // [9,5]
+view.clear();                             // original: [4]
+
+// Pre-allocate for performance
+List<String> big = new ArrayList<>(100_000);`,
+  },
+
+  LinkedList: {
+    type: 'class',
+    pkg: 'java.util',
+    tags: ['null', 'deque'],
+    desc: 'Doubly-linked list implementation of List and Deque. O(1) insertions at front/back.',
+    methods: [
+      { sig: 'void addFirst(E e)', desc: 'Insert at front O(1)' },
+      { sig: 'void addLast(E e)', desc: 'Insert at back O(1)' },
+      { sig: 'E removeFirst()', desc: 'Remove and return head' },
+      { sig: 'E removeLast()', desc: 'Remove and return tail' },
+      { sig: 'E peekFirst()', desc: 'Peek head, null if empty' },
+      { sig: 'E peekLast()', desc: 'Peek tail, null if empty' },
+      { sig: 'void push(E e)', desc: 'Stack push (addFirst)' },
+      { sig: 'E pop()', desc: 'Stack pop (removeFirst)' },
+      { sig: 'boolean offer(E e)', desc: 'Queue enqueue (addLast)' },
+      { sig: 'E poll()', desc: 'Queue dequeue, null if empty' },
+    ],
+    bigo: [
+      { op: 'get(i)', best: 'O(1)', avg: 'O(n)', worst: 'O(n)' },
+      { op: 'add(front)', best: 'O(1)', avg: 'O(1)', worst: 'O(1)' },
+      { op: 'add(back)', best: 'O(1)', avg: 'O(1)', worst: 'O(1)' },
+      { op: 'add(index)', best: 'O(1)', avg: 'O(n)', worst: 'O(n)' },
+      { op: 'remove(front)', best: 'O(1)', avg: 'O(1)', worst: 'O(1)' },
+      { op: 'remove(index)', best: 'O(1)', avg: 'O(n)', worst: 'O(n)' },
+      { op: 'contains()', best: 'O(1)', avg: 'O(n)', worst: 'O(n)' },
+    ],
+    whenToUse: '✓ Frequent insertions/removals at front or back\n✓ Implementing a deque/stack/queue without size limit\n✗ Random access (prefer ArrayList)\n✗ Memory-sensitive (high per-element overhead)\n✗ Cache performance matters (no spatial locality)',
+    example: `Deque<String> deque = new LinkedList<>();
+
+// As a stack (LIFO)
+deque.push("first");
+deque.push("second");
+deque.push("third");
+System.out.println(deque.pop()); // "third"
+
+// As a queue (FIFO)
+deque.offer("a"); deque.offer("b"); deque.offer("c");
+System.out.println(deque.poll()); // "a"
+
+// As a list
+List<String> list = new LinkedList<>(List.of("x","y","z"));
+list.add(1, "w"); // O(n) traversal + O(1) insert`,
+  },
+
+  Set: {
+    type: 'interface',
+    pkg: 'java.util',
+    desc: 'Collection with no duplicates. Models the mathematical set. Equality/hashCode contract critical.',
+    methods: [
+      { sig: 'boolean add(E e)', desc: 'Adds if not already present' },
+      { sig: 'boolean contains(Object o)', desc: 'Membership test' },
+      { sig: 'boolean remove(Object o)', desc: 'Removes element' },
+      { sig: 'static Set<E> of(E... e)', desc: 'Immutable set (Java 9+)' },
+      { sig: 'static Set<E> copyOf(Collection<? extends E> c)', desc: 'Immutable copy (Java 10+)' },
+    ],
+    bigo: [],
+    whenToUse: 'When uniqueness must be enforced. Use HashSet for speed, TreeSet for sorted order, LinkedHashSet for insertion order. Critical: override equals() and hashCode() in elements.',
+    example: `Set<String> a = new HashSet<>(Set.of("a","b","c","d"));
+Set<String> b = new HashSet<>(Set.of("c","d","e","f"));
+
+// Intersection
+Set<String> intersection = new HashSet<>(a);
+intersection.retainAll(b);  // {c, d}
+
+// Union
+Set<String> union = new HashSet<>(a);
+union.addAll(b);  // {a,b,c,d,e,f}
+
+// Difference
+Set<String> diff = new HashSet<>(a);
+diff.removeAll(b);  // {a, b}`,
+  },
+
+  HashSet: {
+    type: 'class',
+    pkg: 'java.util',
+    tags: ['null'],
+    desc: 'Hash table-based Set. O(1) average for all operations. No ordering guarantee.',
+    methods: [],
+    bigo: [
+      { op: 'add(e)', best: 'O(1)', avg: 'O(1)', worst: 'O(n)*' },
+      { op: 'remove(e)', best: 'O(1)', avg: 'O(1)', worst: 'O(n)*' },
+      { op: 'contains(e)', best: 'O(1)', avg: 'O(1)', worst: 'O(n)*' },
+      { op: 'iteration', best: 'O(n)', avg: 'O(n+cap)', worst: 'O(n+cap)' },
+    ],
+    whenToUse: '✓ Fast membership test, deduplication\n✓ No iteration order needed\n✓ Default Set choice\n✗ Elements need sorting\n✗ Insertion order needed\n* Worst case on many hash collisions',
+    example: `Set<String> visited = new HashSet<>();
+
+String[] pages = {"home","about","home","contact","about"};
+for (String page : pages) {
+    if (!visited.add(page)) {
+        System.out.println("Duplicate: " + page);
+    }
+}
+// Outputs: Duplicate: home, Duplicate: about
+
+// Remove duplicates from list
+List<String> unique = new ArrayList<>(
+    new HashSet<>(Arrays.asList(pages))
+);`,
+  },
+
+  LinkedHashSet: {
+    type: 'class',
+    pkg: 'java.util',
+    tags: ['null', 'ordered'],
+    desc: 'HashSet with a doubly-linked list maintaining insertion order.',
+    methods: [],
+    bigo: [
+      { op: 'add(e)', best: 'O(1)', avg: 'O(1)', worst: 'O(n)*' },
+      { op: 'remove(e)', best: 'O(1)', avg: 'O(1)', worst: 'O(n)*' },
+      { op: 'contains(e)', best: 'O(1)', avg: 'O(1)', worst: 'O(n)*' },
+      { op: 'iteration', best: 'O(n)', avg: 'O(n)', worst: 'O(n)' },
+    ],
+    whenToUse: '✓ Need fast Set operations AND predictable iteration order\n✓ Deduplication while keeping first-seen order\n✗ Sorted order needed (use TreeSet)\n✗ Memory tight (extra linked list overhead)',
+    example: `// Deduplication preserving order of first occurrence
+String[] words = {"banana","apple","cherry","apple","banana","date"};
+Set<String> unique = new LinkedHashSet<>(Arrays.asList(words));
+System.out.println(unique);
+// [banana, apple, cherry, date]
+
+// Building a unique ordered menu
+LinkedHashSet<String> menu = new LinkedHashSet<>();
+menu.add("Soup"); menu.add("Salad"); menu.add("Soup"); // dupe ignored
+menu.add("Main"); menu.add("Dessert");
+System.out.println(menu); // [Soup, Salad, Main, Dessert]`,
+  },
+
+  TreeSet: {
+    type: 'class',
+    pkg: 'java.util',
+    tags: ['sorted'],
+    desc: 'NavigableSet backed by a TreeMap (Red-Black tree). Elements kept in sorted order.',
+    methods: [
+      { sig: 'E first()', desc: 'Smallest element' },
+      { sig: 'E last()', desc: 'Largest element' },
+      { sig: 'E floor(E e)', desc: 'Greatest element ≤ e' },
+      { sig: 'E ceiling(E e)', desc: 'Smallest element ≥ e' },
+      { sig: 'E lower(E e)', desc: 'Greatest element < e' },
+      { sig: 'E higher(E e)', desc: 'Smallest element > e' },
+      { sig: 'E pollFirst()', desc: 'Remove and return smallest' },
+      { sig: 'E pollLast()', desc: 'Remove and return largest' },
+      { sig: 'NavigableSet<E> descendingSet()', desc: 'Reverse-order view' },
+      { sig: 'SortedSet<E> headSet(E to)', desc: 'View of elements < to' },
+      { sig: 'SortedSet<E> tailSet(E from)', desc: 'View of elements ≥ from' },
+      { sig: 'SortedSet<E> subSet(E from, E to)', desc: 'View [from, to)' },
+    ],
+    bigo: [
+      { op: 'add(e)', best: 'O(log n)', avg: 'O(log n)', worst: 'O(log n)' },
+      { op: 'remove(e)', best: 'O(log n)', avg: 'O(log n)', worst: 'O(log n)' },
+      { op: 'contains(e)', best: 'O(log n)', avg: 'O(log n)', worst: 'O(log n)' },
+      { op: 'first() / last()', best: 'O(log n)', avg: 'O(log n)', worst: 'O(log n)' },
+      { op: 'floor/ceiling', best: 'O(log n)', avg: 'O(log n)', worst: 'O(log n)' },
+      { op: 'iteration', best: 'O(n)', avg: 'O(n)', worst: 'O(n)' },
+    ],
+    whenToUse: '✓ Need sorted unique elements\n✓ Range queries (headSet, subSet, tailSet)\n✓ Finding nearest element (floor/ceiling)\n✗ Speed critical (HashSet is faster)\n✗ Null elements (throws NullPointerException)',
+    example: `TreeSet<Integer> scores = new TreeSet<>(Set.of(85, 92, 78, 95, 60, 88));
+
+System.out.println(scores);           // [60, 78, 85, 88, 92, 95]
+System.out.println(scores.first());   // 60
+System.out.println(scores.last());    // 95
+System.out.println(scores.floor(90)); // 88 (greatest ≤ 90)
+System.out.println(scores.ceiling(90)); // 92 (smallest ≥ 90)
+
+// Range query: scores between 80 and 95 inclusive
+SortedSet<Integer> range = scores.subSet(80, true, 95, true);
+System.out.println(range); // [85, 88, 92, 95]
+
+// Custom comparator (reverse)
+TreeSet<String> rev = new TreeSet<>(Comparator.reverseOrder());
+rev.addAll(List.of("banana","apple","cherry"));
+System.out.println(rev); // [cherry, banana, apple]`,
+  },
+
+  Queue: {
+    type: 'interface',
+    pkg: 'java.util',
+    desc: 'FIFO collection. Two-tier API: throws-exception methods and returns-special-value methods.',
+    methods: [
+      { sig: 'boolean offer(E e)', desc: 'Enqueue; returns false if full' },
+      { sig: 'boolean add(E e)', desc: 'Enqueue; throws if full' },
+      { sig: 'E poll()', desc: 'Dequeue; null if empty' },
+      { sig: 'E remove()', desc: 'Dequeue; throws if empty' },
+      { sig: 'E peek()', desc: 'Peek head; null if empty' },
+      { sig: 'E element()', desc: 'Peek head; throws if empty' },
+    ],
+    bigo: [],
+    whenToUse: 'Use when processing elements in FIFO order. Prefer ArrayDeque over LinkedList for Queue. Use BlockingQueue for producer-consumer patterns in concurrent code.',
+    example: `Queue<String> queue = new ArrayDeque<>();
+
+// Enqueue
+queue.offer("task-1");
+queue.offer("task-2");
+queue.offer("task-3");
+
+// Process FIFO
+while (!queue.isEmpty()) {
+    String task = queue.poll(); // returns null if empty
+    System.out.println("Processing: " + task);
+}
+
+// Priority queue variant
+Queue<Integer> pq = new PriorityQueue<>();
+pq.offer(5); pq.offer(1); pq.offer(3);
+System.out.println(pq.poll()); // 1 (min-heap)`,
+  },
+
+  Deque: {
+    type: 'interface',
+    pkg: 'java.util',
+    desc: 'Double-ended queue. Supports insertion/removal at both ends. Also serves as Stack.',
+    methods: [
+      { sig: 'void addFirst(E e) / offerFirst(E e)', desc: 'Insert at front (throws / returns false)' },
+      { sig: 'void addLast(E e) / offerLast(E e)', desc: 'Insert at back' },
+      { sig: 'E removeFirst() / pollFirst()', desc: 'Remove head' },
+      { sig: 'E removeLast() / pollLast()', desc: 'Remove tail' },
+      { sig: 'E peekFirst() / peekLast()', desc: 'Inspect without removing' },
+      { sig: 'void push(E e)', desc: 'Stack push = addFirst' },
+      { sig: 'E pop()', desc: 'Stack pop = removeFirst' },
+    ],
+    bigo: [],
+    whenToUse: '✓ Sliding window problems\n✓ Stack (prefer over Stack class)\n✓ Queue\n✓ BFS / DFS traversal\n✓ Palindrome check\nUse ArrayDeque for most cases; LinkedList if you also need List API.',
+    example: `// Sliding window maximum (monotonic deque)
+int[] nums = {1,3,-1,-3,5,3,6,7};
+int k = 3;
+Deque<Integer> dq = new ArrayDeque<>(); // stores indices
+
+for (int i = 0; i < nums.length; i++) {
+    // remove out-of-window elements
+    while (!dq.isEmpty() && dq.peekFirst() < i - k + 1) dq.pollFirst();
+    // remove smaller elements from back
+    while (!dq.isEmpty() && nums[dq.peekLast()] < nums[i]) dq.pollLast();
+    dq.offerLast(i);
+    if (i >= k - 1) System.out.print(nums[dq.peekFirst()] + " ");
+} // Output: 3 3 5 5 6 7`,
+  },
+
+  ArrayDeque: {
+    type: 'class',
+    pkg: 'java.util',
+    desc: 'Resizable-array implementation of Deque. Preferred Stack and Queue implementation. No null elements.',
+    methods: [],
+    bigo: [
+      { op: 'addFirst / addLast', best: 'O(1)', avg: 'O(1)*', worst: 'O(n)' },
+      { op: 'pollFirst / pollLast', best: 'O(1)', avg: 'O(1)', worst: 'O(1)' },
+      { op: 'peekFirst / peekLast', best: 'O(1)', avg: 'O(1)', worst: 'O(1)' },
+      { op: 'size()', best: 'O(1)', avg: 'O(1)', worst: 'O(1)' },
+    ],
+    whenToUse: '✓ Default choice for Stack, Queue, or Deque\n✓ Faster than LinkedList for same operations\n✓ Cache-friendly circular array\n✗ No null elements allowed\n✗ Not thread-safe\n* Amortized; rare O(n) on array doubling',
+    example: `// Use as a Stack (faster than java.util.Stack)
+Deque<Integer> stack = new ArrayDeque<>();
+stack.push(10); stack.push(20); stack.push(30);
+System.out.println(stack.pop()); // 30
+
+// Use as a Queue (faster than LinkedList)
+Deque<String> queue = new ArrayDeque<>();
+queue.offer("first"); queue.offer("second");
+System.out.println(queue.poll()); // "first"
+
+// Reverse a string with deque
+String s = "hello";
+Deque<Character> chars = new ArrayDeque<>();
+for (char c : s.toCharArray()) chars.push(c);
+StringBuilder sb = new StringBuilder();
+while (!chars.isEmpty()) sb.append(chars.pop());
+System.out.println(sb); // "olleh"`,
+  },
+
+  PriorityQueue: {
+    type: 'class',
+    pkg: 'java.util',
+    tags: ['null'],
+    desc: 'Min-heap by default. Elements ordered by natural order or Comparator. Does NOT guarantee FIFO.',
+    methods: [
+      { sig: 'boolean offer(E e)', desc: 'Insert element O(log n)' },
+      { sig: 'E poll()', desc: 'Remove and return minimum O(log n)' },
+      { sig: 'E peek()', desc: 'Inspect minimum O(1)' },
+      { sig: 'int size()', desc: 'Number of elements O(1)' },
+    ],
+    bigo: [
+      { op: 'offer(e)', best: 'O(1)', avg: 'O(log n)', worst: 'O(log n)' },
+      { op: 'poll()', best: 'O(1)', avg: 'O(log n)', worst: 'O(log n)' },
+      { op: 'peek()', best: 'O(1)', avg: 'O(1)', worst: 'O(1)' },
+      { op: 'contains()', best: 'O(1)', avg: 'O(n)', worst: 'O(n)' },
+      { op: 'remove(o)', best: 'O(n)', avg: 'O(n)', worst: 'O(n)' },
+    ],
+    whenToUse: '✓ K-smallest / K-largest elements\n✓ Dijkstra / A* shortest path\n✓ Merge K sorted lists\n✓ Task scheduling by priority\n✗ FIFO needed (use ArrayDeque)\n✗ Does not allow null\n✗ Random access not supported',
+    example: `// Find K largest elements
+int[] nums = {3, 2, 1, 5, 6, 4};
+int k = 3;
+// Min-heap of size k
+PriorityQueue<Integer> pq = new PriorityQueue<>();
+for (int n : nums) {
+    pq.offer(n);
+    if (pq.size() > k) pq.poll(); // remove smallest
+}
+System.out.println(pq.poll()); // 4 (kth largest)
+
+// Max-heap using reversed comparator
+PriorityQueue<Integer> maxHeap =
+    new PriorityQueue<>(Comparator.reverseOrder());
+maxHeap.offer(5); maxHeap.offer(1); maxHeap.offer(8);
+System.out.println(maxHeap.poll()); // 8`,
+  },
+
+  Map: {
+    type: 'interface',
+    pkg: 'java.util',
+    desc: 'Key-value pairs. Keys unique. Values may repeat. No relation to Collection.',
+    methods: [
+      { sig: 'V put(K key, V value)', desc: 'Associate key with value; returns old value' },
+      { sig: 'V get(Object key)', desc: 'Value for key, null if absent' },
+      { sig: 'V getOrDefault(Object key, V defaultValue)', desc: 'Value or default (Java 8+)' },
+      { sig: 'V remove(Object key)', desc: 'Remove mapping; returns old value' },
+      { sig: 'boolean containsKey(Object key)', desc: 'True if key present' },
+      { sig: 'boolean containsValue(Object value)', desc: 'True if value present O(n)' },
+      { sig: 'Set<K> keySet()', desc: 'Set view of keys' },
+      { sig: 'Collection<V> values()', desc: 'Collection view of values' },
+      { sig: 'Set<Map.Entry<K,V>> entrySet()', desc: 'Set view of entries' },
+      { sig: 'void putAll(Map<? extends K,? extends V> m)', desc: 'Copy all mappings' },
+      { sig: 'V putIfAbsent(K key, V value)', desc: 'Put only if key not present (Java 8+)' },
+      { sig: 'V computeIfAbsent(K key, Function<K,V> f)', desc: 'Compute and put if absent (Java 8+)' },
+      { sig: 'V computeIfPresent(K key, BiFunction<K,V,V> f)', desc: 'Compute if present (Java 8+)' },
+      { sig: 'V compute(K key, BiFunction<K,V,V> f)', desc: 'Compute new value (Java 8+)' },
+      { sig: 'V merge(K key, V value, BiFunction<V,V,V> f)', desc: 'Merge with existing value (Java 8+)' },
+      { sig: 'void forEach(BiConsumer<K,V> action)', desc: 'Iterate entries (Java 8+)' },
+      { sig: 'static Map<K,V> of(K k1,V v1,...)', desc: 'Immutable map up to 10 pairs (Java 9+)' },
+      { sig: 'static Map<K,V> copyOf(Map<K,V> m)', desc: 'Immutable copy (Java 10+)' },
+      { sig: 'static Map.Entry<K,V> entry(K k, V v)', desc: 'Immutable entry (Java 9+)' },
+    ],
+    bigo: [],
+    whenToUse: 'Use as parameter/return type for maximum flexibility. HashMap for speed, TreeMap for sorted keys, LinkedHashMap for insertion order.',
+    example: `Map<String, Integer> freq = new HashMap<>();
+
+String[] words = {"apple","banana","apple","cherry","banana","apple"};
+for (String w : words) {
+    freq.merge(w, 1, Integer::sum); // cleaner than getOrDefault
+}
+System.out.println(freq); // {apple=3, banana=2, cherry=1}
+
+// computeIfAbsent for grouping
+Map<Integer, List<String>> byLength = new HashMap<>();
+for (String w : words) {
+    byLength.computeIfAbsent(w.length(), k -> new ArrayList<>()).add(w);
+}
+
+// Java 9+ immutable map
+Map<String, Integer> codes = Map.of("US",1, "UK",44, "DE",49);`,
+  },
+
+  HashMap: {
+    type: 'class',
+    pkg: 'java.util',
+    tags: ['null'],
+    desc: 'Hash table Map implementation. O(1) average get/put. One null key, any number of null values.',
+    methods: [],
+    bigo: [
+      { op: 'put(k, v)', best: 'O(1)', avg: 'O(1)', worst: 'O(n)*' },
+      { op: 'get(k)', best: 'O(1)', avg: 'O(1)', worst: 'O(n)*' },
+      { op: 'remove(k)', best: 'O(1)', avg: 'O(1)', worst: 'O(n)*' },
+      { op: 'containsKey(k)', best: 'O(1)', avg: 'O(1)', worst: 'O(n)*' },
+      { op: 'containsValue(v)', best: 'O(n)', avg: 'O(n)', worst: 'O(n)' },
+      { op: 'iteration', best: 'O(n)', avg: 'O(n+cap)', worst: 'O(n+cap)' },
+    ],
+    whenToUse: '✓ Default Map choice — fast key lookup\n✓ Frequency counting, caching, grouping\n✓ One null key allowed\n✗ Iteration order not guaranteed\n✗ Not thread-safe (use ConcurrentHashMap)\n* Worst case with hash collisions',
+    example: `// Frequency count
+Map<Character, Integer> freq = new HashMap<>();
+for (char c : "programming".toCharArray())
+    freq.merge(c, 1, Integer::sum);
+
+// Group by property
+List<String> names = List.of("Alice","Bob","Anna","Brian","Carol");
+Map<Character, List<String>> byFirst = new HashMap<>();
+for (String name : names)
+    byFirst.computeIfAbsent(name.charAt(0), k -> new ArrayList<>()).add(name);
+
+// Caching with putIfAbsent
+Map<Integer, Long> fibCache = new HashMap<>();
+fibCache.put(0, 0L); fibCache.put(1, 1L);
+// computeIfAbsent supports recursive lambdas (with explicit ref)
+
+// entrySet iteration (fastest way)
+for (Map.Entry<Character, Integer> e : freq.entrySet())
+    System.out.println(e.getKey() + " -> " + e.getValue());`,
+  },
+
+  LinkedHashMap: {
+    type: 'class',
+    pkg: 'java.util',
+    tags: ['null', 'ordered'],
+    desc: 'HashMap with doubly-linked list. Maintains insertion order (or access order for LRU).',
+    methods: [
+      { sig: 'LinkedHashMap(int initialCapacity, float loadFactor, boolean accessOrder)', desc: 'accessOrder=true enables LRU ordering' },
+      { sig: 'protected boolean removeEldestEntry(Map.Entry<K,V> eldest)', desc: 'Override to implement LRU eviction policy' },
+    ],
+    bigo: [
+      { op: 'put / get / remove', best: 'O(1)', avg: 'O(1)', worst: 'O(n)*' },
+      { op: 'iteration', best: 'O(n)', avg: 'O(n)', worst: 'O(n)' },
+    ],
+    whenToUse: '✓ LRU cache (set accessOrder=true, override removeEldestEntry)\n✓ Need HashMap speed + predictable iteration order\n✓ JSON serialization where field order matters\n✗ Sorted order needed (use TreeMap)',
+    example: `// LRU Cache implementation
+int CAPACITY = 3;
+Map<Integer, String> lru = new LinkedHashMap<>(16, 0.75f, true) {
+    @Override
+    protected boolean removeEldestEntry(Map.Entry<Integer, String> eldest) {
+        return size() > CAPACITY;
+    }
+};
+lru.put(1, "a"); lru.put(2, "b"); lru.put(3, "c");
+lru.get(1);    // access key 1 → moves to end
+lru.put(4, "d"); // evicts LRU (key 2)
+System.out.println(lru.keySet()); // [3, 1, 4]
+
+// Insertion-ordered map (default)
+Map<String, Integer> ordered = new LinkedHashMap<>();
+ordered.put("c", 3); ordered.put("a", 1); ordered.put("b", 2);
+System.out.println(ordered); // {c=3, a=1, b=2}`,
+  },
+
+  TreeMap: {
+    type: 'class',
+    pkg: 'java.util',
+    tags: ['sorted'],
+    desc: 'Red-Black tree Map. Keys in sorted order. O(log n) all operations. Implements NavigableMap.',
+    methods: [
+      { sig: 'K firstKey() / lastKey()', desc: 'Smallest/largest key' },
+      { sig: 'K floorKey(K key)', desc: 'Greatest key ≤ given key' },
+      { sig: 'K ceilingKey(K key)', desc: 'Smallest key ≥ given key' },
+      { sig: 'K lowerKey(K key)', desc: 'Greatest key < given key' },
+      { sig: 'K higherKey(K key)', desc: 'Smallest key > given key' },
+      { sig: 'Map.Entry<K,V> firstEntry() / lastEntry()', desc: 'Entry with smallest/largest key' },
+      { sig: 'Map.Entry<K,V> pollFirstEntry() / pollLastEntry()', desc: 'Remove and return first/last' },
+      { sig: 'NavigableMap<K,V> descendingMap()', desc: 'Reverse-order view' },
+      { sig: 'SortedMap<K,V> headMap(K toKey)', desc: 'Entries with key < toKey' },
+      { sig: 'SortedMap<K,V> tailMap(K fromKey)', desc: 'Entries with key ≥ fromKey' },
+      { sig: 'SortedMap<K,V> subMap(K from, K to)', desc: 'Entries with key in [from, to)' },
+    ],
+    bigo: [
+      { op: 'put / get / remove', best: 'O(log n)', avg: 'O(log n)', worst: 'O(log n)' },
+      { op: 'firstKey / lastKey', best: 'O(log n)', avg: 'O(log n)', worst: 'O(log n)' },
+      { op: 'floor / ceiling / lower / higher', best: 'O(log n)', avg: 'O(log n)', worst: 'O(log n)' },
+      { op: 'headMap / subMap / tailMap', best: 'O(log n)', avg: 'O(log n)', worst: 'O(log n)' },
+      { op: 'iteration', best: 'O(n)', avg: 'O(n)', worst: 'O(n)' },
+    ],
+    whenToUse: '✓ Range queries on keys (events in time window)\n✓ Nearest key lookups\n✓ Sorted key iteration\n✓ Phone book, frequency maps sorted by key\n✗ Speed critical (HashMap is 5-10x faster)\n✗ Null keys not allowed',
+    example: `// Time-series range query
+TreeMap<LocalDate, Double> prices = new TreeMap<>();
+prices.put(LocalDate.of(2024,1,1), 100.0);
+prices.put(LocalDate.of(2024,3,1), 105.5);
+prices.put(LocalDate.of(2024,6,1), 98.3);
+prices.put(LocalDate.of(2024,9,1), 112.0);
+
+LocalDate start = LocalDate.of(2024,2,1);
+LocalDate end   = LocalDate.of(2024,7,1);
+SortedMap<LocalDate, Double> quarter =
+    prices.subMap(start, end); // entries between dates
+
+// Nearest lookup
+System.out.println(prices.floorKey(LocalDate.of(2024,4,1)));
+// 2024-03-01`,
+  },
+
+  Collections: {
+    type: 'class',
+    pkg: 'java.util',
+    desc: 'Utility class with static methods for sorting, searching, synchronization, and creating unmodifiable views.',
+    methods: [
+      { sig: 'static <T> void sort(List<T> list)', desc: 'Sort using natural order (mergesort)' },
+      { sig: 'static <T> void sort(List<T> list, Comparator<? super T> c)', desc: 'Sort with comparator' },
+      { sig: 'static void shuffle(List<?> list)', desc: 'Randomly permute' },
+      { sig: 'static void reverse(List<?> list)', desc: 'Reverse in place' },
+      { sig: 'static <T> int binarySearch(List<? extends T> l, T key)', desc: 'Binary search (list must be sorted)' },
+      { sig: 'static <T> T min(Collection<? extends T> c)', desc: 'Smallest element' },
+      { sig: 'static <T> T max(Collection<? extends T> c)', desc: 'Largest element' },
+      { sig: 'static <T> void fill(List<? super T> l, T obj)', desc: 'Replace all elements with obj' },
+      { sig: 'static <T> void copy(List<? super T> dest, List<? extends T> src)', desc: 'Copy src into dest' },
+      { sig: 'static int frequency(Collection<?> c, Object o)', desc: 'Count occurrences' },
+      { sig: 'static boolean disjoint(Collection<?> c1, Collection<?> c2)', desc: 'True if no common elements' },
+      { sig: 'static <T> List<T> unmodifiableList(List<? extends T> l)', desc: 'Read-only wrapper' },
+      { sig: 'static <T> Set<T> unmodifiableSet(Set<? extends T> s)', desc: 'Read-only wrapper' },
+      { sig: 'static <K,V> Map<K,V> unmodifiableMap(Map<? extends K,...> m)', desc: 'Read-only wrapper' },
+      { sig: 'static <T> List<T> synchronizedList(List<T> l)', desc: 'Thread-safe wrapper' },
+      { sig: 'static <T> List<T> nCopies(int n, T o)', desc: 'Immutable list with n copies of o' },
+      { sig: 'static <T> List<T> singletonList(T o)', desc: 'Immutable one-element list' },
+      { sig: 'static <T> Set<T> singleton(T o)', desc: 'Immutable one-element set' },
+      { sig: 'static <T> List<T> emptyList()', desc: 'Immutable empty list' },
+    ],
+    bigo: [],
+    whenToUse: 'Utility class — call its static methods directly. Use unmodifiable*() to create defensive copies. Prefer List.of() / Map.of() (Java 9+) over singleton*() for immutable collections.',
+    example: `List<Integer> nums = new ArrayList<>(Arrays.asList(3,1,4,1,5,9,2,6));
+
+Collections.sort(nums);           // [1,1,2,3,4,5,6,9]
+int idx = Collections.binarySearch(nums, 5); // 5
+
+Collections.shuffle(nums);        // random order
+Collections.reverse(nums);
+
+System.out.println(Collections.frequency(nums, 1)); // 2
+System.out.println(Collections.min(nums));
+System.out.println(Collections.max(nums));
+
+// Defensive read-only view
+List<Integer> readOnly = Collections.unmodifiableList(nums);
+// readOnly.add(10); // throws UnsupportedOperationException
+
+// Java 9+ preferred for immutable collections
+List<String> immutable = List.of("a","b","c");
+Map<String,Integer> immutableMap = Map.of("x",1,"y",2);`,
+  },
+
+  Arrays: {
+    type: 'class',
+    pkg: 'java.util',
+    desc: 'Utility class for arrays. sort, binarySearch, fill, copyOf, asList, stream and more.',
+    methods: [
+      { sig: 'static void sort(T[] a)', desc: 'Sort array (dual-pivot quicksort / mergesort)' },
+      { sig: 'static int binarySearch(T[] a, T key)', desc: 'Binary search on sorted array' },
+      { sig: 'static T[] copyOf(T[] original, int newLength)', desc: 'Copy with new length' },
+      { sig: 'static T[] copyOfRange(T[] original, int from, int to)', desc: 'Copy subrange' },
+      { sig: 'static void fill(T[] a, T val)', desc: 'Fill array with value' },
+      { sig: 'static boolean equals(T[] a, T[] b)', desc: 'Deep element comparison' },
+      { sig: 'static List<T> asList(T... a)', desc: 'Fixed-size list backed by array' },
+      { sig: 'static Stream<T> stream(T[] a)', desc: 'Stream from array (Java 8+)' },
+      { sig: 'static String toString(T[] a)', desc: 'Readable string representation' },
+    ],
+    bigo: [],
+    whenToUse: 'Use Arrays.sort() for arrays (faster than Collections.sort for primitives). Arrays.asList() creates a fixed-size List view — cannot add/remove, but can set().',
+    example: `int[] arr = {5, 3, 8, 1, 9, 2};
+Arrays.sort(arr);                         // [1,2,3,5,8,9]
+int pos = Arrays.binarySearch(arr, 8);    // 4
+
+String[] names = {"Charlie","Alice","Bob"};
+Arrays.sort(names);                       // [Alice, Bob, Charlie]
+
+// asList - fixed size list backed by array
+List<String> list = Arrays.asList(names); // [Alice, Bob, Charlie]
+list.set(0, "Aaron");                     // OK: modifies underlying array
+// list.add("Dave");                      // UnsupportedOperationException
+
+// Create proper mutable list from array
+List<String> mutable = new ArrayList<>(Arrays.asList(names));
+mutable.add("Dave");
+
+// Stream from array
+int sum = Arrays.stream(arr).sum();
+int[] copy = Arrays.copyOfRange(arr, 1, 4); // [2,3,5]`,
+  },
+};
+
+// ══════════════════════════════════════════════════
+// TREE STRUCTURE
+// ══════════════════════════════════════════════════
+
+const COLLECTION_TREE = [
+  { id: 'Iterable',       indent: 0, type: 'interface' },
+  { id: 'Collection',     indent: 1, type: 'interface' },
+  { id: 'List',           indent: 2, type: 'interface' },
+  { id: 'ArrayList',      indent: 3, type: 'class' },
+  { id: 'LinkedList',     indent: 3, type: 'class' },
+  { id: 'Set',            indent: 2, type: 'interface' },
+  { id: 'HashSet',        indent: 3, type: 'class' },
+  { id: 'LinkedHashSet',  indent: 4, type: 'class' },
+  { id: 'TreeSet',        indent: 3, type: 'class' },
+  { id: 'Queue',          indent: 2, type: 'interface' },
+  { id: 'Deque',          indent: 3, type: 'interface' },
+  { id: 'ArrayDeque',     indent: 4, type: 'class' },
+  { id: 'PriorityQueue',  indent: 3, type: 'class' },
+];
+
+const MAP_TREE = [
+  { id: 'Map',            indent: 0, type: 'interface' },
+  { id: 'HashMap',        indent: 1, type: 'class' },
+  { id: 'LinkedHashMap',  indent: 2, type: 'class' },
+  { id: 'TreeMap',        indent: 1, type: 'class' },
+];
+
+const UTIL_TREE = [
+  { id: 'Collections',    indent: 0, type: 'class' },
+  { id: 'Arrays',         indent: 0, type: 'class' },
+];
+
+const connectors = ['└', '├', '│', '─'];
+
+function buildTree(treeData, containerId) {
+  const container = document.getElementById(containerId);
+  treeData.forEach((node, i) => {
+    const div = document.createElement('div');
+    div.className = `tree-node tree-indent-${node.indent}`;
+    div.dataset.nodeId = node.id;
+
+    const next = treeData[i + 1];
+    const hasChildren = next && next.indent > node.indent;
+    const isLast = !next || next.indent < node.indent;
+
+    const connector = node.indent === 0 ? '' : (isLast ? '└─ ' : '├─ ');
+
+    div.innerHTML = `
+      <span class="tree-line">${connector}</span>
+      <span class="node-name ${node.type}">${node.id}</span>
+      <span class="badge badge-${node.type}">${node.type}</span>
+    `;
+
+    div.addEventListener('click', () => selectNode(node.id, div));
+    container.appendChild(div);
+  });
+}
+
+function selectNode(id, el) {
+  document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
+  el.classList.add('selected');
+  renderDetail(id);
+}
+
+function renderDetail(id) {
+  const data = NODES[id];
+  if (!data) return;
+
+  const panel = document.getElementById('detail-panel');
+  const tags = (data.tags || []).map(t => `<span class="tag tag-${t}">${t}</span>`).join('');
+
+  let html = `
+    <div class="detail-header">
+      <h2 class="${data.type}">${id}</h2>
+      <span style="color:var(--text-dim);font-size:0.8rem;font-family:monospace;">${data.pkg}</span>
+      ${tags}
+      <span class="badge badge-${data.type}" style="margin-left:auto;">${data.type}</span>
+    </div>
+    <p style="color:var(--text-dim);margin-bottom:1rem;font-size:0.9rem;">${data.desc}</p>
+    <div class="detail-tabs">
+      <button class="detail-tab active" onclick="switchTab(this,'tab-methods-${id}')">Methods</button>
+      ${data.bigo.length ? `<button class="detail-tab" onclick="switchTab(this,'tab-bigo-${id}')">Big O</button>` : ''}
+      <button class="detail-tab" onclick="switchTab(this,'tab-when-${id}')">When to Use</button>
+      <button class="detail-tab" onclick="switchTab(this,'tab-example-${id}')">Code Example</button>
+    </div>
+  `;
+
+  // Methods tab
+  html += `<div id="tab-methods-${id}" class="detail-content active">`;
+  if (data.methods.length) {
+    html += `<div class="method-grid">`;
+    data.methods.forEach(m => {
+      html += `<div class="method-item">
+        <div class="method-sig">${m.sig}</div>
+        <div class="method-desc">${m.desc}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<p style="color:var(--text-dim);font-size:0.88rem;">Inherits methods from parent interfaces/classes. See <strong>${id}</strong>'s supertype for core operations.</p>`;
+  }
+  html += `</div>`;
+
+  // Big O tab
+  if (data.bigo.length) {
+    html += `<div id="tab-bigo-${id}" class="detail-content">
+      <table class="bigo-table">
+        <thead><tr><th>Operation</th><th>Best</th><th>Average</th><th>Worst</th></tr></thead>
+        <tbody>`;
+    data.bigo.forEach(row => {
+      const cls = o => {
+        if (o.includes('1)')) return 'o-1';
+        if (o.includes('log')) return 'o-log';
+        if (o === 'O(n)' || o.startsWith('O(n)') || o.includes('O(n)') && !o.includes('log')) return 'o-n';
+        if (o.includes('n log') || o.includes('n²')) return 'o-nl';
+        return '';
+      };
+      html += `<tr>
+        <td>${row.op}</td>
+        <td class="${cls(row.best)}">${row.best}</td>
+        <td class="${cls(row.avg)}">${row.avg}</td>
+        <td class="${cls(row.worst)}">${row.worst}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>
+      <p style="color:var(--text-dim);font-size:0.75rem;margin-top:0.5rem;">* Amortized. Colors: <span class="o-1">O(1)</span> <span class="o-log">O(log n)</span> <span class="o-n">O(n)</span> <span class="o-nl">O(n log n)+</span></p>
+    </div>`;
+  }
+
+  // When to use tab
+  html += `<div id="tab-when-${id}" class="detail-content">
+    <div class="when-to-use"><pre style="white-space:pre-wrap;font-family:inherit;">${data.whenToUse}</pre></div>
+  </div>`;
+
+  // Example tab
+  html += `<div id="tab-example-${id}" class="detail-content">
+    <pre><code class="language-java">${escHtml(data.example)}</code></pre>
+  </div>`;
+
+  panel.innerHTML = html;
+  panel.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+}
+
+function switchTab(btn, tabId) {
+  const parent = btn.closest('.detail-panel');
+  parent.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  parent.querySelectorAll('.detail-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ══════════════════════════════════════════════════
+// FLOWCHART / DECISION TREE
+// ══════════════════════════════════════════════════
+
+const FLOW = {
+  start: {
+    question: 'What do you primarily need?',
+    options: [
+      { label: 'Key → Value mapping', next: 'map_type' },
+      { label: 'Unique elements (no duplicates)', next: 'set_type' },
+      { label: 'Ordered sequence (with duplicates OK)', next: 'list_type' },
+      { label: 'Queue / Stack / Deque', next: 'queue_type' },
+    ]
+  },
+  map_type: {
+    question: 'What matters most about the Map?',
+    options: [
+      { label: 'Speed — O(1) lookups', next: 'map_speed' },
+      { label: 'Sorted by key', next: 'map_sorted' },
+      { label: 'Preserve insertion order', next: 'map_ordered' },
+      { label: 'Thread-safe', next: 'map_concurrent' },
+    ]
+  },
+  map_speed: {
+    question: 'Do you need null keys?',
+    options: [
+      { label: 'Yes (at most one null key)', next: 'rec_HashMap' },
+      { label: 'No', next: 'rec_HashMap' },
+    ]
+  },
+  map_sorted: { question: 'Custom sort order?', options: [
+      { label: 'Natural order is fine', next: 'rec_TreeMap' },
+      { label: 'Custom Comparator', next: 'rec_TreeMap' },
+  ]},
+  map_ordered: { question: 'LRU Cache?', options: [
+      { label: 'Yes', next: 'rec_LinkedHashMap_lru' },
+      { label: 'No — just insertion order', next: 'rec_LinkedHashMap' },
+  ]},
+  map_concurrent: { question: 'Sorted concurrent?', options: [
+      { label: 'Yes (sorted + thread-safe)', next: 'rec_ConcurrentSkipListMap' },
+      { label: 'No (just thread-safe)', next: 'rec_ConcurrentHashMap' },
+  ]},
+  set_type: {
+    question: 'What matters about the Set?',
+    options: [
+      { label: 'Maximum speed', next: 'rec_HashSet' },
+      { label: 'Sorted elements', next: 'rec_TreeSet' },
+      { label: 'Preserve insertion order', next: 'rec_LinkedHashSet' },
+    ]
+  },
+  list_type: {
+    question: 'Most common operation?',
+    options: [
+      { label: 'Random access / iteration', next: 'rec_ArrayList' },
+      { label: 'Frequent front/back insertions', next: 'rec_LinkedList' },
+      { label: 'Concurrent reads, rare writes', next: 'rec_CopyOnWriteArrayList' },
+    ]
+  },
+  queue_type: {
+    question: 'Which behavior?',
+    options: [
+      { label: 'FIFO Queue or Stack', next: 'rec_ArrayDeque' },
+      { label: 'Priority / min-heap', next: 'rec_PriorityQueue' },
+      { label: 'Blocking (producer-consumer)', next: 'blocking_type' },
+      { label: 'Both-ends deque', next: 'rec_ArrayDeque' },
+    ]
+  },
+  blocking_type: {
+    question: 'Bounded or unbounded?',
+    options: [
+      { label: 'Bounded (fixed capacity)', next: 'rec_ArrayBlockingQueue' },
+      { label: 'Unbounded', next: 'rec_LinkedBlockingQueue' },
+    ]
+  },
+
+  // Recommendations
+  rec_HashMap: { recommendation: true, name: 'HashMap', reason: 'The go-to Map for O(1) average get/put. Supports one null key. Not thread-safe. Use ConcurrentHashMap in concurrent code.' },
+  rec_TreeMap: { recommendation: true, name: 'TreeMap', reason: 'Keys always sorted by natural order or Comparator. O(log n) operations. Rich NavigableMap API for range queries (headMap, subMap, floorKey, ceilingKey).' },
+  rec_LinkedHashMap: { recommendation: true, name: 'LinkedHashMap', reason: 'HashMap + predictable insertion-order iteration. Slightly more memory than HashMap. Great when you need both speed and ordering.' },
+  rec_LinkedHashMap_lru: { recommendation: true, name: 'LinkedHashMap (LRU mode)', reason: 'Use new LinkedHashMap(16, 0.75f, true) and override removeEldestEntry(). The simplest way to build an LRU cache without external libraries.' },
+  rec_ConcurrentHashMap: { recommendation: true, name: 'ConcurrentHashMap', reason: 'Thread-safe, high-performance Map using lock striping (Java 8: CAS). Much better than synchronizedMap(). Use for concurrent frequency counting, caches.' },
+  rec_ConcurrentSkipListMap: { recommendation: true, name: 'ConcurrentSkipListMap', reason: 'Concurrent sorted map using a skip list. O(log n), fully thread-safe without explicit locking. Use when you need both thread-safety and sorted key iteration.' },
+  rec_HashSet: { recommendation: true, name: 'HashSet', reason: 'Default Set. O(1) average add/remove/contains. Backed by HashMap. No ordering. Allows one null. Override equals() and hashCode() in elements.' },
+  rec_TreeSet: { recommendation: true, name: 'TreeSet', reason: 'Sorted unique elements. O(log n) operations. Backed by TreeMap. NavigableSet API for floor/ceiling/range queries. No null elements.' },
+  rec_LinkedHashSet: { recommendation: true, name: 'LinkedHashSet', reason: 'HashSet that remembers insertion order. O(1) add/remove/contains. Perfect for deduplication while preserving first-seen order.' },
+  rec_ArrayList: { recommendation: true, name: 'ArrayList', reason: 'Default List. O(1) random access, cache-friendly. Great for most use cases. Prefer over LinkedList unless you need frequent front insertions.' },
+  rec_LinkedList: { recommendation: true, name: 'LinkedList', reason: 'Doubly-linked List + Deque. O(1) add/remove at both ends. High memory overhead per element. Use when front-insertion/removal is the primary operation.' },
+  rec_CopyOnWriteArrayList: { recommendation: true, name: 'CopyOnWriteArrayList', reason: 'Thread-safe List that copies backing array on every write. Ideal for read-heavy scenarios (listeners, event handlers). Iterators never throw ConcurrentModificationException.' },
+  rec_ArrayDeque: { recommendation: true, name: 'ArrayDeque', reason: 'Preferred Stack and Queue implementation. Faster than LinkedList and Stack. Resizable circular array. No null elements. Use for BFS, DFS, and sliding window problems.' },
+  rec_PriorityQueue: { recommendation: true, name: 'PriorityQueue', reason: 'Min-heap (use Comparator.reverseOrder() for max-heap). O(log n) offer/poll, O(1) peek. Perfect for K-largest, Dijkstra, and task scheduling.' },
+  rec_ArrayBlockingQueue: { recommendation: true, name: 'ArrayBlockingQueue', reason: 'Bounded thread-safe FIFO queue. Blocks producers when full, blocks consumers when empty. Fixed capacity set at construction. Fair ordering option available.' },
+  rec_LinkedBlockingQueue: { recommendation: true, name: 'LinkedBlockingQueue', reason: 'Optionally bounded thread-safe FIFO queue. Separate locks for head and tail give better throughput than ArrayBlockingQueue for high-concurrency producer-consumer.' },
+};
+
+let flowHistory = [];
+let currentStep = 'start';
+
+function renderFlowchart() {
+  const app = document.getElementById('flowchart-app');
+  const step = FLOW[currentStep];
+
+  if (step.recommendation) {
+    const breadcrumbHtml = flowHistory.length ? `
+      <div class="breadcrumb">
+        ${flowHistory.map((h,i) => `
+          <span>${h}</span>
+          ${i < flowHistory.length - 1 ? '<span class="arrow">→</span>' : ''}
+        `).join('')}
+      </div>` : '';
+
+    app.innerHTML = `
+      ${breadcrumbHtml}
+      <div class="recommendation-card">
+        <div class="rec-title">Recommended Collection</div>
+        <div class="rec-name">${step.name}</div>
+        <div class="rec-reason">${step.reason}</div>
+        <button class="restart-btn" onclick="restartFlow()">&#8635; Start Over</button>
+      </div>
+    `;
+    return;
+  }
+
+  const breadcrumbHtml = flowHistory.length ? `
+    <div class="breadcrumb">
+      ${flowHistory.map((h,i) => `
+        <span>${h}</span>
+        ${i < flowHistory.length - 1 ? '<span class="arrow">→</span>' : ''}
+      `).join('')}
+      ${flowHistory.length ? '<span class="arrow">→</span>' : ''}
+    </div>` : '';
+
+  app.innerHTML = `
+    ${breadcrumbHtml}
+    <div class="question-card">
+      <h3>Question ${flowHistory.length + 1}</h3>
+      <div class="question-text">${step.question}</div>
+      <div class="options-grid">
+        ${step.options.map(opt => `
+          <button class="option-btn" onclick="flowAnswer('${opt.label}','${opt.next}')">${opt.label}</button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function flowAnswer(label, next) {
+  flowHistory.push(label);
+  currentStep = next;
+  renderFlowchart();
+}
+
+function restartFlow() {
+  flowHistory = [];
+  currentStep = 'start';
+  renderFlowchart();
+}
+
+// ══════════════════════════════════════════════════
+// SNIPPETS
+// ══════════════════════════════════════════════════
+
+const SNIPPETS = [
+  { name: 'ArrayList', pkg: 'java.util', code: `List<String> list = new ArrayList<>();
+list.add("Alice"); list.add("Bob"); list.add("Charlie");
+list.add(1, "Dave");                   // insert at index 1
+list.set(0, "Aaron");                  // replace at index 0
+list.remove("Bob");                    // remove by value
+list.removeIf(s -> s.length() > 5);   // conditional remove
+list.sort(Comparator.naturalOrder());  // in-place sort
+for (String s : list) System.out.println(s);` },
+
+  { name: 'LinkedList as Deque', pkg: 'java.util', code: `Deque<String> deque = new LinkedList<>();
+deque.addFirst("first");
+deque.addLast("last");
+deque.offerFirst("front");  // like addFirst but returns boolean
+
+// Stack
+deque.push("top");
+System.out.println(deque.pop());     // "top"
+
+// Queue
+deque.offer("enqueued");
+System.out.println(deque.poll());    // "front"
+
+// Peek without removing
+System.out.println(deque.peekFirst());
+System.out.println(deque.peekLast());` },
+
+  { name: 'HashSet', pkg: 'java.util', code: `Set<Integer> set = new HashSet<>(Set.of(1, 2, 3, 4, 5));
+
+set.add(3);           // no change (duplicate)
+set.remove(5);
+System.out.println(set.contains(2)); // true
+
+// Set operations
+Set<Integer> other = new HashSet<>(Set.of(3, 4, 5, 6));
+set.retainAll(other);  // intersection: {3, 4}
+
+Set<Integer> a = new HashSet<>(Set.of(1,2,3));
+Set<Integer> b = new HashSet<>(Set.of(3,4,5));
+a.addAll(b);           // union: {1,2,3,4,5}` },
+
+  { name: 'TreeSet', pkg: 'java.util', code: `TreeSet<Integer> ts = new TreeSet<>(List.of(5,1,8,3,7,2));
+// Automatically sorted: [1,2,3,5,7,8]
+
+System.out.println(ts.first());      // 1
+System.out.println(ts.last());       // 8
+System.out.println(ts.floor(4));     // 3 (greatest ≤ 4)
+System.out.println(ts.ceiling(4));   // 5 (smallest ≥ 4)
+System.out.println(ts.headSet(5));   // [1, 2, 3]
+System.out.println(ts.tailSet(5));   // [5, 7, 8]
+System.out.println(ts.subSet(2,6));  // [2, 3, 5]
+
+ts.pollFirst(); // remove and return 1
+ts.pollLast();  // remove and return 8` },
+
+  { name: 'HashMap', pkg: 'java.util', code: `Map<String, Integer> map = new HashMap<>();
+map.put("alice", 90);
+map.put("bob", 85);
+
+// Java 8+ methods
+map.putIfAbsent("carol", 78);
+map.merge("alice", 5, Integer::sum); // alice=95
+map.computeIfAbsent("dave", k -> k.length()); // dave=4
+
+// Iterate entries (fastest)
+map.forEach((k, v) -> System.out.println(k + ": " + v));
+
+// Frequency count pattern
+String text = "hello world";
+Map<Character, Integer> freq = new HashMap<>();
+for (char c : text.toCharArray())
+    freq.merge(c, 1, Integer::sum);` },
+
+  { name: 'LinkedHashMap LRU Cache', pkg: 'java.util', code: `class LRUCache<K, V> extends LinkedHashMap<K, V> {
+    private final int capacity;
+
+    LRUCache(int capacity) {
+        super(16, 0.75f, true); // accessOrder=true
+        this.capacity = capacity;
+    }
+
+    @Override
+    protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+        return size() > capacity;
+    }
+}
+
+LRUCache<Integer, String> cache = new LRUCache<>(3);
+cache.put(1, "a"); cache.put(2, "b"); cache.put(3, "c");
+cache.get(1);          // access key 1
+cache.put(4, "d");     // evicts key 2 (least recently used)
+System.out.println(cache.keySet()); // [3, 1, 4]` },
+
+  { name: 'TreeMap Range Queries', pkg: 'java.util', code: `TreeMap<String, Integer> scores = new TreeMap<>();
+scores.put("Alice", 95); scores.put("Bob", 82);
+scores.put("Carol", 91); scores.put("Dave", 78);
+scores.put("Eve", 88);
+
+// Sorted by key
+System.out.println(scores.firstKey());          // Alice
+System.out.println(scores.lastEntry().getValue()); // 78
+
+// Range query
+SortedMap<String, Integer> bc =
+    scores.subMap("B", "D");  // [Bob, Carol]
+System.out.println(bc);
+
+// Nearest key
+System.out.println(scores.floorKey("Cat"));    // Carol
+System.out.println(scores.ceilingKey("Cat"));  // Dave` },
+
+  { name: 'PriorityQueue', pkg: 'java.util', code: `// Min-heap (default)
+PriorityQueue<Integer> minHeap = new PriorityQueue<>();
+minHeap.offer(5); minHeap.offer(1); minHeap.offer(3);
+System.out.println(minHeap.poll()); // 1
+
+// Max-heap
+PriorityQueue<Integer> maxHeap =
+    new PriorityQueue<>(Comparator.reverseOrder());
+maxHeap.offer(5); maxHeap.offer(1); maxHeap.offer(3);
+System.out.println(maxHeap.poll()); // 5
+
+// K smallest numbers
+int[] nums = {7,3,1,9,2,5,4};
+PriorityQueue<Integer> pq = new PriorityQueue<>(Arrays.stream(nums)
+    .boxed().toList());
+List<Integer> kSmallest = new ArrayList<>();
+for (int i = 0; i < 3; i++) kSmallest.add(pq.poll());
+System.out.println(kSmallest); // [1, 2, 3]` },
+
+  { name: 'ArrayDeque — Stack & Queue', pkg: 'java.util', code: `// As Stack (Java docs recommend over Stack class)
+Deque<Integer> stack = new ArrayDeque<>();
+stack.push(1); stack.push(2); stack.push(3);
+while (!stack.isEmpty()) System.out.print(stack.pop() + " "); // 3 2 1
+
+// As Queue
+Deque<String> queue = new ArrayDeque<>();
+queue.offer("first"); queue.offer("second"); queue.offer("third");
+while (!queue.isEmpty()) System.out.print(queue.poll() + " ");
+
+// BFS traversal example
+Deque<Integer> bfsQueue = new ArrayDeque<>();
+Set<Integer> visited = new HashSet<>();
+bfsQueue.offer(0);
+while (!bfsQueue.isEmpty()) {
+    int node = bfsQueue.poll();
+    if (visited.add(node)) {
+        // process node, enqueue neighbors
+    }
+}` },
+
+  { name: 'Collections Utility', pkg: 'java.util', code: `List<Integer> list = new ArrayList<>(List.of(5,3,8,1,9,2,4,7,6));
+
+Collections.sort(list);               // [1,2,3,4,5,6,7,8,9]
+int idx = Collections.binarySearch(list, 7); // 6
+
+Collections.shuffle(list);            // random order
+Collections.reverse(list);
+
+System.out.println("Min: " + Collections.min(list));
+System.out.println("Max: " + Collections.max(list));
+System.out.println("Freq of 3: " + Collections.frequency(list, 3));
+
+// Unmodifiable view
+List<Integer> ro = Collections.unmodifiableList(list);
+
+// nCopies
+List<String> zeros = Collections.nCopies(5, "0"); // [0,0,0,0,0]
+
+Set<Integer> a = new HashSet<>(Set.of(1,2,3));
+Set<Integer> b = new HashSet<>(Set.of(4,5,6));
+System.out.println(Collections.disjoint(a, b)); // true` },
+];
+
+function renderSnippets() {
+  const grid = document.getElementById('snippets-grid');
+  SNIPPETS.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'snippet-card';
+    card.innerHTML = `
+      <div class="snippet-card-header">
+        <span class="name">${s.name}</span>
+        <span class="pkg">${s.pkg}</span>
+      </div>
+      <pre><code class="language-java">${escHtml(s.code)}</code></pre>
+    `;
+    grid.appendChild(card);
+  });
+  grid.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+}
+
+// ══════════════════════════════════════════════════
+// SECTION NAV
+// ══════════════════════════════════════════════════
+
+function showSection(id, btn) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+  buildTree(COLLECTION_TREE, 'collection-tree');
+  buildTree(MAP_TREE, 'map-tree');
+  buildTree(UTIL_TREE, 'util-tree');
+  renderFlowchart();
+  renderSnippets();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OOP Inheritance Visualization</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #1a1a2e;
+    color: #eee;
+    font-family: system-ui, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    color: #e94560;
+    margin-bottom: 8px;
+    font-size: 1.8rem;
+  }
+  .subtitle {
+    text-align: center;
+    color: #888;
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+  }
+  .back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #0f3460;
+    color: #4da8da;
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  .back-link:hover { text-decoration: underline; }
+
+  /* Tree layout */
+  .tree-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    position: relative;
+    margin-bottom: 30px;
+  }
+  .tree-level {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    position: relative;
+    width: 100%;
+  }
+
+  /* Class cards */
+  .class-card {
+    background: #16213e;
+    border: 2px solid #0f3460;
+    border-radius: 10px;
+    width: 200px;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+  }
+  .class-card.animal { border-color: #e94560; }
+  .class-card.dog { border-color: #f5a623; }
+  .class-card.cat { border-color: #7ed6df; }
+  .class-card.puppy { border-color: #a29bfe; }
+
+  .class-header {
+    padding: 8px 12px;
+    font-weight: bold;
+    font-size: 1rem;
+    text-align: center;
+  }
+  .class-card.animal .class-header { background: #e94560; color: #fff; }
+  .class-card.dog .class-header { background: #f5a623; color: #1a1a2e; }
+  .class-card.cat .class-header { background: #7ed6df; color: #1a1a2e; }
+  .class-card.puppy .class-header { background: #a29bfe; color: #1a1a2e; }
+
+  .class-extends {
+    text-align: center;
+    font-size: 0.7rem;
+    color: #aaa;
+    padding: 3px;
+    background: #0d1b34;
+    font-style: italic;
+  }
+  .section-label {
+    font-size: 0.65rem;
+    color: #888;
+    padding: 4px 10px 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #0d1b34;
+    border-top: 1px solid #0f3460;
+  }
+  .field-item, .method-item {
+    padding: 3px 10px;
+    font-size: 0.78rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .field-item:last-child, .method-item:last-child { padding-bottom: 8px; }
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  /* Field color coding */
+  .dot.parent-field { background: #e94560; }     /* inherited from parent */
+  .dot.own-field { background: #2ecc71; }         /* new in this class */
+  .dot.inherited { background: #888; }            /* further inherited */
+
+  /* Method color coding */
+  .dot.inherited-method { background: #888; }
+  .dot.overridden-method { background: #f39c12; } /* orange = overridden */
+  .dot.new-method { background: #2ecc71; }        /* green = new */
+
+  .tag {
+    font-size: 0.6rem;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-weight: bold;
+  }
+  .tag.override { background: #f39c12; color: #1a1a2e; }
+  .tag.new-tag { background: #2ecc71; color: #1a1a2e; }
+
+  /* Arrows */
+  .arrow-connector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    height: 50px;
+  }
+  .arrow-group {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    width: 100%;
+  }
+  .arrow-single {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 200px;
+  }
+  .arrow-line {
+    width: 2px;
+    height: 35px;
+    background: #4da8da;
+    position: relative;
+  }
+  .arrow-head {
+    width: 0; height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 12px solid #4da8da;
+    margin-top: -1px;
+  }
+  .arrow-label {
+    font-size: 0.65rem;
+    color: #4da8da;
+    margin-top: 3px;
+    text-align: center;
+  }
+
+  /* Multi-arrow from two children to one parent */
+  .arrow-multi {
+    position: relative;
+    width: 100%;
+    height: 60px;
+  }
+  .arrow-multi svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* Legend */
+  .legend {
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 0 auto 24px;
+    max-width: 700px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  /* Buttons */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  button {
+    background: #0f3460;
+    color: #eee;
+    border: 1px solid #4da8da;
+    border-radius: 6px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+  }
+  button:hover { background: #1a5276; }
+  button.primary { background: #e94560; border-color: #e94560; }
+  button.primary:hover { background: #c0392b; }
+
+  /* Output panel */
+  #output-panel {
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: 16px;
+    max-width: 800px;
+    margin: 0 auto 20px;
+    min-height: 100px;
+    display: none;
+  }
+  #output-panel h3 {
+    color: #4da8da;
+    margin-bottom: 12px;
+    font-size: 1rem;
+  }
+  .instance-display {
+    background: #0d1b34;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+  }
+  .instance-display .class-name {
+    font-weight: bold;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+  }
+  .field-row {
+    display: flex;
+    gap: 10px;
+    padding: 2px 0;
+  }
+  .field-row .fname { color: #4da8da; min-width: 100px; }
+  .field-row .fval { color: #2ecc71; }
+  .field-row .fsrc { color: #888; font-size: 0.75rem; margin-left: auto; }
+
+  .sound-display {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .sound-card {
+    background: #0d1b34;
+    border-radius: 8px;
+    padding: 12px 16px;
+    text-align: center;
+    min-width: 140px;
+  }
+  .sound-card .animal-type { font-weight: bold; margin-bottom: 4px; }
+  .sound-card .sound-text { font-size: 1.2rem; color: #f5a623; }
+  .sound-card .method-note { font-size: 0.7rem; color: #888; margin-top: 4px; }
+
+  .explanation {
+    background: #0d1b34;
+    border-left: 3px solid #4da8da;
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.85rem;
+    color: #ccc;
+    margin-top: 12px;
+    line-height: 1.5;
+  }
+
+  /* Phase animation */
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  .animating { animation: pulse 0.8s ease-in-out 3; }
+</style>
+</head>
+<body>
+
+<a href="../../README.md" class="back-link">← Back to Index</a>
+
+<h1>OOP Inheritance</h1>
+<p class="subtitle">Understanding class hierarchies, method overriding, and polymorphism</p>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#e94560"></div> Defined in parent class</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#2ecc71"></div> New in this class</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#888"></div> Inherited (unchanged)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f39c12"></div> Overridden method</div>
+</div>
+
+<!-- Inheritance Tree -->
+<div class="tree-container" id="tree">
+
+  <!-- Level 0: Animal -->
+  <div class="tree-level">
+    <div class="class-card animal" id="card-animal">
+      <div class="class-header">Animal</div>
+      <div class="section-label">Fields</div>
+      <div class="field-item"><div class="dot own-field"></div> name: String</div>
+      <div class="field-item"><div class="dot own-field"></div> age: int</div>
+      <div class="section-label">Methods</div>
+      <div class="method-item"><div class="dot new-method"></div> eat()</div>
+      <div class="method-item"><div class="dot new-method"></div> breathe()</div>
+      <div class="method-item"><div class="dot new-method"></div> makeSound()</div>
+    </div>
+  </div>
+
+  <!-- Arrow from Animal down to Dog/Cat level -->
+  <div style="position:relative; width:100%; height:60px;">
+    <svg id="arrow-animal" width="100%" height="60" style="overflow:visible; display:block;">
+      <!-- Lines drawn by JS after layout -->
+    </svg>
+  </div>
+
+  <!-- Level 1: Dog and Cat -->
+  <div class="tree-level" id="level-dog-cat">
+    <div class="class-card dog" id="card-dog">
+      <div class="class-header">Dog</div>
+      <div class="class-extends">extends Animal</div>
+      <div class="section-label">Fields</div>
+      <div class="field-item"><div class="dot parent-field"></div> name: String</div>
+      <div class="field-item"><div class="dot parent-field"></div> age: int</div>
+      <div class="field-item"><div class="dot own-field"></div> breed: String <span class="tag new-tag">NEW</span></div>
+      <div class="section-label">Methods</div>
+      <div class="method-item"><div class="dot inherited-method"></div> eat()</div>
+      <div class="method-item"><div class="dot inherited-method"></div> breathe()</div>
+      <div class="method-item"><div class="dot overridden-method"></div> makeSound() <span class="tag override">OVERRIDE</span></div>
+      <div class="method-item"><div class="dot new-method"></div> fetch() <span class="tag new-tag">NEW</span></div>
+    </div>
+
+    <div class="class-card cat" id="card-cat">
+      <div class="class-header">Cat</div>
+      <div class="class-extends">extends Animal</div>
+      <div class="section-label">Fields</div>
+      <div class="field-item"><div class="dot parent-field"></div> name: String</div>
+      <div class="field-item"><div class="dot parent-field"></div> age: int</div>
+      <div class="field-item"><div class="dot own-field"></div> indoor: boolean <span class="tag new-tag">NEW</span></div>
+      <div class="section-label">Methods</div>
+      <div class="method-item"><div class="dot inherited-method"></div> eat()</div>
+      <div class="method-item"><div class="dot inherited-method"></div> breathe()</div>
+      <div class="method-item"><div class="dot overridden-method"></div> makeSound() <span class="tag override">OVERRIDE</span></div>
+      <div class="method-item"><div class="dot new-method"></div> purr() <span class="tag new-tag">NEW</span></div>
+    </div>
+  </div>
+
+  <!-- Arrow from Dog down to Puppy -->
+  <div style="position:relative; width:100%; height:60px;">
+    <svg id="arrow-dog" width="100%" height="60" style="overflow:visible; display:block;"></svg>
+  </div>
+
+  <!-- Level 2: Puppy -->
+  <div class="tree-level" id="level-puppy">
+    <div class="class-card puppy" id="card-puppy">
+      <div class="class-header">Puppy</div>
+      <div class="class-extends">extends Dog</div>
+      <div class="section-label">Fields</div>
+      <div class="field-item"><div class="dot inherited"></div> name: String</div>
+      <div class="field-item"><div class="dot inherited"></div> age: int</div>
+      <div class="field-item"><div class="dot inherited"></div> breed: String</div>
+      <div class="field-item"><div class="dot own-field"></div> vaccinated: boolean <span class="tag new-tag">NEW</span></div>
+      <div class="section-label">Methods</div>
+      <div class="method-item"><div class="dot inherited-method"></div> eat()</div>
+      <div class="method-item"><div class="dot inherited-method"></div> breathe()</div>
+      <div class="method-item"><div class="dot overridden-method"></div> makeSound() <span class="tag override">from Dog</span></div>
+      <div class="method-item"><div class="dot inherited-method"></div> fetch()</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Controls -->
+<div class="controls">
+  <button onclick="createDogInstance()">Create Dog Instance</button>
+  <button onclick="createCatInstance()">Create Cat Instance</button>
+  <button onclick="createPuppyInstance()">Create Puppy Instance</button>
+  <button class="primary" onclick="polymorphismDemo()">Call makeSound() on All Animals</button>
+</div>
+
+<!-- Output Panel -->
+<div id="output-panel">
+  <h3 id="output-title">Output</h3>
+  <div id="output-content"></div>
+</div>
+
+<!-- Explanation -->
+<div style="max-width:800px;margin:0 auto 30px;" id="explanation-area">
+  <div class="explanation">
+    <strong>Key Concepts:</strong><br>
+    <strong>Inheritance:</strong> Dog inherits <code>eat()</code> and <code>breathe()</code> from Animal — it doesn't need to redefine them.<br>
+    <strong>Override:</strong> Dog has its OWN <code>makeSound()</code> — it replaces Animal's version entirely.<br>
+    <strong>Extension:</strong> Dog adds <code>fetch()</code> which Animal doesn't have.<br>
+    <strong>Multi-level:</strong> Puppy extends Dog, inheriting everything from Dog (and therefore Animal too).<br>
+    <strong>Polymorphism:</strong> When you call <code>makeSound()</code> on any Animal reference, each subclass runs its OWN version.
+  </div>
+</div>
+
+<script>
+  // Draw SVG arrows after layout
+  function drawArrows() {
+    const treeContainer = document.getElementById('tree');
+    const containerRect = treeContainer.getBoundingClientRect();
+
+    // Arrow from Animal to Dog/Cat
+    const animalCard = document.getElementById('card-animal');
+    const dogCard = document.getElementById('card-dog');
+    const catCard = document.getElementById('card-cat');
+    const arrowAnimalSvg = document.getElementById('arrow-animal');
+    const arrowAnimalRect = arrowAnimalSvg.getBoundingClientRect();
+
+    const animalRect = animalCard.getBoundingClientRect();
+    const dogRect = dogCard.getBoundingClientRect();
+    const catRect = catCard.getBoundingClientRect();
+
+    // Relative positions to SVG
+    const svgTop = arrowAnimalRect.top;
+    const svgLeft = arrowAnimalRect.left;
+
+    const animalMidX = animalRect.left + animalRect.width/2 - svgLeft;
+    const animalBottom = 0; // starts at top of SVG (which is bottom of animal)
+    const dogMidX = dogRect.left + dogRect.width/2 - svgLeft;
+    const dogTop = arrowAnimalRect.height;
+    const catMidX = catRect.left + catRect.width/2 - svgLeft;
+    const catTop = arrowAnimalRect.height;
+    const midY = arrowAnimalRect.height / 2;
+
+    arrowAnimalSvg.innerHTML = `
+      <defs>
+        <marker id="arrowhead1" markerWidth="8" markerHeight="6" refX="4" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#4da8da"/>
+        </marker>
+      </defs>
+      <line x1="${animalMidX}" y1="0" x2="${animalMidX}" y2="${midY}" stroke="#4da8da" stroke-width="2"/>
+      <line x1="${dogMidX}" y1="${midY}" x2="${catMidX}" y2="${midY}" stroke="#4da8da" stroke-width="2"/>
+      <line x1="${dogMidX}" y1="${midY}" x2="${dogMidX}" y2="${dogTop}" stroke="#4da8da" stroke-width="2" marker-end="url(#arrowhead1)"/>
+      <line x1="${catMidX}" y1="${midY}" x2="${catMidX}" y2="${catTop}" stroke="#4da8da" stroke-width="2" marker-end="url(#arrowhead1)"/>
+    `;
+
+    // Arrow from Dog to Puppy
+    const puppyCard = document.getElementById('card-puppy');
+    const arrowDogSvg = document.getElementById('arrow-dog');
+    const arrowDogRect = arrowDogSvg.getBoundingClientRect();
+    const puppyRect = puppyCard.getBoundingClientRect();
+
+    const dogSvgLeft = arrowDogRect.left;
+    const dogMidX2 = dogRect.left + dogRect.width/2 - dogSvgLeft;
+    const puppyMidX = puppyRect.left + puppyRect.width/2 - dogSvgLeft;
+    const dogMidY = arrowDogRect.height / 2;
+    const arrowHeight = arrowDogRect.height;
+
+    arrowDogSvg.innerHTML = `
+      <defs>
+        <marker id="arrowhead2" markerWidth="8" markerHeight="6" refX="4" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#a29bfe"/>
+        </marker>
+      </defs>
+      <line x1="${dogMidX2}" y1="0" x2="${dogMidX2}" y2="${dogMidY}" stroke="#a29bfe" stroke-width="2"/>
+      <line x1="${dogMidX2}" y1="${dogMidY}" x2="${puppyMidX}" y2="${dogMidY}" stroke="#a29bfe" stroke-width="2"/>
+      <line x1="${puppyMidX}" y1="${dogMidY}" x2="${puppyMidX}" y2="${arrowHeight}" stroke="#a29bfe" stroke-width="2" marker-end="url(#arrowhead2)"/>
+    `;
+  }
+
+  window.addEventListener('load', drawArrows);
+  window.addEventListener('resize', drawArrows);
+
+  function showOutput(title, content) {
+    const panel = document.getElementById('output-panel');
+    document.getElementById('output-title').textContent = title;
+    document.getElementById('output-content').innerHTML = content;
+    panel.style.display = 'block';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function createDogInstance() {
+    const html = `
+      <div class="instance-display">
+        <div class="class-name" style="color:#f5a623;">new Dog("Buddy", 3, "Labrador")</div>
+        <div style="margin-bottom:8px;font-size:0.75rem;color:#888;">— All fields, including inherited ones —</div>
+        <div class="field-row"><span class="fname">name:</span><span class="fval">"Buddy"</span><span class="fsrc">← from Animal</span></div>
+        <div class="field-row"><span class="fname">age:</span><span class="fval">3</span><span class="fsrc">← from Animal</span></div>
+        <div class="field-row"><span class="fname">breed:</span><span class="fval">"Labrador"</span><span class="fsrc">← defined in Dog</span></div>
+      </div>
+      <div class="instance-display">
+        <div class="class-name" style="color:#4da8da;">Available Methods</div>
+        <div class="field-row"><span class="fname" style="color:#888;">eat()</span><span class="fval" style="color:#888;">→ "Buddy is eating"</span><span class="fsrc">inherited from Animal</span></div>
+        <div class="field-row"><span class="fname" style="color:#888;">breathe()</span><span class="fval" style="color:#888;">→ "Buddy is breathing"</span><span class="fsrc">inherited from Animal</span></div>
+        <div class="field-row"><span class="fname" style="color:#f39c12;">makeSound()</span><span class="fval" style="color:#f39c12;">→ "Woof! Woof!"</span><span class="fsrc" style="color:#f39c12;">OVERRIDDEN in Dog</span></div>
+        <div class="field-row"><span class="fname" style="color:#2ecc71;">fetch()</span><span class="fval" style="color:#2ecc71;">→ "Fetching ball!"</span><span class="fsrc" style="color:#2ecc71;">new in Dog</span></div>
+      </div>
+      <div class="explanation">
+        Dog <strong>inherits</strong> <code>eat()</code> and <code>breathe()</code> from Animal, but has its <strong>OWN</strong> <code>makeSound()</code>.
+        When you call <code>buddy.makeSound()</code>, Java runs Dog's version — not Animal's.
+      </div>
+    `;
+    showOutput('Dog Instance Created', html);
+  }
+
+  function createCatInstance() {
+    const html = `
+      <div class="instance-display">
+        <div class="class-name" style="color:#7ed6df;">new Cat("Whiskers", 5, true)</div>
+        <div style="margin-bottom:8px;font-size:0.75rem;color:#888;">— All fields, including inherited ones —</div>
+        <div class="field-row"><span class="fname">name:</span><span class="fval">"Whiskers"</span><span class="fsrc">← from Animal</span></div>
+        <div class="field-row"><span class="fname">age:</span><span class="fval">5</span><span class="fsrc">← from Animal</span></div>
+        <div class="field-row"><span class="fname">indoor:</span><span class="fval">true</span><span class="fsrc">← defined in Cat</span></div>
+      </div>
+      <div class="instance-display">
+        <div class="class-name" style="color:#4da8da;">Available Methods</div>
+        <div class="field-row"><span class="fname" style="color:#888;">eat()</span><span class="fval" style="color:#888;">→ "Whiskers is eating"</span><span class="fsrc">inherited from Animal</span></div>
+        <div class="field-row"><span class="fname" style="color:#888;">breathe()</span><span class="fval" style="color:#888;">→ "Whiskers is breathing"</span><span class="fsrc">inherited from Animal</span></div>
+        <div class="field-row"><span class="fname" style="color:#f39c12;">makeSound()</span><span class="fval" style="color:#f39c12;">→ "Meow! Meow!"</span><span class="fsrc" style="color:#f39c12;">OVERRIDDEN in Cat</span></div>
+        <div class="field-row"><span class="fname" style="color:#2ecc71;">purr()</span><span class="fval" style="color:#2ecc71;">→ "Purrrrr..."</span><span class="fsrc" style="color:#2ecc71;">new in Cat</span></div>
+      </div>
+      <div class="explanation">
+        Cat <strong>inherits</strong> <code>eat()</code> and <code>breathe()</code> from Animal, but has its <strong>OWN</strong> <code>makeSound()</code>.
+        Cat also adds the new method <code>purr()</code> which Animal and Dog don't have.
+      </div>
+    `;
+    showOutput('Cat Instance Created', html);
+  }
+
+  function createPuppyInstance() {
+    const html = `
+      <div class="instance-display">
+        <div class="class-name" style="color:#a29bfe;">new Puppy("Max", 0, "Beagle", false)</div>
+        <div style="margin-bottom:8px;font-size:0.75rem;color:#888;">— All fields from Animal + Dog + Puppy —</div>
+        <div class="field-row"><span class="fname">name:</span><span class="fval">"Max"</span><span class="fsrc">← from Animal (2 levels up)</span></div>
+        <div class="field-row"><span class="fname">age:</span><span class="fval">0</span><span class="fsrc">← from Animal (2 levels up)</span></div>
+        <div class="field-row"><span class="fname">breed:</span><span class="fval">"Beagle"</span><span class="fsrc">← from Dog (1 level up)</span></div>
+        <div class="field-row"><span class="fname">vaccinated:</span><span class="fval">false</span><span class="fsrc">← defined in Puppy</span></div>
+      </div>
+      <div class="explanation">
+        Puppy inherits from Dog which inherits from Animal. This is <strong>multi-level inheritance</strong>.
+        Puppy gets ALL fields and methods from the entire chain above it.
+      </div>
+    `;
+    showOutput('Puppy Instance Created (Multi-level inheritance)', html);
+  }
+
+  function polymorphismDemo() {
+    const html = `
+      <div style="margin-bottom:12px;font-size:0.85rem;color:#ccc;">
+        Imagine an array: <code style="color:#4da8da;">Animal[] animals = {new Animal(), new Dog(), new Cat(), new Puppy()};</code><br>
+        Calling <code style="color:#f39c12;">animal.makeSound()</code> on each — each runs its OWN version:
+      </div>
+      <div class="sound-display">
+        <div class="sound-card">
+          <div class="animal-type" style="color:#e94560;">Animal</div>
+          <div class="sound-text">... (generic)</div>
+          <div class="method-note">Animal's makeSound()</div>
+        </div>
+        <div class="sound-card">
+          <div class="animal-type" style="color:#f5a623;">Dog "Buddy"</div>
+          <div class="sound-text">Woof! Woof!</div>
+          <div class="method-note">Dog's makeSound() <span class="tag override">OVERRIDE</span></div>
+        </div>
+        <div class="sound-card">
+          <div class="animal-type" style="color:#7ed6df;">Cat "Whiskers"</div>
+          <div class="sound-text">Meow! Meow!</div>
+          <div class="method-note">Cat's makeSound() <span class="tag override">OVERRIDE</span></div>
+        </div>
+        <div class="sound-card">
+          <div class="animal-type" style="color:#a29bfe;">Puppy "Max"</div>
+          <div class="sound-text">Woof! Woof!</div>
+          <div class="method-note">Dog's makeSound() <span class="tag override">inherited override</span></div>
+        </div>
+      </div>
+      <div class="explanation" style="margin-top:12px;">
+        <strong>Polymorphism:</strong> Even though the variable type is <code>Animal</code>, Java calls the <em>actual</em> object's method at runtime.
+        This is called <strong>dynamic dispatch</strong> or <strong>late binding</strong>.
+        Dog's <code>makeSound()</code> overrides Animal's, so even Puppy (which extends Dog) uses Dog's version.
+      </div>
+    `;
+    showOutput('Polymorphism Demo — makeSound() on all animals', html);
+  }
+</script>
+
+</body>
+</html>

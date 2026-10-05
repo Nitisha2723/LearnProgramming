@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Binary Search Visualization</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a1a2e;
+      color: #eee;
+      font-family: system-ui, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    a.back-link {
+      align-self: flex-start;
+      color: #a0aec0;
+      text-decoration: none;
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+      transition: color 0.2s;
+    }
+    a.back-link:hover { color: #eee; }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      color: #a0aec0;
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+
+    .panel {
+      background: #16213e;
+      border-radius: 12px;
+      padding: 1.75rem 2rem;
+      width: 100%;
+      max-width: 860px;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    /* ---- Controls ---- */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .controls label { font-size: 0.9rem; color: #a0aec0; white-space: nowrap; }
+    .controls input[type="number"] {
+      background: #0f3460;
+      border: 1.5px solid #334155;
+      border-radius: 6px;
+      color: #eee;
+      font-size: 1rem;
+      padding: 0.45rem 0.75rem;
+      width: 110px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .controls input[type="number"]:focus { border-color: #6366f1; }
+
+    button {
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.5rem 1.1rem;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    button:active { transform: scale(0.97); }
+    button:disabled { opacity: 0.38; cursor: not-allowed; }
+
+    .btn-search   { background: #6366f1; color: #fff; }
+    .btn-next     { background: #22c55e; color: #111; }
+    .btn-autoplay { background: #f59e0b; color: #111; }
+    .btn-reset    { background: #475569; color: #eee; }
+
+    /* ---- Array display ---- */
+    .array-section { overflow-x: auto; }
+
+    .array-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0;
+      min-width: max-content;
+    }
+
+    .index-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 4px;
+      padding: 0 2px;
+    }
+    .index-label {
+      width: 52px;
+      text-align: center;
+      font-size: 0.7rem;
+      color: #64748b;
+    }
+
+    .boxes-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .box {
+      width: 52px;
+      height: 52px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      border: 2.5px solid transparent;
+      background: #0f3460;
+      color: #eee;
+      transition: background 0.35s, border-color 0.35s, color 0.35s, opacity 0.35s;
+      position: relative;
+      user-select: none;
+    }
+
+    /* states */
+    .box.eliminated {
+      background: #1e293b;
+      color: #475569;
+      border-color: transparent;
+    }
+    .box.mid {
+      background: #854d0e;
+      border-color: #fbbf24;
+      color: #fef9c3;
+    }
+    .box.found {
+      background: #166534;
+      border-color: #4ade80;
+      color: #bbf7d0;
+      animation: pop 0.4s ease;
+    }
+
+    @keyframes pop {
+      0%   { transform: scale(1);   }
+      50%  { transform: scale(1.18); }
+      100% { transform: scale(1);   }
+    }
+
+    /* pointer row */
+    .pointer-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+      min-height: 28px;
+    }
+    .pointer-cell {
+      width: 52px;
+      height: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      font-size: 0.7rem;
+      font-weight: 700;
+      gap: 2px;
+    }
+    .ptr-arrow {
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 8px solid currentColor;
+    }
+    .ptr-label { font-size: 0.65rem; }
+
+    .ptr-L  { color: #60a5fa; }
+    .ptr-R  { color: #f87171; }
+    .ptr-M  { color: #fbbf24; }
+    .ptr-LM { color: #a78bfa; } /* L and M overlap */
+    .ptr-RM { color: #fb923c; } /* R and M overlap */
+    .ptr-LR { color: #a3e635; } /* L and R overlap */
+    .ptr-LRM{ color: #e879f9; } /* all overlap */
+
+    /* ---- Explanation ---- */
+    .explanation {
+      background: #0f172a;
+      border-left: 4px solid #6366f1;
+      border-radius: 0 8px 8px 0;
+      padding: 0.85rem 1.1rem;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      min-height: 3.2rem;
+      color: #cbd5e1;
+      transition: all 0.3s;
+    }
+    .explanation.found    { border-left-color: #4ade80; color: #bbf7d0; }
+    .explanation.notfound { border-left-color: #f87171; color: #fca5a5; }
+
+    /* ---- Counter ---- */
+    .counter {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+    }
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-label { color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.07em; }
+    .stat-value { font-size: 1.4rem; font-weight: 700; }
+    .stat-value.binary { color: #6366f1; }
+    .stat-value.linear { color: #f59e0b; }
+
+    .step-progress {
+      color: #a0aec0;
+      font-size: 0.82rem;
+      margin-top: 4px;
+    }
+
+    /* ---- Legend ---- */
+    .legend {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-dot {
+      width: 14px; height: 14px;
+      border-radius: 3px;
+      border: 2px solid transparent;
+    }
+    .ld-mid      { background: #854d0e; border-color: #fbbf24; }
+    .ld-found    { background: #166534; border-color: #4ade80; }
+    .ld-elim     { background: #1e293b; border-color: #334155; }
+    .ld-active   { background: #0f3460; border-color: #334155; }
+    .ld-ptr-l    { background: #60a5fa; }
+    .ld-ptr-r    { background: #f87171; }
+    .ld-ptr-m    { background: #fbbf24; }
+  </style>
+</head>
+<body>
+
+  <a class="back-link" href="../../README.md">&#8592; Back to Index</a>
+
+  <h1>Binary Search</h1>
+  <p class="subtitle">O(log n) search on a sorted array</p>
+
+  <!-- Controls -->
+  <div class="panel">
+    <div class="controls">
+      <label for="targetInput">Target value:</label>
+      <input type="number" id="targetInput" placeholder="e.g. 72" min="1" />
+      <button class="btn-search" id="btnSearch">Search</button>
+      <button class="btn-next"     id="btnNext"     disabled>Next Step</button>
+      <button class="btn-autoplay" id="btnAutoplay" disabled>Auto-Play</button>
+      <button class="btn-reset"    id="btnReset">Reset</button>
+    </div>
+  </div>
+
+  <!-- Array visualization -->
+  <div class="panel array-section">
+    <div class="array-wrapper" id="arrayWrapper">
+      <!-- built by JS -->
+    </div>
+  </div>
+
+  <!-- Explanation -->
+  <div class="panel">
+    <div class="explanation" id="explanation">
+      Enter a target value and press <strong>Search</strong> to begin.
+    </div>
+  </div>
+
+  <!-- Counter -->
+  <div class="panel">
+    <div class="counter">
+      <div class="stat">
+        <span class="stat-label">Binary Search Steps</span>
+        <span class="stat-value binary" id="binarySteps">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Linear Search Would Take</span>
+        <span class="stat-value linear" id="linearSteps">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Progress</span>
+        <span class="stat-value step-progress" id="stepProgress">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="panel">
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot ld-active"></div> Active range</div>
+      <div class="legend-item"><div class="legend-dot ld-mid"></div> Mid (current check)</div>
+      <div class="legend-item"><div class="legend-dot ld-found"></div> Found!</div>
+      <div class="legend-item"><div class="legend-dot ld-elim"></div> Eliminated</div>
+      <div class="legend-item"><div class="legend-dot ld-ptr-l"></div> L pointer</div>
+      <div class="legend-item"><div class="legend-dot ld-ptr-r"></div> R pointer</div>
+      <div class="legend-item"><div class="legend-dot ld-ptr-m"></div> M pointer</div>
+    </div>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+
+  const ARR = [2, 5, 8, 12, 16, 23, 38, 45, 56, 72, 81, 91, 104, 117, 132];
+  const N   = ARR.length;
+
+  // ── DOM refs ──────────────────────────────────────────────────────────────
+  const wrapper      = document.getElementById('arrayWrapper');
+  const explanation  = document.getElementById('explanation');
+  const binarySteps  = document.getElementById('binarySteps');
+  const linearSteps  = document.getElementById('linearSteps');
+  const stepProgress = document.getElementById('stepProgress');
+  const btnSearch    = document.getElementById('btnSearch');
+  const btnNext      = document.getElementById('btnNext');
+  const btnAutoplay  = document.getElementById('btnAutoplay');
+  const btnReset     = document.getElementById('btnReset');
+  const targetInput  = document.getElementById('targetInput');
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  let steps        = [];  // pre-computed step records
+  let currentStep  = -1;  // index into steps (-1 = idle)
+  let autoTimer    = null;
+  let isPlaying    = false;
+
+  // ── Build DOM ─────────────────────────────────────────────────────────────
+  function buildArray() {
+    wrapper.innerHTML = '';
+
+    // Index row
+    const idxRow = document.createElement('div');
+    idxRow.className = 'index-row';
+    ARR.forEach((_, i) => {
+      const lbl = document.createElement('div');
+      lbl.className = 'index-label';
+      lbl.textContent = i;
+      idxRow.appendChild(lbl);
+    });
+
+    // Boxes row
+    const boxesRow = document.createElement('div');
+    boxesRow.className = 'boxes-row';
+    ARR.forEach((v, i) => {
+      const box = document.createElement('div');
+      box.className = 'box';
+      box.id = 'box-' + i;
+      box.textContent = v;
+      boxesRow.appendChild(box);
+    });
+
+    // Pointer row
+    const ptrRow = document.createElement('div');
+    ptrRow.className = 'pointer-row';
+    ARR.forEach((_, i) => {
+      const cell = document.createElement('div');
+      cell.className = 'pointer-cell';
+      cell.id = 'ptr-' + i;
+      ptrRow.appendChild(cell);
+    });
+
+    wrapper.appendChild(idxRow);
+    wrapper.appendChild(boxesRow);
+    wrapper.appendChild(ptrRow);
+  }
+
+  function resetBoxes() {
+    for (let i = 0; i < N; i++) {
+      const box = document.getElementById('box-' + i);
+      box.className = 'box';
+      const ptr = document.getElementById('ptr-' + i);
+      ptr.innerHTML = '';
+    }
+  }
+
+  // ── Pre-compute steps ────────────────────────────────────────────────────
+  /**
+   * Each step record:
+   * {
+   *   lo, hi, mid,          // indices
+   *   midVal, target,
+   *   result: 'less' | 'greater' | 'equal' | 'notfound',
+   *   eliminated: [indices to gray out AFTER this step],
+   *   explanation: string,
+   *   done: bool,
+   * }
+   */
+  function computeSteps(target) {
+    const stepList = [];
+    let lo = 0, hi = N - 1;
+    const eliminated = new Set();
+
+    while (lo <= hi) {
+      const mid    = Math.floor((lo + hi) / 2);
+      const midVal = ARR[mid];
+
+      let result;
+      let newElim = [];
+      let expText;
+
+      if (midVal === target) {
+        result  = 'equal';
+        expText = `Mid index=${mid}, value=${midVal}. Target ${target} = ${midVal}. <strong>FOUND!</strong>`;
+
+        stepList.push({
+          lo, hi, mid, midVal, target,
+          result, eliminated: [...eliminated],
+          newElim: [],
+          explanation: expText,
+          done: true,
+        });
+        return stepList;
+      } else if (target > midVal) {
+        result  = 'greater';
+        expText = `Mid index=${mid}, value=${midVal}. Target ${target} > ${midVal} &rarr; search <strong>RIGHT</strong> half.`;
+        // eliminate lo..mid
+        for (let i = lo; i <= mid; i++) newElim.push(i);
+        stepList.push({
+          lo, hi, mid, midVal, target,
+          result, eliminated: [...eliminated],
+          newElim,
+          explanation: expText,
+          done: false,
+        });
+        newElim.forEach(i => eliminated.add(i));
+        lo = mid + 1;
+      } else {
+        result  = 'less';
+        expText = `Mid index=${mid}, value=${midVal}. Target ${target} < ${midVal} &rarr; search <strong>LEFT</strong> half.`;
+        // eliminate mid..hi
+        for (let i = mid; i <= hi; i++) newElim.push(i);
+        stepList.push({
+          lo, hi, mid, midVal, target,
+          result, eliminated: [...eliminated],
+          newElim,
+          explanation: expText,
+          done: false,
+        });
+        newElim.forEach(i => eliminated.add(i));
+        hi = mid - 1;
+      }
+    }
+
+    // Not found
+    stepList.push({
+      lo: -1, hi: -1, mid: -1, midVal: null, target,
+      result: 'notfound',
+      eliminated: [...eliminated],
+      newElim: [],
+      explanation: `Target ${target} is <strong>NOT in the array</strong>. Search space exhausted.`,
+      done: true,
+    });
+    return stepList;
+  }
+
+  // ── Linear search cost (1-based, worst = N) ───────────────────────────────
+  function linearSearchSteps(target) {
+    for (let i = 0; i < N; i++) {
+      if (ARR[i] === target) return i + 1;
+    }
+    return N; // not found: checked all
+  }
+
+  // ── Render a single step ─────────────────────────────────────────────────
+  function renderStep(stepIdx) {
+    const s = steps[stepIdx];
+
+    resetBoxes();
+
+    // Gray out already-eliminated before this step
+    s.eliminated.forEach(i => {
+      document.getElementById('box-' + i).classList.add('eliminated');
+    });
+
+    if (s.result === 'notfound') {
+      // Gray everything remaining
+      for (let i = 0; i < N; i++) {
+        document.getElementById('box-' + i).classList.add('eliminated');
+      }
+      setExplanation(s.explanation, 'notfound');
+    } else {
+      // Highlight mid
+      if (s.mid >= 0) {
+        const midBox = document.getElementById('box-' + s.mid);
+        if (s.result === 'equal') {
+          midBox.classList.add('found');
+        } else {
+          midBox.classList.add('mid');
+        }
+      }
+
+      // Draw pointers
+      drawPointers(s);
+
+      setExplanation(s.explanation, s.result === 'equal' ? 'found' : '');
+    }
+
+    // Counters
+    const displayedBinary = stepIdx + 1;
+    const linSteps = linearSearchSteps(s.target);
+
+    binarySteps.textContent  = displayedBinary;
+    linearSteps.textContent  = s.done
+      ? (s.result === 'notfound' ? N + ' (all)' : linSteps)
+      : '…';
+    stepProgress.textContent = `Step ${displayedBinary} of ${steps.length}`;
+  }
+
+  function drawPointers(s) {
+    if (s.lo < 0) return;
+
+    // Collect which labels each cell gets
+    const cells = {}; // index -> string[]
+    const add = (i, label) => {
+      if (!cells[i]) cells[i] = [];
+      cells[i].push(label);
+    };
+
+    add(s.lo,  'L');
+    add(s.hi,  'R');
+    if (s.mid >= 0) add(s.mid, 'M');
+
+    Object.entries(cells).forEach(([idxStr, labels]) => {
+      const i    = parseInt(idxStr);
+      const cell = document.getElementById('ptr-' + i);
+      const key  = labels.sort().join('');   // e.g. "L", "LM", "LR", "M", "R", "LMR"
+
+      const colorClass = {
+        'L'   : 'ptr-L',
+        'R'   : 'ptr-R',
+        'M'   : 'ptr-M',
+        'LM'  : 'ptr-LM',
+        'MR'  : 'ptr-RM',
+        'LR'  : 'ptr-LR',
+        'LMR' : 'ptr-LRM',
+      }[key] || 'ptr-M';
+
+      cell.innerHTML = `
+        <div class="ptr-arrow ${colorClass}"></div>
+        <div class="ptr-label ${colorClass}">${labels.join('/')}</div>
+      `;
+    });
+  }
+
+  function setExplanation(html, extraClass) {
+    explanation.innerHTML = html;
+    explanation.className = 'explanation' + (extraClass ? ' ' + extraClass : '');
+  }
+
+  // ── Button handlers ───────────────────────────────────────────────────────
+  btnSearch.addEventListener('click', () => {
+    const raw = targetInput.value.trim();
+    if (raw === '') return;
+    const target = parseInt(raw, 10);
+    if (isNaN(target)) return;
+
+    stopAutoplay();
+    steps       = computeSteps(target);
+    currentStep = 0;
+    renderStep(0);
+    updateButtons();
+  });
+
+  btnNext.addEventListener('click', () => {
+    if (currentStep < 0 || currentStep >= steps.length - 1) {
+      // Already on last step; show it again or do nothing
+      return;
+    }
+    currentStep++;
+    renderStep(currentStep);
+    updateButtons();
+  });
+
+  btnAutoplay.addEventListener('click', () => {
+    if (isPlaying) {
+      stopAutoplay();
+    } else {
+      startAutoplay();
+    }
+  });
+
+  btnReset.addEventListener('click', () => {
+    stopAutoplay();
+    steps       = [];
+    currentStep = -1;
+    resetBoxes();
+    targetInput.value = '';
+    setExplanation('Enter a target value and press <strong>Search</strong> to begin.', '');
+    binarySteps.textContent  = '—';
+    linearSteps.textContent  = '—';
+    stepProgress.textContent = '—';
+    updateButtons();
+  });
+
+  // keyboard shortcut: Enter = search
+  targetInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') btnSearch.click();
+  });
+
+  function updateButtons() {
+    const inProgress = currentStep >= 0 && currentStep < steps.length;
+    const lastStep   = inProgress && currentStep === steps.length - 1;
+
+    btnNext.disabled     = !inProgress || lastStep;
+    btnAutoplay.disabled = !inProgress || lastStep;
+    btnAutoplay.textContent = isPlaying ? 'Pause' : 'Auto-Play';
+  }
+
+  function startAutoplay() {
+    if (isPlaying) return;
+    isPlaying = true;
+    updateButtons();
+    tick();
+  }
+
+  function stopAutoplay() {
+    isPlaying = false;
+    if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+    updateButtons();
+  }
+
+  function tick() {
+    if (!isPlaying) return;
+    if (currentStep >= steps.length - 1) {
+      stopAutoplay();
+      return;
+    }
+    currentStep++;
+    renderStep(currentStep);
+    updateButtons();
+    if (currentStep < steps.length - 1) {
+      autoTimer = setTimeout(tick, 1100);
+    } else {
+      stopAutoplay();
+    }
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  buildArray();
+  updateButtons();
+
+})();
+</script>
+</body>
+</html>

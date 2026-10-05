@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java vs Python Execution Model</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #1a1a2e; color: #eee; font-family: system-ui, 'Segoe UI', sans-serif; padding: 20px; min-height: 100vh; }
+        a { color: #e94560; text-decoration: none; font-size: 14px; }
+        a:hover { text-decoration: underline; }
+        h1 { font-size: 1.8rem; color: #e94560; margin: 10px 0 5px; }
+        .subtitle { color: #aaa; margin-bottom: 24px; font-size: 14px; }
+
+        .pipeline-section { margin-bottom: 24px; }
+        .pipeline-label { font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; padding: 6px 12px; display: inline-block; border-radius: 4px; }
+        .java-label { background: #1a2f4a; color: #5dade2; border: 1px solid #3498db; }
+        .python-label { background: #2a2a1a; color: #f4d03f; border: 1px solid #f1c40f; }
+
+        .pipeline { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; padding: 16px; background: #16213e; border-radius: 10px; }
+        .step-box { background: #0f3460; border: 2px solid #3498db; border-radius: 8px; padding: 12px 16px; cursor: pointer; text-align: center; min-width: 110px; transition: all 0.25s; position: relative; user-select: none; }
+        .step-box:hover { background: #1a4a7a; border-color: #5dade2; transform: translateY(-2px); }
+        .step-box.active { background: #1a4a7a; border-color: #e94560; box-shadow: 0 0 16px rgba(233,69,96,0.5); }
+        .step-box.animating { animation: flowThrough 0.6s ease; }
+        @keyframes flowThrough {
+            0% { background: #0f3460; }
+            50% { background: #27ae60; border-color: #27ae60; box-shadow: 0 0 20px #27ae60; }
+            100% { background: #0f3460; }
+        }
+        .java-step { border-color: #3498db; }
+        .java-step:hover { border-color: #5dade2; }
+        .java-step.active { border-color: #e94560; }
+        .python-step { border-color: #c0932d; background: #1f1f0d; }
+        .python-step:hover { background: #2a2a1a; border-color: #f1c40f; }
+        .python-step.active { border-color: #e94560; }
+
+        .step-icon { font-size: 22px; margin-bottom: 4px; }
+        .step-name { font-size: 13px; font-weight: bold; }
+        .step-ext { font-size: 11px; color: #aaa; margin-top: 3px; }
+
+        .arrow { color: #555; font-size: 22px; flex-shrink: 0; }
+
+        .info-card { background: #16213e; border-radius: 10px; padding: 20px; margin-bottom: 24px; border-left: 4px solid #e94560; min-height: 80px; transition: all 0.3s; }
+        .info-card-title { font-size: 14px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .info-card h3 { font-size: 1.1rem; color: #eee; margin-bottom: 10px; }
+        .info-card p { font-size: 14px; line-height: 1.7; color: #ccc; }
+        .info-card .tag { display: inline-block; background: #0f3460; border: 1px solid #3498db; border-radius: 20px; padding: 2px 10px; font-size: 12px; color: #5dade2; margin-right: 6px; margin-bottom: 6px; }
+        .info-card.java-info { border-left-color: #3498db; }
+        .info-card.python-info { border-left-color: #f1c40f; }
+
+        .controls-row { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
+        .btn { background: #0f3460; border: 1px solid #e94560; color: #eee; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .btn:hover { background: #e94560; color: #fff; }
+        .btn.java-btn { border-color: #3498db; }
+        .btn.java-btn:hover { background: #3498db; }
+        .btn.python-btn { border-color: #f1c40f; }
+        .btn.python-btn:hover { background: #f1c40f; color: #1a1a2e; }
+
+        .animation-strip { background: #16213e; border-radius: 10px; padding: 16px; margin-bottom: 24px; display: none; }
+        .animation-strip.visible { display: block; }
+        .anim-row { display: flex; align-items: center; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+        .anim-label { font-size: 13px; font-weight: bold; width: 70px; flex-shrink: 0; }
+        .anim-label.java { color: #5dade2; }
+        .anim-label.python { color: #f4d03f; }
+        .anim-step { padding: 8px 14px; border-radius: 6px; font-size: 12px; border: 2px solid transparent; transition: all 0.4s; opacity: 0.3; text-align: center; min-width: 90px; }
+        .anim-step.lit { opacity: 1; transform: scale(1.08); }
+        .anim-step.java-anim { background: #0f3460; border-color: #3498db; }
+        .anim-step.python-anim { background: #1f1f0d; border-color: #c0932d; }
+        .anim-step.lit.java-anim { border-color: #e94560; box-shadow: 0 0 12px rgba(52,152,219,0.6); }
+        .anim-step.lit.python-anim { border-color: #f1c40f; box-shadow: 0 0 12px rgba(241,196,15,0.5); }
+        .anim-arrow { color: #555; font-size: 18px; flex-shrink: 0; }
+        .code-snippet { font-family: 'Courier New', monospace; font-size: 12px; background: #0a0a1a; border: 1px solid #0f3460; border-radius: 4px; padding: 8px 12px; margin-top: 8px; color: #98c379; }
+
+        .diff-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 14px; }
+        .diff-table th { background: #0f3460; padding: 12px 16px; text-align: left; }
+        .diff-table th:first-child { border-radius: 8px 0 0 0; }
+        .diff-table th:last-child { border-radius: 0 8px 0 0; }
+        .diff-table td { padding: 10px 16px; border-bottom: 1px solid #1e2d50; vertical-align: top; }
+        .diff-table tr:last-child td { border-bottom: none; }
+        .diff-table tr:nth-child(even) td { background: #161e35; }
+        .feature-cell { color: #aaa; font-weight: bold; }
+        .java-cell { color: #5dade2; }
+        .python-cell { color: #f4d03f; }
+        .section-title { font-size: 13px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin: 24px 0 12px; }
+    </style>
+</head>
+<body>
+    <a href="../README.md">← Back to Index</a>
+    <h1>Execution Model: Java vs Python</h1>
+    <p class="subtitle">How source code becomes running instructions — click any stage to learn what happens there. | Module: Java &amp; Python Comparison</p>
+
+    <div class="controls-row">
+        <button class="btn" onclick="animateBoth()">▶ Animate: Run "Hello World" through both pipelines</button>
+        <button class="btn" style="border-color:#555" onclick="clearAnimation()">Clear Animation</button>
+    </div>
+
+    <div class="animation-strip" id="animStrip">
+        <div style="font-size: 13px; color: #aaa; margin-bottom: 12px;">Animating code flow through each stage...</div>
+        <div class="code-snippet">System.out.println("Hello, World!") / print("Hello, World!")</div>
+        <div style="margin-top: 12px;">
+            <div class="anim-row">
+                <div class="anim-label java">Java</div>
+                <div class="anim-step java-anim" id="ja-1">.java<br>source</div>
+                <div class="anim-arrow">→</div>
+                <div class="anim-step java-anim" id="ja-2">javac<br>compiler</div>
+                <div class="anim-arrow">→</div>
+                <div class="anim-step java-anim" id="ja-3">.class<br>bytecode</div>
+                <div class="anim-arrow">→</div>
+                <div class="anim-step java-anim" id="ja-4">JVM<br>JIT</div>
+                <div class="anim-arrow">→</div>
+                <div class="anim-step java-anim" id="ja-5">CPU<br>Output</div>
+            </div>
+            <div class="anim-row">
+                <div class="anim-label python">Python</div>
+                <div class="anim-step python-anim" id="py-1">.py<br>source</div>
+                <div class="anim-arrow">→</div>
+                <div class="anim-step python-anim" id="py-2">CPython<br>parser</div>
+                <div class="anim-arrow">→</div>
+                <div class="anim-step python-anim" id="py-3">.pyc<br>bytecode</div>
+                <div class="anim-arrow">→</div>
+                <div class="anim-step python-anim" id="py-4">PVM<br>interpreter</div>
+                <div class="anim-arrow">→</div>
+                <div class="anim-step python-anim" id="py-5">CPU<br>Output</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Java Pipeline -->
+    <div class="pipeline-section">
+        <div class="pipeline-label java-label">Java Pipeline</div>
+        <div class="pipeline">
+            <div class="step-box java-step" onclick="showInfo('java-source')">
+                <div class="step-icon">📄</div>
+                <div class="step-name">.java</div>
+                <div class="step-ext">Source Code</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step-box java-step" onclick="showInfo('javac')">
+                <div class="step-icon">⚙️</div>
+                <div class="step-name">javac</div>
+                <div class="step-ext">Compiler</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step-box java-step" onclick="showInfo('class-file')">
+                <div class="step-icon">📦</div>
+                <div class="step-name">.class</div>
+                <div class="step-ext">Bytecode</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step-box java-step" onclick="showInfo('jvm')">
+                <div class="step-icon">🏃</div>
+                <div class="step-name">JVM</div>
+                <div class="step-ext">+ JIT</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step-box java-step" onclick="showInfo('native-java')">
+                <div class="step-icon">💻</div>
+                <div class="step-name">Native</div>
+                <div class="step-ext">CPU / OS</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Python Pipeline -->
+    <div class="pipeline-section">
+        <div class="pipeline-label python-label">Python Pipeline</div>
+        <div class="pipeline">
+            <div class="step-box python-step" onclick="showInfo('py-source')">
+                <div class="step-icon">📄</div>
+                <div class="step-name">.py</div>
+                <div class="step-ext">Source Code</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step-box python-step" onclick="showInfo('cpython')">
+                <div class="step-icon">🐍</div>
+                <div class="step-name">CPython</div>
+                <div class="step-ext">Interpreter</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step-box python-step" onclick="showInfo('pyc-file')">
+                <div class="step-icon">📦</div>
+                <div class="step-name">.pyc</div>
+                <div class="step-ext">Bytecode Cache</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step-box python-step" onclick="showInfo('pvm')">
+                <div class="step-icon">🏃</div>
+                <div class="step-name">PVM</div>
+                <div class="step-ext">Virtual Machine</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step-box python-step" onclick="showInfo('native-python')">
+                <div class="step-icon">💻</div>
+                <div class="step-name">Native</div>
+                <div class="step-ext">CPU / OS</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card" id="infoCard">
+        <div class="info-card-title">Click any stage above to learn what happens there</div>
+        <p>Both Java and Python source code goes through several transformation stages before reaching the CPU. Each stage has a specific job. Click a box above to explore it.</p>
+    </div>
+
+    <!-- Differences Table -->
+    <div class="section-title">Key Differences</div>
+    <table class="diff-table">
+        <thead>
+            <tr>
+                <th>Aspect</th>
+                <th style="color:#5dade2">Java</th>
+                <th style="color:#f4d03f">Python</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="feature-cell">Compilation trigger</td>
+                <td class="java-cell">Explicit: <code>javac Hello.java</code> before running</td>
+                <td class="python-cell">Automatic: Python compiles to .pyc lazily on first import</td>
+            </tr>
+            <tr>
+                <td class="feature-cell">Type checking</td>
+                <td class="java-cell">At compile time — errors before the program runs</td>
+                <td class="python-cell">At runtime — errors only when the code line executes</td>
+            </tr>
+            <tr>
+                <td class="feature-cell">Bytecode format</td>
+                <td class="java-cell">.class files — JVM instruction set, cross-platform</td>
+                <td class="python-cell">.pyc files in __pycache__ — CPython-specific format</td>
+            </tr>
+            <tr>
+                <td class="feature-cell">JIT optimization</td>
+                <td class="java-cell">HotSpot JIT compiles hot code to native machine code</td>
+                <td class="python-cell">Standard CPython does NOT JIT-compile (PyPy does)</td>
+            </tr>
+            <tr>
+                <td class="feature-cell">Startup time</td>
+                <td class="java-cell">Slower (JVM startup overhead)</td>
+                <td class="python-cell">Faster startup, slower steady-state execution</td>
+            </tr>
+            <tr>
+                <td class="feature-cell">Runtime performance</td>
+                <td class="java-cell">Faster — JIT can match near-native speeds</td>
+                <td class="python-cell">Slower — interpreter loop overhead per statement</td>
+            </tr>
+            <tr>
+                <td class="feature-cell">Platform independence</td>
+                <td class="java-cell">"Write once, run anywhere" — .class runs on any JVM</td>
+                <td class="python-cell">Source is portable, but .pyc is version-specific</td>
+            </tr>
+            <tr>
+                <td class="feature-cell">Memory management</td>
+                <td class="java-cell">JVM garbage collector (generational GC)</td>
+                <td class="python-cell">Reference counting + cyclic GC</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        const infos = {
+            'java-source': {
+                title: 'Java: .java — Source Code',
+                cls: 'java-info',
+                tags: ['Human-readable', 'UTF-8 text', 'Statically typed'],
+                body: `The developer writes <code>.java</code> files — plain text with Java syntax. Classes, methods, types all declared here. This is the only stage a human normally reads and writes. <br><br>
+                <strong>Example:</strong> <code>HelloWorld.java</code> contains <code>public class HelloWorld { public static void main(String[] args) { System.out.println("Hello!"); } }</code><br><br>
+                Types are fully declared here: <code>int x = 5;</code>, <code>String name = "Alice";</code>. The compiler will check every type.`
+            },
+            'javac': {
+                title: 'javac — The Java Compiler',
+                cls: 'java-info',
+                tags: ['Ahead-of-time', 'Type checking', 'Static analysis'],
+                body: `<strong>javac</strong> is the Java compiler. Running <code>javac HelloWorld.java</code> does several things:<br><br>
+                1. <strong>Parsing</strong> — reads the source code into an AST (abstract syntax tree)<br>
+                2. <strong>Type checking</strong> — verifies all types are compatible, catches errors like <code>int x = "hello";</code><br>
+                3. <strong>Code generation</strong> — produces <code>.class</code> bytecode files<br><br>
+                All type errors are caught HERE, before the program ever runs. This is why Java catches more bugs at development time than Python.`
+            },
+            'class-file': {
+                title: '.class — Java Bytecode',
+                cls: 'java-info',
+                tags: ['Platform-independent', 'JVM instructions', 'Binary format'],
+                body: `The <code>.class</code> file contains <strong>Java bytecode</strong> — a compact binary instruction set designed for the JVM, NOT for a specific CPU.<br><br>
+                <strong>Key property: Write Once, Run Anywhere.</strong> The same <code>.class</code> file runs on Windows, macOS, Linux — anything with a JVM.<br><br>
+                Bytecode is more compact and faster to execute than source code, but still interpreted by the JVM (or JIT-compiled to native code for hot paths).<br><br>
+                You can inspect bytecode with <code>javap -c HelloWorld.class</code>.`
+            },
+            'jvm': {
+                title: 'JVM + JIT — Java Virtual Machine',
+                cls: 'java-info',
+                tags: ['JIT compilation', 'HotSpot optimizer', 'Garbage collector', 'Thread management'],
+                body: `The <strong>JVM</strong> (Java Virtual Machine) is where the magic happens at runtime:<br><br>
+                1. <strong>Class loader</strong> — loads and links <code>.class</code> files<br>
+                2. <strong>Bytecode interpreter</strong> — executes bytecode instructions one by one at first<br>
+                3. <strong>JIT compiler (HotSpot)</strong> — detects "hot" code (frequently executed loops/methods) and compiles them to native machine code. After warmup, can match C++ speeds.<br>
+                4. <strong>Garbage Collector</strong> — automatically frees memory (generational, G1, ZGC, Shenandoah)<br>
+                5. <strong>Thread management</strong> — maps Java threads to OS threads<br><br>
+                The JIT optimization is why Java's startup is slow but steady-state performance is very fast.`
+            },
+            'native-java': {
+                title: 'Native CPU Execution — Java Final Stage',
+                cls: 'java-info',
+                tags: ['Machine code', 'Direct CPU execution'],
+                body: `After JIT compilation, the <strong>hot paths</strong> of your Java program run as native machine code — directly on the CPU, no interpretation overhead.<br><br>
+                Less-frequently-executed code may still run as interpreted bytecode. The JVM decides dynamically which parts to JIT-compile based on profiling data.<br><br>
+                Result: Java programs typically achieve <strong>near-native performance</strong> for long-running, CPU-intensive work.`
+            },
+            'py-source': {
+                title: 'Python: .py — Source Code',
+                cls: 'python-info',
+                tags: ['Human-readable', 'Dynamically typed', 'Interpreted'],
+                body: `The developer writes <code>.py</code> files — plain text with Python syntax. No type declarations required.<br><br>
+                <strong>Example:</strong> <code>print("Hello, World!")</code> — that's a complete working program.<br><br>
+                Python's minimal syntax means you can write much less code to do the same things. But no types are declared, so errors only show up when the code actually runs.`
+            },
+            'cpython': {
+                title: 'CPython — The Reference Python Implementation',
+                cls: 'python-info',
+                tags: ['Reference implementation', 'Written in C', 'Interprets .py'],
+                body: `<strong>CPython</strong> is the standard Python interpreter (the one you download from python.org). It's written in C.<br><br>
+                When you run <code>python hello.py</code>, CPython:<br>
+                1. <strong>Parses</strong> the .py file into an AST<br>
+                2. <strong>Compiles</strong> the AST to .pyc bytecode (automatically, no explicit step)<br>
+                3. <strong>Executes</strong> the bytecode in the PVM interpreter loop<br><br>
+                Unlike javac, this compilation happens lazily and automatically — you don't run a separate compile step. The .pyc file is cached in <code>__pycache__/</code> and reused on subsequent runs.`
+            },
+            'pyc-file': {
+                title: '.pyc — Python Bytecode Cache',
+                cls: 'python-info',
+                tags: ['Cached bytecode', '__pycache__', 'Python-version specific'],
+                body: `<code>.pyc</code> files are Python's equivalent of Java's <code>.class</code> files, but with key differences:<br><br>
+                - Stored in <code>__pycache__/</code> directory automatically<br>
+                - Filename includes Python version: <code>hello.cpython-311.pyc</code><br>
+                - <strong>NOT cross-version</strong>: Python 3.11 .pyc won't run on Python 3.9<br>
+                - <strong>NOT cross-implementation</strong>: CPython .pyc won't run on PyPy<br><br>
+                Python skips recompilation if the .pyc is newer than the .py source — so the second run of a script is slightly faster. But this is just caching, not native compilation.`
+            },
+            'pvm': {
+                title: 'PVM — Python Virtual Machine',
+                cls: 'python-info',
+                tags: ['Interpreter loop', 'No JIT in CPython', 'GIL'],
+                body: `The <strong>PVM</strong> (Python Virtual Machine) is the bytecode interpreter loop inside CPython:<br><br>
+                - Reads bytecode instructions one at a time and executes them<br>
+                - <strong>No JIT compilation</strong> in standard CPython — every instruction is interpreted, every time<br>
+                - The <strong>GIL</strong> (Global Interpreter Lock) allows only ONE thread to execute Python bytecode at a time<br><br>
+                <strong>Why no JIT?</strong> Python's dynamic nature (duck typing, runtime mutation of classes) makes JIT compilation much harder. <strong>PyPy</strong> (an alternative Python implementation) DOES have a JIT and can be 5-10x faster for CPU-bound code.`
+            },
+            'native-python': {
+                title: 'Native CPU Execution — Python Final Stage',
+                cls: 'python-info',
+                tags: ['Via C extension calls', 'Numpy uses native code'],
+                body: `Python bytecode itself doesn't become native machine code in CPython. But:<br><br>
+                - Python's standard library is largely written in <strong>C</strong> — so built-in functions like <code>len()</code>, <code>sorted()</code> run at native speed<br>
+                - Libraries like <strong>NumPy</strong> and <strong>Pandas</strong> run their core operations in C, which is why they're fast despite Python's interpreter overhead<br>
+                - The <strong>PyPy</strong> interpreter uses a JIT and DOES compile to native code<br><br>
+                This is why "Python is slow" is nuanced — pure Python loops are slow, but Python calling C libraries can be very fast.`
+            }
+        };
+
+        function showInfo(key) {
+            const data = infos[key];
+            if (!data) return;
+            const card = document.getElementById('infoCard');
+            card.className = 'info-card ' + data.cls;
+            const tagsHtml = (data.tags || []).map(t => `<span class="tag">${t}</span>`).join('');
+            card.innerHTML = `
+                <div class="info-card-title">${data.cls.includes('java') ? 'Java Pipeline Stage' : 'Python Pipeline Stage'}</div>
+                <h3>${data.title}</h3>
+                <div style="margin-bottom:10px">${tagsHtml}</div>
+                <p>${data.body}</p>
+            `;
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        async function animateBoth() {
+            const strip = document.getElementById('animStrip');
+            strip.classList.add('visible');
+            strip.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            // Reset all
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById('ja-' + i).classList.remove('lit');
+                document.getElementById('py-' + i).classList.remove('lit');
+            }
+            await sleep(400);
+            // Animate both in parallel
+            const javaSteps = ['ja-1', 'ja-2', 'ja-3', 'ja-4', 'ja-5'];
+            const pythonSteps = ['py-1', 'py-2', 'py-3', 'py-4', 'py-5'];
+            const javaDelays = [0, 600, 1400, 2200, 2800];     // javac takes longer
+            const pythonDelays = [0, 300, 600, 900, 1300];     // python faster to start
+            javaSteps.forEach((id, i) => {
+                setTimeout(() => {
+                    document.getElementById(id).classList.add('lit');
+                }, javaDelays[i]);
+            });
+            pythonSteps.forEach((id, i) => {
+                setTimeout(() => {
+                    document.getElementById(id).classList.add('lit');
+                }, pythonDelays[i]);
+            });
+        }
+
+        function clearAnimation() {
+            document.getElementById('animStrip').classList.remove('visible');
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById('ja-' + i).classList.remove('lit');
+                document.getElementById('py-' + i).classList.remove('lit');
+            }
+        }
+
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+    </script>
+</body>
+</html>
