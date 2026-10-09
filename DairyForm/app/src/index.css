@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+:root {
+  font-family: 'DM Sans', sans-serif;
+  color: #17221d;
+  background: #f5f7f6;
+  font-synthesis: none;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+button, input, select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.section-title {
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.section-subtitle {
+  margin-top: 5px;
+  color: #8c9691;
+  font-size: 9px;
+}
+
+.icon-tile {
+  display: flex;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.icon-tile.green { color: #267957; background: #e6f3ec; }
+.icon-tile.purple { color: #76579f; background: #f0ebf7; }
+.icon-tile.amber { color: #a36f25; background: #fcf1de; }
+.icon-tile.blue { color: #4678a7; background: #e9f1f8; }
+.icon-tile.cyan { color: #397f92; background: #e4f3f5; }
+
+.page-icon {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.page-icon.green { color: #267957; background: #e6f3ec; }
+.page-icon.purple { color: #76579f; background: #f0ebf7; }
+.page-icon.amber { color: #a36f25; background: #fcf1de; }
+.page-icon.blue { color: #4678a7; background: #e9f1f8; }
+.page-icon.red { color: #b25248; background: #fbe9e6; }
+
+@media (min-width: 640px) {
+  .section-title { font-size: 14px; }
+  .section-subtitle { font-size: 10px; }
+}

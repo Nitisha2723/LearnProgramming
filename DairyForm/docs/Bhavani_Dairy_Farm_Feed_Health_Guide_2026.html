@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bhavani Dairy Farm — Comprehensive Feed & Health Guide 2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #1a2e25; line-height: 1.5; background: #f9fafb; }
+  .container { max-width: 900px; margin: 0 auto; background: white; }
+
+  /* COVER PAGE */
+  .cover { background: linear-gradient(135deg, #1a4a35 0%, #2d7a5a 50%, #1a4a35 100%); color: white; padding: 60px 50px; text-align: center; page-break-after: always; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  .cover .farm-name { font-size: 32px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+  .cover .tagline { font-size: 15px; opacity: 0.85; letter-spacing: 1px; margin-bottom: 40px; }
+  .cover .guide-title { font-size: 22px; font-weight: 700; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; padding: 20px 30px; display: inline-block; margin-bottom: 40px; }
+  .cover .meta { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 20px 30px; display: inline-block; text-align: left; }
+  .cover .meta p { margin: 6px 0; font-size: 13px; }
+  .cover .meta strong { opacity: 1; }
+  .cover .seal { margin-top: 40px; font-size: 11px; opacity: 0.6; }
+
+  /* CONTENT */
+  .content { padding: 20px 40px; }
+
+  h1.section { font-size: 18px; font-weight: 800; color: #1a4a35; border-bottom: 3px solid #2d7a5a; padding-bottom: 8px; margin: 30px 0 16px; page-break-before: always; }
+  h1.section:first-child { page-break-before: avoid; }
+  h2.sub { font-size: 14px; font-weight: 700; color: #1d7352; margin: 20px 0 10px; border-left: 4px solid #2d7a5a; padding-left: 10px; }
+  h3.mini { font-size: 12px; font-weight: 700; color: #17221d; margin: 14px 0 8px; }
+
+  /* TABLES */
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 11px; }
+  th { background: #1a4a35; color: white; padding: 7px 9px; text-align: left; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 6px 9px; border-bottom: 1px solid #e8ede9; }
+  tr:nth-child(even) td { background: #f2f7f4; }
+  tr:hover td { background: #e6f4ec; }
+  .table-note { font-size: 10px; color: #5a7a6a; font-style: italic; margin-top: 4px; margin-bottom: 12px; }
+
+  /* CARDS */
+  .card { background: #f2f7f4; border: 1px solid #cce0d5; border-radius: 8px; padding: 14px 18px; margin: 12px 0; }
+  .card.highlight { background: #e6f4ec; border-color: #2d7a5a; border-left: 5px solid #1d7352; }
+  .card.warning { background: #fff8e7; border-color: #f0c040; border-left: 5px solid #e09c10; }
+  .card.alert { background: #fce9e7; border-color: #e8a09a; border-left: 5px solid #b25248; }
+  .card h4 { font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+
+  /* BLOCKQUOTE */
+  blockquote { background: #f2f7f4; border-left: 4px solid #2d7a5a; padding: 10px 16px; margin: 12px 0; font-size: 11px; color: #2d4a3a; }
+
+  /* TOC */
+  .toc { background: #f2f7f4; border-radius: 10px; padding: 20px 24px; margin: 20px 0; page-break-after: always; }
+  .toc h2 { font-size: 16px; font-weight: 700; color: #1a4a35; margin-bottom: 16px; }
+  .toc-item { display: flex; padding: 5px 0; border-bottom: 1px dotted #c8ddd0; }
+  .toc-num { font-weight: 700; color: #1d7352; width: 28px; flex-shrink: 0; }
+  .toc-text { flex: 1; color: #1a2e25; }
+
+  /* STAT BOXES */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 12px 0 20px; }
+  .stat-box { background: linear-gradient(135deg, #1a4a35, #2d7a5a); color: white; border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-box .val { font-size: 22px; font-weight: 800; }
+  .stat-box .lbl { font-size: 9px; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+  /* BADGES */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+  .badge-green { background: #e6f4ec; color: #1d7352; }
+  .badge-gold { background: #fff3cd; color: #856404; }
+  .badge-red { background: #fce9e7; color: #b25248; }
+  .badge-blue { background: #e7f0fb; color: #2955a0; }
+
+  /* MONTH STRIP */
+  .month-strip { display: flex; gap: 4px; margin: 8px 0; flex-wrap: wrap; }
+  .month-pill { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+  .mp-active { background: #1a4a35; color: white; }
+  .mp-inactive { background: #e8ede9; color: #7a9a87; }
+
+  /* SEPARATOR */
+  hr { border: none; border-top: 1px solid #e0eae4; margin: 20px 0; }
+  .section-divider { text-align: center; margin: 10px 0; color: #5a8a7a; font-size: 12px; letter-spacing: 3px; }
+
+  /* PRINT */
+  @media print {
+    body { background: white; }
+    .container { box-shadow: none; }
+    h1.section { page-break-before: always; }
+    table { page-break-inside: avoid; }
+    .card { page-break-inside: avoid; }
+    .stat-grid { page-break-inside: avoid; }
+  }
+  @page { margin: 1.5cm 1.5cm; size: A4; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <div class="farm-name">Bhavani Dairy Farm</div>
+  <div class="tagline">Pydi Bhimavaram · Gara Mandal · Srikakulam District · Andhra Pradesh</div>
+  <div class="guide-title">Comprehensive Feed, Health &amp; Management Guide<br><span style="font-size:15px;font-weight:400;opacity:0.85">40 Murrah Buffalo Farm — Season 2026</span></div>
+  <div class="meta">
+    <p><strong>Farmer:</strong> Smt. D. Bhavani</p>
+    <p><strong>Project:</strong> ₹1,34,00,000 (NABARD DEDS — 33.33% Women Subsidy)</p>
+    <p><strong>Herd:</strong> 40 Murrah Buffaloes | ~31 Lactating + 9 Dry/Pregnant</p>
+    <p><strong>Prepared:</strong> September 2026</p>
+    <p><strong>Standards:</strong> ICAR / NDDB / AP Animal Husbandry Dept</p>
+  </div>
+  <div class="seal">Based on ICAR/NDDB standards · AP Animal Husbandry Department protocols · Srikakulam regional data 2025–26</div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- FARM OVERVIEW STATS -->
+<div class="stat-grid" style="margin-top:20px">
+  <div class="stat-box"><div class="val">40</div><div class="lbl">Murrah Buffaloes</div></div>
+  <div class="stat-box"><div class="val">12 L</div><div class="lbl">Target/Animal/Day</div></div>
+  <div class="stat-box"><div class="val">₹73 L</div><div class="lbl">Annual Milk Revenue</div></div>
+  <div class="stat-box"><div class="val">₹27 L</div><div class="lbl">Net Profit/Year</div></div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <div class="toc-item"><span class="toc-num">1.</span><span class="toc-text">Farm Overview &amp; Herd Profile</span></div>
+  <div class="toc-item"><span class="toc-num">2.</span><span class="toc-text">Locally Available Feed Ingredients — Srikakulam Region</span></div>
+  <div class="toc-item"><span class="toc-num">3.</span><span class="toc-text">Standard Daily Ration — Murrah Buffalo</span></div>
+  <div class="toc-item"><span class="toc-num">4.</span><span class="toc-text">Home-Mixed Concentrate Formula (Two Recipes)</span></div>
+  <div class="toc-item"><span class="toc-num">5.</span><span class="toc-text">Three Feeding Models with Full Cost Comparison</span></div>
+  <div class="toc-item"><span class="toc-num">6.</span><span class="toc-text">Best Model Recommendation — Model B: Own Napier + Purchased Concentrate</span></div>
+  <div class="toc-item"><span class="toc-num">7.</span><span class="toc-text">Seasonal Mineral &amp; Medicine Schedule (Monthly Calendar)</span></div>
+  <div class="toc-item"><span class="toc-num">8.</span><span class="toc-text">Annual Vaccination Calendar — Andhra Pradesh</span></div>
+  <div class="toc-item"><span class="toc-num">9.</span><span class="toc-text">Deworming Protocol — Drugs, Dosages, Schedule</span></div>
+  <div class="toc-item"><span class="toc-num">10.</span><span class="toc-text">Seasonal Health Management (Summer / Monsoon / Winter)</span></div>
+  <div class="toc-item"><span class="toc-num">11.</span><span class="toc-text">Common Diseases — Coastal AP Buffaloes</span></div>
+  <div class="toc-item"><span class="toc-num">12.</span><span class="toc-text">Animal Health Tracking Protocol — Daily Checklist</span></div>
+  <div class="toc-item"><span class="toc-num">13.</span><span class="toc-text">Reproductive Management &amp; Calving</span></div>
+  <div class="toc-item"><span class="toc-num">14.</span><span class="toc-text">Water Quality Testing — Parameters &amp; Labs</span></div>
+  <div class="toc-item"><span class="toc-num">15.</span><span class="toc-text">Soil Testing for Fodder Cultivation</span></div>
+  <div class="toc-item"><span class="toc-num">16.</span><span class="toc-text">Revenue &amp; Profit Projection</span></div>
+  <div class="toc-item"><span class="toc-num">17.</span><span class="toc-text">Government Schemes &amp; Key Contacts</span></div>
+  <div class="toc-item"><span class="toc-num">18.</span><span class="toc-text">Quick Reference Cards</span></div>
+</div>
+
+<!-- SECTION 1 -->
+<h1 class="section">1. Farm Overview &amp; Herd Profile</h1>
+
+<h2 class="sub">Recommended Herd Structure</h2>
+<table>
+  <tr><th>Category</th><th>Count</th><th>Notes</th></tr>
+  <tr><td>Lactating buffaloes</td><td>31</td><td>Target 12–15 litres/day each</td></tr>
+  <tr><td>Dry / late-pregnant</td><td>6</td><td>Mandatory 60-day dry period before calving</td></tr>
+  <tr><td>Early pregnant</td><td>3</td><td>Bred within 90 days of calving</td></tr>
+  <tr><td><strong>Total</strong></td><td><strong>40</strong></td><td>All Murrah breed</td></tr>
+</table>
+
+<h2 class="sub">Expected Annual Production Targets</h2>
+<table>
+  <tr><th>Parameter</th><th>Target</th></tr>
+  <tr><td>Milk per lactating buffalo per day</td><td>12 litres (minimum)</td></tr>
+  <tr><td>Lactation length</td><td>290–305 days</td></tr>
+  <tr><td>Milk fat %</td><td>6.5–7.5%</td></tr>
+  <tr><td>Milk SNF %</td><td>9.0–9.5%</td></tr>
+  <tr><td>Calving interval</td><td>≤ 400 days</td></tr>
+  <tr><td>Annual herd milk production</td><td>~1,13,700 litres</td></tr>
+</table>
+
+<!-- SECTION 2 -->
+<h1 class="section">2. Locally Available Feed Ingredients — Srikakulam Region</h1>
+
+<blockquote>Pydi Bhimavaram is in the Vamsadhara-Nagavali river basin — ideal for year-round Napier cultivation. Srikakulam is also a major paddy belt, making deoiled rice bran cheap and consistently available.</blockquote>
+
+<h2 class="sub">Green Fodder (2025–26 market prices)</h2>
+<table>
+  <tr><th>Feed</th><th>Availability</th><th>₹/kg</th><th>Protein (DM%)</th><th>Notes</th></tr>
+  <tr><td><strong>Napier grass CO-4</strong></td><td>Excellent — year-round</td><td>1.0–1.5</td><td>9–12%</td><td>Best choice; 1 acre = 250–300 t/year</td></tr>
+  <tr><td>Maize fodder</td><td>Good — Kharif season</td><td>1.5–2.0</td><td>8–10%</td><td>Dual use: grain + fodder</td></tr>
+  <tr><td>Sorghum (Jowar) fodder</td><td>Good — Rabi</td><td>1.5–2.0</td><td>9–11%</td><td></td></tr>
+  <tr><td>Sweet sorghum</td><td>Moderate</td><td>1.5–2.0</td><td>9%</td><td>Good for silage making</td></tr>
+  <tr><td>Para grass</td><td>Good — waterlogged areas</td><td>1.0–1.5</td><td>8–9%</td><td>Near Vamsadhara river banks</td></tr>
+  <tr><td>Subabul (Leucaena)</td><td>Moderate</td><td>1.0</td><td>22–26%</td><td>Protein-rich; max 10% of green fodder</td></tr>
+</table>
+
+<h2 class="sub">Dry Fodder</h2>
+<table>
+  <tr><th>Feed</th><th>₹/kg</th><th>Notes</th></tr>
+  <tr><td>Paddy straw</td><td>2.0–3.0</td><td>Most abundant locally; urea-treat to improve digestibility 45%→65%</td></tr>
+  <tr><td>Maize stover</td><td>2.5–3.0</td><td>Better quality than paddy straw</td></tr>
+  <tr><td>Groundnut haulms</td><td>5.0–7.0</td><td>Protein-rich (11%); available Oct–Nov</td></tr>
+  <tr><td>Sugarcane tops</td><td>1.5–2.0</td><td>Seasonal — October to February</td></tr>
+</table>
+
+<div class="card">
+  <h4>Urea Treatment of Paddy Straw (increases digestibility from 45% → 65%)</h4>
+  <p>Dissolve 3 kg urea in 30 litres water. Spray on 100 kg paddy straw in a covered pit or polythene-covered stack. Seal for 21 days. Air for 2–4 hours before feeding. <strong>Cost: ₹5 extra per 100 kg.</strong></p>
+</div>
+
+<h2 class="sub">Concentrate Ingredients</h2>
+<table>
+  <tr><th>Ingredient</th><th>₹/kg</th><th>Crude Protein</th><th>Notes</th></tr>
+  <tr><td>Maize grain</td><td>22–26</td><td>9%</td><td>Abundant locally — Kharif crop</td></tr>
+  <tr><td>Broken rice</td><td>20–24</td><td>8%</td><td>Local by-product from mills</td></tr>
+  <tr><td><strong>Deoiled rice bran</strong></td><td>18–22</td><td>14%</td><td><strong>Very abundant — Srikakulam is a major rice-milling district</strong></td></tr>
+  <tr><td>Wheat bran</td><td>18–22</td><td>15%</td><td>Available from traders</td></tr>
+  <tr><td><strong>Cotton seed cake</strong></td><td>30–35</td><td>38%</td><td>High protein; available from north AP</td></tr>
+  <tr><td><strong>Groundnut cake</strong></td><td>42–50</td><td>45%</td><td>Best protein source; available Oct–Dec locally</td></tr>
+  <tr><td>Sunflower cake</td><td>28–32</td><td>35%</td><td>Good alternative to groundnut cake</td></tr>
+  <tr><td>Copra cake</td><td>35–40</td><td>20%</td><td>Coastal advantage — good availability</td></tr>
+</table>
+
+<div class="card warning">
+  <h4>⚠ Srikakulam Mineral Deficiency Alert</h4>
+  <p>Coastal alluvial soils in Srikakulam are deficient in <strong>Selenium, Zinc, Copper, and Cobalt</strong>. Always use <strong>chelated mineral mixture</strong> (Animax / Agrimin Forte / Himax) — NOT basic mineral mixture alone. Selenium deficiency causes retained placenta, white muscle disease in calves, and poor fertility.</p>
+</div>
+
+<!-- SECTION 3 -->
+<h1 class="section">3. Standard Daily Ration — Murrah Buffalo</h1>
+
+<h2 class="sub">Dry Matter Requirements per Day</h2>
+<table>
+  <tr><th>Category</th><th>Bodyweight</th><th>DM required/day</th></tr>
+  <tr><td>Lactating (12 L/day)</td><td>500 kg</td><td>14–16 kg DM</td></tr>
+  <tr><td>Dry/pregnant (last trimester)</td><td>480 kg</td><td>10–11 kg DM</td></tr>
+  <tr><td>Dry (non-pregnant)</td><td>450 kg</td><td>8–9 kg DM</td></tr>
+</table>
+
+<h2 class="sub">Balanced Daily Ration — Lactating Buffalo (12 litres/day)</h2>
+<table>
+  <tr><th>Feed Item</th><th>Quantity/day</th><th>DM contribution</th></tr>
+  <tr><td>Napier grass / green fodder</td><td>30–35 kg</td><td>5.5–6.0 kg DM</td></tr>
+  <tr><td>Paddy straw / dry fodder</td><td>4–5 kg</td><td>3.5–4.5 kg DM</td></tr>
+  <tr><td>Concentrate mixture</td><td>6–7 kg</td><td>5.5–6.5 kg DM</td></tr>
+  <tr><td>Mineral mixture (chelated)</td><td>50 g</td><td>—</td></tr>
+  <tr><td>Common salt (iodised)</td><td>30 g</td><td>—</td></tr>
+  <tr><td>Bypass fat (peak lactation)</td><td>100–150 g</td><td>—</td></tr>
+  <tr><td style="font-weight:700">Clean water</td><td style="font-weight:700">80–100 litres</td><td>—</td></tr>
+</table>
+
+<div class="card highlight">
+  <h4>ICAR Concentrate Calculation Rule</h4>
+  <p><strong>Concentrate = 2 kg (maintenance) + 400 g per litre above the first 4 litres</strong></p>
+  <p>Example for 12-litre buffalo: 2 + (8 × 0.4) = 5.2 kg → round to 6 kg with fodder quality buffer.</p>
+</div>
+
+<h2 class="sub">Daily Feeding Schedule</h2>
+<table>
+  <tr><th>Time</th><th>Activity</th></tr>
+  <tr><td>5:30 AM</td><td>Morning milking</td></tr>
+  <tr><td>6:30 AM</td><td>50% of green fodder + 50% of dry fodder</td></tr>
+  <tr><td>7:00 AM</td><td>50% of concentrate + minerals + salt</td></tr>
+  <tr><td>12:00 PM</td><td>Fresh water refresh + 20% of remaining green fodder</td></tr>
+  <tr><td>4:30 PM</td><td>Evening milking</td></tr>
+  <tr><td>5:30 PM</td><td>Remaining green fodder + dry fodder</td></tr>
+  <tr><td>6:00 PM</td><td>Remaining concentrate</td></tr>
+  <tr><td>Night</td><td>Continuous water access + dry fodder free-choice</td></tr>
+</table>
+
+<!-- SECTION 4 -->
+<h1 class="section">4. Home-Mixed Concentrate Formula</h1>
+
+<h2 class="sub">Formula A — Standard (Recommended for AP Region)</h2>
+<table>
+  <tr><th>Ingredient</th><th>%</th><th>Per 100 kg batch</th><th>Cost (₹)</th></tr>
+  <tr><td>Maize grain</td><td>35%</td><td>35 kg</td><td>875</td></tr>
+  <tr><td>Deoiled rice bran</td><td>25%</td><td>25 kg</td><td>500</td></tr>
+  <tr><td>Cotton seed cake</td><td>20%</td><td>20 kg</td><td>650</td></tr>
+  <tr><td>Groundnut cake</td><td>12%</td><td>12 kg</td><td>576</td></tr>
+  <tr><td>Wheat bran</td><td>5%</td><td>5 kg</td><td>100</td></tr>
+  <tr><td>Mineral mixture</td><td>2%</td><td>2 kg</td><td>160</td></tr>
+  <tr><td>Common salt</td><td>1%</td><td>1 kg</td><td>10</td></tr>
+  <tr><td><strong>Total</strong></td><td><strong>100%</strong></td><td><strong>100 kg</strong></td><td><strong>₹2,871 (₹28.7/kg)</strong></td></tr>
+</table>
+<p class="table-note">Crude Protein: ~22% | TDN: ~72% | Suitable for high-yielding Murrah (12+ litres/day)</p>
+
+<h2 class="sub">Formula B — Budget Version (When Groundnut Cake is Expensive)</h2>
+<table>
+  <tr><th>Ingredient</th><th>%</th><th>Per 100 kg batch</th><th>Cost (₹)</th></tr>
+  <tr><td>Maize grain</td><td>30%</td><td>30 kg</td><td>720</td></tr>
+  <tr><td>Broken rice / rice bran</td><td>30%</td><td>30 kg</td><td>630</td></tr>
+  <tr><td>Cotton seed cake</td><td>25%</td><td>25 kg</td><td>812</td></tr>
+  <tr><td>Sunflower cake</td><td>10%</td><td>10 kg</td><td>310</td></tr>
+  <tr><td>Mineral mixture</td><td>2%</td><td>2 kg</td><td>160</td></tr>
+  <tr><td>Limestone powder</td><td>2%</td><td>2 kg</td><td>16</td></tr>
+  <tr><td>Common salt</td><td>1%</td><td>1 kg</td><td>10</td></tr>
+  <tr><td><strong>Total</strong></td><td><strong>100%</strong></td><td><strong>100 kg</strong></td><td><strong>₹2,658 (₹26.6/kg)</strong></td></tr>
+</table>
+<p class="table-note">Crude Protein: ~20% | Suitable for medium-yielding animals (8–11 litres/day)</p>
+
+<!-- SECTION 5 -->
+<h1 class="section">5. Three Feeding Models — Full Cost Comparison</h1>
+
+<h2 class="sub">Model A — Fully Purchased Feed (No own cultivation)</h2>
+<table>
+  <tr><th>Item</th><th>Qty/lactating/day</th><th>Rate</th><th>Cost/day</th></tr>
+  <tr><td>Napier/green fodder (purchased)</td><td>32 kg</td><td>₹1.50/kg</td><td>₹48.00</td></tr>
+  <tr><td>Paddy straw (purchased)</td><td>5 kg</td><td>₹2.50/kg</td><td>₹12.50</td></tr>
+  <tr><td>Concentrate (Formula A)</td><td>6 kg</td><td>₹28.70/kg</td><td>₹172.20</td></tr>
+  <tr><td>Mineral mixture + salt</td><td>80 g</td><td>₹65/kg avg</td><td>₹5.20</td></tr>
+  <tr><td><strong>Total per lactating buffalo/day</strong></td><td></td><td></td><td><strong>₹237.90</strong></td></tr>
+</table>
+<table>
+  <tr><th></th><th>Monthly</th><th>Annual</th></tr>
+  <tr><td>31 lactating × ₹238 × 30</td><td>₹2,21,340</td><td>₹26,56,080</td></tr>
+  <tr><td>9 dry × ₹85 × 30</td><td>₹22,950</td><td>₹2,75,400</td></tr>
+  <tr><td><strong>Total</strong></td><td><strong>₹2,44,290</strong></td><td><strong>₹29,31,480</strong></td></tr>
+</table>
+
+<h2 class="sub">Model B — Own Napier + Purchased Concentrate ⭐ RECOMMENDED</h2>
+<table>
+  <tr><th>Item</th><th>Qty/lactating/day</th><th>Rate</th><th>Cost/day</th></tr>
+  <tr><td>Own Napier grass (cultivation cost only)</td><td>32 kg</td><td>₹0.30/kg</td><td>₹9.60</td></tr>
+  <tr><td>Paddy straw (own/purchased)</td><td>5 kg</td><td>₹2.50/kg</td><td>₹12.50</td></tr>
+  <tr><td>Concentrate (Formula A)</td><td>6 kg</td><td>₹28.70/kg</td><td>₹172.20</td></tr>
+  <tr><td>Mineral mixture + salt</td><td>80 g</td><td>₹65/kg avg</td><td>₹5.20</td></tr>
+  <tr><td><strong>Total per lactating buffalo/day</strong></td><td></td><td></td><td><strong>₹199.50</strong></td></tr>
+</table>
+<table>
+  <tr><th></th><th>Monthly</th><th>Annual</th></tr>
+  <tr><td>31 lactating × ₹199.50 × 30</td><td>₹1,85,535</td><td>₹22,26,420</td></tr>
+  <tr><td>9 dry × ₹60 × 30</td><td>₹16,200</td><td>₹1,94,400</td></tr>
+  <tr><td>Napier cultivation (4 acres, annualised)</td><td>₹5,000</td><td>₹60,000</td></tr>
+  <tr><td>Summer top-up purchase</td><td>₹3,000</td><td>₹36,000</td></tr>
+  <tr><td><strong>Total</strong></td><td><strong>₹2,09,735</strong></td><td><strong>₹24,16,820</strong></td></tr>
+</table>
+<p class="table-note">One-time Napier planting: 4 acres × ₹15,000 = ₹60,000 | Annual saving vs Model A: ₹5,14,660</p>
+
+<h2 class="sub">Model C — Silage-Based</h2>
+<p>Make 150–200 tonnes maize/sorghum silage from 6–8 acres. Covers 6 months of green fodder.</p>
+<table>
+  <tr><th></th><th>Monthly</th><th>Annual</th></tr>
+  <tr><td>Total feed cost (silage + green season avg)</td><td>≈ ₹2,07,000</td><td>≈ ₹24,84,000</td></tr>
+  <tr><td>Capital: Silage pit (200 MT RCC)</td><td>One-time</td><td>₹1.2–1.5 lakh</td></tr>
+</table>
+
+<h2 class="sub">Model Comparison Summary</h2>
+<table>
+  <tr><th>Factor</th><th>Model A</th><th style="background:#1a4a35">Model B ⭐</th><th>Model C</th></tr>
+  <tr><td>Annual feed cost</td><td>₹29.3 lakh</td><td style="background:#e6f4ec;font-weight:700">₹24.2 lakh</td><td>₹24.8 lakh</td></tr>
+  <tr><td>Capital needed</td><td>Nil</td><td style="background:#e6f4ec">₹60,000</td><td>₹1.5 lakh</td></tr>
+  <tr><td>Drought resilience</td><td>Poor</td><td style="background:#e6f4ec">Moderate</td><td>Excellent</td></tr>
+  <tr><td>Operational complexity</td><td>Low</td><td style="background:#e6f4ec">Medium</td><td>High</td></tr>
+  <tr><td>Annual saving vs A</td><td>—</td><td style="background:#e6f4ec;font-weight:700">₹5.1 lakh</td><td>₹4.5 lakh</td></tr>
+</table>
+
+<!-- SECTION 6 -->
+<h1 class="section">6. Best Model Recommendation</h1>
+
+<div class="card highlight">
+  <h4>✓ RECOMMENDED: Model B — Own Napier Cultivation + Purchased Concentrate</h4>
+  <p style="margin-top:8px">This is the optimal strategy for Pydi Bhimavaram, Gara Mandal for five reasons:</p>
+  <ol style="margin:8px 0 0 16px;line-height:2">
+    <li><strong>Climate is ideal:</strong> Srikakulam's humid subtropical climate supports Napier CO-4 year-round without irrigation in most months.</li>
+    <li><strong>Land is available:</strong> Gara mandal has canal irrigation from Vamsadhara and Nagavali projects; 4 acres leased land costs ₹60,000/year — paid back in 2 months of savings.</li>
+    <li><strong>Rice bran advantage:</strong> Srikakulam's many rice mills ensure cheap, consistent deoiled rice bran for home-mixed concentrate at ₹28.70/kg vs. purchased pellets at ₹35–42/kg.</li>
+    <li><strong>₹5.1 lakh annual saving</strong> with only ₹60,000 one-time investment — ROI in 6 weeks.</li>
+    <li><strong>Simple operation:</strong> Napier only needs harvesting every 45–60 days with a chaff cutter — no complex pit management required.</li>
+  </ol>
+</div>
+
+<h2 class="sub">Action Plan to Implement Model B</h2>
+<table>
+  <tr><th>Step</th><th>Action</th><th>Timeline</th></tr>
+  <tr><td>1</td><td>Identify 4 acres leased land within 3 km (canal-irrigated preferred)</td><td>October 2026</td></tr>
+  <tr><td>2</td><td>Purchase Napier CO-4 slips from KVK Srikakulam (subsidised)</td><td>October 2026</td></tr>
+  <tr><td>3</td><td>Plant Napier — October–November (best establishment post-monsoon)</td><td>November 2026</td></tr>
+  <tr><td>4</td><td>First harvest at 75–90 days; subsequent every 45 days</td><td>January 2027</td></tr>
+  <tr><td>5</td><td>Source rice bran from local rice mills; oil cake from nearby dealers</td><td>Immediately</td></tr>
+  <tr><td>6</td><td>Set up home concentrate mixing shed with a weighing scale</td><td>Within 1 month</td></tr>
+</table>
+
+<!-- SECTION 7 -->
+<h1 class="section">7. Seasonal Mineral &amp; Medicine Schedule</h1>
+
+<h2 class="sub">Mineral Deficiency Profile — Srikakulam Coastal Alluvial Soils</h2>
+<table>
+  <tr><th>Mineral</th><th>Status</th><th>Deficiency Signs</th><th>Daily Supplement</th></tr>
+  <tr><td><strong>Selenium</strong></td><td><span class="badge badge-red">Deficient</span></td><td>Retained placenta, white muscle disease, poor fertility</td><td>Sodium selenite 5 mg (in mineral mix)</td></tr>
+  <tr><td><strong>Zinc</strong></td><td><span class="badge badge-red">Deficient</span></td><td>Skin lesions, poor hoof quality, low fertility</td><td>Zinc sulphate 2–3 g</td></tr>
+  <tr><td><strong>Copper</strong></td><td><span class="badge badge-gold">Low</span></td><td>Anaemia, poor coat, low immunity</td><td>Copper sulphate 1–2 g</td></tr>
+  <tr><td>Cobalt</td><td><span class="badge badge-gold">Low</span></td><td>Poor appetite, anaemia, weight loss</td><td>Cobalt chloride 1 mg</td></tr>
+  <tr><td>Iodine</td><td><span class="badge badge-gold">Borderline</span></td><td>Goitre, abortions, weak calves</td><td>Iodised salt — mandatory</td></tr>
+  <tr><td><strong>Phosphorus</strong></td><td><span class="badge badge-red">Deficient</span></td><td>Pica (eating soil/bones), poor fertility</td><td>Dicalcium phosphate 50 g</td></tr>
+</table>
+
+<h2 class="sub">Monthly Medicine &amp; Mineral Calendar</h2>
+<table>
+  <tr><th>Month</th><th>Action</th><th>Product</th><th>Dose</th></tr>
+  <tr><td><strong>January</strong></td><td>Vitamin ADE injection</td><td>Vit-AD3E injection</td><td>10 mL IM</td></tr>
+  <tr><td><strong>January</strong></td><td>Mineral bolus — 1st dose</td><td>Agrimin / Unimax bolus</td><td>1 bolus oral</td></tr>
+  <tr><td><strong>February</strong></td><td>Theileria vaccination</td><td>Rakshavac-T</td><td>2 mL SC</td></tr>
+  <tr><td><strong>March</strong></td><td>FMD vaccination — Dose 1</td><td>Aftovaxpur DO / Raksha OVAC</td><td>2 mL IM</td></tr>
+  <tr><td><strong>April</strong></td><td>Deworming — Round 1</td><td>Albendazole 10% + Ivermectin</td><td>See Section 9</td></tr>
+  <tr><td><strong>April</strong></td><td>Liver tonic course</td><td>Livol / Amprolium</td><td>50 mL oral × 14 days</td></tr>
+  <tr><td><strong>May</strong></td><td>HS + BQ vaccination</td><td>HS-BQ Bivalent (APVS)</td><td>5 mL SC</td></tr>
+  <tr><td><strong>May</strong></td><td>Pre-summer electrolytes start</td><td>ORS-Vet / Electral Vet</td><td>50–100 g/day in water</td></tr>
+  <tr><td><strong>June</strong></td><td>Tick control</td><td>Butox 5% (Deltamethrin pour-on)</td><td>10–20 mL/animal</td></tr>
+  <tr><td><strong>July</strong></td><td>FMD vaccination — Dose 2</td><td>Same as March</td><td>2 mL IM</td></tr>
+  <tr><td><strong>August</strong></td><td>Deworming — Round 2 + Liver fluke</td><td>Oxyclozanide (Nilzan) + Levamisole</td><td>20 mL oral</td></tr>
+  <tr><td><strong>October</strong></td><td>HS + BQ booster</td><td>HS-BQ Bivalent</td><td>5 mL SC</td></tr>
+  <tr><td><strong>October</strong></td><td>Deworming — Round 3</td><td>Albendazole + Ivermectin</td><td>See Section 9</td></tr>
+  <tr><td><strong>November</strong></td><td>Vitamin ADE injection</td><td>Vit-AD3E</td><td>10 mL IM</td></tr>
+  <tr><td><strong>November</strong></td><td>Brucella vaccination (heifers only)</td><td>S19 / RB51</td><td>2 mL SC (heifers 4–8 months)</td></tr>
+  <tr><td><strong>December</strong></td><td>Mineral bolus — 2nd dose</td><td>Agrimin / Unimax bolus</td><td>1 bolus oral</td></tr>
+</table>
+
+<!-- SECTION 8 -->
+<h1 class="section">8. Annual Vaccination Calendar — Andhra Pradesh</h1>
+
+<div class="card highlight">
+  <h4>AP Govt provides FMD, HS, BQ, and Brucella vaccines FREE — Contact Veterinary Poly Clinic, Srikakulam or call 1962</h4>
+</div>
+
+<table>
+  <tr><th>Vaccine</th><th>Disease</th><th>Month(s)</th><th>Dose</th><th>Route</th><th>Govt Free?</th></tr>
+  <tr><td><strong>FMD (Aftovaxpur / Raksha OVAC)</strong></td><td>Foot &amp; Mouth Disease</td><td>March + July</td><td>2 mL</td><td>IM</td><td><span class="badge badge-green">YES</span></td></tr>
+  <tr><td><strong>HS-BQ Bivalent</strong></td><td>Haemorrhagic Septicaemia + Black Quarter</td><td>May + October</td><td>5 mL</td><td>SC</td><td><span class="badge badge-green">YES</span></td></tr>
+  <tr><td><strong>Brucella (S19/RB51)</strong></td><td>Brucellosis</td><td>November</td><td>2 mL</td><td>SC</td><td><span class="badge badge-green">YES (heifers 4–8 mo)</span></td></tr>
+  <tr><td>Rakshavac-T (Theileria)</td><td>Theileriosis</td><td>February</td><td>2 mL</td><td>SC</td><td><span class="badge badge-gold">Subsidised</span></td></tr>
+</table>
+
+<h2 class="sub">Vaccination Rules</h2>
+<ul style="margin-left:18px;line-height:2;font-size:11px">
+  <li>Never vaccinate sick animals or those within 2 months of calving (live vaccines)</li>
+  <li>Record: Animal tag, date, vaccine name, batch number, vet name</li>
+  <li>Store vaccines at 2–8°C; use within 4–6 hours of opening multi-dose vials</li>
+  <li>IM injection: neck muscle | SC injection: skin fold behind shoulder</li>
+</ul>
+
+<!-- SECTION 9 -->
+<h1 class="section">9. Deworming Protocol</h1>
+
+<table>
+  <tr><th>Drug</th><th>Trade Name</th><th>Indication</th><th>Dose (500 kg buffalo)</th><th>Frequency</th></tr>
+  <tr><td><strong>Albendazole 10% oral</strong></td><td>Valbazen, Bendex</td><td>Roundworms, tapeworms, liver fluke</td><td>50 mL oral</td><td>April + October</td></tr>
+  <tr><td><strong>Ivermectin 1% injection</strong></td><td>Ivomec, Noromectin</td><td>Mange, ticks, bot fly</td><td>10 mL SC (1 mL/50 kg)</td><td>Annually</td></tr>
+  <tr><td>Fenbendazole</td><td>Panacur 10%</td><td>Roundworms</td><td>25 g oral (5 mg/kg)</td><td>Alternate years</td></tr>
+  <tr><td><strong>Oxyclozanide + Levamisole</strong></td><td>Nilzan Plus</td><td>Liver fluke + roundworms</td><td>20 mL oral</td><td>August (monsoon)</td></tr>
+  <tr><td>Deltamethrin pour-on</td><td>Butox 5%</td><td>Ticks, flies, mange</td><td>10–20 mL topical</td><td>June + September</td></tr>
+</table>
+
+<h2 class="sub">Annual Deworming Calendar</h2>
+<table>
+  <tr><th>Round</th><th>Month</th><th>Drug(s)</th><th>Notes</th></tr>
+  <tr><td>Round 1</td><td>April</td><td>Albendazole 10% oral</td><td>Pre-summer; also dose all new animals on entry</td></tr>
+  <tr><td>Round 2</td><td>August</td><td>Oxyclozanide + Levamisole</td><td>Monsoon liver fluke risk in paddy belt</td></tr>
+  <tr><td>Round 3</td><td>October</td><td>Albendazole + Ivermectin SC</td><td>Post-monsoon peak worm burden</td></tr>
+</table>
+
+<div class="card">
+  <h4>Important Deworming Rules</h4>
+  <ul style="margin-left:16px;line-height:1.8;font-size:11px">
+    <li>Deworm ALL 40 animals on the same day</li>
+    <li>Withhold milk for 3 days after deworming (check individual product label)</li>
+    <li>Do NOT deworm in the last month of pregnancy</li>
+    <li>New animals: quarantine 7 days + deworm before mixing with herd</li>
+  </ul>
+</div>
+
+<!-- SECTION 10 -->
+<h1 class="section">10. Seasonal Health Management</h1>
+
+<h2 class="sub">SUMMER (March–June) — Heat Stress Prevention</h2>
+<p style="margin-bottom:8px">Srikakulam temperatures reach 40–44°C in April–May. Murrah buffaloes suffer performance loss above 32°C.</p>
+<table>
+  <tr><th>Action</th><th>Details</th></tr>
+  <tr><td>Cooling</td><td>Run fans/foggers 6–10 AM and 2–6 PM; provide mud wallowing pond or spray system</td></tr>
+  <tr><td>Water</td><td>100 litres cool water/animal/day; refresh 3× daily</td></tr>
+  <tr><td>Feed timing</td><td>70% of daily feed in early morning (5:30–9 AM) and evening (after 6 PM)</td></tr>
+  <tr><td>Electrolytes</td><td>ORS-Vet 50–100 g/day in water during days above 38°C</td></tr>
+  <tr><td>Sodium bicarbonate</td><td>100–150 g/day in feed (prevents acidosis + reduces heat stress)</td></tr>
+  <tr><td>Vitamin C</td><td>2 g IV/IM every 15 days during peak heat (April–May)</td></tr>
+</table>
+
+<div class="card alert">
+  <h4>Heat Stress Emergency Signs</h4>
+  <p>Panting >80 breaths/min | Standing in water | Off feed | Milk drop >15%<br>
+  <strong>Emergency action:</strong> Hose with cold water, move to shade. Call vet if rectal temp >41°C.</p>
+</div>
+
+<h2 class="sub">MONSOON (July–September) — Disease Peak Season</h2>
+<table>
+  <tr><th>Action</th><th>Details</th></tr>
+  <tr><td>FMD Booster</td><td>Critical in July — Srikakulam has seasonal FMD outbreaks</td></tr>
+  <tr><td>Foot care</td><td>Weekly hoof check; copper sulphate footbath (2%) 3× per week</td></tr>
+  <tr><td>Mastitis watch</td><td>CMT test twice weekly; monsoon humidity increases Staph aureus</td></tr>
+  <tr><td>HS alert</td><td>Any sudden fever 41°C+ + throat swelling → call vet IMMEDIATELY (kills in 24–48 hrs)</td></tr>
+  <tr><td>Shed drainage</td><td>Drain floor twice daily; dry bedding to prevent leptospirosis and foot rot</td></tr>
+  <tr><td>Feed protection</td><td>Add Mycosorb 100 g/tonne to wet stored fodder (mycotoxin prevention)</td></tr>
+</table>
+
+<h2 class="sub">WINTER (December–February) — Nutritional Support</h2>
+<table>
+  <tr><th>Action</th><th>Details</th></tr>
+  <tr><td>Vitamin ADE injection</td><td>10 mL IM — prevents night blindness, boosts calf immunity in newborns</td></tr>
+  <tr><td>Mineral bolus</td><td>1 bolus/animal — 3-month sustained trace mineral release</td></tr>
+  <tr><td>Increase concentrate</td><td>Add 0.5 kg/day extra in Dec–Jan (cold increases energy demand)</td></tr>
+  <tr><td>Bypass fat</td><td>Megalac/RuFat 100 g/day/lactating animal (supports milk fat %)</td></tr>
+  <tr><td>Dry cow therapy (DCT)</td><td>At every dry-off: Cepravin/Orbenin intramammary all 4 quarters</td></tr>
+</table>
+
+<!-- SECTION 11 -->
+<h1 class="section">11. Common Diseases — Coastal AP Buffaloes</h1>
+
+<table>
+  <tr><th>Disease</th><th>Peak Season</th><th>Key Signs</th><th>First Aid</th><th>Prevention</th></tr>
+  <tr><td><strong>FMD</strong></td><td>Oct–Dec</td><td>Blisters on feet/mouth, drooling, lameness, 80% milk drop</td><td>Isolate; disinfect shed; antiseptic on lesions; supportive care</td><td>Vaccine every 6 months</td></tr>
+  <tr><td><strong>Haemorrhagic Septicaemia</strong></td><td>Pre-monsoon</td><td>Fever 41°C+, swollen throat, laboured breathing, sudden death</td><td>Oxytetracycline 10 mg/kg IV immediately; call vet urgently</td><td>HS vaccine (May + Oct)</td></tr>
+  <tr><td><strong>Mastitis</strong></td><td>Year-round; peak monsoon</td><td>Hard quarter, clots in milk, CMT positive, fever</td><td>Strip quarter; Amoxicillin-Cloxacillin intramammary; teat dipping</td><td>CMT 2×/week; hygiene</td></tr>
+  <tr><td><strong>Milk Fever</strong></td><td>Within 48 hrs of calving</td><td>Cannot stand, cold ears/nose, tetany</td><td>IV Calcium Borogluconate 400 mL slowly</td><td>Cal-Mag drench at calving</td></tr>
+  <tr><td><strong>Ketosis</strong></td><td>2–6 weeks post-calving</td><td>Off feed, sweet breath, low milk</td><td>Propylene glycol 300 mL oral 2×/day; IV Dextrose</td><td>High-energy diet pre-calving</td></tr>
+  <tr><td><strong>Black Quarter</strong></td><td>Monsoon</td><td>Lameness, swollen thigh (crepitating gas), fever, sudden death</td><td>Penicillin G high dose IM; call vet urgently</td><td>BQ vaccine (May + Oct)</td></tr>
+  <tr><td><strong>Bloat (Tympany)</strong></td><td>Year-round</td><td>Distended left flank, laboured breathing</td><td>Stomach tube; Turpentine 30 mL + linseed oil oral; walk animal</td><td>Gradual change to green fodder</td></tr>
+  <tr><td><strong>Theileriosis</strong></td><td>March–June (tick season)</td><td>High fever, swollen lymph nodes, anaemia, pale mucosa</td><td><strong>Buparvaquone (Butalex) 2.5 mg/kg IM — specific treatment</strong></td><td>Rakshavac-T vaccine (Feb); tick control</td></tr>
+  <tr><td><strong>Retained Placenta</strong></td><td>Post-calving</td><td>Placenta not expelled >12 hours</td><td>Oxytocin 20 IU IM; manual removal by vet at 48–72 hrs</td><td>Selenium/Vitamin E injection pre-calving</td></tr>
+  <tr><td>Foot Rot</td><td>Monsoon</td><td>Lameness, foul lesion between hooves</td><td>Copper sulphate footbath; Oxytetracycline spray; Penicillin systemic</td><td>Weekly footbath in monsoon</td></tr>
+</table>
+
+<div class="card alert">
+  <h4>Emergency Helpline: 1962 (AP Livestock Emergency — Toll-Free)</h4>
+</div>
+
+<!-- SECTION 12 -->
+<h1 class="section">12. Animal Health Tracking Protocol</h1>
+
+<h2 class="sub">Daily Morning Observation Checklist (per animal)</h2>
+<table>
+  <tr><th>Check</th><th>Normal</th><th>Action if Abnormal</th></tr>
+  <tr><td><strong>Appetite</strong></td><td>Eating within 15 minutes</td><td>Refusing feed → check temperature, record in app</td></tr>
+  <tr><td><strong>Rumination</strong></td><td>6–8 hrs/day; 40–60 chews/cud</td><td>&lt;4 hrs = digestive problem; reduce concentrate</td></tr>
+  <tr><td><strong>Body temperature</strong></td><td>38.0–39.5°C</td><td>&gt;40°C = fever; isolate, call vet</td></tr>
+  <tr><td><strong>Respiration</strong></td><td>10–30 breaths/min</td><td>&gt;60 = heat stress or pneumonia</td></tr>
+  <tr><td><strong>Milk yield</strong></td><td>Within 10% of usual</td><td>&gt;15% drop → check for mastitis, fever, or estrus</td></tr>
+  <tr><td><strong>Udder</strong></td><td>Soft, even, no heat/swelling</td><td>CMT test if any quarter feels different</td></tr>
+  <tr><td>Eyes/nose</td><td>Clear, no discharge</td><td>Any discharge = respiratory/fever alert</td></tr>
+  <tr><td>Faeces</td><td>Formed, medium brown</td><td>Watery = dietary/infection; bloody = urgent; very dry = dehydration</td></tr>
+  <tr><td>Gait</td><td>Normal walk</td><td>Any limp → check all 4 hooves for lesions</td></tr>
+  <tr><td>Behaviour</td><td>Social, calm</td><td>Isolation, teeth grinding, restlessness = pain or estrus</td></tr>
+</table>
+
+<h2 class="sub">CMT (California Mastitis Test) — Quick Guide</h2>
+<ol style="margin-left:18px;line-height:2;font-size:11px">
+  <li>Collect 2–3 mL milk from each quarter into CMT paddle</li>
+  <li>Add equal volume CMT reagent (sodium lauryl sulphate solution)</li>
+  <li>Rotate gently for 10 seconds</li>
+  <li><strong>Reading:</strong> No gel = Negative | Slight gel = Trace | Thick gel = Positive (treat)</li>
+  <li>Record: Date, animal tag, which quarter, result in Dairy Farm Management App</li>
+</ol>
+
+<!-- SECTION 13 -->
+<h1 class="section">13. Reproductive Management &amp; Calving</h1>
+
+<h2 class="sub">Reproductive Targets — Murrah Herd</h2>
+<table>
+  <tr><th>Parameter</th><th>Target</th><th>Action if Below Target</th></tr>
+  <tr><td>First heat post-calving</td><td>60–90 days</td><td>Check selenium/phosphorus, body condition; call vet</td></tr>
+  <tr><td>First AI post-calving</td><td>90–100 days</td><td>Wait for 2nd or 3rd heat for best conception rate</td></tr>
+  <tr><td>Conception rate per AI</td><td>≥60%</td><td>Check semen quality, AI timing, nutrition if &lt;50%</td></tr>
+  <tr><td>Pregnancy confirmation</td><td>60–90 days post-AI</td><td>Rectal palpation by vet or progesterone milk test</td></tr>
+  <tr><td>Calving interval</td><td>≤400 days</td><td>Review AI records; Ovsynch synchronisation</td></tr>
+  <tr><td>Dry period</td><td>60 days (mandatory)</td><td>Shorter dry period → 20–30% lower next lactation yield</td></tr>
+</table>
+
+<h2 class="sub">Estrus (Heat) Detection Signs</h2>
+<ul style="margin-left:18px;line-height:2;font-size:11px">
+  <li>Restless, increased activity, mounts other animals</li>
+  <li>Stands to be mounted — <strong>standing heat = best AI time</strong></li>
+  <li>Clear stringy mucus discharge from vulva; swollen moist vulva</li>
+  <li>Reduced milk yield for 1–2 days; tail head slightly raised</li>
+  <li><strong>Duration:</strong> 12–24 hours (shorter than cattle; don't miss it)</li>
+  <li><strong>Best AI time:</strong> 12–18 hours after onset of standing heat</li>
+</ul>
+
+<h2 class="sub">Calving Management Timeline</h2>
+<table>
+  <tr><th>Timeline</th><th>Action</th></tr>
+  <tr><td>3 weeks before calving</td><td>Move to separate calving pen; increase energy feed by 0.5 kg/day</td></tr>
+  <tr><td>1 week before</td><td>Calcium drench (Calphosol) 300 mL orally daily</td></tr>
+  <tr><td>Day of calving</td><td>Monitor every 2 hours; assist only after 2+ hrs of active labour</td></tr>
+  <tr><td>Within 30 minutes</td><td>Clear calf airways; allow dam to lick calf (bonding + drying)</td></tr>
+  <tr><td>Within 2 hours</td><td>Ensure calf receives colostrum (3–4 litres = 10% of body weight)</td></tr>
+  <tr><td>6 hours after</td><td>Oxytocin 20 IU IM to expel placenta; check if passed</td></tr>
+  <tr><td>24 hours</td><td>Check uterine discharge (should be reddish-brown, not foul-smelling)</td></tr>
+  <tr><td>14 days</td><td>Post-calving uterine check by vet; Oxytetracycline pessaries if discharge abnormal</td></tr>
+</table>
+
+<!-- SECTION 14 -->
+<h1 class="section">14. Water Quality Testing</h1>
+
+<h2 class="sub">Parameters and Acceptable Ranges — Dairy Buffalo Drinking Water</h2>
+<table>
+  <tr><th>Parameter</th><th>Acceptable Range</th><th>Concern Threshold</th><th>Health Impact</th></tr>
+  <tr><td>pH</td><td>6.5–8.5</td><td>&lt;6.0 or &gt;9.0</td><td>Digestive problems</td></tr>
+  <tr><td>TDS</td><td>&lt;3,000 mg/L</td><td>&gt;5,000 mg/L</td><td>Reduces intake, diarrhoea</td></tr>
+  <tr><td>Nitrates (NO₃)</td><td>&lt;50 mg/L</td><td>&gt;100 mg/L</td><td>Methaemoglobinaemia, abortions</td></tr>
+  <tr><td><strong>Fluoride</strong></td><td>&lt;2.0 mg/L</td><td>&gt;3.0 mg/L</td><td><strong>Fluorosis, lameness — elevated in coastal AP</strong></td></tr>
+  <tr><td>Hardness</td><td>&lt;500 mg/L</td><td>&gt;2,000 mg/L</td><td>Reduces Mg absorption</td></tr>
+  <tr><td>Sulphates</td><td>&lt;500 mg/L</td><td>&gt;1,000 mg/L</td><td>Diarrhoea, mineral interference</td></tr>
+  <tr><td>E. coli / Coliforms</td><td>Zero / 100 mL</td><td>Any positive</td><td>Diarrhoea, mastitis, reproductive failure</td></tr>
+  <tr><td>Iron</td><td>&lt;0.3 mg/L</td><td>&gt;1.0 mg/L</td><td>Bitter taste, reduced intake</td></tr>
+  <tr><td><strong>Arsenic</strong></td><td>&lt;0.05 mg/L</td><td>&gt;0.1 mg/L</td><td><strong>Critical — coastal AP groundwater risk</strong></td></tr>
+</table>
+
+<div class="card warning">
+  <h4>⚠ Srikakulam Water Alert</h4>
+  <p>Gara, Etcherla, Santhakaviti mandal ground water often has elevated fluoride (2–4 mg/L) and iron (&gt;1 mg/L). <strong>Test borewell water before giving to animals.</strong> Coastal mandals: check for chloride (seawater intrusion). Test after any flood event.</p>
+</div>
+
+<h2 class="sub">Water Requirement for 40 Animals</h2>
+<table>
+  <tr><th>Category</th><th>Water/day</th></tr>
+  <tr><td>Lactating buffalo</td><td>80–100 litres/animal</td></tr>
+  <tr><td>Dry buffalo</td><td>40–60 litres/animal</td></tr>
+  <tr><td>Shed cleaning</td><td>20 litres/animal</td></tr>
+  <tr><td><strong>Total for 40 animals</strong></td><td><strong>3,500–4,500 litres/day (3.5–4.5 KL)</strong></td></tr>
+</table>
+
+<h2 class="sub">Testing Labs — Srikakulam Region</h2>
+<table>
+  <tr><th>Lab</th><th>Location</th><th>Tests Available</th><th>Cost</th></tr>
+  <tr><td>Soil &amp; Water Testing Lab, Dept. Agriculture</td><td>Srikakulam town</td><td>pH, TDS, nitrates, fluoride, iron</td><td>Free / ₹50–200</td></tr>
+  <tr><td>KVK Srikakulam</td><td>Srikakulam</td><td>Full potable water panel</td><td>₹100–300</td></tr>
+  <tr><td>AP State Soil Health Lab</td><td>Rajam, Srikakulam</td><td>Full mineral panel</td><td>₹300–500</td></tr>
+  <tr><td>NABL-accredited private lab</td><td>Vizianagaram (40 km)</td><td>Full quality + heavy metals</td><td>₹800–2,000</td></tr>
+  <tr><td>APPCB Environmental Lab</td><td>Visakhapatnam</td><td>Heavy metals, arsenic</td><td>₹1,500–3,000</td></tr>
+</table>
+
+<!-- SECTION 15 -->
+<h1 class="section">15. Soil Testing for Fodder Cultivation</h1>
+
+<table>
+  <tr><th>Test</th><th>What it Measures</th><th>Target Range</th><th>Action if Outside</th></tr>
+  <tr><td>pH</td><td>Acidity/alkalinity</td><td>6.5–7.5</td><td>&lt;6.5: add lime 200 kg/acre | &gt;7.5: add gypsum</td></tr>
+  <tr><td>Organic Carbon</td><td>Soil fertility</td><td>&gt;0.75%</td><td>&lt;0.5%: add FYM 5 tonnes/acre</td></tr>
+  <tr><td>Available Nitrogen</td><td>Fodder protein</td><td>Medium–High</td><td>Apply urea 50 kg/acre/cut</td></tr>
+  <tr><td>Available Phosphorus</td><td>Root development</td><td>15–25 kg/ha</td><td>Apply SSP 50 kg/acre</td></tr>
+  <tr><td>Available Potassium</td><td>Disease resistance, yield</td><td>120–180 kg/ha</td><td>Apply MOP 20 kg/acre</td></tr>
+  <tr><td>Sulphur</td><td>Amino acid synthesis</td><td>&gt;10 mg/kg</td><td>Apply gypsum 50 kg/acre</td></tr>
+  <tr><td><strong>Zinc</strong></td><td>Micronutrient; fodder quality</td><td>&gt;0.6 mg/kg</td><td>Apply zinc sulphate 10 kg/acre</td></tr>
+  <tr><td>EC (Salinity)</td><td>Salt level</td><td>&lt;1.0 dS/m</td><td>&gt;2: leach soil; avoid Napier planting</td></tr>
+</table>
+
+<h2 class="sub">Fertiliser Recommendation — Napier CO-4 (per acre)</h2>
+<table>
+  <tr><th>Fertiliser</th><th>Quantity</th><th>Timing</th></tr>
+  <tr><td>FYM / Compost</td><td>5 tonnes</td><td>Before planting (basal)</td></tr>
+  <tr><td>DAP</td><td>25 kg</td><td>Before planting (basal)</td></tr>
+  <tr><td>Urea</td><td>50 kg</td><td>At planting + 50 kg after each harvest (every 45 days)</td></tr>
+  <tr><td>MOP (Potassium)</td><td>20 kg</td><td>Basal</td></tr>
+  <tr><td>Zinc sulphate</td><td>5 kg</td><td>Basal (if Zn-deficient as per test)</td></tr>
+</table>
+
+<p style="margin-top:10px;font-size:11px"><strong>Free soil testing:</strong> Register at Gara Mandal Agriculture Office under the Soil Health Card Scheme — free testing every 2 years. Contact Rythu Seva Kendra, Gara Mandal.</p>
+
+<!-- SECTION 16 -->
+<h1 class="section">16. Revenue &amp; Profit Projection</h1>
+
+<h2 class="sub">Annual Feed Cost — Model B (Recommended)</h2>
+<table>
+  <tr><th>Item</th><th>Monthly (₹)</th><th>Annual (₹)</th></tr>
+  <tr><td>Napier cultivation, 4 acres (amortised)</td><td>3,750</td><td>45,000</td></tr>
+  <tr><td>Paddy straw + dry fodder</td><td>18,750</td><td>2,25,000</td></tr>
+  <tr><td>Concentrate — 31 lactating (6 kg × ₹28.70 × 31 × 30)</td><td>1,59,867</td><td>19,18,404</td></tr>
+  <tr><td>Concentrate — 9 dry (2 kg × ₹28.70 × 9 × 30)</td><td>15,498</td><td>1,85,976</td></tr>
+  <tr><td>Mineral mixture + salt (40 animals)</td><td>7,800</td><td>93,600</td></tr>
+  <tr><td>Summer fodder top-up</td><td>3,500</td><td>42,000</td></tr>
+  <tr><td><strong>Total Feed Cost</strong></td><td><strong>2,09,165</strong></td><td><strong>25,09,980</strong></td></tr>
+</table>
+
+<h2 class="sub">Annual Medicine + Health Cost</h2>
+<table>
+  <tr><th>Item</th><th>Annual (₹)</th></tr>
+  <tr><td>Vaccines (Theileria paid; others free govt)</td><td>25,000</td></tr>
+  <tr><td>Deworming drugs (40 animals × 3 rounds)</td><td>12,000</td></tr>
+  <tr><td>Bypass fat + vitamin injections</td><td>35,000</td></tr>
+  <tr><td>Mastitis treatment + Dry Cow Therapy</td><td>20,000</td></tr>
+  <tr><td>Liver tonics, electrolytes, supplements</td><td>20,000</td></tr>
+  <tr><td>Emergency vet calls + drugs</td><td>30,000</td></tr>
+  <tr><td><strong>Total Medicine + Health</strong></td><td><strong>1,42,000</strong></td></tr>
+</table>
+
+<h2 class="sub">Revenue Estimate</h2>
+<table>
+  <tr><th>Source</th><th>Calculation</th><th>Annual (₹)</th></tr>
+  <tr><td><strong>Milk sales</strong></td><td>31 × 12 L × 305 days × ₹65/L</td><td><strong>73,83,600</strong></td></tr>
+  <tr><td>Male calf sales</td><td>~15 calves × ₹8,000</td><td>1,20,000</td></tr>
+  <tr><td>Female heifer sales</td><td>~5 surplus heifers × ₹35,000</td><td>1,75,000</td></tr>
+  <tr><td>Biogas / dung value</td><td>40 × 10 kg × ₹0.50 × 365</td><td>73,000</td></tr>
+  <tr><td><strong>Total Revenue</strong></td><td></td><td><strong>77,51,600</strong></td></tr>
+</table>
+
+<h2 class="sub">Profit Summary</h2>
+<table>
+  <tr><th>Item</th><th>Annual (₹)</th></tr>
+  <tr><td>Total Revenue</td><td>77,51,600</td></tr>
+  <tr><td>Feed cost</td><td>–25,09,980</td></tr>
+  <tr><td>Medicine + health</td><td>–1,42,000</td></tr>
+  <tr><td>Labour (4 staff × avg ₹13,500/month)</td><td>–6,48,000</td></tr>
+  <tr><td>Power + water + misc operating</td><td>–1,80,000</td></tr>
+  <tr><td style="font-weight:700;background:#e6f4ec">Operating Profit (EBITDA)</td><td style="font-weight:700;background:#e6f4ec">42,71,620</td></tr>
+  <tr><td>Loan EMI (₹90 lakh @ 9%, 7 years)</td><td>–15,48,000</td></tr>
+  <tr><td style="font-weight:700;background:#1a4a35;color:white">Net Profit after EMI</td><td style="font-weight:700;background:#1a4a35;color:white">≈ ₹27,23,620 / year</td></tr>
+  <tr><td style="font-weight:700">Net Profit per month</td><td style="font-weight:700">≈ ₹2,27,000/month</td></tr>
+</table>
+
+<!-- SECTION 17 -->
+<h1 class="section">17. Government Schemes &amp; Key Contacts</h1>
+
+<table>
+  <tr><th>Scheme</th><th>Benefit</th><th>How to Access</th></tr>
+  <tr><td>NABARD DEDS <span class="badge badge-green">Already Approved</span></td><td>33.33% capital subsidy — women farmer</td><td>NABARD Visakhapatnam Regional Office</td></tr>
+  <tr><td>Animal Husbandry KCC</td><td>Working capital loan at 7% p.a.</td><td>Any nationalised bank; KCC for Animal Husbandry</td></tr>
+  <tr><td>APDDCF Cooperative</td><td>Milk procurement ₹60–70/litre with fat-SNF bonus</td><td>Register at APDDCF Srikakulam district office</td></tr>
+  <tr><td>Rashtriya Gokul Mission</td><td>Free Murrah semen straws, subsidised AI</td><td>AP Animal Husbandry Dept</td></tr>
+  <tr><td>Soil Health Card</td><td>Free soil testing every 2 years</td><td>Gara Mandal Agriculture Office</td></tr>
+  <tr><td>Pashudhan Bima</td><td>Animal death insurance — ₹10/animal/year</td><td>LIC / United India Insurance; via Vet Poly Clinic</td></tr>
+  <tr><td>AP Free Vaccines</td><td>FMD, HS, BQ, Brucella — free</td><td>AP AH Poly Clinic, Srikakulam</td></tr>
+  <tr><td>Napier CO-4 Slips Scheme</td><td>Subsidised Napier planting material</td><td>KVK Srikakulam / Horticulture Dept</td></tr>
+</table>
+
+<h2 class="sub">Key Contacts — Srikakulam District</h2>
+<table>
+  <tr><th>Department</th><th>Purpose</th><th>Contact</th></tr>
+  <tr><td><strong>KVK Srikakulam</strong></td><td>Soil/water testing, AI, fodder seeds, training</td><td>08942-249122</td></tr>
+  <tr><td><strong>Vet Poly Clinic, Srikakulam</strong></td><td>Free vaccines, vet services, disease reporting</td><td>08942-227073</td></tr>
+  <tr><td>AP AH Dept — Gara Mandal</td><td>Local animal health services, AI technician</td><td>Gara Mandal Office</td></tr>
+  <tr><td>APDDCF Srikakulam</td><td>Milk marketing cooperative</td><td>Srikakulam District Office</td></tr>
+  <tr><td>Agriculture Extension, Gara</td><td>Soil Health Card, fertiliser recommendations</td><td>Gara Mandal Office</td></tr>
+  <tr><td style="font-weight:700;background:#fce9e7">Emergency Veterinary Helpline</td><td>Animal emergency 24×7</td><td style="font-weight:800;font-size:14px;color:#b25248">1962 (Toll-Free)</td></tr>
+</table>
+
+<!-- SECTION 18 -->
+<h1 class="section">18. Quick Reference Cards</h1>
+
+<h2 class="sub">Card 1 — Daily Feed Per Animal</h2>
+<table>
+  <tr><th>Status</th><th>Green Fodder</th><th>Dry Fodder</th><th>Concentrate</th><th>Mineral+Salt</th><th>Water</th></tr>
+  <tr><td>Lactating (12 L)</td><td>32 kg</td><td>5 kg</td><td>6 kg</td><td>80 g</td><td>100 L</td></tr>
+  <tr><td>Lactating (15 L)</td><td>35 kg</td><td>5 kg</td><td>7 kg</td><td>80 g</td><td>100 L</td></tr>
+  <tr><td>Dry (non-pregnant)</td><td>20 kg</td><td>5 kg</td><td>1.5 kg</td><td>50 g</td><td>60 L</td></tr>
+  <tr><td>Dry (7–9 mo pregnant)</td><td>25 kg</td><td>5 kg</td><td>3 kg</td><td>80 g</td><td>70 L</td></tr>
+  <tr><td>Dry (last month)</td><td>25 kg</td><td>4 kg</td><td>4 kg</td><td>80 g</td><td>80 L</td></tr>
+</table>
+
+<h2 class="sub">Card 2 — Emergency First Aid</h2>
+<table>
+  <tr><th>Emergency</th><th>First Action</th><th>Medicine</th><th>Call Vet?</th></tr>
+  <tr><td>High fever (&gt;41°C)</td><td>Move to shade; cool water on body</td><td>Meloxicam 2 mL IM or Ketoprofen IM</td><td>Immediately</td></tr>
+  <tr><td>Bloat (swollen left flank)</td><td>Walk animal; stomach tube</td><td>Turpentine 30 mL + linseed oil 500 mL oral</td><td>If not resolved in 30 min</td></tr>
+  <tr><td>Milk fever (cannot stand)</td><td>Keep warm; IV calcium</td><td>Calcium Borogluconate 400 mL IV slowly</td><td>Always call vet</td></tr>
+  <tr><td>Foot lesion / lameness</td><td>Copper sulphate footbath</td><td>Oxytetracycline spray on lesion</td><td>If no improvement in 3 days</td></tr>
+  <tr><td>Diarrhoea</td><td>Electrolytes; reduce green fodder</td><td>ORS + Kaolin-Pectin oral</td><td>If bloody or &gt;48 hrs</td></tr>
+  <tr><td>Retained placenta &gt;12 hrs</td><td>Oxytocin 20 IU IM; do NOT pull</td><td>Antibiotics to prevent infection</td><td>At 48 hrs for removal</td></tr>
+</table>
+
+<h2 class="sub">Card 3 — Monthly Action Calendar</h2>
+<table>
+  <tr><th>Month</th><th>Vaccine</th><th>Deworming</th><th>Nutrition Extra</th><th>Other</th></tr>
+  <tr><td><strong>January</strong></td><td>—</td><td>—</td><td>Vit ADE injection; Mineral bolus</td><td>Body condition score all 40</td></tr>
+  <tr><td><strong>February</strong></td><td>Theileria</td><td>—</td><td>—</td><td>Check tick load; start Butox dipping</td></tr>
+  <tr><td><strong>March</strong></td><td>FMD Dose 1</td><td>—</td><td>Start bypass fat (peak lactation)</td><td>Summer prep: fans, water troughs</td></tr>
+  <tr><td><strong>April</strong></td><td>—</td><td>Round 1 (Albendazole)</td><td>Electrolytes in water</td><td>Heat stress watch &gt;38°C days</td></tr>
+  <tr><td><strong>May</strong></td><td>HS + BQ</td><td>—</td><td>Liver tonic course (14 days)</td><td>Tick control — Deltamethrin</td></tr>
+  <tr><td><strong>June</strong></td><td>—</td><td>—</td><td>Max cooling protocols</td><td>Plan silage making</td></tr>
+  <tr><td><strong>July</strong></td><td>FMD Dose 2</td><td>—</td><td>—</td><td>Drain shed daily; weekly foot check</td></tr>
+  <tr><td><strong>August</strong></td><td>—</td><td>Round 2 (Oxyclozanide)</td><td>—</td><td>CMT twice/week; HS disease alert</td></tr>
+  <tr><td><strong>September</strong></td><td>—</td><td>—</td><td>—</td><td>AI programme peak; conception checks</td></tr>
+  <tr><td><strong>October</strong></td><td>HS + BQ</td><td>Round 3 (Albendazole)</td><td>—</td><td>BCS target 3.0–3.5; DCT for dry cows</td></tr>
+  <tr><td><strong>November</strong></td><td>Brucella (heifers)</td><td>—</td><td>Vit ADE; increase concentrate 0.5 kg</td><td>Plant Napier (best season)</td></tr>
+  <tr><td><strong>December</strong></td><td>—</td><td>—</td><td>Mineral bolus; bypass fat</td><td>Year-end herd records review</td></tr>
+</table>
+
+<hr>
+<p style="text-align:center;font-size:10px;color:#7a9a87;margin-top:20px;padding-bottom:20px">
+  <em>Prepared for Smt. D. Bhavani's 40 Murrah Buffalo Dairy Farm, Pydi Bhimavaram, Gara Mandal, Srikakulam, Andhra Pradesh</em><br>
+  Based on ICAR / NDDB standards · AP Animal Husbandry Department protocols · Srikakulam regional agricultural data 2025–26<br>
+  <strong>September 2026</strong> · Consult your local veterinarian and KVK Srikakulam for farm-specific advice
+</p>
+
+</div>
+</div>
+</body>
+</html>

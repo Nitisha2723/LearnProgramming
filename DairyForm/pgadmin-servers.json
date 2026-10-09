@@ -1,0 +1,15 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Bhavani Dairy Farm DB",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "dairy_farm",
+      "Username": "bhavani",
+      "Password": "DairyFarm@2026",
+      "SSLMode": "prefer",
+      "SavePassword": true
+    }
+  }
+}

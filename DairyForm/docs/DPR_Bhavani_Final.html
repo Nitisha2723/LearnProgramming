@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DPR — Bhavani Dairy Farm | NABARD DEDS 2026</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Noto+Sans:wght@400;500;600;700&display=swap');
+@page { size: A4; margin: 22mm 20mm 22mm 25mm; }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy: #1a3a5a;
+  --teal: #1d5c4a;
+  --gold: #c4962a;
+  --red: #b91c1c;
+  --gray-bg: #f5f5f5;
+  --gray-border: #d1d5db;
+  --text: #1a1a1a;
+}
+
+body {
+  font-family: 'Noto Sans', Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.55;
+  color: var(--text);
+  background: #e8e8e8;
+}
+
+.page-shell {
+  max-width: 210mm;
+  margin: 0 auto;
+  background: white;
+  padding: 22mm 20mm 22mm 25mm;
+}
+
+/* Page break helpers */
+.page-break { page-break-before: always; break-before: page; }
+.no-break { page-break-inside: avoid; break-inside: avoid; }
+.keep-with-next { page-break-after: avoid; break-after: avoid; }
+
+/* ─── COVER PAGE ─── */
+.cover { text-align: center; padding: 10mm 0; }
+.cover-emblem { font-size: 56pt; line-height: 1; margin-bottom: 8mm; }
+.cover-badge {
+  display: inline-block;
+  background: var(--navy);
+  color: white;
+  font-family: 'Noto Serif', serif;
+  font-size: 9pt;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 3px;
+  margin-bottom: 6mm;
+}
+.cover-title {
+  font-family: 'Noto Serif', serif;
+  font-size: 26pt;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.15;
+  margin-bottom: 4mm;
+}
+.cover-subtitle {
+  font-size: 13pt;
+  color: #374151;
+  margin-bottom: 3mm;
+}
+.cover-scheme {
+  font-size: 10pt;
+  color: var(--teal);
+  font-weight: 600;
+  margin-bottom: 10mm;
+}
+.cover-divider {
+  width: 60mm;
+  height: 3px;
+  background: linear-gradient(to right, var(--navy), var(--gold));
+  margin: 0 auto 10mm;
+  border-radius: 2px;
+}
+.cover-parties {
+  display: flex;
+  gap: 10mm;
+  text-align: left;
+  margin-top: 12mm;
+}
+.cover-party {
+  flex: 1;
+  border: 1.5px solid var(--gray-border);
+  border-radius: 6px;
+  padding: 6mm;
+}
+.cover-party h3 {
+  font-size: 8pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--navy);
+  border-bottom: 1px solid var(--gray-border);
+  padding-bottom: 3px;
+  margin-bottom: 4px;
+}
+.cover-party p { font-size: 10pt; line-height: 1.7; color: #374151; }
+.cover-party strong { color: var(--text); }
+.cover-date { font-size: 10pt; color: #6b7280; margin-top: 8mm; }
+.cover-confidential { font-size: 8pt; color: #9ca3af; margin-top: 4mm; letter-spacing: 0.08em; }
+
+/* ─── SECTION HEADINGS ─── */
+h1.section-heading {
+  font-family: 'Noto Serif', serif;
+  font-size: 13pt;
+  font-weight: 700;
+  color: white;
+  background: var(--navy);
+  padding: 5px 10px;
+  margin: 8mm 0 4mm;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+h2.sub-heading {
+  font-size: 11pt;
+  font-weight: 700;
+  color: var(--teal);
+  border-bottom: 1.5px solid var(--teal);
+  padding-bottom: 2px;
+  margin: 5mm 0 3mm;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+/* ─── TABLES ─── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10pt;
+  margin-bottom: 5mm;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+th {
+  background: var(--navy);
+  color: white;
+  font-weight: 700;
+  padding: 5px 8px;
+  text-align: left;
+  font-size: 9.5pt;
+}
+td { padding: 4px 8px; border: 1px solid var(--gray-border); vertical-align: top; }
+tr:nth-child(even) td { background: var(--gray-bg); }
+tr.highlight-gold td { background: #fef9e7; font-weight: 700; }
+tr.highlight-red td { background: #fef2f2; }
+tr.highlight-red td:last-child { color: var(--red); font-weight: 700; }
+tr.highlight-amber td { background: #fffbeb; }
+tr.total-row td { background: #e8f4ed; font-weight: 700; color: var(--teal); }
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+
+/* ─── FINANCIAL HIGHLIGHT BOX ─── */
+.fin-highlight {
+  background: linear-gradient(135deg, #e8f4f0 0%, #e0f2fe 100%);
+  border: 2px solid var(--teal);
+  border-radius: 8px;
+  padding: 6mm 8mm;
+  margin: 5mm 0;
+  page-break-inside: avoid;
+}
+.fin-highlight h3 {
+  font-family: 'Noto Serif', serif;
+  font-size: 11pt;
+  color: var(--navy);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 3mm;
+  font-weight: 700;
+}
+.fin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; }
+.fin-item { background: white; border-radius: 5px; padding: 3mm 4mm; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.fin-item .label { font-size: 8pt; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.fin-item .value { font-size: 13pt; font-weight: 700; color: var(--navy); margin-top: 1px; }
+.fin-item .sub { font-size: 8pt; color: #374151; }
+.fin-item.subsidy .value { color: var(--teal); }
+.fin-item.dscr .value { color: #166534; }
+
+/* ─── LISTS ─── */
+ul, ol { padding-left: 6mm; margin-bottom: 3mm; }
+li { margin-bottom: 1.5px; font-size: 10pt; }
+
+/* ─── PARAGRAPH / BODY ─── */
+p { font-size: 10.5pt; margin-bottom: 3mm; }
+
+/* ─── SWOT GRID ─── */
+.swot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-bottom: 5mm; }
+.swot-box { border-radius: 6px; padding: 4mm; page-break-inside: avoid; }
+.swot-box h4 { font-size: 10pt; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; }
+.swot-box ul { font-size: 9.5pt; }
+.swot-box.s { background: #f0fdf4; border: 1px solid #86efac; }
+.swot-box.s h4 { color: #166534; }
+.swot-box.w { background: #fef2f2; border: 1px solid #fca5a5; }
+.swot-box.w h4 { color: #991b1b; }
+.swot-box.o { background: #eff6ff; border: 1px solid #93c5fd; }
+.swot-box.o h4 { color: #1e40af; }
+.swot-box.t { background: #fffbeb; border: 1px solid #fcd34d; }
+.swot-box.t h4 { color: #92400e; }
+
+/* ─── DECLARATIONS ─── */
+.declaration-box { border: 1.5px solid var(--gray-border); border-radius: 6px; padding: 5mm; margin: 4mm 0; }
+.signature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10mm; margin-top: 15mm; }
+.sig-block { border-top: 1.5px solid var(--text); padding-top: 2mm; font-size: 9.5pt; }
+.sig-block strong { display: block; font-weight: 700; }
+
+/* ─── TABLE OF CONTENTS ─── */
+.toc-item { display: flex; align-items: baseline; gap: 2px; margin-bottom: 2.5mm; font-size: 10.5pt; }
+.toc-item .toc-num { width: 8mm; font-weight: 700; color: var(--navy); flex-shrink: 0; }
+.toc-item .toc-dots { flex: 1; border-bottom: 1.5px dotted #aaa; margin: 0 3px 2px; min-width: 10mm; }
+.toc-item .toc-pg { width: 10mm; text-align: right; color: #6b7280; font-size: 9pt; }
+
+/* ─── PRINT BUTTON ─── */
+.print-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--navy);
+  color: white;
+  border: none;
+  border-radius: 40px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0,0,0,.25);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Noto Sans', sans-serif;
+  transition: background .2s;
+}
+.print-btn:hover { background: #254f78; }
+
+/* ─── FOOTER (print only via counter) ─── */
+@media print {
+  body { background: white; }
+  .page-shell { padding: 0; max-width: none; box-shadow: none; }
+  .print-btn { display: none !important; }
+
+  @page {
+    @bottom-center {
+      content: "DPR — Bhavani Dairy Farm | Srikakulam, AP | NABARD DEDS 2026 | Confidential";
+      font-size: 7.5pt;
+      color: #9ca3af;
+    }
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font-size: 7.5pt;
+      color: #9ca3af;
+    }
+  }
+
+  h1.section-heading { page-break-before: always; break-before: page; }
+  h1.section-heading:first-of-type { page-break-before: avoid; }
+  .cover { page-break-after: always; break-after: page; }
+  .toc-page { page-break-after: always; break-after: page; }
+}
+
+.note-box {
+  background: #eff6ff;
+  border-left: 4px solid #3b82f6;
+  padding: 3mm 4mm;
+  margin: 3mm 0;
+  font-size: 9.5pt;
+  color: #1e3a5f;
+  border-radius: 0 4px 4px 0;
+}
+</style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+
+<div class="page-shell">
+
+<!-- ══════════════════════════════════════════════════════════
+     COVER PAGE
+══════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-emblem">🇮🇳</div>
+  <div class="cover-badge">Government of India — NABARD Scheme</div>
+  <div class="cover-title">DETAILED PROJECT REPORT</div>
+  <div class="cover-subtitle">Establishment of 40-Head Automated Buffalo Dairy Farm</div>
+  <div class="cover-scheme">NABARD — Dairy Entrepreneurship Development Scheme (DEDS)</div>
+  <div class="cover-divider"></div>
+
+  <div class="cover-parties">
+    <div class="cover-party">
+      <h3>Submitted To</h3>
+      <p>
+        The Branch Manager<br/>
+        <strong>[Name of Bank &amp; Branch]</strong><br/>
+        Srikakulam District<br/>
+        Andhra Pradesh — 532401
+      </p>
+    </div>
+    <div class="cover-party">
+      <h3>Submitted By</h3>
+      <p>
+        <strong>Smt. Danthuluri Bhavani</strong><br/>
+        W/o. Sri Venkata Rama Raju Danthuluri<br/>
+        9-57A, Devunipalavalasa<br/>
+        Ranasthalam, Srikakulam Dist., AP — 532409<br/>
+        Aadhar: 5074 6346 4518<br/>
+        PAN: GNXPB7068F<br/>
+        Mobile: +91 80198 20303
+      </p>
+    </div>
+  </div>
+
+  <div class="cover-date">Date: September 2026</div>
+  <div class="cover-confidential">CONFIDENTIAL — FOR BANK &amp; NABARD USE ONLY</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TABLE OF CONTENTS
+══════════════════════════════════════════════════════════ -->
+<div class="toc-page page-break">
+  <h1 class="section-heading" style="page-break-before:avoid;break-before:avoid">TABLE OF CONTENTS</h1>
+  <div style="margin-top:5mm">
+    <div class="toc-item"><span class="toc-num">1.</span><span>Executive Summary</span><span class="toc-dots"></span></div>
+    <div class="toc-item"><span class="toc-num">2.</span><span>Applicant Profile</span><span class="toc-dots"></span></div>
+    <div class="toc-item"><span class="toc-num">3.</span><span>Project Description</span><span class="toc-dots"></span></div>
+    <div class="toc-item"><span class="toc-num">4.</span><span>Land &amp; Location Details</span><span class="toc-dots"></span></div>
+    <div class="toc-item"><span class="toc-num">5.</span><span>Technical Details — Civil Construction</span><span class="toc-dots"></span></div>
+    <div class="toc-item"><span class="toc-num">6.</span><span>Automation &amp; Infrastructure Plan</span><span class="toc-dots"></span></div>
+    <div class="toc-item"><span class="toc-num">7.</span><span>Animal Details &amp; Breed Selection</span><span class="toc-dots"></span></div>
+    <div class="toc-item"><span class="toc-num">8.</span><span>Feed &amp; Fodder Plan</span><span class="toc-dots"></span></div>
+    <div class="toc-item"><span class="toc-num">9.</span><span>Financial Plan — Project Cost &amp; Means of Finance</span><span class="toc-dots"></span></div>
+    <div class="toc-item"><span class="toc-num">10.</span><span>Revenue &amp; Profitability Projections</span><span class="toc-dots"></span></div>
+    <div class="toc-item"><span class="toc-num">11.</span><span>Repayment Schedule &amp; DSCR</span><span class="toc-dots"></span></div>
+    <div class="toc-item"><span class="toc-num">12.</span><span>SWOT Analysis</span><span class="toc-dots"></span></div>
+    <div class="toc-item"><span class="toc-num">13.</span><span>Government Subsidy Details</span><span class="toc-dots"></span></div>
+    <div class="toc-item"><span class="toc-num">14.</span><span>Environmental &amp; Waste Management Plan</span><span class="toc-dots"></span></div>
+    <div class="toc-item"><span class="toc-num">15.</span><span>Implementation Schedule</span><span class="toc-dots"></span></div>
+    <div class="toc-item"><span class="toc-num">16.</span><span>Declarations &amp; Undertakings</span><span class="toc-dots"></span></div>
+    <div class="toc-item"><span class="toc-num">17.</span><span>Annexures (Documents Checklist)</span><span class="toc-dots"></span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 1: EXECUTIVE SUMMARY
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">1. Executive Summary</h1>
+
+<table class="no-break">
+  <tr><th>Parameter</th><th>Details</th></tr>
+  <tr><td>Name of Applicant</td><td><strong>Smt. Danthuluri Bhavani</strong></td></tr>
+  <tr><td>Category</td><td>Woman Entrepreneur — General</td></tr>
+  <tr><td>Project Title</td><td>Establishment of 40-Head Automated Buffalo Dairy Farm</td></tr>
+  <tr><td>Location</td><td>Survey No. 57-3, Devunipalavalasa Village, Ranasthalam Mandal, Srikakulam District, AP</td></tr>
+  <tr><td>Land Area</td><td>3.5 Acres (on registered lease from father/land owner)</td></tr>
+  <tr><td>Scheme</td><td>NABARD — Dairy Entrepreneurship Development Scheme (DEDS)</td></tr>
+  <tr class="highlight-gold"><td><strong>Total Project Cost</strong></td><td><strong>₹1,34,00,000</strong></td></tr>
+  <tr class="highlight-red"><td>NABARD Subsidy (33.33% — Women)</td><td>₹44,66,600</td></tr>
+  <tr><td>Bank Term Loan Required</td><td><strong>₹89,33,400</strong></td></tr>
+  <tr><td>Promoter's Own Contribution</td><td>NIL (Women Entrepreneur DEDS)</td></tr>
+  <tr><td>Repayment Period</td><td>7 Years (including 1-year moratorium)</td></tr>
+  <tr><td>Break-even Period</td><td><strong>~2.5 Years</strong></td></tr>
+  <tr><td>Employment Generated</td><td>2 Permanent + 1 Seasonal</td></tr>
+  <tr><td>Daily Milk Production (Year 1)</td><td>~320 litres/day</td></tr>
+  <tr><td>Annual Milk Revenue (Year 1)</td><td>₹49,92,000</td></tr>
+</table>
+
+<div class="fin-highlight">
+  <h3>Financial Highlights</h3>
+  <div class="fin-grid">
+    <div class="fin-item">
+      <div class="label">Total Project Cost</div>
+      <div class="value">₹1,34,00,000</div>
+      <div class="sub">Civil + Equipment + Animals + Working Capital</div>
+    </div>
+    <div class="fin-item subsidy">
+      <div class="label">NABARD Subsidy (33.33% Women)</div>
+      <div class="value">₹44,66,600</div>
+      <div class="sub">Back-ended, credited to loan account</div>
+    </div>
+    <div class="fin-item">
+      <div class="label">Bank Term Loan</div>
+      <div class="value">₹89,33,400</div>
+      <div class="sub">9% p.a., 7 years (1 yr moratorium)</div>
+    </div>
+    <div class="fin-item">
+      <div class="label">Year 1 Net Profit (After Tax)</div>
+      <div class="value">~₹10,00,000</div>
+      <div class="sub">After all costs &amp; loan servicing</div>
+    </div>
+    <div class="fin-item dscr">
+      <div class="label">DSCR Year 2</div>
+      <div class="value">2.36 ✓</div>
+      <div class="sub">Well above 1.5 — strong repayment capacity</div>
+    </div>
+    <div class="fin-item">
+      <div class="label">Break-even</div>
+      <div class="value">~2.5 Years</div>
+      <div class="sub">Production break-even at ~50,000 L/year</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 2: APPLICANT PROFILE
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">2. Applicant Profile</h1>
+
+<h2 class="sub-heading">2.1 Personal Details</h2>
+<table class="no-break">
+  <tr><th>Field</th><th>Details</th></tr>
+  <tr><td>Full Name</td><td><strong>Smt. Danthuluri Bhavani</strong></td></tr>
+  <tr><td>Date of Birth</td><td>01 January 1971</td></tr>
+  <tr><td>Age</td><td>55 Years</td></tr>
+  <tr><td>Gender</td><td>Female</td></tr>
+  <tr><td>Category</td><td>Women Entrepreneur (General)</td></tr>
+  <tr><td>Aadhar Number</td><td>5074 6346 4518</td></tr>
+  <tr><td>PAN Number</td><td>GNXPB7068F</td></tr>
+  <tr><td>Mobile Number</td><td>+91 80198 20303</td></tr>
+  <tr><td>Email</td><td>Bhavani.danthuluri@gmail.com</td></tr>
+  <tr><td>Address</td><td>9-57A, Devunipalavalasa, Ranasthalam, Srikakulam — 532409</td></tr>
+  <tr><td>District</td><td>Srikakulam</td></tr>
+  <tr><td>State</td><td>Andhra Pradesh</td></tr>
+</table>
+
+<h2 class="sub-heading">2.2 Land Owner Details</h2>
+<table class="no-break">
+  <tr><th>Field</th><th>Details</th></tr>
+  <tr><td>Full Name</td><td>Sri Danthuluri Venkata Rama Raju</td></tr>
+  <tr><td>Relationship</td><td>Father of Applicant</td></tr>
+  <tr><td>Land Holding</td><td>Survey No. 57-3, Devunipalavalasa, Srikakulam</td></tr>
+  <tr><td>Land Area</td><td>3.5 Acres</td></tr>
+  <tr><td>Land Use</td><td>Leased to applicant under Registered Lease Agreement</td></tr>
+  <tr><td>Lease Rent</td><td>₹10,000 per annum</td></tr>
+</table>
+
+<h2 class="sub-heading">2.3 Educational &amp; Experience Background</h2>
+<table class="no-break">
+  <tr><th>Field</th><th>Details</th></tr>
+  <tr><td>Educational Qualification</td><td>7th Standard</td></tr>
+  <tr><td>Previous Experience</td><td>Agricultural / animal husbandry household background</td></tr>
+  <tr><td>Training</td><td>Will undergo NABARD / Animal Husbandry Dept dairy training before operations</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 3: PROJECT DESCRIPTION
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">3. Project Description</h1>
+
+<h2 class="sub-heading">3.1 Project Concept</h2>
+<p>Smt. Danthuluri Bhavani proposes to establish a <strong>40-head fully automated buffalo dairy farm</strong> on 3.5 acres of leased agricultural land at Devunipalavalasa Village, Srikakulam District, Andhra Pradesh. The farm will be set up under the <strong>NABARD Dairy Entrepreneurship Development Scheme (DEDS)</strong> and will adopt modern automation technologies to enable efficient operation by 1–2 workers.</p>
+
+<p>The project aims to:</p>
+<ul>
+  <li>Produce approximately 350–400 litres of high-quality buffalo milk daily</li>
+  <li>Supply milk to Vijaya Dairy / APDDCF / private dairies at remunerative prices</li>
+  <li>Generate sustainable livelihood and rural employment</li>
+  <li>Adopt zero-waste practices through biogas and organic manure</li>
+</ul>
+
+<h2 class="sub-heading">3.2 Project Rationale</h2>
+<ul>
+  <li>Srikakulam District has strong demand for milk with organized procurement through <strong>Vijaya Dairy</strong></li>
+  <li>Buffalo milk commands premium price (₹50–58/litre) due to higher fat content</li>
+  <li>Murrah buffalo breed is ideally suited to AP's agro-climatic conditions</li>
+  <li>Government of India and AP State Government actively support dairy through subsidies</li>
+  <li>Growing demand for A2 buffalo milk in urban markets</li>
+  <li>Applicant owns 3.5 acres suitable for fodder cultivation, reducing feed costs by ~40%</li>
+</ul>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 4: LAND & LOCATION
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">4. Land &amp; Location Details</h1>
+
+<h2 class="sub-heading">4.1 Land Details</h2>
+<table class="no-break">
+  <tr><th>Parameter</th><th>Details</th></tr>
+  <tr><td>Survey Number</td><td>57-3</td></tr>
+  <tr><td>Village</td><td>Devunipalavalasa</td></tr>
+  <tr><td>Mandal</td><td>Ranasthalam</td></tr>
+  <tr><td>District</td><td>Srikakulam</td></tr>
+  <tr><td>State</td><td>Andhra Pradesh</td></tr>
+  <tr><td>Total Area</td><td>3.5 Acres</td></tr>
+  <tr><td>Land Owner</td><td>Sri Danthuluri Venkata Rama Raju</td></tr>
+  <tr><td>Land Use</td><td>Agricultural — Leased to Applicant</td></tr>
+  <tr><td>Type of Deed</td><td>Registered Lease Agreement (₹10,000/year)</td></tr>
+  <tr><td>Distance to Nearest Town</td><td>Ranasthalam — 10 km</td></tr>
+  <tr><td>Distance to Milk Procurement Point</td><td>Vijaya Dairy collection point — 10 km</td></tr>
+  <tr><td>Water Source</td><td>Bore Well (to be drilled) + seasonal canal</td></tr>
+  <tr><td>Electricity</td><td>APSPDCL — Consumer No. 1312641214001032</td></tr>
+</table>
+
+<h2 class="sub-heading">4.2 Land Utilization Plan</h2>
+<table class="no-break">
+  <tr><th>Area Use</th><th class="text-right">Extent</th></tr>
+  <tr><td>Animal Shed &amp; Infrastructure</td><td class="text-right">1.0 Acre</td></tr>
+  <tr><td>Green Fodder Cultivation (Napier / Sorghum)</td><td class="text-right">2.0 Acres</td></tr>
+  <tr><td>Silage Pit &amp; Compost Yard</td><td class="text-right">0.25 Acres</td></tr>
+  <tr><td>Internal Roads &amp; Open Area</td><td class="text-right">0.25 Acres</td></tr>
+  <tr class="total-row"><td><strong>Total</strong></td><td class="text-right"><strong>3.5 Acres</strong></td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 5: TECHNICAL DETAILS
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">5. Technical Details — Civil Construction</h1>
+
+<h2 class="sub-heading">5.1 Farm Layout</h2>
+<p>The farm follows a <strong>loose housing system</strong> — the most productive and hygienic system for buffaloes — with:</p>
+<ul>
+  <li>Separate milking parlour (auto cluster milking)</li>
+  <li>Covered feeding area with Total Mixed Ration (TMR) system</li>
+  <li>Open exercise yard</li>
+  <li>Calf rearing unit (separate)</li>
+  <li>Feed storage godown</li>
+  <li>Biogas plant (30 m³)</li>
+  <li>Milk chilling room with BMC (500 L)</li>
+  <li>Worker quarters (2 rooms)</li>
+</ul>
+
+<h2 class="sub-heading">5.2 Civil Construction Cost</h2>
+<table>
+  <tr><th>Structure</th><th class="text-center">Area (sq ft)</th><th class="text-center">Rate (₹/sq ft)</th><th class="text-right">Cost (₹)</th></tr>
+  <tr><td>Animal Shed — Loose Housing (40 animals)</td><td class="text-center">4,000</td><td class="text-center">800</td><td class="text-right">32,00,000</td></tr>
+  <tr><td>Milking Parlour</td><td class="text-center">500</td><td class="text-center">800</td><td class="text-right">4,00,000</td></tr>
+  <tr><td>Feed Storage Godown</td><td class="text-center">1,000</td><td class="text-center">600</td><td class="text-right">6,00,000</td></tr>
+  <tr><td>Calf Rearing Unit</td><td class="text-center">600</td><td class="text-center">700</td><td class="text-right">4,20,000</td></tr>
+  <tr><td>Worker Quarters (2 rooms)</td><td class="text-center">400</td><td class="text-center">700</td><td class="text-right">2,80,000</td></tr>
+  <tr><td>Biogas Plant (40 animals, 30 m³)</td><td class="text-center">1 unit</td><td class="text-center">—</td><td class="text-right">3,00,000</td></tr>
+  <tr><td>Bore Well + Motor + OH Tank</td><td class="text-center">1 unit</td><td class="text-center">—</td><td class="text-right">3,50,000</td></tr>
+  <tr><td>Underground Drainage &amp; Slurry Pit</td><td class="text-center">1 unit</td><td class="text-center">—</td><td class="text-right">1,00,000</td></tr>
+  <tr><td>Perimeter Fencing (3.5 acres)</td><td class="text-center">—</td><td class="text-center">—</td><td class="text-right">2,00,000</td></tr>
+  <tr><td>Internal Roads &amp; Drainage</td><td class="text-center">—</td><td class="text-center">—</td><td class="text-right">1,80,000</td></tr>
+  <tr class="total-row"><td colspan="3"><strong>Civil Construction Total</strong></td><td class="text-right"><strong>₹60,30,000</strong></td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 6: AUTOMATION & INFRASTRUCTURE
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">6. Automation &amp; Infrastructure Plan</h1>
+
+<p>The farm is designed for <strong>full automation</strong> requiring only 1–2 workers for daily operation through the following equipment:</p>
+
+<h2 class="sub-heading">6.1 Equipment List</h2>
+<table>
+  <tr><th>Equipment</th><th class="text-center">Qty</th><th class="text-right">Unit Cost (₹)</th><th class="text-right">Total (₹)</th><th>Purpose</th></tr>
+  <tr><td>Automatic Cluster Milking Machine (2-unit)</td><td class="text-center">2</td><td class="text-right">1,50,000</td><td class="text-right">3,00,000</td><td>Milk 40 animals in 2 hrs</td></tr>
+  <tr><td>Bulk Milk Cooler / Chiller (500 L)</td><td class="text-center">1</td><td class="text-right">2,50,000</td><td class="text-right">2,50,000</td><td>Preserve milk quality @4°C</td></tr>
+  <tr><td>TMR Mixer Feed Wagon</td><td class="text-center">1</td><td class="text-right">3,50,000</td><td class="text-right">3,50,000</td><td>Automated feed preparation</td></tr>
+  <tr><td>Electric Chaff Cutter (heavy duty)</td><td class="text-center">1</td><td class="text-right">80,000</td><td class="text-right">80,000</td><td>Fodder cutting</td></tr>
+  <tr><td>Automatic Water Drinkers (float valve)</td><td class="text-center">10</td><td class="text-right">8,000</td><td class="text-right">80,000</td><td>Continuous clean water supply</td></tr>
+  <tr><td>Automatic Manure Floor Scraper</td><td class="text-center">1</td><td class="text-right">1,50,000</td><td class="text-right">1,50,000</td><td>Shed hygiene automation</td></tr>
+  <tr><td>Solar Power System (5 kW with battery)</td><td class="text-center">1</td><td class="text-right">2,50,000</td><td class="text-right">2,50,000</td><td>Near-zero electricity bill</td></tr>
+  <tr><td>Biogas Genset Connection</td><td class="text-center">1</td><td class="text-right">50,000</td><td class="text-right">50,000</td><td>Backup power + cooking</td></tr>
+  <tr><td>CCTV System (8 cameras + NVR + mobile app)</td><td class="text-center">1 set</td><td class="text-right">60,000</td><td class="text-right">60,000</td><td>Remote monitoring</td></tr>
+  <tr><td>Milk Fat/SNF Analyzer (Milko tester)</td><td class="text-center">1</td><td class="text-right">80,000</td><td class="text-right">80,000</td><td>Quality testing at collection</td></tr>
+  <tr><td>IoT Animal Health Sensors (ear tags)</td><td class="text-center">40</td><td class="text-right">2,000</td><td class="text-right">80,000</td><td>Health &amp; estrus monitoring</td></tr>
+  <tr><td>Farm Management Software</td><td class="text-center">1</td><td class="text-right">50,000</td><td class="text-right">50,000</td><td>Records &amp; analytics</td></tr>
+  <tr><td>Tractor (second-hand, for fodder transport)</td><td class="text-center">1</td><td class="text-right">3,00,000</td><td class="text-right">3,00,000</td><td>Fodder &amp; manure handling</td></tr>
+  <tr class="total-row"><td colspan="3"><strong>Equipment Total</strong></td><td class="text-right"><strong>₹21,30,000</strong></td><td></td></tr>
+</table>
+
+<h2 class="sub-heading">6.2 Daily Operation Schedule (2 Workers)</h2>
+<table class="no-break">
+  <tr><th>Time</th><th>Activity</th><th>Worker</th></tr>
+  <tr><td>5:00 AM</td><td>Auto floor scraper runs (triggered)</td><td>—</td></tr>
+  <tr><td>5:30 AM</td><td>Morning milking (auto milking machine)</td><td>Worker 1</td></tr>
+  <tr><td>6:30 AM</td><td>TMR feed preparation &amp; auto distribution</td><td>Worker 2</td></tr>
+  <tr><td>7:00 AM</td><td>Calf feeding &amp; health check</td><td>Worker 1</td></tr>
+  <tr><td>8:00 AM</td><td>Milk dispatch to Vijaya Dairy collection point</td><td>Worker 2</td></tr>
+  <tr><td>4:00 PM</td><td>Evening milking</td><td>Worker 1</td></tr>
+  <tr><td>5:00 PM</td><td>Evening feed</td><td>Worker 2</td></tr>
+  <tr><td>6:00 PM</td><td>Auto floor scraper runs (triggered)</td><td>—</td></tr>
+  <tr><td>7:00 PM</td><td>CCTV monitoring via mobile app</td><td>Remote</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 7: ANIMAL DETAILS
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">7. Animal Details &amp; Breed Selection</h1>
+
+<h2 class="sub-heading">7.1 Breed: Murrah Buffalo</h2>
+<table class="no-break">
+  <tr><th>Parameter</th><th>Details</th></tr>
+  <tr><td>Breed</td><td><strong>Murrah Buffalo</strong> (Pure / High-grade)</td></tr>
+  <tr><td>Why Murrah</td><td>Highest milk yield among buffalo breeds; well-adapted to AP climate</td></tr>
+  <tr><td>Average Milk Yield</td><td>10–14 litres/day per animal</td></tr>
+  <tr><td>Lactation Period</td><td>300 days</td></tr>
+  <tr><td>Fat Content</td><td>7–8% (commands premium price)</td></tr>
+  <tr><td>Calving Interval</td><td>14–16 months</td></tr>
+  <tr><td>Procurement Source</td><td>AP Livestock Development Agency (APLDA) / CFSPTI Bangalore / Registered breeders</td></tr>
+</table>
+
+<h2 class="sub-heading">7.2 Animal Composition (40 Head)</h2>
+<table class="no-break">
+  <tr><th>Category</th><th class="text-center">Number</th><th class="text-right">Unit Cost (₹)</th><th class="text-right">Total (₹)</th></tr>
+  <tr><td>Murrah Buffalo (lactating, 8–10 L/day yield)</td><td class="text-center">32</td><td class="text-right">80,000</td><td class="text-right">25,60,000</td></tr>
+  <tr><td>Murrah Buffalo (pregnant, 3rd month+)</td><td class="text-center">6</td><td class="text-right">75,000</td><td class="text-right">4,50,000</td></tr>
+  <tr><td>Heifer (18 months, ready to calve)</td><td class="text-center">2</td><td class="text-right">55,000</td><td class="text-right">1,10,000</td></tr>
+  <tr class="total-row"><td><strong>Animal Total</strong></td><td class="text-center"><strong>40</strong></td><td></td><td class="text-right"><strong>₹31,20,000</strong></td></tr>
+</table>
+
+<h2 class="sub-heading">7.3 Annual Veterinary Care Plan</h2>
+<table class="no-break">
+  <tr><th>Service</th><th>Frequency</th><th class="text-right">Annual Cost (₹)</th></tr>
+  <tr><td>Routine vaccination (FMD, HS, BQ)</td><td>2× per year</td><td class="text-right">16,000</td></tr>
+  <tr><td>De-worming</td><td>4× per year</td><td class="text-right">8,000</td></tr>
+  <tr><td>Artificial Insemination</td><td>As needed</td><td class="text-right">12,000</td></tr>
+  <tr><td>Emergency veterinary visits</td><td>As needed</td><td class="text-right">24,000</td></tr>
+  <tr><td>Vitamin/mineral supplements</td><td>Monthly</td><td class="text-right">18,000</td></tr>
+  <tr class="total-row"><td colspan="2"><strong>Annual Veterinary Cost</strong></td><td class="text-right"><strong>₹78,000</strong></td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 8: FEED & FODDER
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">8. Feed &amp; Fodder Plan</h1>
+
+<h2 class="sub-heading">8.1 Daily Feed Requirement (per animal)</h2>
+<table class="no-break">
+  <tr><th>Feed Type</th><th class="text-center">Qty/Animal/Day</th><th class="text-right">Total (40 animals)</th></tr>
+  <tr><td>Green fodder (Napier / Sorghum)</td><td class="text-center">20 kg</td><td class="text-right">800 kg</td></tr>
+  <tr><td>Dry fodder (Paddy straw / Sorghum hay)</td><td class="text-center">5 kg</td><td class="text-right">200 kg</td></tr>
+  <tr><td>Concentrate feed (commercial)</td><td class="text-center">4 kg</td><td class="text-right">160 kg</td></tr>
+  <tr><td>Mineral mixture</td><td class="text-center">50 g</td><td class="text-right">2 kg</td></tr>
+  <tr><td>Water</td><td class="text-center">60 litres</td><td class="text-right">2,400 litres</td></tr>
+</table>
+
+<h2 class="sub-heading">8.2 Fodder Cultivation (2 Acres)</h2>
+<table class="no-break">
+  <tr><th>Crop</th><th>Area</th><th class="text-right">Yield/Acre/Year</th><th class="text-right">Annual Yield</th><th class="text-right">Value (₹)</th></tr>
+  <tr><td>Napier Grass (CO-4)</td><td>1.5 Acres</td><td class="text-right">80 tonnes</td><td class="text-right">120 tonnes</td><td class="text-right">3,60,000</td></tr>
+  <tr><td>Sorghum (multi-cut)</td><td>0.5 Acres</td><td class="text-right">30 tonnes</td><td class="text-right">15 tonnes</td><td class="text-right">45,000</td></tr>
+  <tr class="total-row"><td colspan="2"><strong>Total Green Fodder</strong></td><td class="text-right"><strong>—</strong></td><td class="text-right"><strong>135 tonnes</strong></td><td class="text-right"><strong>₹4,05,000</strong></td></tr>
+</table>
+
+<div class="note-box">Annual green fodder requirement: 800 kg × 365 = <strong>292 tonnes</strong> | Own production: <strong>135 tonnes (46% self-sufficient)</strong> | Balance to purchase: 157 tonnes (54%)</div>
+
+<h2 class="sub-heading">8.3 Annual Feed Cost</h2>
+<table class="no-break">
+  <tr><th>Item</th><th class="text-right">Annual Cost (₹)</th></tr>
+  <tr><td>Purchased green fodder</td><td class="text-right">5,50,000</td></tr>
+  <tr><td>Dry fodder (paddy straw)</td><td class="text-right">2,40,000</td></tr>
+  <tr><td>Concentrate feed</td><td class="text-right">11,68,000</td></tr>
+  <tr><td>Mineral mixture</td><td class="text-right">36,000</td></tr>
+  <tr><td>Fodder cultivation inputs (seeds, fertilizer)</td><td class="text-right">60,000</td></tr>
+  <tr class="total-row"><td><strong>Total Annual Feed Cost</strong></td><td class="text-right"><strong>₹20,54,000</strong></td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 9: FINANCIAL PLAN
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">9. Financial Plan — Project Cost &amp; Means of Finance</h1>
+
+<h2 class="sub-heading">9.1 Total Project Cost</h2>
+<table class="no-break">
+  <tr><th>Component</th><th class="text-right">Amount (₹)</th></tr>
+  <tr><td>A. Civil Construction</td><td class="text-right">60,30,000</td></tr>
+  <tr><td>B. Automation &amp; Equipment</td><td class="text-right">21,30,000</td></tr>
+  <tr><td>C. Animals (40 Murrah Buffaloes)</td><td class="text-right">31,20,000</td></tr>
+  <tr><td>D. Fodder Cultivation Setup (drip irrigation + land prep)</td><td class="text-right">2,40,000</td></tr>
+  <tr><td>E. Working Capital (6 months)</td><td class="text-right">12,24,000</td></tr>
+  <tr><td>F. Contingency @ 5%</td><td class="text-right">6,37,200</td></tr>
+  <tr class="highlight-gold"><td><strong>TOTAL PROJECT COST</strong></td><td class="text-right"><strong>₹1,34,00,000</strong></td></tr>
+</table>
+
+<h2 class="sub-heading">9.2 Means of Finance</h2>
+<table class="no-break">
+  <tr><th>Source</th><th class="text-right">Amount (₹)</th><th class="text-center">%</th></tr>
+  <tr class="highlight-red"><td><strong>NABARD DEDS Subsidy (33.33% — Women)</strong></td><td class="text-right"><strong>44,66,600</strong></td><td class="text-center"><strong>33.33%</strong></td></tr>
+  <tr><td>Bank Term Loan</td><td class="text-right">89,33,400</td><td class="text-center">66.67%</td></tr>
+  <tr><td>Promoter's Own Contribution</td><td class="text-right">0</td><td class="text-center">0%</td></tr>
+  <tr class="total-row"><td><strong>Total</strong></td><td class="text-right"><strong>₹1,34,00,000</strong></td><td class="text-center"><strong>100%</strong></td></tr>
+</table>
+
+<div class="note-box">Under DEDS for Women entrepreneurs, subsidy is 33.33% of total project cost with <strong>no mandatory own contribution</strong> requirement. Bank finances the remaining 66.67%.</div>
+
+<h2 class="sub-heading">9.3 Bank Loan Details</h2>
+<table class="no-break">
+  <tr><th>Parameter</th><th>Details</th></tr>
+  <tr><td>Loan Amount</td><td><strong>₹89,33,400</strong></td></tr>
+  <tr><td>Interest Rate</td><td>9% p.a. (reducing balance)</td></tr>
+  <tr><td>Repayment Period</td><td>7 years</td></tr>
+  <tr><td>Moratorium</td><td>12 months</td></tr>
+  <tr><td>Effective Repayment Period</td><td>6 years (after moratorium)</td></tr>
+  <tr><td>Security</td><td>Mortgage of leased land + hypothecation of animals &amp; equipment</td></tr>
+  <tr><td>Collateral</td><td>Personal guarantee of applicant + land owner NOC</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 10: REVENUE & PROFITABILITY
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">10. Revenue &amp; Profitability Projections</h1>
+
+<h2 class="sub-heading">10.1 Milk Production Estimate</h2>
+<table class="no-break">
+  <tr><th>Parameter</th><th class="text-center">Year 1</th><th class="text-center">Year 2</th><th class="text-center">Year 3+</th></tr>
+  <tr><td>Lactating animals</td><td class="text-center">32</td><td class="text-center">36</td><td class="text-center">38</td></tr>
+  <tr><td>Average yield/animal/day (litres)</td><td class="text-center">10</td><td class="text-center">11</td><td class="text-center">12</td></tr>
+  <tr><td>Daily milk production (litres)</td><td class="text-center">320</td><td class="text-center">396</td><td class="text-center">456</td></tr>
+  <tr><td>Production days/year</td><td class="text-center">300</td><td class="text-center">300</td><td class="text-center">300</td></tr>
+  <tr><td>Annual milk production (litres)</td><td class="text-center">96,000</td><td class="text-center">1,18,800</td><td class="text-center">1,36,800</td></tr>
+  <tr><td>Sale price per litre (₹)</td><td class="text-center">52</td><td class="text-center">54</td><td class="text-center">56</td></tr>
+  <tr class="highlight-gold"><td><strong>Annual Milk Revenue (₹)</strong></td><td class="text-center"><strong>49,92,000</strong></td><td class="text-center"><strong>64,15,200</strong></td><td class="text-center"><strong>76,60,800</strong></td></tr>
+</table>
+
+<h2 class="sub-heading">10.2 Additional Revenue</h2>
+<table class="no-break">
+  <tr><th>Source</th><th class="text-right">Annual Revenue (₹)</th></tr>
+  <tr><td>Sale of male calves / heifers</td><td class="text-right">2,40,000</td></tr>
+  <tr><td>Organic manure (compost sale)</td><td class="text-right">1,20,000</td></tr>
+  <tr><td>Biogas saving (electricity/fuel)</td><td class="text-right">60,000</td></tr>
+  <tr class="total-row"><td><strong>Total Other Revenue</strong></td><td class="text-right"><strong>₹4,20,000</strong></td></tr>
+</table>
+
+<h2 class="sub-heading">10.3 Annual Operating Costs</h2>
+<table class="no-break">
+  <tr><th>Expense</th><th class="text-right">Year 1 (₹)</th><th class="text-right">Year 3+ (₹)</th></tr>
+  <tr><td>Feed &amp; Fodder</td><td class="text-right">20,54,000</td><td class="text-right">22,00,000</td></tr>
+  <tr><td>Labour (2 workers @ ₹12,000/month)</td><td class="text-right">2,88,000</td><td class="text-right">3,12,000</td></tr>
+  <tr><td>Veterinary &amp; medicines</td><td class="text-right">78,000</td><td class="text-right">84,000</td></tr>
+  <tr><td>Electricity (net after solar/biogas)</td><td class="text-right">36,000</td><td class="text-right">36,000</td></tr>
+  <tr><td>Maintenance &amp; repairs</td><td class="text-right">60,000</td><td class="text-right">72,000</td></tr>
+  <tr><td>Land rent (to father)</td><td class="text-right">10,000</td><td class="text-right">10,000</td></tr>
+  <tr><td>Insurance (animals + shed)</td><td class="text-right">48,000</td><td class="text-right">52,000</td></tr>
+  <tr><td>Misc (transport, admin)</td><td class="text-right">36,000</td><td class="text-right">40,000</td></tr>
+  <tr class="total-row"><td><strong>Total Operating Cost</strong></td><td class="text-right"><strong>₹26,10,000</strong></td><td class="text-right"><strong>₹28,06,000</strong></td></tr>
+</table>
+
+<h2 class="sub-heading">10.4 Profit &amp; Loss Summary</h2>
+<table class="no-break">
+  <tr><th>Parameter</th><th class="text-right">Year 1 (₹)</th><th class="text-right">Year 2 (₹)</th><th class="text-right">Year 3 (₹)</th></tr>
+  <tr><td>Milk Revenue</td><td class="text-right">49,92,000</td><td class="text-right">64,15,200</td><td class="text-right">76,60,800</td></tr>
+  <tr><td>Other Revenue</td><td class="text-right">4,20,000</td><td class="text-right">4,20,000</td><td class="text-right">4,50,000</td></tr>
+  <tr class="highlight-gold"><td><strong>Total Revenue</strong></td><td class="text-right"><strong>54,12,000</strong></td><td class="text-right"><strong>68,35,200</strong></td><td class="text-right"><strong>81,10,800</strong></td></tr>
+  <tr><td>Operating Cost</td><td class="text-right">26,10,000</td><td class="text-right">27,00,000</td><td class="text-right">28,06,000</td></tr>
+  <tr><td>Depreciation (10% on assets)</td><td class="text-right">8,16,000</td><td class="text-right">7,34,400</td><td class="text-right">6,60,960</td></tr>
+  <tr><td>Interest on Loan</td><td class="text-right">8,03,900</td><td class="text-right">7,23,510</td><td class="text-right">6,43,120</td></tr>
+  <tr><td>Total Expenses</td><td class="text-right">42,29,900</td><td class="text-right">41,57,910</td><td class="text-right">41,10,080</td></tr>
+  <tr class="highlight-gold"><td><strong>Net Profit Before Tax</strong></td><td class="text-right"><strong>11,82,100</strong></td><td class="text-right"><strong>26,77,290</strong></td><td class="text-right"><strong>40,00,720</strong></td></tr>
+  <tr class="total-row"><td><strong>Net Profit After Tax (est.)</strong></td><td class="text-right"><strong>~10,00,000</strong></td><td class="text-right"><strong>~22,50,000</strong></td><td class="text-right"><strong>~34,00,000</strong></td></tr>
+</table>
+
+<h2 class="sub-heading">10.5 Break-even Analysis</h2>
+<table class="no-break">
+  <tr><th>Parameter</th><th>Value</th></tr>
+  <tr><td>Fixed Cost (annual)</td><td>₹16,19,900</td></tr>
+  <tr><td>Variable Cost per litre</td><td>₹19.50</td></tr>
+  <tr><td>Selling price per litre</td><td>₹52.00</td></tr>
+  <tr><td>Break-even Production</td><td>~50,000 litres/year</td></tr>
+  <tr class="highlight-gold"><td><strong>Break-even Period</strong></td><td><strong>~2.5 years</strong></td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 11: REPAYMENT SCHEDULE
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">11. Repayment Schedule &amp; DSCR</h1>
+
+<p>Loan: ₹89,33,400 | Rate: 9% p.a. | 7 Years (Year 1 moratorium, Years 2–7 repayment)</p>
+
+<table>
+  <tr>
+    <th>Year</th>
+    <th class="text-right">Opening Balance (₹)</th>
+    <th class="text-right">Principal (₹)</th>
+    <th class="text-right">Interest (₹)</th>
+    <th class="text-right">Total EMI (₹)</th>
+    <th class="text-right">Closing Balance (₹)</th>
+  </tr>
+  <tr class="highlight-amber"><td>Year 1 (Moratorium)</td><td class="text-right">89,33,400</td><td class="text-right">0</td><td class="text-right">8,03,900</td><td class="text-right">8,03,900</td><td class="text-right">89,33,400</td></tr>
+  <tr><td>Year 2</td><td class="text-right">89,33,400</td><td class="text-right">14,88,900</td><td class="text-right">8,03,900</td><td class="text-right">22,92,800</td><td class="text-right">74,44,500</td></tr>
+  <tr><td>Year 3</td><td class="text-right">74,44,500</td><td class="text-right">14,88,900</td><td class="text-right">6,70,005</td><td class="text-right">21,58,905</td><td class="text-right">59,55,600</td></tr>
+  <tr><td>Year 4</td><td class="text-right">59,55,600</td><td class="text-right">14,88,900</td><td class="text-right">5,36,004</td><td class="text-right">20,24,904</td><td class="text-right">44,66,700</td></tr>
+  <tr><td>Year 5</td><td class="text-right">44,66,700</td><td class="text-right">14,88,900</td><td class="text-right">4,02,003</td><td class="text-right">18,90,903</td><td class="text-right">29,77,800</td></tr>
+  <tr><td>Year 6</td><td class="text-right">29,77,800</td><td class="text-right">14,88,900</td><td class="text-right">2,68,002</td><td class="text-right">17,56,902</td><td class="text-right">14,88,900</td></tr>
+  <tr><td>Year 7</td><td class="text-right">14,88,900</td><td class="text-right">14,88,900</td><td class="text-right">1,34,001</td><td class="text-right">16,22,901</td><td class="text-right">0</td></tr>
+  <tr class="total-row"><td><strong>Total</strong></td><td></td><td class="text-right"><strong>₹89,33,400</strong></td><td class="text-right"><strong>₹36,17,815</strong></td><td class="text-right"><strong>₹1,25,51,215</strong></td><td></td></tr>
+</table>
+
+<div class="note-box">
+  <strong>Debt Service Coverage Ratio (DSCR):</strong><br/>
+  Year 2: ₹54,12,000 ÷ ₹22,92,800 = <strong>2.36</strong> ✓ (Benchmark: &gt;1.5)<br/>
+  Year 3: ₹68,35,200 ÷ ₹21,58,905 = <strong>3.17</strong> ✓ — Strong repayment capacity
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 12: SWOT
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">12. SWOT Analysis</h1>
+
+<div class="swot-grid">
+  <div class="swot-box s">
+    <h4>Strengths</h4>
+    <ul>
+      <li>Women entrepreneur — maximum subsidy (33.33%)</li>
+      <li>Own land (leased from father) — no land purchase cost</li>
+      <li>Fully automated farm — low labor dependency</li>
+      <li>AP has strong milk procurement (Vijaya Dairy)</li>
+      <li>Buffalo milk commands premium price</li>
+    </ul>
+  </div>
+  <div class="swot-box w">
+    <h4>Weaknesses</h4>
+    <ul>
+      <li>First-time dairy entrepreneur</li>
+      <li>Mitigation: hire experienced farm manager initially</li>
+      <li>Dependence on purchased concentrate feed</li>
+      <li>Mitigation: expand fodder area progressively</li>
+    </ul>
+  </div>
+  <div class="swot-box o">
+    <h4>Opportunities</h4>
+    <ul>
+      <li>Growing demand for A2 buffalo milk in urban/export markets</li>
+      <li>Scope to add value-added products (ghee, paneer) in Phase 2</li>
+      <li>Carbon credits from biogas plant</li>
+      <li>AP government's push for dairy sector growth</li>
+    </ul>
+  </div>
+  <div class="swot-box t">
+    <h4>Threats</h4>
+    <ul>
+      <li>Milk price fluctuation — mitigation: tie-up with Vijaya Dairy at fixed rates</li>
+      <li>Disease outbreak — mitigation: insurance + vaccination protocol</li>
+      <li>Fodder shortage in drought — mitigation: silage storage</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 13: GOVERNMENT SUBSIDY
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">13. Government Subsidy Details</h1>
+
+<h2 class="sub-heading">13.1 NABARD DEDS Scheme</h2>
+<table class="no-break">
+  <tr><th>Parameter</th><th>Details</th></tr>
+  <tr><td>Scheme Name</td><td>Dairy Entrepreneurship Development Scheme (DEDS)</td></tr>
+  <tr><td>Implementing Agency</td><td>NABARD through Scheduled Commercial Banks / RRBs / Cooperative Banks</td></tr>
+  <tr><td>Eligible Activity</td><td>Setting up modern dairy farm</td></tr>
+  <tr class="highlight-red"><td><strong>Subsidy for Women</strong></td><td><strong>33.33% of total project cost</strong></td></tr>
+  <tr class="highlight-red"><td><strong>Subsidy Amount (this project)</strong></td><td><strong>₹44,66,600</strong></td></tr>
+  <tr><td>Disbursement</td><td>Back-ended (credited to loan account after verification)</td></tr>
+  <tr><td>Nodal Officer</td><td>NABARD District Development Manager, Srikakulam</td></tr>
+</table>
+
+<h2 class="sub-heading">13.2 Additional AP State Schemes</h2>
+<table class="no-break">
+  <tr><th>Scheme</th><th>Benefit</th><th>Department</th></tr>
+  <tr><td>AP Animal Husbandry Dept — Dairy Unit Subsidy</td><td>25–33% on infrastructure</td><td>JDAH Srikakulam</td></tr>
+  <tr><td>PM Kusum Yojana</td><td>60% subsidy on solar pump</td><td>Agriculture Dept</td></tr>
+  <tr><td>National Biogas Programme</td><td>₹10,000–18,000 on biogas plant</td><td>MNRE / KVIC</td></tr>
+  <tr><td>Kisan Credit Card (KCC)</td><td>Working capital @ 4% interest</td><td>Any bank</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 14: ENVIRONMENT & WASTE
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">14. Environmental &amp; Waste Management</h1>
+
+<table class="no-break">
+  <tr><th>Waste Type</th><th>Qty/Day</th><th>Management Method</th><th>Value</th></tr>
+  <tr><td>Dung</td><td>400–500 kg</td><td>Biogas plant input</td><td>Gas for cooking/power</td></tr>
+  <tr><td>Slurry (post biogas)</td><td>300 kg</td><td>Organic compost</td><td>₹1,20,000/year</td></tr>
+  <tr><td>Wash water</td><td>1,000 litres</td><td>Soak pit / drip irrigation for fodder</td><td>Recycled</td></tr>
+  <tr><td>Dead animals</td><td>Rare</td><td>APLDA protocol / burial pit</td><td>—</td></tr>
+</table>
+
+<ul>
+  <li><strong>Biogas plant (30 m³)</strong> will generate ~25–30 m³ gas/day — sufficient for farm cooking + partial power backup</li>
+  <li><strong>Zero liquid discharge</strong> — wash water recycled for fodder irrigation</li>
+  <li>No open burning of waste; compost yard produces organic fertilizer</li>
+  <li>Farm will apply for <strong>FSSAI Basic Registration</strong> for milk handling</li>
+</ul>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 15: IMPLEMENTATION SCHEDULE
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">15. Implementation Schedule</h1>
+
+<table class="no-break">
+  <tr><th>Activity</th><th>Timeline</th></tr>
+  <tr><td>Submission of DPR to bank</td><td>Month 1</td></tr>
+  <tr><td>Bank sanction</td><td>Month 2–3</td></tr>
+  <tr><td>Land lease registration</td><td>Month 2</td></tr>
+  <tr><td>Civil construction begins</td><td>Month 3</td></tr>
+  <tr><td>Bore well drilling &amp; solar installation</td><td>Month 3–4</td></tr>
+  <tr><td>Biogas plant construction</td><td>Month 4</td></tr>
+  <tr><td>Equipment procurement &amp; installation</td><td>Month 4–5</td></tr>
+  <tr><td>Animal purchase (in 2 batches)</td><td>Month 5–6</td></tr>
+  <tr><td>Fodder cultivation begins</td><td>Month 4</td></tr>
+  <tr><td>Milk supply agreement (Vijaya Dairy)</td><td>Month 5</td></tr>
+  <tr class="highlight-gold"><td><strong>Full Operations Commence</strong></td><td><strong>Month 6</strong></td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 16: DECLARATIONS
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">16. Declarations &amp; Undertakings</h1>
+
+<div class="declaration-box">
+  <p>I, <strong>Smt. Danthuluri Bhavani</strong>, W/o. Sri Venkata Rama Raju Danthuluri, resident of 9-57A, Devunipalavalasa, Ranasthalam, Srikakulam District — 532409, do hereby solemnly declare that:</p>
+  <ol>
+    <li>The information furnished in this DPR is true and correct to the best of my knowledge.</li>
+    <li>I have not availed any subsidy for dairy farming from any other government scheme for this project.</li>
+    <li>I will comply with all conditions of the loan and subsidy as stipulated by NABARD and the bank.</li>
+    <li>The animals purchased will not be sold/transferred without prior permission of the bank during the loan period.</li>
+    <li>I will maintain proper records of milk production, sales, and financial transactions.</li>
+    <li>I will allow inspection of the farm by NABARD / Bank / Government officials at any time.</li>
+    <li>I will obtain all necessary licenses (FSSAI, APPCB consent, etc.) before commencing operations.</li>
+  </ol>
+</div>
+
+<div class="signature-row" style="margin-top:16mm">
+  <div class="sig-block">
+    <strong>Signature of Applicant</strong>
+    Smt. Danthuluri Bhavani
+  </div>
+  <div class="sig-block">
+    <strong>Date</strong>
+    &nbsp;
+  </div>
+  <div class="sig-block">
+    <strong>Place</strong>
+    Srikakulam
+  </div>
+</div>
+
+<div style="margin-top:12mm; padding: 4mm; border: 1.5px solid var(--gray-border); border-radius:6px;">
+  <strong>Bank Certification (to be filled by banker):</strong><br/><br/>
+  Certified that the above-named applicant is known to this branch and the details furnished are verified to the best of our knowledge.<br/><br/>
+  <div class="signature-row">
+    <div class="sig-block">
+      <strong>Branch Manager Signature</strong>
+    </div>
+    <div class="sig-block">
+      <strong>Branch Seal &amp; Date</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 17: ANNEXURES
+══════════════════════════════════════════════════════════ -->
+<h1 class="section-heading">17. Annexures — Documents Checklist</h1>
+
+<table>
+  <tr><th class="text-center">S.No</th><th>Document</th><th>Status</th><th class="text-center">Provided ☐</th></tr>
+  <tr><td class="text-center">1</td><td>Aadhar Card (Applicant)</td><td>Attach copy</td><td class="text-center">☐</td></tr>
+  <tr><td class="text-center">2</td><td>PAN Card (Applicant)</td><td>Attach copy</td><td class="text-center">☐</td></tr>
+  <tr><td class="text-center">3</td><td>Bank Account Passbook (last 6 months)</td><td>Attach copy</td><td class="text-center">☐</td></tr>
+  <tr><td class="text-center">4</td><td>Land Patta / Adangal (Father's name)</td><td>Attach copy</td><td class="text-center">☐</td></tr>
+  <tr><td class="text-center">5</td><td>Registered Lease Agreement (Father to Applicant)</td><td>To be executed</td><td class="text-center">☐</td></tr>
+  <tr><td class="text-center">6</td><td>NOC from land owner (Father)</td><td>Obtain &amp; attach</td><td class="text-center">☐</td></tr>
+  <tr><td class="text-center">7</td><td>Caste Certificate (if applicable)</td><td>Attach if SC/ST</td><td class="text-center">☐</td></tr>
+  <tr><td class="text-center">8</td><td>Photographs of land site</td><td>Attach 4–6 photos</td><td class="text-center">☐</td></tr>
+  <tr><td class="text-center">9</td><td>Quotations for construction (2 contractors)</td><td>Obtain &amp; attach</td><td class="text-center">☐</td></tr>
+  <tr><td class="text-center">10</td><td>Quotations for equipment (2 suppliers)</td><td>Obtain &amp; attach</td><td class="text-center">☐</td></tr>
+  <tr><td class="text-center">11</td><td>Quotations for buffalo purchase (2 sources)</td><td>Obtain &amp; attach</td><td class="text-center">☐</td></tr>
+  <tr><td class="text-center">12</td><td>Agreement letter from Vijaya Dairy / milk buyer</td><td>Obtain &amp; attach</td><td class="text-center">☐</td></tr>
+  <tr><td class="text-center">13</td><td>NABARD DPR Format (bank-specific form)</td><td>Bank will provide</td><td class="text-center">☐</td></tr>
+  <tr><td class="text-center">14</td><td>Passport size photographs (4 copies)</td><td>Attach</td><td class="text-center">☐</td></tr>
+</table>
+
+<div class="note-box" style="margin-top:6mm">
+  <em>This DPR has been prepared based on prevailing market rates and NABARD DEDS guidelines as of 2026. Actual costs may vary. The applicant is advised to obtain current quotations and verify subsidy norms with the nearest NABARD District Development Manager before submission.</em>
+</div>
+
+<div style="text-align:center; margin-top:10mm; padding:4mm; border-top: 2px solid var(--navy); color: #6b7280; font-size:9pt;">
+  <strong>— END OF DETAILED PROJECT REPORT —</strong><br/>
+  DPR — Bhavani Dairy Farm | Devunipalavalasa, Srikakulam, AP | NABARD DEDS 2026 | Confidential
+</div>
+
+</div><!-- /page-shell -->
+</body>
+</html>

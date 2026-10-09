@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bhavani Dairy Farm — Construction Drawing</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#1a1a2e;color:#e0e0e0;min-height:100vh}
+header{background:#0d2137;padding:12px 20px;border-bottom:2px solid #2a6496}
+header h1{font-size:15px;color:#7ec8e3;letter-spacing:.04em}
+header p{font-size:11px;color:#90a4ae;margin-top:2px}
+.tabs{display:flex;gap:0;background:#0a1929;border-bottom:2px solid #2a6496;overflow-x:auto}
+.tab{padding:10px 18px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:#90a4ae;white-space:nowrap;border-bottom:3px solid transparent;transition:all .2s}
+.tab.active{color:#7ec8e3;border-bottom-color:#7ec8e3;background:#0d2137}
+.tab:hover:not(.active){color:#b0bec5;background:#0d2137}
+.panel{display:none;padding:10px}
+.panel.active{display:block}
+.drawing-frame{background:#fafaf8;border:1px solid #333;overflow:auto;max-height:85vh}
+svg text{font-family:'Arial',sans-serif}
+.legend{background:#0d2137;border:1px solid #2a6496;padding:8px 12px;margin-top:6px;display:flex;flex-wrap:wrap;gap:8px 20px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:10.5px;color:#b0bec5}
+.legend-swatch{width:14px;height:14px;border-radius:2px;flex-shrink:0}
+.title-block{position:absolute;right:0;bottom:0;width:320px;border-top:2px solid #333;border-left:2px solid #333}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>BHAVANI DAIRY FARM — CONSTRUCTION DRAWINGS</h1>
+  <p>Devunipalavalasa, Ranasthalam, Srikakulam AP | 40-Head Murrah Buffalo Loose Housing System | NABARD DEDS 2026</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="show(0)">01 — SITE &amp; FLOOR PLAN</button>
+  <button class="tab" onclick="show(1)">02 — CROSS SECTION A–A</button>
+  <button class="tab" onclick="show(2)">03 — DRAIN PIT DETAIL</button>
+  <button class="tab" onclick="show(3)">04 — TMR &amp; WATER SYSTEM</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     TAB 0 — SITE / FLOOR PLAN
+═══════════════════════════════════════════════════════════════════ -->
+<div class="panel active" id="p0">
+<div class="drawing-frame">
+<svg viewBox="0 0 1100 780" width="1100" height="780" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#aaa" stroke-width="0.6"/>
+    </pattern>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0,8 3,0 6" fill="#333"/>
+    </marker>
+    <marker id="arrowW" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0,8 3,0 6" fill="#fff"/>
+    </marker>
+    <marker id="dimend" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+      <line x1="3" y1="0" x2="3" y2="6" stroke="#555" stroke-width="1.2"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="780" fill="#f8f6f0"/>
+
+  <!-- Drawing border -->
+  <rect x="10" y="10" width="1080" height="760" fill="none" stroke="#333" stroke-width="2"/>
+  <rect x="16" y="16" width="1068" height="748" fill="none" stroke="#aaa" stroke-width="0.5"/>
+
+  <!-- Title block -->
+  <rect x="16" y="720" width="1068" height="38" fill="#e8e8e0" stroke="#333" stroke-width="1"/>
+  <text x="24" y="734" font-size="9" fill="#333" font-weight="bold">PROJECT: BHAVANI DAIRY FARM, DEVUNIPALAVALASA, SRIKAKULAM, AP</text>
+  <text x="24" y="744" font-size="8" fill="#555">CLIENT: SMT. DANTHULURI BHAVANI | NABARD DEDS 2026</text>
+  <text x="560" y="734" font-size="9" fill="#333" font-weight="bold">DWG NO: BDF-01 | SHEET: 01 OF 04</text>
+  <text x="560" y="744" font-size="8" fill="#333" font-weight="bold">TITLE: SITE LAYOUT &amp; FLOOR PLAN</text>
+  <text x="560" y="755" font-size="8" fill="#555">SCALE: 1:200 (INDICATIVE) | DATE: SEP 2026</text>
+  <text x="950" y="740" font-size="8.5" fill="#333" font-weight="bold">NORTH</text>
+  <polygon points="970,710 976,728 970,725 964,728" fill="#333"/>
+  <line x1="970" y1="710" x2="970" y2="730" stroke="#333" stroke-width="1.5"/>
+  <text x="967" y="708" font-size="7" fill="#333">N</text>
+
+  <!-- ── SITE BOUNDARY ── -->
+  <rect x="40" y="30" width="1020" height="680" fill="#f0ede6" stroke="#555" stroke-width="1.5" stroke-dasharray="8,4"/>
+  <text x="55" y="48" font-size="9" fill="#666" font-style="italic">SITE BOUNDARY — 3.5 ACRES (SURVEY NO. 57-3, DEVUNIPALAVALASA)</text>
+
+  <!-- ── MAIN SHED ── -->
+  <!-- Shed footprint: ~60m×15m, scaled ~480×120px -->
+  <rect x="80" y="120" width="480" height="120" fill="#dce8f5" stroke="#1a3a5a" stroke-width="2.5"/>
+  <!-- Shed partition into 5 bays (8 buffaloes × 5 bays = 40) -->
+  <line x1="176" y1="120" x2="176" y2="240" stroke="#1a3a5a" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="272" y1="120" x2="272" y2="240" stroke="#1a3a5a" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="368" y1="120" x2="368" y2="240" stroke="#1a3a5a" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="464" y1="120" x2="464" y2="240" stroke="#1a3a5a" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Feed manger along north wall (top) -->
+  <rect x="80" y="120" width="480" height="18" fill="#fde68a" stroke="#92400e" stroke-width="1"/>
+  <text x="300" y="132" font-size="9" fill="#92400e" text-anchor="middle" font-weight="bold">FEED MANGER (TMR) — 60m LONG</text>
+
+  <!-- Central drain channel -->
+  <rect x="80" y="177" width="480" height="6" fill="#60a5fa" stroke="#1d4ed8" stroke-width="1"/>
+  <text x="300" y="175" font-size="8" fill="#1d4ed8" text-anchor="middle">CENTRAL DRAIN CHANNEL (300×450mm UNDERGROUND)</text>
+
+  <!-- Water trough along south wall (bottom) -->
+  <rect x="80" y="222" width="480" height="10" fill="#93c5fd" stroke="#1d4ed8" stroke-width="1"/>
+  <text x="300" y="231" font-size="8" fill="#1d4ed8" text-anchor="middle">AUTOMATIC WATER TROUGH × 10 (FLOAT VALVE)</text>
+
+  <!-- Buffalo symbols (simplified) — 5 rows × 8 -->
+  <!-- Row indicators -->
+  <text x="300" y="205" font-size="10" fill="#1a3a5a" text-anchor="middle" font-weight="bold">40 BUFFALOES LOOSE HOUSING (8 PER BAY × 5 BAYS)</text>
+
+  <!-- Shed label -->
+  <text x="300" y="145" font-size="11" fill="#1a3a5a" text-anchor="middle" font-weight="bold">MAIN BUFFALO SHED (60m × 15m RCC)</text>
+  <text x="300" y="158" font-size="9" fill="#334155" text-anchor="middle">LOOSE HOUSING SYSTEM | SLOPED FLOOR 2% TOWARD DRAIN</text>
+
+  <!-- TMR Track arrow -->
+  <line x1="80" y1="138" x2="560" y2="138" stroke="#f97316" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+  <text x="310" y="148" font-size="8" fill="#c2410c" text-anchor="middle">TMR WAGON TRACK →</text>
+
+  <!-- Drain slope arrows (2%) -->
+  <line x1="180" y1="185" x2="270" y2="181" stroke="#1d4ed8" stroke-width="1" marker-end="url(#arrow)"/>
+  <line x1="380" y1="185" x2="290" y2="181" stroke="#1d4ed8" stroke-width="1" marker-end="url(#arrow)"/>
+  <text x="130" y="200" font-size="8" fill="#1d4ed8">2% SLOPE</text>
+  <text x="430" y="200" font-size="8" fill="#1d4ed8">2% SLOPE</text>
+
+  <!-- ── MILKING PARLOUR ── -->
+  <rect x="560" y="120" width="80" height="120" fill="#e9d5ff" stroke="#6b21a8" stroke-width="2"/>
+  <text x="600" y="160" font-size="9" fill="#6b21a8" text-anchor="middle" font-weight="bold">MILKING</text>
+  <text x="600" y="172" font-size="9" fill="#6b21a8" text-anchor="middle" font-weight="bold">PARLOUR</text>
+  <text x="600" y="184" font-size="8" fill="#6b21a8" text-anchor="middle">8m × 6m</text>
+  <text x="600" y="196" font-size="8" fill="#6b21a8" text-anchor="middle">AUTO CLUSTER</text>
+  <text x="600" y="207" font-size="8" fill="#6b21a8" text-anchor="middle">MILKING × 2</text>
+
+  <!-- ── MILK ROOM / CHILLING ── -->
+  <rect x="560" y="70" width="80" height="50" fill="#fce7f3" stroke="#9d174d" stroke-width="2"/>
+  <text x="600" y="90" font-size="8.5" fill="#9d174d" text-anchor="middle" font-weight="bold">MILK ROOM</text>
+  <text x="600" y="103" font-size="8" fill="#9d174d" text-anchor="middle">BMC 500L</text>
+  <text x="600" y="114" font-size="8" fill="#9d174d" text-anchor="middle">8m × 4m</text>
+
+  <!-- ── CALF UNIT ── -->
+  <rect x="560" y="240" width="80" height="70" fill="#d1fae5" stroke="#065f46" stroke-width="2"/>
+  <text x="600" y="268" font-size="9" fill="#065f46" text-anchor="middle" font-weight="bold">CALF</text>
+  <text x="600" y="281" font-size="9" fill="#065f46" text-anchor="middle" font-weight="bold">UNIT</text>
+  <text x="600" y="293" font-size="8" fill="#065f46" text-anchor="middle">8m × 6m</text>
+
+  <!-- ── FEED GODOWN ── -->
+  <rect x="660" y="120" width="100" height="80" fill="#fef3c7" stroke="#92400e" stroke-width="2"/>
+  <text x="710" y="152" font-size="9" fill="#92400e" text-anchor="middle" font-weight="bold">FEED GODOWN</text>
+  <text x="710" y="165" font-size="8" fill="#92400e" text-anchor="middle">10m × 8m</text>
+  <text x="710" y="177" font-size="8" fill="#92400e" text-anchor="middle">TMR MIXER</text>
+
+  <!-- ── WORKER QUARTERS ── -->
+  <rect x="660" y="210" width="80" height="60" fill="#f0fdf4" stroke="#166534" stroke-width="2"/>
+  <text x="700" y="237" font-size="9" fill="#166534" text-anchor="middle" font-weight="bold">WORKER</text>
+  <text x="700" y="250" font-size="9" fill="#166534" text-anchor="middle" font-weight="bold">QUARTERS</text>
+  <text x="700" y="262" font-size="8" fill="#166534" text-anchor="middle">8m × 6m</text>
+
+  <!-- ── BIOGAS PLANT ── -->
+  <ellipse cx="780" cy="430" rx="55" ry="40" fill="#fde68a" stroke="#d97706" stroke-width="2"/>
+  <text x="780" y="425" font-size="9" fill="#92400e" text-anchor="middle" font-weight="bold">BIOGAS</text>
+  <text x="780" y="438" font-size="8" fill="#92400e" text-anchor="middle">PLANT 30m³</text>
+  <text x="780" y="450" font-size="8" fill="#92400e" text-anchor="middle">FIXED DOME</text>
+
+  <!-- ── SOLAR PANELS ── -->
+  <rect x="860" y="60" width="180" height="80" fill="#bbf7d0" stroke="#166534" stroke-width="2"/>
+  <text x="950" y="95" font-size="10" fill="#166534" text-anchor="middle" font-weight="bold">SOLAR PANELS</text>
+  <text x="950" y="110" font-size="8.5" fill="#166534" text-anchor="middle">5 kW SYSTEM</text>
+  <!-- Panel grid lines -->
+  <line x1="890" y1="60" x2="890" y2="140" stroke="#166534" stroke-width="0.5"/>
+  <line x1="920" y1="60" x2="920" y2="140" stroke="#166534" stroke-width="0.5"/>
+  <line x1="950" y1="60" x2="950" y2="140" stroke="#166534" stroke-width="0.5"/>
+  <line x1="980" y1="60" x2="980" y2="140" stroke="#166534" stroke-width="0.5"/>
+  <line x1="1010" y1="60" x2="1010" y2="140" stroke="#166534" stroke-width="0.5"/>
+  <line x1="860" y1="90" x2="1040" y2="90" stroke="#166534" stroke-width="0.5"/>
+
+  <!-- ── DRAIN PIT (TWO CHAMBER) ── -->
+  <rect x="80" y="370" width="100" height="70" fill="#dbeafe" stroke="#1e40af" stroke-width="2.5"/>
+  <!-- Two chambers -->
+  <line x1="130" y1="370" x2="130" y2="440" stroke="#1e40af" stroke-width="2"/>
+  <text x="104" y="397" font-size="8" fill="#1e40af" text-anchor="middle" font-weight="bold">PIT</text>
+  <text x="104" y="408" font-size="8" fill="#1e40af" text-anchor="middle" font-weight="bold">CH.1</text>
+  <text x="104" y="420" font-size="7" fill="#1e40af" text-anchor="middle">4m×3m</text>
+  <text x="156" y="397" font-size="8" fill="#1e40af" text-anchor="middle" font-weight="bold">PIT</text>
+  <text x="156" y="408" font-size="8" fill="#1e40af" text-anchor="middle" font-weight="bold">CH.2</text>
+  <text x="156" y="420" font-size="7" fill="#1e40af" text-anchor="middle">4m×3m</text>
+
+  <!-- Separator machine symbol in CH.1 -->
+  <rect x="87" y="425" width="36" height="12" fill="#f97316" stroke="#c2410c" stroke-width="1"/>
+  <text x="105" y="434" font-size="7" fill="white" text-anchor="middle">SEPARATOR</text>
+
+  <!-- Drain pipe from shed to pit -->
+  <line x1="320" y1="240" x2="320" y2="370" stroke="#1e40af" stroke-width="3" stroke-dasharray="5,2"/>
+  <line x1="130" y1="370" x2="320" y2="370" stroke="#1e40af" stroke-width="3" stroke-dasharray="5,2"/>
+  <text x="210" y="365" font-size="8" fill="#1e40af" text-anchor="middle" font-weight="bold">UNDERGROUND DRAIN PIPE (200mm DIA PVC)</text>
+  <polygon points="125,370 135,366 135,374" fill="#1e40af"/>
+
+  <!-- ── BORE WELL + OH TANK ── -->
+  <circle cx="870" cy="310" r="22" fill="#bfdbfe" stroke="#1e40af" stroke-width="2"/>
+  <text x="870" y="305" font-size="8" fill="#1e40af" text-anchor="middle" font-weight="bold">BORE</text>
+  <text x="870" y="317" font-size="8" fill="#1e40af" text-anchor="middle" font-weight="bold">WELL</text>
+
+  <!-- OH Tank -->
+  <rect x="920" y="280" width="50" height="40" fill="#93c5fd" stroke="#1d4ed8" stroke-width="2"/>
+  <text x="945" y="297" font-size="7.5" fill="#1d4ed8" text-anchor="middle" font-weight="bold">OH TANK</text>
+  <text x="945" y="308" font-size="7.5" fill="#1d4ed8" text-anchor="middle">10,000L</text>
+
+  <!-- HP Pump -->
+  <rect x="990" y="285" width="55" height="30" fill="#f0abfc" stroke="#7e22ce" stroke-width="2"/>
+  <text x="1017" y="298" font-size="7.5" fill="#7e22ce" text-anchor="middle" font-weight="bold">HP PUMP</text>
+  <text x="1017" y="309" font-size="7" fill="#7e22ce" text-anchor="middle">5-6 BAR</text>
+
+  <!-- Water supply line to shed -->
+  <line x1="940" y1="300" x2="940" y2="240" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="6,3"/>
+  <line x1="940" y1="240" x2="560" y2="240" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="6,3"/>
+  <text x="750" y="235" font-size="8" fill="#1d4ed8" text-anchor="middle">HP WATER SUPPLY LINE (63mm HDPE)</text>
+
+  <!-- ── FODDER FIELD ── -->
+  <rect x="80" y="490" width="700" height="200" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <!-- Rows -->
+  <line x1="80" y1="530" x2="780" y2="530" stroke="#86efac" stroke-width="0.7"/>
+  <line x1="80" y1="570" x2="780" y2="570" stroke="#86efac" stroke-width="0.7"/>
+  <line x1="80" y1="610" x2="780" y2="610" stroke="#86efac" stroke-width="0.7"/>
+  <line x1="80" y1="650" x2="780" y2="650" stroke="#86efac" stroke-width="0.7"/>
+  <text x="420" y="560" font-size="11" fill="#166534" text-anchor="middle" font-weight="bold">GREEN FODDER FIELD — 2.5 ACRES</text>
+  <text x="420" y="578" font-size="9" fill="#166534" text-anchor="middle">NAPIER GRASS (1.5 ACRES) + SORGHUM (0.5 ACRES) + SILAGE PIT (0.5 ACRES)</text>
+
+  <!-- ── SILAGE PIT ── -->
+  <rect x="810" y="490" width="90" height="80" fill="#fef9c3" stroke="#d97706" stroke-width="2"/>
+  <text x="855" y="525" font-size="9" fill="#92400e" text-anchor="middle" font-weight="bold">SILAGE PIT</text>
+  <text x="855" y="538" font-size="8" fill="#92400e" text-anchor="middle">0.5 ACRES</text>
+
+  <!-- DIMENSION LINES -->
+  <!-- Shed width 60m -->
+  <line x1="80" y1="105" x2="560" y2="105" stroke="#555" stroke-width="1" marker-start="url(#dimend)" marker-end="url(#dimend)"/>
+  <text x="320" y="100" font-size="10" fill="#333" text-anchor="middle" font-weight="bold">60 m</text>
+  <!-- Shed depth 15m -->
+  <line x1="64" y1="120" x2="64" y2="240" stroke="#555" stroke-width="1" marker-start="url(#dimend)" marker-end="url(#dimend)"/>
+  <text x="54" y="185" font-size="10" fill="#333" text-anchor="middle" font-weight="bold" transform="rotate(-90,54,185)">15 m</text>
+
+  <!-- Section cut line A-A -->
+  <line x1="80" y1="265" x2="560" y2="265" stroke="#c00" stroke-width="1.5" stroke-dasharray="10,4"/>
+  <text x="82" y="260" font-size="11" fill="#c00" font-weight="bold">A</text>
+  <text x="548" y="260" font-size="11" fill="#c00" font-weight="bold">A</text>
+  <text x="314" y="279" font-size="9" fill="#c00" text-anchor="middle">SECTION A–A (SEE SHEET 02)</text>
+
+  <!-- CCTV label -->
+  <circle cx="87" cy="127" r="5" fill="#ef4444" stroke="#991b1b" stroke-width="1"/>
+  <circle cx="553" cy="127" r="5" fill="#ef4444" stroke="#991b1b" stroke-width="1"/>
+  <circle cx="87" cy="233" r="5" fill="#ef4444" stroke="#991b1b" stroke-width="1"/>
+  <circle cx="553" cy="233" r="5" fill="#ef4444" stroke="#991b1b" stroke-width="1"/>
+  <text x="960" y="210" font-size="8" fill="#ef4444">● CCTV CAMERAS × 8</text>
+
+  <!-- LEGEND BOX -->
+  <rect x="810" y="590" width="235" height="120" fill="#f5f5f5" stroke="#555" stroke-width="1"/>
+  <text x="927" y="604" font-size="9" fill="#333" text-anchor="middle" font-weight="bold">LEGEND</text>
+  <rect x="820" y="610" width="14" height="10" fill="#dce8f5" stroke="#1a3a5a" stroke-width="1"/><text x="840" y="619" font-size="8" fill="#333">Main Buffalo Shed (RCC)</text>
+  <rect x="820" y="624" width="14" height="10" fill="#fde68a" stroke="#92400e" stroke-width="1"/><text x="840" y="633" font-size="8" fill="#333">Feed Manger / Godown</text>
+  <rect x="820" y="638" width="14" height="10" fill="#dbeafe" stroke="#1e40af" stroke-width="1"/><text x="840" y="647" font-size="8" fill="#333">Drain / Water</text>
+  <rect x="820" y="652" width="14" height="10" fill="#d1fae5" stroke="#065f46" stroke-width="1"/><text x="840" y="661" font-size="8" fill="#333">Green / Utility</text>
+  <rect x="820" y="666" width="14" height="10" fill="#fde68a" stroke="#d97706" stroke-width="1"/><text x="840" y="675" font-size="8" fill="#333">Biogas / Solar</text>
+  <line x1="820" y1="684" x2="834" y2="684" stroke="#c00" stroke-width="1.5" stroke-dasharray="4,2"/><text x="840" y="688" font-size="8" fill="#333">Section Cut</text>
+  <line x1="820" y1="697" x2="834" y2="697" stroke="#1e40af" stroke-width="2" stroke-dasharray="4,2"/><text x="840" y="701" font-size="8" fill="#333">Underground Drain/Water Pipe</text>
+</svg>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     TAB 1 — CROSS SECTION A-A
+═══════════════════════════════════════════════════════════════════ -->
+<div class="panel" id="p1">
+<div class="drawing-frame">
+<svg viewBox="0 0 1100 700" width="1100" height="700" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1100" height="700" fill="#f8f6f0"/>
+  <rect x="10" y="10" width="1080" height="680" fill="none" stroke="#333" stroke-width="2"/>
+
+  <!-- Title -->
+  <rect x="16" y="660" width="1068" height="28" fill="#e8e8e0" stroke="#333" stroke-width="1"/>
+  <text x="400" y="672" font-size="9" fill="#333" font-weight="bold">DWG BDF-02 | SECTION A–A — SHED CROSS SECTION (1:50 INDICATIVE) | BHAVANI DAIRY FARM</text>
+  <text x="400" y="682" font-size="8" fill="#555">Shows: RCC structure, 2% floor slope, underground drain channel, feed manger, water trough, buffalo clearances</text>
+
+  <!-- GROUND LINE -->
+  <line x1="30" y1="560" x2="1070" y2="560" stroke="#8B4513" stroke-width="2"/>
+  <text x="35" y="575" font-size="8" fill="#8B4513">G.L. (FINISHED GROUND)</text>
+
+  <!-- FOUNDATION -->
+  <rect x="60" y="560" width="30" height="30" fill="#a1a1aa" stroke="#555" stroke-width="1"/><!-- left column footing -->
+  <rect x="1010" y="560" width="30" height="30" fill="#a1a1aa" stroke="#555" stroke-width="1"/><!-- right column footing -->
+  <!-- Intermediate footings -->
+  <rect x="330" y="560" width="20" height="24" fill="#a1a1aa" stroke="#555" stroke-width="1"/>
+  <rect x="650" y="560" width="20" height="24" fill="#a1a1aa" stroke="#555" stroke-width="1"/>
+
+  <!-- LEFT RCC COLUMN -->
+  <rect x="68" y="300" width="22" height="260" fill="#c0c0c0" stroke="#555" stroke-width="1.5"/>
+  <text x="79" y="295" font-size="7" fill="#555" text-anchor="middle">RCC COL</text>
+  <text x="79" y="285" font-size="7" fill="#555" text-anchor="middle">350×350</text>
+
+  <!-- RIGHT RCC COLUMN -->
+  <rect x="1010" y="300" width="22" height="260" fill="#c0c0c0" stroke="#555" stroke-width="1.5"/>
+
+  <!-- INTERMEDIATE COLUMNS -->
+  <rect x="334" y="360" width="16" height="200" fill="#c0c0c0" stroke="#555" stroke-width="1"/>
+  <rect x="652" y="360" width="16" height="200" fill="#c0c0c0" stroke="#555" stroke-width="1"/>
+
+  <!-- ROOF — portal frame with apex -->
+  <!-- Left rafter -->
+  <polygon points="79,300 660,180 660,190 79,315" fill="#c0c0c0" stroke="#555" stroke-width="1.5"/>
+  <!-- Right rafter -->
+  <polygon points="1021,300 660,180 660,190 1021,315" fill="#c0c0c0" stroke="#555" stroke-width="1.5"/>
+  <!-- Ridge cap -->
+  <rect x="654" y="175" width="14" height="20" fill="#888" stroke="#555" stroke-width="1"/>
+  <!-- Roof sheeting (GI/steel) -->
+  <polygon points="79,310 660,188 1021,310 1030,305 660,180 70,305" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+  <text x="660" y="235" font-size="9" fill="#475569" text-anchor="middle" font-weight="bold">GI ROOFING SHEETS (INSULATED)</text>
+  <text x="660" y="248" font-size="8" fill="#475569" text-anchor="middle">Ridge Height: ~6.5m | Eave Height: ~4.5m</text>
+
+  <!-- PURLINS (horizontal lines on roof) -->
+  <line x1="200" y1="268" x2="660" y2="214" stroke="#64748b" stroke-width="0.7"/>
+  <line x1="400" y1="247" x2="660" y2="200" stroke="#64748b" stroke-width="0.7"/>
+  <line x1="200" y1="268" x2="79" y2="280" stroke="#64748b" stroke-width="0.7"/>
+  <line x1="850" y1="268" x2="660" y2="214" stroke="#64748b" stroke-width="0.7"/>
+  <line x1="920" y1="280" x2="1021" y2="286" stroke="#64748b" stroke-width="0.7"/>
+
+  <!-- FANS / VENTILATION at ridge -->
+  <rect x="630" y="170" width="10" height="15" fill="#fbbf24" stroke="#d97706" stroke-width="1"/>
+  <rect x="680" y="170" width="10" height="15" fill="#fbbf24" stroke="#d97706" stroke-width="1"/>
+  <text x="660" y="163" font-size="7.5" fill="#d97706" text-anchor="middle">RIDGE VENTILATION</text>
+
+  <!-- ── FLOOR with 2% slope ── -->
+  <!-- Slope goes from outer walls down to central drain -->
+  <!-- Floor surface (left half — slopes down right) -->
+  <polygon points="90,558 550,560 90,558" fill="none"/>
+  <!-- Simple filled ramp polygon left side -->
+  <polygon points="90,540 550,556 550,558 90,558" fill="#e5e7eb" stroke="#9ca3af" stroke-width="1"/>
+  <!-- Right half slopes down left -->
+  <polygon points="550,556 1012,540 1012,558 550,558" fill="#e5e7eb" stroke="#9ca3af" stroke-width="1"/>
+
+  <!-- Floor finish (anti-slip ribbed) -->
+  <text x="280" y="548" font-size="7.5" fill="#374151" text-anchor="middle">FLOOR: ANTI-SLIP M25 CONCRETE (50mm)</text>
+  <text x="800" y="548" font-size="7.5" fill="#374151" text-anchor="middle">FLOOR: ANTI-SLIP M25 CONCRETE (50mm)</text>
+
+  <!-- SLOPE ARROWS -->
+  <line x1="220" y1="543" x2="500" y2="553" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="340" y="537" font-size="8.5" fill="#dc2626" text-anchor="middle" font-weight="bold">2% SLOPE →</text>
+  <line x1="870" y1="543" x2="600" y2="553" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="740" y="537" font-size="8.5" fill="#dc2626" text-anchor="middle" font-weight="bold">← 2% SLOPE</text>
+
+  <!-- UNDERGROUND DRAIN CHANNEL (center) -->
+  <!-- Channel cut in floor -->
+  <rect x="522" y="556" width="56" height="60" fill="#bfdbfe" stroke="#1e40af" stroke-width="2"/>
+  <text x="550" y="576" font-size="7.5" fill="#1e40af" text-anchor="middle" font-weight="bold">DRAIN</text>
+  <text x="550" y="587" font-size="7" fill="#1e40af" text-anchor="middle">300mm W</text>
+  <text x="550" y="598" font-size="7" fill="#1e40af" text-anchor="middle">450mm D</text>
+  <!-- Drain grating -->
+  <rect x="522" y="556" width="56" height="5" fill="#64748b" stroke="#334155" stroke-width="1"/>
+  <text x="550" y="561" font-size="6" fill="white" text-anchor="middle">GRATING</text>
+  <!-- Drain slope arrow -->
+  <line x1="550" y1="600" x2="550" y2="620" stroke="#1e40af" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="550" y="637" font-size="7.5" fill="#1e40af" text-anchor="middle">TO PIT</text>
+  <!-- Underground pipe -->
+  <rect x="530" y="616" width="40" height="18" fill="#93c5fd" stroke="#1d4ed8" stroke-width="1.5"/>
+  <text x="550" y="629" font-size="7" fill="#1d4ed8" text-anchor="middle">200mm DIA PVC</text>
+
+  <!-- DIMENSION: Drain width -->
+  <line x1="522" y1="542" x2="578" y2="542" stroke="#555" stroke-width="0.8" marker-start="url(#dimend)" marker-end="url(#dimend)"/>
+  <text x="550" y="540" font-size="7" fill="#333" text-anchor="middle">300mm</text>
+
+  <!-- FEED MANGER (left side) -->
+  <rect x="90" y="430" width="70" height="50" fill="#fde68a" stroke="#92400e" stroke-width="2"/>
+  <!-- Manger cross section -->
+  <polygon points="100,480 130,455 160,480" fill="#fbbf24" stroke="#92400e" stroke-width="1"/>
+  <text x="125" y="447" font-size="8" fill="#92400e" text-anchor="middle" font-weight="bold">FEED MANGER</text>
+  <text x="125" y="462" font-size="7" fill="#92400e" text-anchor="middle">450mm W × 400mm D</text>
+  <text x="125" y="495" font-size="7" fill="#92400e" text-anchor="middle">RAISED 200mm</text>
+
+  <!-- TMR Wagon above manger -->
+  <rect x="90" y="390" width="80" height="35" fill="#fb923c" stroke="#c2410c" stroke-width="1.5"/>
+  <circle cx="110" cy="428" r="5" fill="#333"/>
+  <circle cx="150" cy="428" r="5" fill="#333"/>
+  <text x="130" y="403" font-size="7" fill="white" text-anchor="middle" font-weight="bold">TMR WAGON</text>
+  <text x="130" y="414" font-size="6.5" fill="white" text-anchor="middle">ON RAIL TRACK</text>
+
+  <!-- WATER TROUGH (right side) -->
+  <rect x="940" y="450" width="75" height="35" fill="#93c5fd" stroke="#1d4ed8" stroke-width="2"/>
+  <polygon points="945,485 977,465 1012,485" fill="#60a5fa" stroke="#1d4ed8" stroke-width="1"/>
+  <text x="978" y="460" font-size="8" fill="#1d4ed8" text-anchor="middle" font-weight="bold">AUTO WATER</text>
+  <text x="978" y="471" font-size="7" fill="#1d4ed8" text-anchor="middle">TROUGH</text>
+  <text x="978" y="498" font-size="7" fill="#1d4ed8" text-anchor="middle">FLOAT VALVE</text>
+  <!-- HP water pipe -->
+  <line x1="978" y1="450" x2="978" y2="420" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4,2"/>
+  <text x="990" y="435" font-size="7" fill="#1d4ed8">HP 5-6 BAR</text>
+
+  <!-- BUFFALO SILHOUETTE (simplified) left group -->
+  <ellipse cx="280" cy="520" rx="35" ry="20" fill="#78716c" stroke="#44403c" stroke-width="1.5"/><!-- body -->
+  <ellipse cx="315" cy="512" rx="14" ry="12" fill="#78716c" stroke="#44403c" stroke-width="1.5"/><!-- head -->
+  <line x1="268" y1="538" x2="255" y2="558" stroke="#57534e" stroke-width="3"/><!-- front leg -->
+  <line x1="285" y1="540" x2="278" y2="558" stroke="#57534e" stroke-width="3"/>
+  <line x1="295" y1="540" x2="302" y2="558" stroke="#57534e" stroke-width="3"/>
+  <line x1="310" y1="539" x2="320" y2="558" stroke="#57534e" stroke-width="3"/>
+  <!-- Horn -->
+  <path d="M309,502 Q322,488 318,496" fill="none" stroke="#57534e" stroke-width="2"/>
+  <path d="M318,503 Q331,490 326,500" fill="none" stroke="#57534e" stroke-width="2"/>
+  <text x="280" y="510" font-size="7" fill="white" text-anchor="middle">BUFFALO</text>
+  <text x="280" y="500" font-size="6.5" fill="#d6d3d1" text-anchor="middle">~1.5m STANDING</text>
+
+  <!-- BUFFALO SILHOUETTE right group -->
+  <ellipse cx="800" cy="520" rx="35" ry="20" fill="#78716c" stroke="#44403c" stroke-width="1.5"/>
+  <ellipse cx="765" cy="512" rx="14" ry="12" fill="#78716c" stroke="#44403c" stroke-width="1.5"/>
+  <line x1="812" y1="538" x2="825" y2="558" stroke="#57534e" stroke-width="3"/>
+  <line x1="795" y1="540" x2="802" y2="558" stroke="#57534e" stroke-width="3"/>
+  <line x1="785" y1="540" x2="778" y2="558" stroke="#57534e" stroke-width="3"/>
+  <line x1="770" y1="539" x2="760" y2="558" stroke="#57534e" stroke-width="3"/>
+  <path d="M769,502 Q756,488 762,496" fill="none" stroke="#57534e" stroke-width="2"/>
+  <path d="M762,503 Q749,490 754,500" fill="none" stroke="#57534e" stroke-width="2"/>
+
+  <!-- CLEARANCE DIMENSIONS -->
+  <line x1="160" y1="558" x2="522" y2="558" stroke="#666" stroke-width="0.8" stroke-dasharray="3,2"/>
+  <line x1="160" y1="450" x2="160" y2="540" stroke="#666" stroke-width="0.8" marker-start="url(#dimend)" marker-end="url(#dimend)"/>
+  <text x="148" y="498" font-size="7" fill="#555" text-anchor="middle" transform="rotate(-90,148,498)">FEEDING AREA: 3m</text>
+
+  <!-- Height dimensions -->
+  <line x1="45" y1="560" x2="45" y2="300" stroke="#555" stroke-width="0.8" marker-start="url(#dimend)" marker-end="url(#dimend)"/>
+  <text x="33" y="435" font-size="8" fill="#333" text-anchor="middle" font-weight="bold" transform="rotate(-90,33,435)">EAVE HT: ~4.5m</text>
+
+  <!-- Section labels -->
+  <text x="80" y="660" font-size="10" fill="#c00" font-weight="bold">A</text>
+  <text x="1060" y="660" font-size="10" fill="#c00" font-weight="bold">A</text>
+
+</svg>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     TAB 2 — DRAIN PIT DETAIL
+═══════════════════════════════════════════════════════════════════ -->
+<div class="panel" id="p2">
+<div class="drawing-frame">
+<svg viewBox="0 0 1100 700" width="1100" height="700" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1100" height="700" fill="#f8f6f0"/>
+  <rect x="10" y="10" width="1080" height="680" fill="none" stroke="#333" stroke-width="2"/>
+
+  <rect x="16" y="658" width="1068" height="30" fill="#e8e8e0" stroke="#333" stroke-width="1"/>
+  <text x="400" y="670" font-size="9" fill="#333" font-weight="bold">DWG BDF-03 | TWO-CHAMBER DRAIN PIT &amp; SOLID-LIQUID SEPARATOR DETAIL | BHAVANI DAIRY FARM</text>
+  <text x="400" y="681" font-size="8" fill="#555">Scale 1:25 (indicative) | CH.1 = Primary (Separator) | CH.2 = Secondary overflow | Pipe ∅200 PVC</text>
+
+  <!-- PLAN VIEW (top) -->
+  <text x="350" y="45" font-size="11" fill="#333" font-weight="bold" text-anchor="middle">PLAN VIEW — TWO-CHAMBER PIT</text>
+  <text x="350" y="58" font-size="8.5" fill="#555" text-anchor="middle">(Overall pit: 8m × 3m | Each chamber: 4m × 3m | Depth: 2.5m)</text>
+
+  <!-- Chamber 1 (left) -->
+  <rect x="80" y="70" width="270" height="180" fill="#dbeafe" stroke="#1e40af" stroke-width="3"/>
+  <text x="215" y="100" font-size="11" fill="#1e40af" text-anchor="middle" font-weight="bold">CHAMBER 1</text>
+  <text x="215" y="115" font-size="9" fill="#1e40af" text-anchor="middle">(PRIMARY — SEPARATOR)</text>
+  <text x="215" y="128" font-size="8.5" fill="#1e40af" text-anchor="middle">4.0m × 3.0m × 2.5m deep</text>
+  <text x="215" y="141" font-size="8.5" fill="#1e40af" text-anchor="middle">Vol: ~30 m³</text>
+  <text x="215" y="155" font-size="8" fill="#374151" text-anchor="middle">RCC M25 walls (150mm thick)</text>
+  <text x="215" y="167" font-size="8" fill="#374151" text-anchor="middle">Waterproofed (2-coat bitumen)</text>
+  <text x="215" y="180" font-size="8" fill="#374151" text-anchor="middle">Bottom slope to sump: 1%</text>
+  <text x="215" y="193" font-size="8" fill="#374151" text-anchor="middle">Manhole cover 600×600mm</text>
+  <text x="215" y="206" font-size="8" fill="#374151" text-anchor="middle">HDPE liner option</text>
+  <text x="215" y="220" font-size="8" fill="#374151" text-anchor="middle">Aeration pipe at top</text>
+  <text x="215" y="235" font-size="8" fill="#374151" text-anchor="middle">Biogas offtake pipe</text>
+
+  <!-- Separator machine in CH1 -->
+  <rect x="100" y="225" width="180" height="22" fill="#f97316" stroke="#c2410c" stroke-width="2"/>
+  <text x="190" y="238" font-size="9" fill="white" text-anchor="middle" font-weight="bold">SCREW-PRESS SEPARATOR</text>
+  <rect x="103" y="248" width="10" height="8" fill="#9ca3af" stroke="#6b7280"/><!-- liquid outlet -->
+  <rect x="267" y="248" width="10" height="8" fill="#78350f" stroke="#451a03"/><!-- solid outlet -->
+  <text x="108" y="265" font-size="7" fill="#1e40af" text-anchor="middle">LIQUID</text>
+  <text x="272" y="265" font-size="7" fill="#78350f" text-anchor="middle">SOLID</text>
+
+  <!-- Dividing wall with transfer valve -->
+  <rect x="350" y="70" width="20" height="180" fill="#94a3b8" stroke="#334155" stroke-width="2"/>
+  <text x="360" y="165" font-size="7" fill="white" text-anchor="middle" font-weight="bold" transform="rotate(-90,360,165)">DIVIDING WALL (RCC 200mm)</text>
+  <!-- Valve symbol -->
+  <circle cx="360" cy="135" r="12" fill="#fbbf24" stroke="#92400e" stroke-width="2"/>
+  <text x="360" y="139" font-size="7" fill="#92400e" text-anchor="middle" font-weight="bold">V1</text>
+  <text x="360" y="60" font-size="7.5" fill="#92400e" text-anchor="middle">GATE VALVE</text>
+  <text x="360" y="50" font-size="7.5" fill="#92400e" text-anchor="middle">(MANUAL)</text>
+  <line x1="360" y1="123" x2="360" y2="70" stroke="#92400e" stroke-width="1.5" stroke-dasharray="3,2"/>
+
+  <!-- Chamber 2 (right) -->
+  <rect x="370" y="70" width="270" height="180" fill="#d1fae5" stroke="#065f46" stroke-width="3"/>
+  <text x="505" y="100" font-size="11" fill="#065f46" text-anchor="middle" font-weight="bold">CHAMBER 2</text>
+  <text x="505" y="115" font-size="9" fill="#065f46" text-anchor="middle">(SECONDARY — OVERFLOW)</text>
+  <text x="505" y="128" font-size="8.5" fill="#065f46" text-anchor="middle">4.0m × 3.0m × 2.5m deep</text>
+  <text x="505" y="141" font-size="8.5" fill="#065f46" text-anchor="middle">Vol: ~30 m³</text>
+  <text x="505" y="155" font-size="8" fill="#374151" text-anchor="middle">Same construction as CH.1</text>
+  <text x="505" y="168" font-size="8" fill="#374151" text-anchor="middle">Used when CH.1 is full</text>
+  <text x="505" y="181" font-size="8" fill="#374151" text-anchor="middle">Close V1, open V2 to redirect flow</text>
+  <text x="505" y="194" font-size="8" fill="#374151" text-anchor="middle">Allows CH.1 to be emptied &amp; cleaned</text>
+  <text x="505" y="208" font-size="8" fill="#374151" text-anchor="middle">Manhole cover 600×600mm</text>
+  <text x="505" y="221" font-size="8" fill="#374151" text-anchor="middle">Effluent pump for disposal</text>
+  <text x="505" y="234" font-size="8" fill="#374151" text-anchor="middle">Overflow to biogas plant</text>
+
+  <!-- Inlet pipe from shed -->
+  <line x1="215" y1="70" x2="215" y2="35" stroke="#1e40af" stroke-width="3"/>
+  <polygon points="207,35 223,35 215,20" fill="#1e40af"/>
+  <text x="215" y="18" font-size="9" fill="#1e40af" text-anchor="middle" font-weight="bold">INLET FROM SHED</text>
+  <text x="215" y="30" font-size="7.5" fill="#1e40af" text-anchor="middle">∅200mm PVC pipe (slope 1:100)</text>
+
+  <!-- V2 — inlet diverter valve -->
+  <circle cx="215" cy="70" r="10" fill="#fbbf24" stroke="#92400e" stroke-width="2"/>
+  <text x="215" y="74" font-size="7" fill="#92400e" text-anchor="middle" font-weight="bold">V2</text>
+  <text x="250" y="67" font-size="7.5" fill="#92400e">DIVERTER VALVE → CH.2</text>
+
+  <!-- Biogas connection from CH2 -->
+  <line x1="505" y1="70" x2="505" y2="35" stroke="#d97706" stroke-width="2.5" stroke-dasharray="5,3"/>
+  <text x="505" y="25" font-size="8.5" fill="#d97706" text-anchor="middle" font-weight="bold">BIOGAS OFFTAKE PIPE</text>
+  <text x="505" y="35" font-size="7" fill="#d97706" text-anchor="middle">→ BIOGAS PLANT (30m³ fixed dome)</text>
+
+  <!-- ── SECTION VIEW ── -->
+  <text x="850" y="45" font-size="11" fill="#333" font-weight="bold" text-anchor="middle">SECTION VIEW (X–X)</text>
+  <text x="850" y="58" font-size="8.5" fill="#555" text-anchor="middle">Chamber 1 — Screw Separator Detail</text>
+
+  <!-- Pit cross section -->
+  <!-- Walls -->
+  <rect x="680" y="70" width="20" height="200" fill="#9ca3af" stroke="#555" stroke-width="1.5"/><!-- left wall -->
+  <rect x="1020" y="70" width="20" height="200" fill="#9ca3af" stroke="#555" stroke-width="1.5"/><!-- right wall -->
+  <rect x="680" y="268" width="360" height="20" fill="#9ca3af" stroke="#555" stroke-width="1.5"/><!-- bottom -->
+
+  <!-- Pit interior (liquid) -->
+  <rect x="700" y="170" width="320" height="100" fill="#bfdbfe" stroke="none"/>
+  <text x="860" y="225" font-size="9" fill="#1e40af" text-anchor="middle">LIQUID / SLURRY</text>
+  <line x1="700" y1="170" x2="1020" y2="170" stroke="#60a5fa" stroke-width="1" stroke-dasharray="4,2"/>
+
+  <!-- Separator machine cross section -->
+  <rect x="740" y="165" width="260" height="40" fill="#f97316" stroke="#c2410c" stroke-width="2"/>
+  <!-- Screw symbol -->
+  <line x1="750" y1="185" x2="990" y2="185" stroke="#fed7aa" stroke-width="2"/>
+  <line x1="760" y1="168" x2="760" y2="203" stroke="#fed7aa" stroke-width="1.5"/>
+  <line x1="790" y1="168" x2="790" y2="203" stroke="#fed7aa" stroke-width="1.5"/>
+  <line x1="820" y1="168" x2="820" y2="203" stroke="#fed7aa" stroke-width="1.5"/>
+  <line x1="850" y1="168" x2="850" y2="203" stroke="#fed7aa" stroke-width="1.5"/>
+  <line x1="880" y1="168" x2="880" y2="203" stroke="#fed7aa" stroke-width="1.5"/>
+  <line x1="910" y1="168" x2="910" y2="203" stroke="#fed7aa" stroke-width="1.5"/>
+  <line x1="940" y1="168" x2="940" y2="203" stroke="#fed7aa" stroke-width="1.5"/>
+  <line x1="970" y1="168" x2="970" y2="203" stroke="#fed7aa" stroke-width="1.5"/>
+  <text x="860" y="161" font-size="8" fill="#c2410c" text-anchor="middle" font-weight="bold">SCREW-PRESS SEPARATOR (ELECTRIC MOTOR 1.5kW)</text>
+  <!-- Motor -->
+  <rect x="990" y="162" width="30" height="45" fill="#6b7280" stroke="#374151" stroke-width="1.5"/>
+  <text x="1005" y="183" font-size="6.5" fill="white" text-anchor="middle">MOTOR</text>
+  <text x="1005" y="192" font-size="6.5" fill="white" text-anchor="middle">1.5kW</text>
+
+  <!-- Solid outlet (right) -->
+  <line x1="1020" y1="182" x2="1060" y2="182" stroke="#78350f" stroke-width="3"/>
+  <text x="1068" y="186" font-size="7.5" fill="#78350f">DRY SOLID</text>
+  <text x="1068" y="197" font-size="7.5" fill="#78350f">→ COMPOST</text>
+
+  <!-- Liquid outlet (bottom) -->
+  <line x1="860" y1="285" x2="860" y2="310" stroke="#1e40af" stroke-width="2.5"/>
+  <text x="860" y="325" font-size="7.5" fill="#1e40af" text-anchor="middle">LIQUID → BIOGAS INPUT</text>
+
+  <!-- Inlet pipe -->
+  <line x1="770" y1="70" x2="770" y2="165" stroke="#1e40af" stroke-width="3"/>
+  <polygon points="762,165 778,165 770,180" fill="#1e40af"/>
+  <text x="750" y="63" font-size="7.5" fill="#1e40af">INLET</text>
+  <text x="750" y="74" font-size="7.5" fill="#1e40af">∅200mm</text>
+
+  <!-- Dimension — depth -->
+  <line x1="660" y1="70" x2="660" y2="285" stroke="#555" stroke-width="0.8" marker-start="url(#dimend)" marker-end="url(#dimend)"/>
+  <text x="645" y="182" font-size="8" fill="#333" text-anchor="middle" font-weight="bold" transform="rotate(-90,645,182)">DEPTH: 2.5m</text>
+
+  <!-- ── OPERATION LEGEND ── -->
+  <rect x="80" y="310" width="560" height="140" fill="#fff7ed" stroke="#d97706" stroke-width="1.5" rx="6"/>
+  <text x="360" y="330" font-size="10" fill="#92400e" text-anchor="middle" font-weight="bold">OPERATING PROCEDURE — TWO-CHAMBER SYSTEM</text>
+
+  <text x="100" y="350" font-size="9" fill="#333" font-weight="bold">NORMAL OPERATION:</text>
+  <text x="100" y="364" font-size="8.5" fill="#555">• V2 (inlet diverter) directs flow to CHAMBER 1. V1 (divider) CLOSED.</text>
+  <text x="100" y="378" font-size="8.5" fill="#555">• Screw separator runs 1–2 hrs/day, separates solid (compost) from liquid (biogas input).</text>
+  <text x="100" y="392" font-size="8.5" fill="#555">• Monitor level gauge — when CH.1 reaches 80% full, prepare to switch.</text>
+
+  <text x="100" y="412" font-size="9" fill="#333" font-weight="bold">SWITCHING TO CHAMBER 2:</text>
+  <text x="100" y="426" font-size="8.5" fill="#555">• Open V2 diverter to route incoming flow to CHAMBER 2.</text>
+  <text x="100" y="440" font-size="8.5" fill="#555">• Empty CH.1 using tanker or pump. Clean, inspect walls, reset separator. Then close V2, reopen to CH.1.</text>
+
+  <!-- Biogas spec box -->
+  <rect x="680" y="345" width="390" height="110" fill="#fef9c3" stroke="#d97706" stroke-width="1.5" rx="6"/>
+  <text x="875" y="363" font-size="10" fill="#92400e" text-anchor="middle" font-weight="bold">BIOGAS CONNECTION SPEC</text>
+  <text x="700" y="382" font-size="8.5" fill="#555">• 40 buffalo × 10 kg dung/day = 400 kg/day dung input</text>
+  <text x="700" y="396" font-size="8.5" fill="#555">• Expected biogas: ~20–25 m³/day</text>
+  <text x="700" y="410" font-size="8.5" fill="#555">• Biogas plant: 30 m³ fixed dome (KVIC type)</text>
+  <text x="700" y="424" font-size="8.5" fill="#555">• Liquid effluent from separator → biogas plant inlet</text>
+  <text x="700" y="438" font-size="8.5" fill="#555">• Digestate from biogas → vermicompost bed</text>
+
+</svg>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     TAB 3 — TMR & WATER SYSTEM
+═══════════════════════════════════════════════════════════════════ -->
+<div class="panel" id="p3">
+<div class="drawing-frame">
+<svg viewBox="0 0 1100 700" width="1100" height="700" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1100" height="700" fill="#f8f6f0"/>
+  <rect x="10" y="10" width="1080" height="680" fill="none" stroke="#333" stroke-width="2"/>
+
+  <rect x="16" y="658" width="1068" height="30" fill="#e8e8e0" stroke="#333" stroke-width="1"/>
+  <text x="400" y="670" font-size="9" fill="#333" font-weight="bold">DWG BDF-04 | TMR FEED SYSTEM &amp; HIGH-PRESSURE WATER CLEANING SYSTEM | BHAVANI DAIRY FARM</text>
+  <text x="400" y="681" font-size="8" fill="#555">TMR mixer capacity: 1.5–2.0 tonne | HP pump: 5–6 bar | Bore well 150mm dia | OH tank 10,000L</text>
+
+  <!-- ── TMR SYSTEM ── LEFT HALF ── -->
+  <text x="290" y="40" font-size="12" fill="#92400e" font-weight="bold" text-anchor="middle">TMR FEED DISTRIBUTION SYSTEM</text>
+  <text x="290" y="56" font-size="8.5" fill="#555" text-anchor="middle">Total Mixed Ration: Green fodder + Dry fodder + Concentrate + Mineral mix prepared &amp; distributed automatically</text>
+
+  <!-- Ingredient hoppers -->
+  <rect x="30" y="75" width="90" height="70" fill="#dcfce7" stroke="#166534" stroke-width="2"/>
+  <text x="75" y="100" font-size="8.5" fill="#166534" text-anchor="middle" font-weight="bold">GREEN</text>
+  <text x="75" y="112" font-size="8.5" fill="#166534" text-anchor="middle" font-weight="bold">FODDER</text>
+  <text x="75" y="124" font-size="7.5" fill="#166534" text-anchor="middle">800 kg/day</text>
+  <text x="75" y="135" font-size="7" fill="#166534" text-anchor="middle">(Napier/Sorghum)</text>
+  <polygon points="30,145 120,145 105,165 45,165" fill="#a7f3d0" stroke="#166534" stroke-width="1"/>
+
+  <rect x="145" y="75" width="90" height="70" fill="#fef3c7" stroke="#b45309" stroke-width="2"/>
+  <text x="190" y="100" font-size="8.5" fill="#b45309" text-anchor="middle" font-weight="bold">DRY</text>
+  <text x="190" y="112" font-size="8.5" fill="#b45309" text-anchor="middle" font-weight="bold">FODDER</text>
+  <text x="190" y="124" font-size="7.5" fill="#b45309" text-anchor="middle">200 kg/day</text>
+  <text x="190" y="135" font-size="7" fill="#b45309" text-anchor="middle">(Paddy straw)</text>
+  <polygon points="145,145 235,145 220,165 160,165" fill="#fde68a" stroke="#b45309" stroke-width="1"/>
+
+  <rect x="260" y="75" width="90" height="70" fill="#ede9fe" stroke="#6d28d9" stroke-width="2"/>
+  <text x="305" y="100" font-size="8.5" fill="#6d28d9" text-anchor="middle" font-weight="bold">CONC.</text>
+  <text x="305" y="112" font-size="8.5" fill="#6d28d9" text-anchor="middle" font-weight="bold">FEED</text>
+  <text x="305" y="124" font-size="7.5" fill="#6d28d9" text-anchor="middle">160 kg/day</text>
+  <text x="305" y="135" font-size="7" fill="#6d28d9" text-anchor="middle">(Soya/cotton)</text>
+  <polygon points="260,145 350,145 335,165 275,165" fill="#c4b5fd" stroke="#6d28d9" stroke-width="1"/>
+
+  <rect x="375" y="75" width="90" height="70" fill="#fce7f3" stroke="#9d174d" stroke-width="2"/>
+  <text x="420" y="100" font-size="8.5" fill="#9d174d" text-anchor="middle" font-weight="bold">MINERAL</text>
+  <text x="420" y="112" font-size="8.5" fill="#9d174d" text-anchor="middle" font-weight="bold">MIX</text>
+  <text x="420" y="124" font-size="7.5" fill="#9d174d" text-anchor="middle">2 kg/day</text>
+  <text x="420" y="135" font-size="7" fill="#9d174d" text-anchor="middle">+ bypass salt</text>
+  <polygon points="375,145 465,145 450,165 390,165" fill="#fbcfe8" stroke="#9d174d" stroke-width="1"/>
+
+  <!-- Feed mixer -->
+  <rect x="60" y="175" width="420" height="80" fill="#fed7aa" stroke="#c2410c" stroke-width="3" rx="6"/>
+  <text x="270" y="205" font-size="11" fill="#c2410c" text-anchor="middle" font-weight="bold">VERTICAL TMR MIXER / FEED WAGON</text>
+  <text x="270" y="220" font-size="9" fill="#7c2d12" text-anchor="middle">Capacity: 1.5–2.0 tonne | Electric motor 7.5 kW | PTO-driven mixing auger</text>
+  <text x="270" y="234" font-size="8.5" fill="#7c2d12" text-anchor="middle">Stainless steel bowl | Weighing system (load cells) | Digital readout</text>
+  <text x="270" y="248" font-size="8" fill="#7c2d12" text-anchor="middle">Brand options: Trioliet / Kuhn / Jayem (India)</text>
+
+  <!-- Wheels -->
+  <ellipse cx="110" cy="255" rx="16" ry="14" fill="#374151" stroke="#111"/>
+  <ellipse cx="430" cy="255" rx="16" ry="14" fill="#374151" stroke="#111"/>
+
+  <!-- Rail track for wagon -->
+  <line x1="30" y1="268" x2="580" y2="268" stroke="#374151" stroke-width="4"/>
+  <line x1="30" y1="273" x2="580" y2="273" stroke="#374151" stroke-width="4"/>
+  <!-- Rail ties -->
+  <line x1="60" y1="265" x2="60" y2="278" stroke="#374151" stroke-width="3"/>
+  <line x1="120" y1="265" x2="120" y2="278" stroke="#374151" stroke-width="3"/>
+  <line x1="180" y1="265" x2="180" y2="278" stroke="#374151" stroke-width="3"/>
+  <line x1="240" y1="265" x2="240" y2="278" stroke="#374151" stroke-width="3"/>
+  <line x1="300" y1="265" x2="300" y2="278" stroke="#374151" stroke-width="3"/>
+  <line x1="360" y1="265" x2="360" y2="278" stroke="#374151" stroke-width="3"/>
+  <line x1="420" y1="265" x2="420" y2="278" stroke="#374151" stroke-width="3"/>
+  <line x1="480" y1="265" x2="480" y2="278" stroke="#374151" stroke-width="3"/>
+  <line x1="540" y1="265" x2="540" y2="278" stroke="#374151" stroke-width="3"/>
+  <text x="305" y="295" font-size="8.5" fill="#374151" text-anchor="middle">RAIL TRACK EMBEDDED IN MANGER (runs full 60m length of shed)</text>
+
+  <!-- Distribution chute arrows -->
+  <line x1="270" y1="255" x2="270" y2="310" stroke="#f97316" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="150" y1="255" x2="120" y2="310" stroke="#f97316" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="390" y1="255" x2="420" y2="310" stroke="#f97316" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Manger cross section (simplified) -->
+  <rect x="30" y="310" width="550" height="30" fill="#fde68a" stroke="#92400e" stroke-width="2"/>
+  <text x="305" y="329" font-size="9" fill="#92400e" text-anchor="middle" font-weight="bold">FEED MANGER (V-SHAPE RCC 450mm W × 400mm D, RAISED 200mm) — RUNS FULL 60m LENGTH</text>
+
+  <!-- Schedule box -->
+  <rect x="30" y="355" width="550" height="100" fill="#fff7ed" stroke="#d97706" stroke-width="1.5" rx="6"/>
+  <text x="305" y="372" font-size="10" fill="#92400e" text-anchor="middle" font-weight="bold">DAILY FEEDING SCHEDULE</text>
+  <text x="50" y="392" font-size="8.5" fill="#555">5:30 AM — Load raw materials into mixer. Start mixing (20 min). Weigh batch: 1.2 tonnes.</text>
+  <text x="50" y="407" font-size="8.5" fill="#555">6:00 AM — Drive wagon along manger track, dispense via auger. All 40 animals fed in 30 min.</text>
+  <text x="50" y="422" font-size="8.5" fill="#555">4:30 PM — Repeat with 0.8 tonne batch (evening ration).</text>
+  <text x="50" y="437" font-size="8.5" fill="#555">Total daily feed dispensed: ~2.0 tonnes dry matter equivalent | Labor: 1 person × 1.5 hours.</text>
+  <text x="50" y="449" font-size="8.5" fill="#555">Cost saving vs. manual: ~1 labor-hour/day = ₹150–200/day = ₹55,000–70,000/year.</text>
+
+  <!-- ── HP WATER SYSTEM ── RIGHT HALF ── -->
+  <text x="830" y="40" font-size="12" fill="#1e40af" font-weight="bold" text-anchor="middle">HP WATER &amp; CLEANING SYSTEM</text>
+  <text x="830" y="56" font-size="8.5" fill="#555" text-anchor="middle">Bore well → OH tank → HP pump → HP wash line &amp; auto drinkers → drain → pit</text>
+
+  <!-- Bore well -->
+  <circle cx="660" cy="140" r="30" fill="#bfdbfe" stroke="#1e40af" stroke-width="2.5"/>
+  <text x="660" y="136" font-size="8" fill="#1e40af" text-anchor="middle" font-weight="bold">BORE</text>
+  <text x="660" y="148" font-size="8" fill="#1e40af" text-anchor="middle" font-weight="bold">WELL</text>
+  <text x="660" y="160" font-size="7" fill="#1e40af" text-anchor="middle">150mm dia</text>
+  <text x="660" y="171" font-size="7" fill="#1e40ae" text-anchor="middle">60m deep</text>
+
+  <!-- Submersible pump -->
+  <rect x="645" y="175" width="30" height="18" fill="#6b7280" stroke="#374151" stroke-width="1.5"/>
+  <text x="660" y="187" font-size="6.5" fill="white" text-anchor="middle">SUB PUMP</text>
+  <text x="660" y="197" font-size="6.5" fill="#555" text-anchor="middle">3HP</text>
+
+  <!-- Pipe to OH tank -->
+  <line x1="690" y1="140" x2="740" y2="140" stroke="#3b82f6" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- OH Tank -->
+  <rect x="740" y="100" width="80" height="80" fill="#93c5fd" stroke="#1d4ed8" stroke-width="2.5"/>
+  <text x="780" y="130" font-size="9" fill="#1d4ed8" text-anchor="middle" font-weight="bold">OH TANK</text>
+  <text x="780" y="143" font-size="8" fill="#1d4ed8" text-anchor="middle">10,000 L</text>
+  <text x="780" y="156" font-size="7.5" fill="#1d4ed8" text-anchor="middle">MS/HDPE</text>
+  <text x="780" y="169" font-size="7.5" fill="#1d4ed8" text-anchor="middle">Ht: 4m (tower)</text>
+  <!-- Level indicator -->
+  <rect x="820" y="110" width="8" height="60" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="1"/>
+  <rect x="820" y="130" width="8" height="40" fill="#3b82f6" stroke="none"/>
+  <text x="835" y="167" font-size="6.5" fill="#1d4ed8">LEVEL</text>
+
+  <!-- HP pump -->
+  <rect x="850" y="110" width="90" height="60" fill="#f0abfc" stroke="#7e22ce" stroke-width="2.5" rx="5"/>
+  <text x="895" y="133" font-size="9" fill="#7e22ce" text-anchor="middle" font-weight="bold">HP PUMP</text>
+  <text x="895" y="147" font-size="8" fill="#7e22ce" text-anchor="middle">5–6 BAR</text>
+  <text x="895" y="160" font-size="7.5" fill="#7e22ce" text-anchor="middle">2.2 kW motor</text>
+  <!-- Pump connections -->
+  <line x1="820" y1="145" x2="850" y2="145" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- HP wash line header -->
+  <line x1="940" y1="140" x2="1060" y2="140" stroke="#7e22ce" stroke-width="3"/>
+  <rect x="1050" y="132" width="30" height="16" fill="#f0abfc" stroke="#7e22ce" stroke-width="1.5"/>
+  <text x="1065" y="143" font-size="7" fill="#7e22ce" text-anchor="middle">HP LINE</text>
+  <text x="950" y="130" font-size="7.5" fill="#7e22ce">63mm HDPE HP PIPE (PN-10)</text>
+
+  <!-- HP outlets in shed -->
+  <line x1="700" y1="200" x2="700" y2="270" stroke="#7e22ce" stroke-width="2" stroke-dasharray="4,2"/>
+  <line x1="780" y1="200" x2="780" y2="270" stroke="#7e22ce" stroke-width="2" stroke-dasharray="4,2"/>
+  <line x1="860" y1="200" x2="860" y2="270" stroke="#7e22ce" stroke-width="2" stroke-dasharray="4,2"/>
+  <line x1="940" y1="200" x2="940" y2="270" stroke="#7e22ce" stroke-width="2" stroke-dasharray="4,2"/>
+  <line x1="1020" y1="200" x2="1020" y2="270" stroke="#7e22ce" stroke-width="2" stroke-dasharray="4,2"/>
+
+  <!-- HP hose reels / nozzles -->
+  <circle cx="700" cy="275" r="10" fill="#f0abfc" stroke="#7e22ce" stroke-width="1.5"/>
+  <circle cx="780" cy="275" r="10" fill="#f0abfc" stroke="#7e22ce" stroke-width="1.5"/>
+  <circle cx="860" cy="275" r="10" fill="#f0abfc" stroke="#7e22ce" stroke-width="1.5"/>
+  <circle cx="940" cy="275" r="10" fill="#f0abfc" stroke="#7e22ce" stroke-width="1.5"/>
+  <circle cx="1020" cy="275" r="10" fill="#f0abfc" stroke="#7e22ce" stroke-width="1.5"/>
+  <text x="700" y="278" font-size="7" fill="#7e22ce" text-anchor="middle">H</text>
+  <text x="780" y="278" font-size="7" fill="#7e22ce" text-anchor="middle">H</text>
+  <text x="860" y="278" font-size="7" fill="#7e22ce" text-anchor="middle">H</text>
+  <text x="940" y="278" font-size="7" fill="#7e22ce" text-anchor="middle">H</text>
+  <text x="1020" y="278" font-size="7" fill="#7e22ce" text-anchor="middle">H</text>
+  <text x="860" y="298" font-size="8" fill="#7e22ce" text-anchor="middle">HP HOSE REEL × 5 (@ 12m intervals along shed)</text>
+
+  <!-- Auto water drinkers -->
+  <line x1="700" y1="200" x2="700" y2="330" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <line x1="820" y1="200" x2="820" y2="330" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <line x1="940" y1="200" x2="940" y2="330" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <rect x="690" y="330" width="20" height="12" fill="#bfdbfe" stroke="#1d4ed8" stroke-width="1.5"/>
+  <rect x="810" y="330" width="20" height="12" fill="#bfdbfe" stroke="#1d4ed8" stroke-width="1.5"/>
+  <rect x="930" y="330" width="20" height="12" fill="#bfdbfe" stroke="#1d4ed8" stroke-width="1.5"/>
+  <text x="860" y="360" font-size="8" fill="#1d4ed8" text-anchor="middle">AUTO WATER DRINKER (FLOAT VALVE) × 10 — 1 PER 4 BUFFALOES</text>
+
+  <!-- Floor scraper system -->
+  <rect x="650" y="390" width="440" height="70" fill="#f1f5f9" stroke="#475569" stroke-width="2" rx="4"/>
+  <text x="870" y="412" font-size="10" fill="#334155" text-anchor="middle" font-weight="bold">AUTO FLOOR SCRAPER SYSTEM</text>
+  <text x="670" y="430" font-size="8.5" fill="#555">• Cable-driven or hydraulic scraper, runs along shed floor 2× daily</text>
+  <text x="670" y="444" font-size="8.5" fill="#555">• Pushes dung &amp; washwater into central drain channel (2% slope)</text>
+  <text x="670" y="458" font-size="8.5" fill="#555">• Timer-controlled: 5:00 AM + 6:00 PM | Motor: 1.5kW | Control panel in shed</text>
+
+  <!-- HP cleaning sequence diagram -->
+  <rect x="650" y="475" width="440" height="110" fill="#faf5ff" stroke="#7e22ce" stroke-width="1.5" rx="4"/>
+  <text x="870" y="495" font-size="10" fill="#6b21a8" text-anchor="middle" font-weight="bold">HP CLEANING SEQUENCE</text>
+  <text x="670" y="513" font-size="8.5" fill="#555">1. Auto floor scraper pre-clears dry dung → 2. HP hose (5-6 bar) washes floor from north to south</text>
+  <text x="670" y="527" font-size="8.5" fill="#555">3. 2% floor slope directs all washwater + dung to central drain channel</text>
+  <text x="670" y="541" font-size="8.5" fill="#555">4. Underground drain (200mm PVC, 1:100 slope) carries to pit Chamber 1</text>
+  <text x="670" y="555" font-size="8.5" fill="#555">5. Screw separator: dry solid → compost | liquid → biogas plant</text>
+  <text x="670" y="569" font-size="8.5" fill="#555">Water consumption: ~1,000 L/clean × 2/day = 2,000 L/day (recaptured for irrigation)</text>
+
+  <!-- Water balance summary -->
+  <rect x="650" y="597" width="430" height="55" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5" rx="4"/>
+  <text x="865" y="614" font-size="9" fill="#1e40af" text-anchor="middle" font-weight="bold">DAILY WATER BUDGET</text>
+  <text x="670" y="630" font-size="8.5" fill="#555">Drinking: 40 × 60L = 2,400L | Cleaning: 2,000L | Misc: 200L | TOTAL: ~4,600 L/day</text>
+  <text x="670" y="644" font-size="8.5" fill="#555">Bore well yield req: min 5,000 L/day | OH tank (10,000L) provides 2-day buffer</text>
+
+</svg>
+</div>
+</div>
+
+<script>
+function show(idx){
+  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+}
+</script>
+</body>
+</html>

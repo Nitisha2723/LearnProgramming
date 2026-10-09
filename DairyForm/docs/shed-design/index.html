@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dairy Farm — Automated Shed Design</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #1a1a2e; color: #eee; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+
+  /* ── TOP HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #0d6e3c, #1a9e5c);
+    padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+  .header h1 { font-size: 1.15rem; font-weight: 700; color: #fff; }
+  .header p  { font-size: 0.78rem; color: #b2dfcc; margin-top: 2px; }
+  .legend-bar { display: flex; gap: 12px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; color: #ccc; }
+  .legend-dot  { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+  /* ── TABS ── */
+  .tabs { display: flex; background: #162032; border-bottom: 2px solid #0d6e3c; padding: 0 20px; }
+  .tab  { padding: 10px 20px; cursor: pointer; font-size: 0.82rem; color: #888; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all .2s; white-space: nowrap; }
+  .tab:hover    { color: #4caf7d; }
+  .tab.active   { color: #4caf7d; border-bottom-color: #4caf7d; font-weight: 600; }
+
+  /* ── PANELS ── */
+  .panel { display: none; padding: 16px 20px; }
+  .panel.active { display: block; }
+
+  /* ── LAYOUT CANVAS ── */
+  #canvas-wrap {
+    position: relative;
+    width: 100%;
+    overflow: auto;
+    background: #0f1923;
+    border-radius: 10px;
+    border: 1px solid #1e3a50;
+  }
+  #farm-svg { display: block; }
+
+  /* tooltip */
+  .tooltip {
+    position: fixed; background: rgba(10,20,35,0.97);
+    border: 1px solid #4caf7d; border-radius: 8px;
+    padding: 12px 16px; max-width: 300px; z-index: 9999;
+    pointer-events: none; opacity: 0; transition: opacity .2s;
+    font-size: 0.8rem; line-height: 1.55;
+  }
+  .tooltip.show { opacity: 1; }
+  .tooltip h4   { color: #4caf7d; font-size: 0.88rem; margin-bottom: 6px; }
+  .tooltip .tag { display: inline-block; background: #1e3a50; color: #7ec8a4;
+                  border-radius: 4px; padding: 1px 7px; font-size: 0.7rem; margin: 2px 2px 0 0; }
+
+  /* ── DETAIL CARDS (panel 2) ── */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 14px; }
+  .card {
+    background: #162032; border-radius: 10px; padding: 16px;
+    border-left: 4px solid #4caf7d; transition: transform .2s, box-shadow .2s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+  .card h3 { font-size: 0.9rem; color: #4caf7d; margin-bottom: 8px; }
+  .card ul  { padding-left: 16px; font-size: 0.8rem; color: #bbb; line-height: 1.7; }
+  .card .badge {
+    display: inline-block; font-size: 0.68rem; padding: 2px 8px;
+    border-radius: 12px; margin-bottom: 8px; font-weight: 600;
+  }
+  .badge-auto { background: #1b5e20; color: #a5d6a7; }
+  .badge-semi { background: #e65100; color: #ffe0b2; }
+  .badge-manual { background: #37474f; color: #cfd8dc; }
+
+  /* ── AUTOMATION FLOW (panel 3) ── */
+  .flow-wrap { overflow-x: auto; padding-bottom: 10px; }
+  .flow-timeline {
+    display: grid;
+    grid-template-columns: 80px repeat(24,1fr);
+    gap: 2px; min-width: 900px;
+  }
+  .ft-label  { font-size: 0.65rem; color: #888; text-align: center; padding-top: 4px; }
+  .ft-row    { display: contents; }
+  .ft-system { font-size: 0.72rem; color: #ccc; padding: 6px 4px; background: #162032;
+               border-radius: 4px; display: flex; align-items: center; font-weight: 600; }
+  .ft-cell   { border-radius: 3px; height: 28px; }
+  .ft-on     { background: #1b5e20; }
+  .ft-active { background: #4caf7d; }
+  .ft-off    { background: #1a2535; }
+  .ft-alert  { background: #b71c1c; }
+  .ft-legend { display: flex; gap: 16px; margin: 12px 0 6px; flex-wrap: wrap; }
+  .ft-leg-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #aaa; }
+  .ft-leg-box  { width: 16px; height: 16px; border-radius: 3px; }
+
+  /* ── COST PANEL ── */
+  .cost-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .cost-table th { background: #0d6e3c; color: #fff; padding: 9px 12px; text-align: left; }
+  .cost-table td { padding: 8px 12px; border-bottom: 1px solid #1e3a50; }
+  .cost-table tr:nth-child(even) td { background: #162032; }
+  .cost-table tr:hover td { background: #1e3a50; }
+  .cost-table .subtotal td { background: #132d1e; color: #a5d6a7; font-weight: 600; }
+  .cost-table .total td    { background: #0d6e3c; color: #fff; font-weight: 700; font-size: 0.9rem; }
+  .rupee { color: #7ec8a4; font-weight: 600; }
+
+  /* ── SECTION TITLES ── */
+  .section-title {
+    font-size: 0.88rem; font-weight: 700; color: #4caf7d;
+    margin: 18px 0 10px; padding-left: 10px;
+    border-left: 3px solid #4caf7d;
+  }
+
+  /* note box */
+  .note { background: #162032; border-left: 3px solid #f9a825;
+          border-radius: 6px; padding: 10px 14px; font-size: 0.78rem;
+          color: #ffe082; margin: 10px 0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Automated Buffalo Dairy Farm — Shed Design</h1>
+    <p>Smt. Danthuluri Bhavani | 40 Murrah Buffaloes | Devunipalavalasa, Ranasthalam, Srikakulam, AP</p>
+  </div>
+  <div class="legend-bar">
+    <div class="legend-item"><div class="legend-dot" style="background:#2e7d32"></div>Animal Zones</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#1565c0"></div>Milking/Processing</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#e65100"></div>Feed/Storage</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#6a1b9a"></div>Utilities/Power</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#37474f"></div>Support</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f9a825"></div>Automation Node</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('layout')">Farm Layout</div>
+  <div class="tab" onclick="switchTab('systems')">Automation Systems</div>
+  <div class="tab" onclick="switchTab('schedule')">Daily Schedule</div>
+  <div class="tab" onclick="switchTab('cost')">Construction Cost</div>
+</div>
+
+<!-- ════════════════ TAB 1: LAYOUT ════════════════ -->
+<div class="panel active" id="tab-layout">
+  <div class="note">Click any zone on the map below for details about that area and its automation systems.</div>
+  <div id="canvas-wrap">
+    <svg id="farm-svg" viewBox="0 0 1100 700" width="1100" height="700" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- patterns -->
+        <pattern id="grass" patternUnits="userSpaceOnUse" width="8" height="8">
+          <rect width="8" height="8" fill="#0d2b1a"/>
+          <line x1="0" y1="4" x2="8" y2="4" stroke="#1b4d2e" stroke-width="0.5"/>
+        </pattern>
+        <pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6">
+          <line x1="0" y1="6" x2="6" y2="0" stroke="#1e3a50" stroke-width="0.8"/>
+        </pattern>
+        <!-- arrow marker -->
+        <marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#4caf7d" opacity="0.7"/>
+        </marker>
+        <marker id="arrow-red" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#ef9a9a" opacity="0.7"/>
+        </marker>
+        <marker id="arrow-blue" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#90caf9" opacity="0.7"/>
+        </marker>
+        <!-- glow -->
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-strong">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- ── BACKGROUND / LAND ── -->
+      <rect width="1100" height="700" fill="#0a141e"/>
+      <!-- land border -->
+      <rect x="10" y="10" width="1080" height="680" rx="8" fill="url(#grass)" stroke="#1b4d2e" stroke-width="2"/>
+
+      <!-- COMPASS -->
+      <g transform="translate(1055,50)">
+        <circle cx="0" cy="0" r="22" fill="#162032" stroke="#2e4a30" stroke-width="1.5"/>
+        <text x="0" y="-8" text-anchor="middle" font-size="9" fill="#4caf7d" font-weight="700">N</text>
+        <text x="0" y="15" text-anchor="middle" font-size="8" fill="#666">S</text>
+        <text x="12" y="4" text-anchor="middle" font-size="8" fill="#666">E</text>
+        <text x="-13" y="4" text-anchor="middle" font-size="8" fill="#666">W</text>
+        <polygon points="0,-15 3,-3 0,-7 -3,-3" fill="#4caf7d"/>
+        <polygon points="0,15 3,3 0,7 -3,3" fill="#444"/>
+      </g>
+
+      <!-- SCALE BAR -->
+      <g transform="translate(30,670)">
+        <rect x="0" y="-6" width="80" height="6" fill="none" stroke="#444" stroke-width="1"/>
+        <rect x="0" y="-6" width="40" height="6" fill="#444"/>
+        <text x="0" y="-9" font-size="8" fill="#666">0</text>
+        <text x="38" y="-9" font-size="8" fill="#666">20m</text>
+        <text x="72" y="-9" font-size="8" fill="#666">40m</text>
+      </g>
+
+      <!-- ══════════ PERIMETER ROAD ══════════ -->
+      <rect x="20" y="20" width="1060" height="660" rx="6" fill="none" stroke="#2a3d2e" stroke-width="16" stroke-dasharray="0"/>
+
+      <!-- ══════════ MAIN ENTRY ROAD ══════════ -->
+      <rect x="20" y="310" width="90" height="80" fill="#1c2e1c" stroke="none"/>
+      <!-- road markings -->
+      <line x1="55" y1="310" x2="55" y2="390" stroke="#2a4a2a" stroke-width="1" stroke-dasharray="8,6"/>
+
+      <!-- ══════════ ENTRY GATE & DISINFECTION ══════════ -->
+      <!-- Gate posts -->
+      <rect x="96" y="308" width="12" height="84" rx="3" fill="#37474f" stroke="#546e7a" stroke-width="1.5"/>
+      <!-- disinfection arch -->
+      <g id="zone-entry" class="clickable" style="cursor:pointer"
+         data-title="Entry Gate — Auto Disinfection System"
+         data-desc="Fully automated bio-security at farm entry."
+         data-tags="Foot Bath|Mist Arch|RFID Gate|CCTV|Auto Lock">
+        <rect x="108" y="300" width="75" height="100" rx="5"
+              fill="#263238" stroke="#f9a825" stroke-width="1.5" opacity="0.9"/>
+        <text x="145" y="320" text-anchor="middle" font-size="8" fill="#f9a825" font-weight="700">ENTRY</text>
+        <text x="145" y="332" text-anchor="middle" font-size="7" fill="#f9a825">GATE</text>
+        <!-- mist nozzles -->
+        <circle cx="115" cy="345" r="3" fill="#29b6f6" filter="url(#glow)"/>
+        <circle cx="175" cy="345" r="3" fill="#29b6f6" filter="url(#glow)"/>
+        <circle cx="145" cy="310" r="3" fill="#29b6f6" filter="url(#glow)"/>
+        <!-- foot bath -->
+        <rect x="118" y="370" width="54" height="14" rx="3" fill="#1565c0" stroke="#42a5f5" stroke-width="1"/>
+        <text x="145" y="380" text-anchor="middle" font-size="7" fill="#90caf9">FOOT BATH</text>
+        <!-- automation dot -->
+        <circle cx="168" cy="303" r="5" fill="#f9a825" filter="url(#glow)"/>
+      </g>
+
+      <!-- ══════════ MAIN INTERNAL ROAD (horizontal spine) ══════════ -->
+      <rect x="183" y="310" width="880" height="80" fill="#141e14" stroke="none" opacity="0.6"/>
+      <line x1="183" y1="350" x2="1063" y2="350" stroke="#1b3020" stroke-width="1" stroke-dasharray="12,8"/>
+
+      <!-- ══════════ ZONE A: MAIN BUFFALO SHED (40 animals) ══════════ -->
+      <g id="zone-shed" class="clickable" style="cursor:pointer"
+         data-title="Main Buffalo Shed — Loose Housing"
+         data-desc="40 Murrah buffaloes in loose housing system. Full automation for feeding, water, manure and climate."
+         data-tags="Auto Feeder|Auto Water|Floor Scraper|Mist Cooling|Exhaust Fans|IoT Tags|CCTV">
+        <rect x="183" y="40" width="520" height="270" rx="6"
+              fill="#1a2d1a" stroke="#2e7d32" stroke-width="2.5"/>
+        <text x="443" y="60" text-anchor="middle" font-size="11" fill="#4caf7d" font-weight="700">MAIN BUFFALO SHED — LOOSE HOUSING</text>
+        <text x="443" y="74" text-anchor="middle" font-size="9" fill="#81c784">40 Murrah Buffaloes | 4,000 sq ft</text>
+
+        <!-- stall grid — 4 rows of 10 animals -->
+        <!-- row 1 (N wall) -->
+        <g id="stalls-row1">
+          <!-- feeding manger along north wall -->
+          <rect x="193" y="85" width="500" height="18" rx="2" fill="#1b3a1b" stroke="#388e3c" stroke-width="1"/>
+          <text x="443" y="97" text-anchor="middle" font-size="7" fill="#81c784">AUTO FEED MANGER (TMR Conveyor)</text>
+          <!-- 10 animal stalls -->
+          <g id="stalls-top">
+            <rect x="193" y="103" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+            <rect x="243" y="103" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+            <rect x="293" y="103" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+            <rect x="343" y="103" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+            <rect x="393" y="103" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+            <rect x="443" y="103" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+            <rect x="493" y="103" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+            <rect x="543" y="103" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+            <rect x="593" y="103" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+            <rect x="643" y="103" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+            <!-- buffalo icons row 1 -->
+            <text x="216" y="133" text-anchor="middle" font-size="14">🐃</text>
+            <text x="266" y="133" text-anchor="middle" font-size="14">🐃</text>
+            <text x="316" y="133" text-anchor="middle" font-size="14">🐃</text>
+            <text x="366" y="133" text-anchor="middle" font-size="14">🐃</text>
+            <text x="416" y="133" text-anchor="middle" font-size="14">🐃</text>
+            <text x="466" y="133" text-anchor="middle" font-size="14">🐃</text>
+            <text x="516" y="133" text-anchor="middle" font-size="14">🐃</text>
+            <text x="566" y="133" text-anchor="middle" font-size="14">🐃</text>
+            <text x="616" y="133" text-anchor="middle" font-size="14">🐃</text>
+            <text x="666" y="133" text-anchor="middle" font-size="14">🐃</text>
+          </g>
+        </g>
+
+        <!-- central walkway + scraper track -->
+        <rect x="193" y="153" width="500" height="24" rx="0" fill="#0f1f0f" stroke="#1b3a1b" stroke-width="1"/>
+        <text x="443" y="168" text-anchor="middle" font-size="7" fill="#555">──── AUTO FLOOR SCRAPER TRACK ────</text>
+
+        <!-- row 2 (S facing N) -->
+        <g id="stalls-bottom">
+          <rect x="193" y="177" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+          <rect x="243" y="177" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+          <rect x="293" y="177" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+          <rect x="343" y="177" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+          <rect x="393" y="177" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+          <rect x="443" y="177" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+          <rect x="493" y="177" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+          <rect x="543" y="177" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+          <rect x="593" y="177" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+          <rect x="643" y="177" width="46" height="50" rx="2" fill="#143314" stroke="#2e7d32" stroke-width="0.8"/>
+          <!-- buffalo icons row 2 -->
+          <text x="216" y="207" text-anchor="middle" font-size="14">🐃</text>
+          <text x="266" y="207" text-anchor="middle" font-size="14">🐃</text>
+          <text x="316" y="207" text-anchor="middle" font-size="14">🐃</text>
+          <text x="366" y="207" text-anchor="middle" font-size="14">🐃</text>
+          <text x="416" y="207" text-anchor="middle" font-size="14">🐃</text>
+          <text x="466" y="207" text-anchor="middle" font-size="14">🐃</text>
+          <text x="516" y="207" text-anchor="middle" font-size="14">🐃</text>
+          <text x="566" y="207" text-anchor="middle" font-size="14">🐃</text>
+          <text x="616" y="207" text-anchor="middle" font-size="14">🐃</text>
+          <text x="666" y="207" text-anchor="middle" font-size="14">🐃</text>
+        </g>
+
+        <!-- south manger -->
+        <rect x="193" y="227" width="500" height="18" rx="2" fill="#1b3a1b" stroke="#388e3c" stroke-width="1"/>
+        <text x="443" y="239" text-anchor="middle" font-size="7" fill="#81c784">AUTO FEED MANGER (TMR Conveyor)</text>
+
+        <!-- scraper line indicator -->
+        <line x1="193" y1="165" x2="693" y2="165" stroke="#f9a825" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5"/>
+
+        <!-- automation nodes in shed -->
+        <!-- exhaust fans -->
+        <circle cx="250" cy="50" r="7" fill="#1565c0" stroke="#42a5f5" stroke-width="1.5" filter="url(#glow)"/>
+        <text x="250" y="53" text-anchor="middle" font-size="7" fill="#90caf9">FAN</text>
+        <circle cx="370" cy="50" r="7" fill="#1565c0" stroke="#42a5f5" stroke-width="1.5" filter="url(#glow)"/>
+        <text x="370" y="53" text-anchor="middle" font-size="7" fill="#90caf9">FAN</text>
+        <circle cx="490" cy="50" r="7" fill="#1565c0" stroke="#42a5f5" stroke-width="1.5" filter="url(#glow)"/>
+        <text x="490" y="53" text-anchor="middle" font-size="7" fill="#90caf9">FAN</text>
+        <circle cx="610" cy="50" r="7" fill="#1565c0" stroke="#42a5f5" stroke-width="1.5" filter="url(#glow)"/>
+        <text x="610" y="53" text-anchor="middle" font-size="7" fill="#90caf9">FAN</text>
+
+        <!-- misting nozzle points -->
+        <circle cx="280" cy="78" r="3" fill="#29b6f6" filter="url(#glow)" opacity="0.8"/>
+        <circle cx="380" cy="78" r="3" fill="#29b6f6" filter="url(#glow)" opacity="0.8"/>
+        <circle cx="480" cy="78" r="3" fill="#29b6f6" filter="url(#glow)" opacity="0.8"/>
+        <circle cx="580" cy="78" r="3" fill="#29b6f6" filter="url(#glow)" opacity="0.8"/>
+        <circle cx="660" cy="78" r="3" fill="#29b6f6" filter="url(#glow)" opacity="0.8"/>
+
+        <!-- CCTV camera indicators -->
+        <text x="200" y="56" font-size="10">📷</text>
+        <text x="672" y="56" font-size="10">📷</text>
+
+        <!-- temp/humidity sensor -->
+        <rect x="423" y="248" width="40" height="14" rx="3" fill="#263238" stroke="#f9a825" stroke-width="1"/>
+        <text x="443" y="258" text-anchor="middle" font-size="7" fill="#f9a825">🌡 SENSOR</text>
+
+        <!-- IoT ear tags indicator -->
+        <circle cx="693" cy="168" r="6" fill="#f9a825" filter="url(#glow)"/>
+        <text x="693" y="171" text-anchor="middle" font-size="7" fill="#000" font-weight="700">IoT</text>
+
+        <!-- water drinkers -->
+        <rect x="193" y="246" width="500" height="12" rx="2" fill="#0d47a1" stroke="#1976d2" stroke-width="0.8" opacity="0.7"/>
+        <text x="443" y="255" text-anchor="middle" font-size="6" fill="#90caf9">AUTO WATER DRINKERS (Float Valve) — continuous supply</text>
+
+      </g>
+
+      <!-- ══════════ ZONE B: EXERCISE YARD ══════════ -->
+      <g id="zone-yard" class="clickable" style="cursor:pointer"
+         data-title="Open Exercise Yard"
+         data-desc="Open area for animal exercise and movement. Sprinkler cooling in summer. Drainage to biogas plant."
+         data-tags="Sprinkler Cooling|Drain to Biogas|CCTV|Sunshade Net">
+        <rect x="183" y="390" width="520" height="130" rx="6"
+              fill="#0f1f0f" stroke="#388e3c" stroke-width="1.5" stroke-dasharray="6,3"/>
+        <text x="443" y="412" text-anchor="middle" font-size="10" fill="#81c784" font-weight="600">EXERCISE YARD (Open)</text>
+        <text x="443" y="425" text-anchor="middle" font-size="8" fill="#4a7a4a">2,400 sq ft — Concrete Floor with Drain Slope</text>
+        <!-- sprinkler heads -->
+        <circle cx="280" cy="450" r="4" fill="#29b6f6" filter="url(#glow)" opacity="0.7"/>
+        <circle cx="380" cy="450" r="4" fill="#29b6f6" filter="url(#glow)" opacity="0.7"/>
+        <circle cx="480" cy="450" r="4" fill="#29b6f6" filter="url(#glow)" opacity="0.7"/>
+        <circle cx="580" cy="450" r="4" fill="#29b6f6" filter="url(#glow)" opacity="0.7"/>
+        <text x="443" y="480" text-anchor="middle" font-size="8" fill="#546e7a">sprinkler cooling nodes ↑</text>
+        <!-- drain arrow -->
+        <line x1="443" y1="500" x2="443" y2="515" stroke="#29b6f6" stroke-width="1.5" marker-end="url(#arrow-blue)" stroke-dasharray="3,2"/>
+        <text x="443" y="512" text-anchor="middle" font-size="7" fill="#546e7a">drain →</text>
+      </g>
+
+      <!-- ══════════ ZONE C: MILKING PARLOUR ══════════ -->
+      <g id="zone-milking" class="clickable" style="cursor:pointer"
+         data-title="Milking Parlour — Auto Milking"
+         data-desc="Dedicated milking room with automatic cluster milking machines. Animals walk in, get milked, walk out — minimal human effort."
+         data-tags="Auto Cluster Milking x2|Milk Pipeline|Teat Dipping Auto|CIP Cleaning|AC Temperature|CCTV">
+        <rect x="703" y="40" width="180" height="160" rx="6"
+              fill="#0d1e30" stroke="#1565c0" stroke-width="2.5"/>
+        <text x="793" y="60" text-anchor="middle" font-size="9" fill="#42a5f5" font-weight="700">MILKING</text>
+        <text x="793" y="73" text-anchor="middle" font-size="8" fill="#42a5f5">PARLOUR</text>
+        <text x="793" y="84" text-anchor="middle" font-size="7" fill="#7986cb">500 sq ft</text>
+        <!-- milking machine icons -->
+        <rect x="720" y="95" width="60" height="40" rx="4" fill="#1565c0" stroke="#42a5f5" stroke-width="1.5"/>
+        <text x="750" y="110" text-anchor="middle" font-size="7" fill="#fff" font-weight="600">MILKER</text>
+        <text x="750" y="122" text-anchor="middle" font-size="7" fill="#90caf9">Unit 1</text>
+        <rect x="800" y="95" width="60" height="40" rx="4" fill="#1565c0" stroke="#42a5f5" stroke-width="1.5"/>
+        <text x="830" y="110" text-anchor="middle" font-size="7" fill="#fff" font-weight="600">MILKER</text>
+        <text x="830" y="122" text-anchor="middle" font-size="7" fill="#90caf9">Unit 2</text>
+        <!-- milk pipeline -->
+        <line x1="750" y1="135" x2="750" y2="150" stroke="#42a5f5" stroke-width="2" marker-end="url(#arrow-blue)"/>
+        <line x1="830" y1="135" x2="830" y2="150" stroke="#42a5f5" stroke-width="2" marker-end="url(#arrow-blue)"/>
+        <line x1="750" y1="150" x2="870" y2="150" stroke="#42a5f5" stroke-width="2"/>
+        <text x="793" y="148" text-anchor="middle" font-size="7" fill="#546e7a">milk pipeline</text>
+        <!-- CIP auto cleaning -->
+        <rect x="715" y="160" width="140" height="14" rx="3" fill="#0d47a1" stroke="#1976d2" stroke-width="1"/>
+        <text x="785" y="170" text-anchor="middle" font-size="7" fill="#90caf9">AUTO CIP CLEANING</text>
+        <!-- CCTV -->
+        <text x="710" y="55" font-size="10">📷</text>
+        <!-- automation node -->
+        <circle cx="875" cy="45" r="5" fill="#f9a825" filter="url(#glow)"/>
+      </g>
+
+      <!-- ══════════ ZONE D: MILK PROCESSING ROOM ══════════ -->
+      <g id="zone-milk" class="clickable" style="cursor:pointer"
+         data-title="Milk Chilling & Processing Room"
+         data-desc="Bulk milk cooler stores milk at 4°C immediately after milking. Milk analyzer tests every batch. Daily dispatch to Vijaya Dairy."
+         data-tags="500L Bulk Cooler|Milk Analyzer|Temperature Logger|Auto Dispatch Alert|FSSAI Compliant">
+        <rect x="703" y="200" width="180" height="100" rx="6"
+              fill="#0d1e30" stroke="#1565c0" stroke-width="2"/>
+        <text x="793" y="218" text-anchor="middle" font-size="9" fill="#42a5f5" font-weight="700">MILK CHILLING</text>
+        <text x="793" y="230" text-anchor="middle" font-size="8" fill="#42a5f5">ROOM</text>
+        <!-- bulk cooler -->
+        <rect x="715" y="238" width="70" height="35" rx="4" fill="#0d47a1" stroke="#42a5f5" stroke-width="1.5"/>
+        <text x="750" y="252" text-anchor="middle" font-size="7" fill="#fff" font-weight="600">BULK</text>
+        <text x="750" y="263" text-anchor="middle" font-size="7" fill="#90caf9">COOLER 500L</text>
+        <!-- analyzer -->
+        <rect x="800" y="238" width="60" height="35" rx="4" fill="#1a237e" stroke="#5c6bc0" stroke-width="1.5"/>
+        <text x="830" y="252" text-anchor="middle" font-size="7" fill="#e8eaf6">MILK</text>
+        <text x="830" y="263" text-anchor="middle" font-size="7" fill="#9fa8da">ANALYZER</text>
+        <!-- temp sensor -->
+        <circle cx="793" cy="286" r="4" fill="#f9a825" filter="url(#glow)"/>
+        <text x="793" y="297" text-anchor="middle" font-size="6.5" fill="#f9a825">AUTO 4°C LOG</text>
+      </g>
+
+      <!-- milk flow from milking to chilling -->
+      <line x1="793" y1="200" x2="793" y2="200" stroke="#42a5f5" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <path d="M793,200 L793,200" stroke="#42a5f5" fill="none"/>
+
+      <!-- ══════════ ZONE E: CALF UNIT ══════════ -->
+      <g id="zone-calf" class="clickable" style="cursor:pointer"
+         data-title="Calf Rearing Unit"
+         data-desc="Separate unit for calves up to 6 months. Auto milk feeder for calves. Individual pens for health monitoring."
+         data-tags="Auto Calf Milk Feeder|Individual Pens|CCTV|Health Monitor|Separate from Adults">
+        <rect x="703" y="390" width="180" height="130" rx="6"
+              fill="#1a1a0d" stroke="#f57f17" stroke-width="2"/>
+        <text x="793" y="410" text-anchor="middle" font-size="9" fill="#ffca28" font-weight="700">CALF REARING</text>
+        <text x="793" y="422" text-anchor="middle" font-size="8" fill="#ffca28">UNIT</text>
+        <text x="793" y="433" text-anchor="middle" font-size="7" fill="#8d6e00">600 sq ft</text>
+        <!-- calf pens 3x2 -->
+        <rect x="715" y="442" width="45" height="35" rx="2" fill="#2a2000" stroke="#f57f17" stroke-width="0.8"/>
+        <rect x="765" y="442" width="45" height="35" rx="2" fill="#2a2000" stroke="#f57f17" stroke-width="0.8"/>
+        <rect x="815" y="442" width="45" height="35" rx="2" fill="#2a2000" stroke="#f57f17" stroke-width="0.8"/>
+        <text x="737" y="462" text-anchor="middle" font-size="12">🐄</text>
+        <text x="787" y="462" text-anchor="middle" font-size="12">🐄</text>
+        <text x="837" y="462" text-anchor="middle" font-size="12">🐄</text>
+        <text x="793" y="495" text-anchor="middle" font-size="7" fill="#8d6e00">auto milk feeder ↑</text>
+        <circle cx="875" cy="395" r="5" fill="#f9a825" filter="url(#glow)"/>
+      </g>
+
+      <!-- ══════════ ZONE F: FEED STORAGE ══════════ -->
+      <g id="zone-feed" class="clickable" style="cursor:pointer"
+         data-title="Feed Storage Godown & TMR Preparation"
+         data-desc="Storage for dry fodder, concentrate feed and mineral mixture. TMR mixer prepares balanced ration. Conveyor delivers to shed."
+         data-tags="TMR Mixer|Chaff Cutter|Auto Conveyor|Dry Fodder Bay|Concentrate Bay|Mineral Store|Weighing Scale">
+        <rect x="183" y="540" width="260" height="140" rx="6"
+              fill="#2a1500" stroke="#e65100" stroke-width="2.5"/>
+        <text x="313" y="558" text-anchor="middle" font-size="9" fill="#ff8a50" font-weight="700">FEED STORAGE</text>
+        <text x="313" y="570" text-anchor="middle" font-size="8" fill="#ff8a50">& TMR PREP</text>
+        <text x="313" y="581" text-anchor="middle" font-size="7" fill="#8d3b00">1,000 sq ft</text>
+        <!-- TMR mixer -->
+        <rect x="195" y="590" width="70" height="40" rx="4" fill="#3e2000" stroke="#e65100" stroke-width="1.5"/>
+        <text x="230" y="607" text-anchor="middle" font-size="7" fill="#ff8a50" font-weight="600">TMR</text>
+        <text x="230" y="618" text-anchor="middle" font-size="7" fill="#ffab76">MIXER</text>
+        <!-- chaff cutter -->
+        <rect x="275" y="590" width="70" height="40" rx="4" fill="#3e2000" stroke="#e65100" stroke-width="1.5"/>
+        <text x="310" y="607" text-anchor="middle" font-size="7" fill="#ff8a50" font-weight="600">CHAFF</text>
+        <text x="310" y="618" text-anchor="middle" font-size="7" fill="#ffab76">CUTTER</text>
+        <!-- storage bays -->
+        <rect x="355" y="590" width="70" height="40" rx="3" fill="#2a1500" stroke="#6d4c41" stroke-width="1"/>
+        <text x="390" y="611" text-anchor="middle" font-size="7" fill="#a1887f">DRY FODDER</text>
+        <!-- conveyor arrow to shed -->
+        <line x1="313" y1="540" x2="313" y2="390" stroke="#e65100" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+        <text x="323" y="470" font-size="7" fill="#e65100" transform="rotate(-90,323,470)">CONVEYOR →</text>
+        <!-- automation node -->
+        <circle cx="433" cy="547" r="5" fill="#f9a825" filter="url(#glow)"/>
+      </g>
+
+      <!-- ══════════ ZONE G: BIOGAS PLANT ══════════ -->
+      <g id="zone-biogas" class="clickable" style="cursor:pointer"
+         data-title="Biogas Plant — 30 m³"
+         data-desc="Receives dung from manure scraper and wash water. Produces 25-30 m³ gas/day for cooking and generator backup. Slurry goes to compost yard."
+         data-tags="30m³ Capacity|Auto Inlet from Scraper|Gas to Kitchen+Genset|Slurry to Compost|Pressure Gauge|MNRE Registered">
+        <rect x="453" y="540" width="130" height="140" rx="6"
+              fill="#1a0a1a" stroke="#6a1b9a" stroke-width="2.5"/>
+        <text x="518" y="557" text-anchor="middle" font-size="9" fill="#ce93d8" font-weight="700">BIOGAS</text>
+        <text x="518" y="569" text-anchor="middle" font-size="8" fill="#ce93d8">PLANT 30m³</text>
+        <!-- dome shape -->
+        <ellipse cx="518" cy="610" rx="45" ry="35" fill="#2a0a2a" stroke="#6a1b9a" stroke-width="1.5"/>
+        <ellipse cx="518" cy="595" rx="45" ry="20" fill="#3d1a3d" stroke="#9c27b0" stroke-width="1"/>
+        <text x="518" y="600" text-anchor="middle" font-size="8" fill="#e040fb">DOME</text>
+        <!-- gas pipe up -->
+        <line x1="518" y1="575" x2="518" y2="560" stroke="#e040fb" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#arrow)"/>
+        <text x="530" y="558" font-size="7" fill="#ce93d8">gas</text>
+        <!-- slurry out -->
+        <line x1="548" y1="615" x2="575" y2="640" stroke="#9c27b0" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <text x="558" y="650" font-size="7" fill="#9c27b0">slurry→compost</text>
+        <!-- dung in from scraper -->
+        <line x1="488" y1="540" x2="443" y2="480" stroke="#6a1b9a" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#arrow)"/>
+      </g>
+
+      <!-- ══════════ ZONE H: COMPOST YARD ══════════ -->
+      <g id="zone-compost" class="clickable" style="cursor:pointer"
+         data-title="Compost Yard"
+         data-desc="Biogas slurry + shed wash water processed into organic compost. Revenue: ₹1.2L/year from compost sales."
+         data-tags="Windrow Composting|Auto Sprinkler|Slurry from Biogas|Revenue ₹1.2L/year">
+        <rect x="593" y="540" width="110" height="140" rx="6"
+              fill="#1a150a" stroke="#795548" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <text x="648" y="558" text-anchor="middle" font-size="9" fill="#a1887f" font-weight="700">COMPOST</text>
+        <text x="648" y="570" text-anchor="middle" font-size="8" fill="#a1887f">YARD</text>
+        <text x="648" y="582" text-anchor="middle" font-size="7" fill="#6d4c41">0.25 acre</text>
+        <!-- compost piles -->
+        <ellipse cx="620" cy="620" rx="18" ry="10" fill="#3e2723" stroke="#795548" stroke-width="1"/>
+        <ellipse cx="650" cy="635" rx="18" ry="10" fill="#3e2723" stroke="#795548" stroke-width="1"/>
+        <ellipse cx="680" cy="615" rx="16" ry="9" fill="#3e2723" stroke="#795548" stroke-width="1"/>
+        <text x="648" y="660" text-anchor="middle" font-size="7" fill="#6d4c41">₹1.2L/yr revenue</text>
+      </g>
+
+      <!-- ══════════ ZONE I: SOLAR + POWER ROOM ══════════ -->
+      <g id="zone-solar" class="clickable" style="cursor:pointer"
+         data-title="Solar Power System + Power Room"
+         data-desc="5kW solar panels on shed roof. Battery backup + grid tie. Diesel genset for emergency. AMF panel auto-starts genset on power failure."
+         data-tags="5kW Solar Panels|Lithium Battery 100Ah|Grid-Tied Inverter|Auto AMF Panel|10kVA Genset|Biogas Backup|App Monitoring">
+        <rect x="883" y="40" width="170" height="110" rx="6"
+              fill="#0d1a0d" stroke="#33691e" stroke-width="2"/>
+        <text x="968" y="57" text-anchor="middle" font-size="9" fill="#aed581" font-weight="700">SOLAR &</text>
+        <text x="968" y="69" text-anchor="middle" font-size="8" fill="#aed581">POWER ROOM</text>
+        <!-- solar panel icon -->
+        <rect x="893" y="78" width="70" height="40" rx="3" fill="#1b3a1b" stroke="#558b2f" stroke-width="1.5"/>
+        <line x1="893" y1="93" x2="963" y2="93" stroke="#558b2f" stroke-width="0.8"/>
+        <line x1="893" y1="103" x2="963" y2="103" stroke="#558b2f" stroke-width="0.8"/>
+        <line x1="918" y1="78" x2="918" y2="118" stroke="#558b2f" stroke-width="0.8"/>
+        <line x1="938" y1="78" x2="938" y2="118" stroke="#558b2f" stroke-width="0.8"/>
+        <text x="928" y="98" text-anchor="middle" font-size="7" fill="#aed581">☀ SOLAR</text>
+        <!-- genset -->
+        <rect x="975" y="78" width="65" height="40" rx="3" fill="#2a2a00" stroke="#afb42b" stroke-width="1.5"/>
+        <text x="1007" y="93" text-anchor="middle" font-size="7" fill="#e6ee9c">GENSET</text>
+        <text x="1007" y="104" text-anchor="middle" font-size="7" fill="#afb42b">10 kVA</text>
+        <!-- AMF panel -->
+        <rect x="893" y="120" width="60" height="20" rx="3" fill="#1a1a00" stroke="#afb42b" stroke-width="1"/>
+        <text x="923" y="132" text-anchor="middle" font-size="7" fill="#e6ee9c">AMF PANEL</text>
+        <!-- automation node -->
+        <circle cx="1043" cy="47" r="5" fill="#f9a825" filter="url(#glow)"/>
+      </g>
+
+      <!-- ══════════ ZONE J: WATER SYSTEM ══════════ -->
+      <g id="zone-water" class="clickable" style="cursor:pointer"
+         data-title="Water System — Bore Well + Overhead Tanks"
+         data-desc="Bore well pumped by solar. Two 5000L overhead tanks give 4-day buffer. Auto float valves in shed. Drip irrigation to fodder fields."
+         data-tags="Bore Well 300ft|2x 5000L Tanks|Auto Float Valve|Drip Irrigation to Fodder|Solar Pump|Water Level Sensor">
+        <rect x="883" y="160" width="170" height="100" rx="6"
+              fill="#0a1a2a" stroke="#0277bd" stroke-width="2"/>
+        <text x="968" y="177" text-anchor="middle" font-size="9" fill="#4fc3f7" font-weight="700">WATER SYSTEM</text>
+        <!-- bore well -->
+        <circle cx="910" cy="210" r="16" fill="#01579b" stroke="#0288d1" stroke-width="1.5"/>
+        <text x="910" y="207" text-anchor="middle" font-size="7" fill="#fff">BORE</text>
+        <text x="910" y="217" text-anchor="middle" font-size="7" fill="#b3e5fc">WELL</text>
+        <!-- overhead tanks -->
+        <rect x="940" y="192" width="38" height="30" rx="4" fill="#01579b" stroke="#29b6f6" stroke-width="1.5"/>
+        <text x="959" y="205" text-anchor="middle" font-size="6.5" fill="#e1f5fe">5000L</text>
+        <text x="959" y="215" text-anchor="middle" font-size="6.5" fill="#b3e5fc">Tank 1</text>
+        <rect x="990" y="192" width="38" height="30" rx="4" fill="#01579b" stroke="#29b6f6" stroke-width="1.5"/>
+        <text x="1009" y="205" text-anchor="middle" font-size="6.5" fill="#e1f5fe">5000L</text>
+        <text x="1009" y="215" text-anchor="middle" font-size="6.5" fill="#b3e5fc">Tank 2</text>
+        <!-- water level sensor -->
+        <circle cx="1040" cy="200" r="4" fill="#f9a825" filter="url(#glow)"/>
+        <text x="1040" y="215" text-anchor="middle" font-size="6" fill="#f9a825">LEVEL</text>
+        <!-- distribution lines -->
+        <line x1="930" y1="210" x2="959" y2="210" stroke="#29b6f6" stroke-width="1" stroke-dasharray="3,2"/>
+        <line x1="959" y1="222" x2="959" y2="240" stroke="#29b6f6" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+        <text x="975" y="248" font-size="7" fill="#4fc3f7">to shed</text>
+        <!-- drip to fodder -->
+        <line x1="883" y1="210" x2="703" y2="210" stroke="#29b6f6" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="793" y="205" text-anchor="middle" font-size="7" fill="#546e7a">drip → fodder fields</text>
+      </g>
+
+      <!-- ══════════ ZONE K: CONTROL ROOM / OFFICE ══════════ -->
+      <g id="zone-control" class="clickable" style="cursor:pointer"
+         data-title="Farm Control Room & Office"
+         data-desc="Central automation hub. All systems monitored here and via mobile app. NVR for CCTV. Temperature/manure/feed/water controllers."
+         data-tags="Central PLC Controller|CCTV NVR|Farm Management PC|Mobile App|Temp Controller|All System Alerts|Internet Router">
+        <rect x="883" y="270" width="170" height="110" rx="6"
+              fill="#1a1035" stroke="#4527a0" stroke-width="2.5"/>
+        <text x="968" y="287" text-anchor="middle" font-size="9" fill="#b39ddb" font-weight="700">CONTROL ROOM</text>
+        <text x="968" y="299" text-anchor="middle" font-size="8" fill="#b39ddb">& OFFICE</text>
+        <!-- control panel icon -->
+        <rect x="893" y="308" width="60" height="45" rx="3" fill="#0d0a25" stroke="#4527a0" stroke-width="1.5"/>
+        <circle cx="903" cy="318" r="3" fill="#4caf50" filter="url(#glow)"/>
+        <circle cx="913" cy="318" r="3" fill="#4caf50" filter="url(#glow)"/>
+        <circle cx="923" cy="318" r="3" fill="#f9a825" filter="url(#glow)"/>
+        <circle cx="933" cy="318" r="3" fill="#f44336" filter="url(#glow)"/>
+        <rect x="897" y="325" width="50" height="20" rx="2" fill="#1a1060" stroke="#512da8"/>
+        <text x="922" y="338" text-anchor="middle" font-size="6.5" fill="#b39ddb">MONITOR</text>
+        <!-- mobile icon -->
+        <rect x="968" y="308" width="25" height="40" rx="4" fill="#1a1060" stroke="#7e57c2" stroke-width="1.5"/>
+        <rect x="971" y="313" width="19" height="27" rx="1" fill="#0d0a25"/>
+        <circle cx="980" cy="343" r="2" fill="#7e57c2"/>
+        <text x="980" y="356" text-anchor="middle" font-size="6.5" fill="#b39ddb">APP</text>
+        <!-- router -->
+        <rect x="1005" y="308" width="35" height="25" rx="3" fill="#1a1060" stroke="#7e57c2" stroke-width="1"/>
+        <text x="1022" y="322" text-anchor="middle" font-size="7" fill="#b39ddb">WiFi</text>
+        <text x="1022" y="355" text-anchor="middle" font-size="7" fill="#7e57c2">INTERNET</text>
+        <!-- automation lines from control room to all zones -->
+        <line x1="883" y1="325" x2="703" y2="200" stroke="#7e57c2" stroke-width="0.8" stroke-dasharray="4,4" opacity="0.4"/>
+        <line x1="883" y1="325" x2="693" y2="168" stroke="#7e57c2" stroke-width="0.8" stroke-dasharray="4,4" opacity="0.4"/>
+        <line x1="968" y1="380" x2="518" y2="540" stroke="#7e57c2" stroke-width="0.8" stroke-dasharray="4,4" opacity="0.3"/>
+      </g>
+
+      <!-- ══════════ ZONE L: WORKER QUARTERS ══════════ -->
+      <g id="zone-workers" class="clickable" style="cursor:pointer"
+         data-title="Worker Quarters (2 Rooms)"
+         data-desc="On-site accommodation for 2 workers. Close to shed for emergency response. Connected to control room alerts."
+         data-tags="2 Rooms|Toilet|Kitchen|Alert Buzzer|Connected to Control Room">
+        <rect x="883" y="390" width="80" height="80" rx="5"
+              fill="#1a1a1a" stroke="#546e7a" stroke-width="1.5"/>
+        <text x="923" y="408" text-anchor="middle" font-size="8" fill="#90a4ae" font-weight="600">WORKER</text>
+        <text x="923" y="420" text-anchor="middle" font-size="7" fill="#90a4ae">QUARTERS</text>
+        <text x="923" y="432" text-anchor="middle" font-size="7" fill="#546e7a">400 sq ft</text>
+        <text x="923" y="462" text-anchor="middle" font-size="14">🏠</text>
+      </g>
+
+      <!-- ══════════ ZONE M: WASH BAY ══════════ -->
+      <g id="zone-wash" class="clickable" style="cursor:pointer"
+         data-title="Animal Wash Bay & Bath Area"
+         data-desc="Dedicated area for buffalo bathing. Pressure wash with warm water. Tick/parasite treatment spray. Automatic timer — twice daily in summer."
+         data-tags="High Pressure Wash|Auto Timer Spray|Anti-Tick Spray|Drainage to Biogas|2x Daily Summer|Non-Slip Floor">
+        <rect x="883" y="480" width="80" height="90" rx="5"
+              fill="#0a1a2a" stroke="#0277bd" stroke-width="1.5"/>
+        <text x="923" y="497" text-anchor="middle" font-size="8" fill="#4fc3f7" font-weight="600">WASH</text>
+        <text x="923" y="509" text-anchor="middle" font-size="7" fill="#4fc3f7">BAY</text>
+        <!-- shower heads -->
+        <circle cx="905" cy="535" r="4" fill="#29b6f6" filter="url(#glow)"/>
+        <circle cx="923" cy="535" r="4" fill="#29b6f6" filter="url(#glow)"/>
+        <circle cx="941" cy="535" r="4" fill="#29b6f6" filter="url(#glow)"/>
+        <text x="923" y="558" text-anchor="middle" font-size="7" fill="#0277bd">auto pressure</text>
+        <text x="923" y="568" text-anchor="middle" font-size="7" fill="#0277bd">spray nozzles</text>
+      </g>
+
+      <!-- ══════════ FODDER FIELDS ══════════ -->
+      <g id="zone-fodder" class="clickable" style="cursor:pointer"
+         data-title="Green Fodder Cultivation (2 Acres)"
+         data-desc="1.5 acres Napier Grass (CO-4) + 0.5 acres Sorghum. Drip irrigation from bore well. Produces 135 tonnes/year green fodder."
+         data-tags="Napier Grass CO-4|Sorghum Multi-cut|Drip Irrigation|135 Tonnes/Year|46% Self-Sufficient|Solar Pump">
+        <rect x="20" y="40" width="155" height="620" rx="6"
+              fill="url(#grass)" stroke="#2e7d32" stroke-width="2" stroke-dasharray="5,3"/>
+        <text x="97" y="220" text-anchor="middle" font-size="9" fill="#81c784" font-weight="700"
+              transform="rotate(-90, 97, 220)">NAPIER GRASS — 1.5 ACRES (DRIP IRRIGATED)</text>
+        <!-- drip lines -->
+        <line x1="50" y1="100" x2="160" y2="100" stroke="#29b6f6" stroke-width="0.5" stroke-dasharray="4,4" opacity="0.4"/>
+        <line x1="50" y1="130" x2="160" y2="130" stroke="#29b6f6" stroke-width="0.5" stroke-dasharray="4,4" opacity="0.4"/>
+        <line x1="50" y1="160" x2="160" y2="160" stroke="#29b6f6" stroke-width="0.5" stroke-dasharray="4,4" opacity="0.4"/>
+        <line x1="50" y1="190" x2="160" y2="190" stroke="#29b6f6" stroke-width="0.5" stroke-dasharray="4,4" opacity="0.4"/>
+        <line x1="50" y1="220" x2="160" y2="220" stroke="#29b6f6" stroke-width="0.5" stroke-dasharray="4,4" opacity="0.4"/>
+        <line x1="50" y1="250" x2="160" y2="250" stroke="#29b6f6" stroke-width="0.5" stroke-dasharray="4,4" opacity="0.4"/>
+        <line x1="50" y1="280" x2="160" y2="280" stroke="#29b6f6" stroke-width="0.5" stroke-dasharray="4,4" opacity="0.4"/>
+        <line x1="50" y1="310" x2="160" y2="310" stroke="#29b6f6" stroke-width="0.5" stroke-dasharray="4,4" opacity="0.4"/>
+        <!-- sorghum section -->
+        <rect x="25" y="420" width="150" height="220" rx="4" fill="none" stroke="#558b2f" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="100" y="550" text-anchor="middle" font-size="9" fill="#aed581" font-weight="700"
+              transform="rotate(-90, 100, 550)">SORGHUM 0.5 AC</text>
+      </g>
+
+      <!-- ══════════ AUTOMATION FLOW LINES ══════════ -->
+      <!-- manure scraper → biogas -->
+      <path d="M443,300 Q443,450 488,540" stroke="#9c27b0" stroke-width="1.5"
+            fill="none" stroke-dasharray="5,3" opacity="0.6" marker-end="url(#arrow)"/>
+
+      <!-- milk pipe from milking to chilling -->
+      <line x1="793" y1="200" x2="793" y2="200" stroke="#42a5f5" stroke-width="2" stroke-dasharray="4,2"/>
+
+      <!-- TITLE LABELS for zones -->
+      <text x="540" y="688" text-anchor="middle" font-size="8" fill="#546e7a">
+        Total Farm: 3.5 Acres | Shed Area: 1 Acre | Fodder: 2 Acres | Other: 0.5 Acre
+      </text>
+
+    </svg>
+  </div>
+</div>
+
+<!-- ════════════════ TAB 2: AUTOMATION SYSTEMS ════════════════ -->
+<div class="panel" id="tab-systems">
+  <div class="card-grid">
+
+    <div class="card" style="border-left-color:#4caf7d">
+      <div class="badge badge-auto">FULLY AUTOMATIC</div>
+      <h3>🥛 Milking System</h3>
+      <ul>
+        <li>2x cluster milking machines (auto pulsation)</li>
+        <li>CIP auto-cleaning after every milking session</li>
+        <li>Milk pipeline direct to bulk cooler</li>
+        <li>Auto milk fat/SNF test after collection</li>
+        <li>Temperature logged every 15 minutes</li>
+        <li>Alert on phone if cooler temp exceeds 6°C</li>
+      </ul>
+    </div>
+
+    <div class="card" style="border-left-color:#e65100">
+      <div class="badge badge-auto">FULLY AUTOMATIC</div>
+      <h3>🌾 Feeding System</h3>
+      <ul>
+        <li>TMR mixer prepares ration at 5 AM &amp; 3 PM</li>
+        <li>Conveyor belt delivers feed along manger</li>
+        <li>Chaff cutter auto-triggered before mixing</li>
+        <li>Weigh scale logs quantity each batch</li>
+        <li>Alert if feed not consumed (animal health)</li>
+        <li>Concentrate &amp; mineral auto-dispensed</li>
+      </ul>
+    </div>
+
+    <div class="card" style="border-left-color:#29b6f6">
+      <div class="badge badge-auto">FULLY AUTOMATIC</div>
+      <h3>💧 Water System</h3>
+      <ul>
+        <li>Solar pump fills overhead tanks automatically</li>
+        <li>Float valve drinkers — always full, never overflow</li>
+        <li>Water level sensor alerts on low tank</li>
+        <li>Drip irrigation to fodder fields on timer</li>
+        <li>Wash bay on timer (twice daily in summer)</li>
+        <li>All water recycled — wash water to biogas</li>
+      </ul>
+    </div>
+
+    <div class="card" style="border-left-color:#9c27b0">
+      <div class="badge badge-auto">FULLY AUTOMATIC</div>
+      <h3>🧹 Manure Management</h3>
+      <ul>
+        <li>Floor scraper runs at 5 AM and 6 PM on timer</li>
+        <li>Scrapes dung to collection pit automatically</li>
+        <li>Dung flows by gravity to biogas plant inlet</li>
+        <li>Biogas slurry flows to compost yard</li>
+        <li>No manual cleaning of shed floor needed</li>
+        <li>Gas production monitored by pressure gauge</li>
+      </ul>
+    </div>
+
+    <div class="card" style="border-left-color:#1565c0">
+      <div class="badge badge-auto">FULLY AUTOMATIC</div>
+      <h3>🌡 Climate Control</h3>
+      <ul>
+        <li>Temperature sensor at 1.5m height in shed</li>
+        <li>Exhaust fans auto-ON at 30°C, OFF at 27°C</li>
+        <li>Mist fogger auto-ON at 32°C in shed</li>
+        <li>Exercise yard sprinklers at 33°C (summer)</li>
+        <li>Humidity sensor — prevents respiratory disease</li>
+        <li>Phone alert if temp exceeds 35°C</li>
+      </ul>
+    </div>
+
+    <div class="card" style="border-left-color:#f9a825">
+      <div class="badge badge-auto">FULLY AUTOMATIC</div>
+      <h3>🔌 Power System</h3>
+      <ul>
+        <li>5 kW solar panels on shed roof</li>
+        <li>Lithium battery — 4 hrs backup at night</li>
+        <li>Grid-tied — sell surplus power to APSPDCL</li>
+        <li>AMF panel auto-starts genset on power cut</li>
+        <li>Biogas connected to genset as fuel backup</li>
+        <li>Power consumption app on mobile</li>
+      </ul>
+    </div>
+
+    <div class="card" style="border-left-color:#f44336">
+      <div class="badge badge-auto">FULLY AUTOMATIC</div>
+      <h3>📷 Security & Monitoring</h3>
+      <ul>
+        <li>8 CCTV cameras — shed, parlour, entry, store</li>
+        <li>Motion detection alert on phone</li>
+        <li>IoT ear tags — activity, temperature, estrus</li>
+        <li>Estrus (heat) detection alert — best AI time</li>
+        <li>Farm management app — all data in one place</li>
+        <li>CCTV accessible remotely 24/7</li>
+      </ul>
+    </div>
+
+    <div class="card" style="border-left-color:#4fc3f7">
+      <div class="badge badge-semi">SEMI-AUTOMATIC</div>
+      <h3>🚿 Hygiene & Bio-security</h3>
+      <ul>
+        <li>Entry gate mist arch — auto spray on entry</li>
+        <li>Foot bath at gate and milking parlour entry</li>
+        <li>Disinfectant changed manually every 3 days</li>
+        <li>Pressure wash of shed by worker — 30 min/day</li>
+        <li>Animal wash bay — timer-triggered twice daily</li>
+        <li>Tick/parasite spray — weekly manual</li>
+      </ul>
+    </div>
+
+    <div class="card" style="border-left-color:#ce93d8">
+      <div class="badge badge-semi">SEMI-AUTOMATIC</div>
+      <h3>⚕️ Animal Health</h3>
+      <ul>
+        <li>IoT ear tag fever alert — auto notification</li>
+        <li>Platform weigh scale — weekly weight check</li>
+        <li>Vaccination schedule in farm app (reminder)</li>
+        <li>Vet call — manual (but app tracks history)</li>
+        <li>Calf auto milk feeder — programmed volumes</li>
+        <li>Pregnancy &amp; calving records in farm app</li>
+      </ul>
+    </div>
+
+    <div class="card" style="border-left-color:#aed581">
+      <div class="badge badge-semi">SEMI-AUTOMATIC</div>
+      <h3>🌿 Fodder Production</h3>
+      <ul>
+        <li>Drip irrigation on timer — fully automatic</li>
+        <li>Fertilizer injection through drip (fertigation)</li>
+        <li>Harvesting — manual (1 worker, 2 hrs/week)</li>
+        <li>Chaff cutting — machine-assisted (30 min/day)</li>
+        <li>Silage making — seasonal, manual + machine</li>
+        <li>Napier regrows — no replanting for 5 years</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════ TAB 3: DAILY SCHEDULE ════════════════ -->
+<div class="panel" id="tab-schedule">
+  <div class="note">Green = running automatically (no worker needed) | Bright Green = active/critical task | Red = alert mode | Dark = OFF</div>
+
+  <div class="ft-legend">
+    <div class="ft-leg-item"><div class="ft-leg-box ft-active"></div> Active / Running</div>
+    <div class="ft-leg-item"><div class="ft-leg-box ft-on" style="background:#1b4d28"></div> Standby / Low</div>
+    <div class="ft-leg-item"><div class="ft-leg-box ft-off"></div> OFF</div>
+    <div class="ft-leg-item"><div class="ft-leg-box ft-alert"></div> Alert / Critical</div>
+  </div>
+
+  <div class="flow-wrap">
+    <div class="flow-timeline">
+      <!-- hour labels -->
+      <div class="ft-label"></div>
+      <div class="ft-label">12</div><div class="ft-label">1</div><div class="ft-label">2</div>
+      <div class="ft-label">3</div><div class="ft-label">4</div><div class="ft-label">5AM</div>
+      <div class="ft-label">6</div><div class="ft-label">7</div><div class="ft-label">8</div>
+      <div class="ft-label">9</div><div class="ft-label">10</div><div class="ft-label">11</div>
+      <div class="ft-label">12</div><div class="ft-label">1</div><div class="ft-label">2</div>
+      <div class="ft-label">3</div><div class="ft-label">4PM</div><div class="ft-label">5</div>
+      <div class="ft-label">6</div><div class="ft-label">7</div><div class="ft-label">8</div>
+      <div class="ft-label">9</div><div class="ft-label">10</div><div class="ft-label">11</div>
+
+      <!-- rows: each system 24 cells -->
+      <!-- Floor Scraper: ON at hour 5 and hour 18 -->
+      <div class="ft-system">🧹 Floor Scraper</div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-active"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-active"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+
+      <!-- TMR Mixer: ON at 5:30 and 15:30 -->
+      <div class="ft-system">🌾 TMR Mixer</div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-active"></div>
+      <div class="ft-cell ft-active"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+
+      <!-- Milking: 5:30-7:30 and 16:00-18:00 -->
+      <div class="ft-system">🥛 Auto Milking</div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-alert"></div>
+      <div class="ft-cell ft-alert"></div><div class="ft-cell ft-alert"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-alert"></div><div class="ft-cell ft-alert"></div>
+      <div class="ft-cell ft-alert"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+
+      <!-- Bulk Cooler: always ON -->
+      <div class="ft-system">❄️ Bulk Cooler</div>
+      <div class="ft-cell ft-on" style="background:#1b4d28"></div><div class="ft-cell ft-on" style="background:#1b4d28"></div><div class="ft-cell ft-on" style="background:#1b4d28"></div>
+      <div class="ft-cell ft-on" style="background:#1b4d28"></div><div class="ft-cell ft-on" style="background:#1b4d28"></div><div class="ft-cell ft-on" style="background:#1b4d28"></div>
+      <div class="ft-cell ft-on" style="background:#1b4d28"></div><div class="ft-cell ft-on" style="background:#1b4d28"></div><div class="ft-cell ft-on" style="background:#1b4d28"></div>
+      <div class="ft-cell ft-on" style="background:#1b4d28"></div><div class="ft-cell ft-on" style="background:#1b4d28"></div><div class="ft-cell ft-on" style="background:#1b4d28"></div>
+      <div class="ft-cell ft-on" style="background:#1b4d28"></div><div class="ft-cell ft-on" style="background:#1b4d28"></div><div class="ft-cell ft-on" style="background:#1b4d28"></div>
+      <div class="ft-cell ft-on" style="background:#1b4d28"></div><div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div>
+      <div class="ft-cell ft-on" style="background:#1b4d28"></div><div class="ft-cell ft-on" style="background:#1b4d28"></div><div class="ft-cell ft-on" style="background:#1b4d28"></div>
+      <div class="ft-cell ft-on" style="background:#1b4d28"></div><div class="ft-cell ft-on" style="background:#1b4d28"></div><div class="ft-cell ft-on" style="background:#1b4d28"></div>
+
+      <!-- Exhaust Fans: 9AM-8PM (temp dependent) -->
+      <div class="ft-system">💨 Exhaust Fans</div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div>
+      <div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div>
+      <div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div>
+      <div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+
+      <!-- Misting: 10AM-5PM if hot -->
+      <div class="ft-system">🌫 Mist Cooler</div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div>
+      <div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div>
+      <div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+
+      <!-- Water drinkers: always ON -->
+      <div class="ft-system">💧 Water Drinkers</div>
+      <div class="ft-cell ft-on" style="background:#01579b"></div><div class="ft-cell ft-on" style="background:#01579b"></div><div class="ft-cell ft-on" style="background:#01579b"></div>
+      <div class="ft-cell ft-on" style="background:#01579b"></div><div class="ft-cell ft-on" style="background:#01579b"></div><div class="ft-cell ft-on" style="background:#01579b"></div>
+      <div class="ft-cell ft-on" style="background:#01579b"></div><div class="ft-cell ft-on" style="background:#01579b"></div><div class="ft-cell ft-on" style="background:#01579b"></div>
+      <div class="ft-cell ft-on" style="background:#01579b"></div><div class="ft-cell ft-on" style="background:#01579b"></div><div class="ft-cell ft-on" style="background:#01579b"></div>
+      <div class="ft-cell ft-on" style="background:#01579b"></div><div class="ft-cell ft-on" style="background:#01579b"></div><div class="ft-cell ft-on" style="background:#01579b"></div>
+      <div class="ft-cell ft-on" style="background:#01579b"></div><div class="ft-cell ft-on" style="background:#01579b"></div><div class="ft-cell ft-on" style="background:#01579b"></div>
+      <div class="ft-cell ft-on" style="background:#01579b"></div><div class="ft-cell ft-on" style="background:#01579b"></div><div class="ft-cell ft-on" style="background:#01579b"></div>
+      <div class="ft-cell ft-on" style="background:#01579b"></div><div class="ft-cell ft-on" style="background:#01579b"></div><div class="ft-cell ft-on" style="background:#01579b"></div>
+
+      <!-- Solar: 6AM-6PM -->
+      <div class="ft-system">☀️ Solar Power</div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div>
+      <div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div>
+      <div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div>
+      <div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div>
+      <div class="ft-cell ft-active"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+
+      <!-- Drip Irrigation: 6AM-8AM -->
+      <div class="ft-system">🌿 Drip Irrigation</div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-active"></div><div class="ft-cell ft-active"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+
+      <!-- CCTV: always on -->
+      <div class="ft-system">📷 CCTV Monitor</div>
+      <div class="ft-cell ft-on" style="background:#263238"></div><div class="ft-cell ft-on" style="background:#263238"></div><div class="ft-cell ft-on" style="background:#263238"></div>
+      <div class="ft-cell ft-on" style="background:#263238"></div><div class="ft-cell ft-on" style="background:#263238"></div><div class="ft-cell ft-on" style="background:#263238"></div>
+      <div class="ft-cell ft-on" style="background:#263238"></div><div class="ft-cell ft-on" style="background:#263238"></div><div class="ft-cell ft-on" style="background:#263238"></div>
+      <div class="ft-cell ft-on" style="background:#263238"></div><div class="ft-cell ft-on" style="background:#263238"></div><div class="ft-cell ft-on" style="background:#263238"></div>
+      <div class="ft-cell ft-on" style="background:#263238"></div><div class="ft-cell ft-on" style="background:#263238"></div><div class="ft-cell ft-on" style="background:#263238"></div>
+      <div class="ft-cell ft-on" style="background:#263238"></div><div class="ft-cell ft-on" style="background:#263238"></div><div class="ft-cell ft-on" style="background:#263238"></div>
+      <div class="ft-cell ft-on" style="background:#263238"></div><div class="ft-cell ft-on" style="background:#263238"></div><div class="ft-cell ft-on" style="background:#263238"></div>
+      <div class="ft-cell ft-on" style="background:#263238"></div><div class="ft-cell ft-on" style="background:#263238"></div><div class="ft-cell ft-on" style="background:#263238"></div>
+
+      <!-- Wash Bay: 8AM and 4PM -->
+      <div class="ft-system">🚿 Wash Bay</div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-active"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-active"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+      <div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div><div class="ft-cell ft-off"></div>
+
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:20px">Worker Tasks (only 2 workers, 6 hours total per day)</div>
+  <table class="cost-table">
+    <tr><th>Time</th><th>Worker 1 Tasks</th><th>Worker 2 Tasks</th><th>Duration</th></tr>
+    <tr><td>5:30 AM</td><td>Supervise morning milking, check animals</td><td>Load TMR mixer, start chaff cutter</td><td>90 min</td></tr>
+    <tr><td>7:30 AM</td><td>Calf feeding &amp; health check</td><td>Milk dispatch to Vijaya Dairy vehicle</td><td>45 min</td></tr>
+    <tr><td>8:00 AM</td><td>Pressure wash milking parlour</td><td>Fodder field — harvest &amp; bring to store</td><td>60 min</td></tr>
+    <tr><td>2:00 PM</td><td>Vet check / medicine if needed</td><td>Prepare afternoon TMR batch</td><td>45 min</td></tr>
+    <tr><td>4:00 PM</td><td>Supervise evening milking</td><td>Evening feed distribution check</td><td>90 min</td></tr>
+    <tr><td>6:00 PM</td><td>Final animal head count &amp; health scan</td><td>Lock gates, check CCTV mobile app</td><td>30 min</td></tr>
+    <tr class="subtotal"><td colspan="3"><strong>Total daily worker hours</strong></td><td><strong>~6 hrs/day total</strong></td></tr>
+  </table>
+</div>
+
+<!-- ════════════════ TAB 4: CONSTRUCTION COST ════════════════ -->
+<div class="panel" id="tab-cost">
+  <div class="section-title">Civil Construction — Zone-wise Breakdown</div>
+  <table class="cost-table">
+    <tr><th>Zone</th><th>Structure</th><th>Area (sq ft)</th><th>Rate (₹/sq ft)</th><th>Cost (₹)</th></tr>
+    <tr><td>A</td><td>Main Buffalo Shed — Loose Housing (RCC roof, concrete floor)</td><td>4,000</td><td>850</td><td class="rupee">34,00,000</td></tr>
+    <tr><td>B</td><td>Exercise Yard — Concrete floor + drainage + sunshade net</td><td>2,400</td><td>300</td><td class="rupee">7,20,000</td></tr>
+    <tr><td>C</td><td>Milking Parlour — RCC, AC provision, tiled walls</td><td>500</td><td>1,000</td><td class="rupee">5,00,000</td></tr>
+    <tr><td>D</td><td>Milk Chilling Room — Insulated walls, AC, tiled</td><td>300</td><td>1,100</td><td class="rupee">3,30,000</td></tr>
+    <tr><td>E</td><td>Calf Rearing Unit — RCC with individual pens</td><td>600</td><td>750</td><td class="rupee">4,50,000</td></tr>
+    <tr><td>F</td><td>Feed Storage Godown — RCC, ventilated</td><td>1,000</td><td>650</td><td class="rupee">6,50,000</td></tr>
+    <tr><td>G</td><td>Biogas Plant — 30 m³ fixed dome, KVIC design</td><td>—</td><td>lump sum</td><td class="rupee">3,00,000</td></tr>
+    <tr><td>H</td><td>Compost Yard — Concrete base + shade</td><td>1,000</td><td>200</td><td class="rupee">2,00,000</td></tr>
+    <tr><td>I</td><td>Solar &amp; Power Room — RCC, panel mounting on shed roof</td><td>200</td><td>800</td><td class="rupee">1,60,000</td></tr>
+    <tr><td>J</td><td>Bore Well (300 ft) + Motor + Pump + OH Tanks</td><td>—</td><td>lump sum</td><td class="rupee">3,50,000</td></tr>
+    <tr><td>K</td><td>Control Room / Farm Office — RCC, AC</td><td>200</td><td>900</td><td class="rupee">1,80,000</td></tr>
+    <tr><td>L</td><td>Worker Quarters — 2 rooms + toilet + kitchen</td><td>400</td><td>750</td><td class="rupee">3,00,000</td></tr>
+    <tr><td>M</td><td>Wash Bay — Concrete + non-slip tiles + drainage</td><td>300</td><td>500</td><td class="rupee">1,50,000</td></tr>
+    <tr><td>—</td><td>Perimeter Fencing (3.5 acres, chain link + posts)</td><td>—</td><td>lump sum</td><td class="rupee">2,50,000</td></tr>
+    <tr><td>—</td><td>Internal Roads (concrete, 3m wide)</td><td>—</td><td>lump sum</td><td class="rupee">2,00,000</td></tr>
+    <tr><td>—</td><td>Drainage system + soak pit + slurry channels</td><td>—</td><td>lump sum</td><td class="rupee">1,50,000</td></tr>
+    <tr><td>—</td><td>Electrical wiring — full farm (shed + all zones)</td><td>—</td><td>lump sum</td><td class="rupee">2,50,000</td></tr>
+    <tr><td>—</td><td>Plumbing — full farm (water supply + drainage)</td><td>—</td><td>lump sum</td><td class="rupee">1,80,000</td></tr>
+    <tr class="subtotal"><td colspan="4"><strong>Civil Construction Subtotal</strong></td><td class="rupee"><strong>86,70,000</strong></td></tr>
+
+    <tr><th colspan="5" style="background:#1a2030; color:#f9a825">Automation & Equipment (from Equipment Master List)</th></tr>
+    <tr><td colspan="4">All Equipment (avg prices, see Equipment_Procurement_Guide.xlsx)</td><td class="rupee">25,02,500</td></tr>
+    <tr><td colspan="4">Spare Parts (initial stock)</td><td class="rupee">1,13,800</td></tr>
+    <tr class="subtotal"><td colspan="4"><strong>Equipment Subtotal</strong></td><td class="rupee"><strong>26,16,300</strong></td></tr>
+
+    <tr><th colspan="5" style="background:#1a2030; color:#f9a825">Animals & Other</th></tr>
+    <tr><td colspan="4">40 Murrah Buffaloes (32 lactating + 6 pregnant + 2 heifers)</td><td class="rupee">31,20,000</td></tr>
+    <tr><td colspan="4">Fodder Cultivation Setup (drip + land prep + seeds)</td><td class="rupee">2,40,000</td></tr>
+    <tr><td colspan="4">Working Capital — 6 months</td><td class="rupee">12,24,000</td></tr>
+    <tr><td colspan="4">Contingency @ 5%</td><td class="rupee">7,93,500</td></tr>
+    <tr class="subtotal"><td colspan="4"><strong>Animals &amp; Other Subtotal</strong></td><td class="rupee"><strong>53,77,500</strong></td></tr>
+
+    <tr class="total"><td colspan="4">GRAND TOTAL PROJECT COST</td><td>₹1,66,63,800</td></tr>
+    <tr class="total"><td colspan="4">NABARD DEDS Subsidy — 33.33% (Women)</td><td>₹55,54,600</td></tr>
+    <tr class="total"><td colspan="4">Bank Loan (66.67%)</td><td>₹1,11,09,200</td></tr>
+    <tr class="total"><td colspan="4">YOUR POCKET CONTRIBUTION</td><td>₹0</td></tr>
+  </table>
+
+  <div class="note" style="margin-top:14px">
+    ⚠️ The civil cost is higher than the original DPR because this design includes all automation infrastructure (control room, wash bay, insulated milk room, full wiring, drainage). Update your DPR Section 9 with these figures. The subsidy and loan amounts will also increase proportionally — this is beneficial for you.
+  </div>
+</div>
+
+<!-- TOOLTIP -->
+<div class="tooltip" id="tooltip">
+  <h4 id="tt-title"></h4>
+  <div id="tt-desc" style="color:#ccc; margin-bottom:6px"></div>
+  <div id="tt-tags"></div>
+</div>
+
+<script>
+  // Tab switching
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // Tooltip logic
+  const tooltip = document.getElementById('tooltip');
+  const ttTitle = document.getElementById('tt-title');
+  const ttDesc  = document.getElementById('tt-desc');
+  const ttTags  = document.getElementById('tt-tags');
+
+  document.querySelectorAll('[data-title]').forEach(el => {
+    el.addEventListener('mouseenter', function(e) {
+      ttTitle.textContent = this.dataset.title;
+      ttDesc.textContent  = this.dataset.desc || '';
+      const tags = (this.dataset.tags || '').split('|').filter(Boolean);
+      ttTags.innerHTML = tags.map(t => `<span class="tag">${t}</span>`).join('');
+      tooltip.classList.add('show');
+    });
+    el.addEventListener('mousemove', function(e) {
+      const x = e.clientX + 16;
+      const y = e.clientY + 16;
+      tooltip.style.left = Math.min(x, window.innerWidth - 320) + 'px';
+      tooltip.style.top  = Math.min(y, window.innerHeight - 200) + 'px';
+    });
+    el.addEventListener('mouseleave', function() {
+      tooltip.classList.remove('show');
+    });
+  });
+</script>
+</body>
+</html>
