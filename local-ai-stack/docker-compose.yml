@@ -31,9 +31,14 @@ services:
       - VECTOR_DB=chroma
       - CHROMA_HTTP_HOST=chromadb
       - CHROMA_HTTP_PORT=8000
+      # Web search via SearXNG
+      - ENABLE_RAG_WEB_SEARCH=true
+      - RAG_WEB_SEARCH_ENGINE=searxng
+      - SEARXNG_QUERY_URL=http://searxng:8080/search?q=<query>&format=json
     depends_on:
       - ollama
       - chromadb
+      - searxng
 
   chromadb:
     image: chromadb/chroma:latest
@@ -70,8 +75,20 @@ services:
     depends_on:
       - ollama
 
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - searxng_data:/etc/searxng
+    environment:
+      - SEARXNG_BASE_URL=http://localhost:8080
+
 volumes:
   ollama_data:
   open_webui_data:
   chroma_data:
   n8n_data:
+  searxng_data:
